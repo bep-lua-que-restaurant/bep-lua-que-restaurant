@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DanhMucMonAnController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,10 +14,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::get('/', function () {
-//     return view('admin.dashboard');
-// });
-
 Route::get('/', function () {
-    return view('client.home');
+    return view('admin.dashboard');
 });
+
+// Danh mục món ăn
+Route::resource('danh-muc-mon-an', DanhMucMonAnController::class);
+
+// Route::get('/', function () {
+//     return view('client.home');
+// });

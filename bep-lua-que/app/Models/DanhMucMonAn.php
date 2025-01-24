@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DanhMucMonAn extends Model
 {
-    use HasFactory ,SoftDeletes;
-    
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = [
+        'ten',
+        'mo_ta',
+        'hinh_anh',
+    ];
 }

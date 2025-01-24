@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\DanhMucMonAn;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -12,6 +13,8 @@ class DanhMucMonAnSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        DanhMucMonAn::factory()
+            ->count(10)
+            ->create();
     }
 }

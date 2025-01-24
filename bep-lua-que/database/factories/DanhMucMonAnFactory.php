@@ -17,7 +17,9 @@ class DanhMucMonAnFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'ten' => $this->faker->name,
+            'mo_ta' => $this->faker->text,
+            'hinh_anh' => $this->faker->imageUrl(),
         ];
     }
 }
