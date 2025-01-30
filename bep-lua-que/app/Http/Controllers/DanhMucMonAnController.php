@@ -6,7 +6,8 @@ use App\Models\DanhMucMonAn;
 use App\Http\Requests\StoreDanhMucMonAnRequest;
 use App\Http\Requests\UpdateDanhMucMonAnRequest;
 use Illuminate\Http\Request;
-
+use App\Exports\DanhMucMonAnExport;
+use Maatwebsite\Excel\Facades\Excel;
 class DanhMucMonAnController extends Controller
 {
     /**
@@ -29,7 +30,12 @@ class DanhMucMonAnController extends Controller
             ]);
         }
 
-        return view('admin.danhmuc.list', compact('data'));
+        return view('admin.danhmuc.list', [
+            'data' => $data,
+            'route' => route('danh-muc-mon-an.index'), // URL route cho AJAX
+            'tableId' => 'list-container', // ID của bảng
+            'searchInputId' => 'search-name', // ID của ô tìm kiếm
+        ]);
     }
 
     /**
@@ -62,7 +68,7 @@ class DanhMucMonAnController extends Controller
      */
     public function show(DanhMucMonAn $danhMucMonAn)
     {
-        //
+        return view('admin.danhmuc.detail', compact('danhMucMonAn'));
     }
 
     /**
@@ -70,7 +76,7 @@ class DanhMucMonAnController extends Controller
      */
     public function edit(DanhMucMonAn $danhMucMonAn)
     {
-        return response()->json($danhMucMonAn);
+        return view('admin.danhmuc.edit', compact('danhMucMonAn'));
     }
 
 
@@ -87,6 +93,22 @@ class DanhMucMonAnController extends Controller
      */
     public function destroy(DanhMucMonAn $danhMucMonAn)
     {
-        //
+        $danhMucMonAn->delete();
+
+        return redirect()->route('danh-muc-mon-an.index')->with('success', 'Xóa danh mục thành công!');
+    }
+
+    public function restore($id)
+    {
+        $danhMucMonAn = DanhMucMonAn::withTrashed()->findOrFail($id);
+        $danhMucMonAn->restore();
+
+        return redirect()->route('danh-muc-mon-an.index')->with('success', 'Khôi phục danh mục thành công!');
+    }
+
+    public function export()
+    {
+        // Xuất file Excel với tên "DanhMucMonAn.xlsx"
+        return Excel::download(new DanhMucMonAnExport, 'DanhMucMonAn.xlsx');
     }
 }

@@ -12,7 +12,15 @@
         </td>
 
         <td>
-            <div class="d-flex align-items-center"><i class="fa fa-circle text-success mr-1"></i> Successful</div>
+            @if ($item->deleted_at != null)
+                <div class="d-flex align-items-center"><i class="fa fa-circle text-danger mr-1"></i> Đã ngừng kinh doanh
+                </div>
+            @else
+                <div class="d-flex align-items-center"><i class="fa fa-circle text-success mr-1"></i> Đang kinh doanh
+                </div>
+                {{ $item->deleted_at }}
+            @endif
+
         </td>
         <td>
             <div class="d-flex align-items-center">
@@ -22,21 +30,31 @@
                 <a href="{{ route('danh-muc-mon-an.edit', $item->id) }}" class="btn btn-warning btn-sm p-2 m-2">
                     <i class="fa fa-edit "></i>
                 </a>
-                <form action="{{ route('danh-muc-mon-an.destroy', $item->id) }}" method="POST" style="display:inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger btn-sm p-2 m-2" title="Xóa">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                </form>
+                @if ($item->deleted_at)
+                    <form action="{{ route('danh-muc-mon-an.restore', $item->id) }}" method="POST"
+                        style="display:inline;">
+                        @csrf
+                        <button type="submit" onclick="return confirm('Bạn có chắc muốn khôi phục mục này không?')"
+                            class="btn btn-success btn-sm p-2 m-2" title="Khôi phục">
+                            <i class="fa fa-recycle"></i> {{-- Icon khôi phục --}}
+                        </button>
+                    </form>
+                @else
+                    <form action="{{ route('danh-muc-mon-an.destroy', $item->id) }}" method="POST"
+                        style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" onclick="return confirm('Bạn muốn ngừng kinh doanh mục này chứ?')"
+                            class="btn btn-danger btn-sm p-2 m-2" title="Xóa">
+                            <i class="fa fa-trash"></i> {{-- Icon xóa --}}
+                        </button>
+                    </form>
+                @endif
             </div>
         </td>
 
 
     </tr>
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+ 
 
-    <script>
-
-    </script>
 @endforeach

@@ -20,7 +20,8 @@ Route::get('/', function () {
 
 // Danh mục món ăn
 Route::resource('danh-muc-mon-an', DanhMucMonAnController::class);
-
+Route::post('danh-muc-mon-an/restore/{id}', [DanhMucMonAnController::class, 'restore'])->name('danh-muc-mon-an.restore');
+Route::get('export-danh-muc-mon-an', [DanhMucMonAnController::class, 'export'])->name('danh-muc-mon-an.export');
 // Route::get('/', function () {
 //     return view('client.home');
 // });

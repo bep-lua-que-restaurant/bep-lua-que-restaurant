@@ -19,7 +19,7 @@
     <link href="{{ asset('admin') }}/vendor/bootstrap-select/dist/css/bootstrap-select.min.css" rel="stylesheet"
         type="text/css" />
     <link href="{{ asset('admin') }}/css/style.css" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.ckeditor.com/ckeditor5/35.3.0/classic/ckeditor.js"></script>
+
 
 </head>
 
@@ -140,6 +140,7 @@
         Scripts
     ***********************************-->
 
+    <script src="https://cdn.ckeditor.com/ckeditor5/35.3.0/classic/ckeditor.js"></script>
     <script src="{{ asset('admin') }}/vendor/global/global.min.js" type="text/javascript"></script>
     <script src="{{ asset('admin') }}/vendor/bootstrap-select/dist/js/bootstrap-select.min.js" type="text/javascript">
     </script>
@@ -152,7 +153,7 @@
     <script src="{{ asset('admin') }}/js/demo.js" type="text/javascript"></script>
     <script src="{{ asset('admin') }}/js/styleSwitcher.js" type="text/javascript"></script>
     <script src="{{ asset('admin') }}/js/app.js" type="text/javascript"></script>
-
+    
 </body>
 
 <!-- Mirrored from uena.dexignzone.com/laravel/demo/index by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 12 Jan 2025 11:04:22 GMT -->

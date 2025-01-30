@@ -23,7 +23,7 @@
         <div class="row">
             @include('admin.filter')
         </div>
-        
+
         <div class="row">
             <div class="col-lg-12">
                 <div class="card">
@@ -31,13 +31,13 @@
                         <h4 class="card-title">Danh sách</h4>
 
                         <div class="btn-group">
-                            <a href="{{route('danh-muc-mon-an.create')}}" class="btn btn-sm btn-primary">
+                            <a href="{{ route('danh-muc-mon-an.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
                             <a href="#" class="btn btn-sm btn-secondary">
                                 <i class="fa fa-upload"></i> Nhập file
                             </a>
-                            <a href="#" class="btn btn-sm btn-success">
+                            <a href="{{ route('danh-muc-mon-an.export') }}" class="btn btn-sm btn-success">
                                 <i class="fa fa-download"></i> Xuất file
                             </a>
                             <a href="#" class="btn btn-sm btn-info">
@@ -64,10 +64,10 @@
                                         <th><strong>Hành động</strong></th>
                                     </tr>
                                 </thead>
-                                <tbody id="list-container" >
+                                <tbody id="{{ $tableId }}">
                                     @include('admin.danhmuc.body-list')
                                 </tbody>
-                               
+
                             </table>
                         </div>
                     </div>
@@ -76,4 +76,7 @@
 
         </div>
     </div>
+    @include('admin.search-srcip')
+    <!-- Hiển thị phân trang -->
+    {{ $data->links('pagination::bootstrap-5') }}
 @endsection
