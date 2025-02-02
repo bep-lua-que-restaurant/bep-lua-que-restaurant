@@ -22,6 +22,7 @@ Route::get('/', function () {
 Route::resource('danh-muc-mon-an', DanhMucMonAnController::class);
 Route::post('danh-muc-mon-an/restore/{id}', [DanhMucMonAnController::class, 'restore'])->name('danh-muc-mon-an.restore');
 Route::get('export-danh-muc-mon-an', [DanhMucMonAnController::class, 'export'])->name('danh-muc-mon-an.export');
+Route::post('/import-danh-muc-mon-an', [DanhMucMonAnController::class, 'importDanhMucMonAn'])->name('danh-muc-mon-an.import');
 // Route::get('/', function () {
 //     return view('client.home');
 // });

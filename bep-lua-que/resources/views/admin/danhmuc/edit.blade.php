@@ -24,9 +24,10 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ route('danh-muc-mon-an.store') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('danh-muc-mon-an.update', $danhMucMonAn) }}" method="POST"
+                            enctype="multipart/form-data">
                             @csrf
-
+                            @method('PUT')
                             <!-- Tên danh mục -->
                             <div class="form-group">
                                 <label for="name">Tên danh mục</label>
@@ -49,7 +50,7 @@
 
                             <!-- Hình ảnh -->
                             <div class="form-group">
-                                <label for="image">Hình ảnh</label>
+                                <label for="image">Ảnh hiện tại</label>
                                 <div class="image-container">
                                     @if ($danhMucMonAn->hinh_anh)
                                         <img src="{{ asset('storage/' . $danhMucMonAn->hinh_anh) }}"
@@ -62,7 +63,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="image">Hình ảnh</label>
+                                <label for="image">Tải lên hình ảnh</label>
                                 <div class="image-upload-container">
                                     <label for="image-upload" class="image-upload-label">
                                         <i class="icon-camera"></i>
@@ -78,8 +79,11 @@
 
                             <!-- Nút submit -->
                             <div class="form-group text-right">
-                                <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Thêm
-                                    mới</button>
+                                <a href="{{route('danh-muc-mon-an.index' )}}" class="btn btn-primary btn-sm"> <i class="fa fa-arrow-left"></i> Quay lại
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-save"></i> Lưu
+                                </button>
+
                             </div>
                         </form>
                     </div>

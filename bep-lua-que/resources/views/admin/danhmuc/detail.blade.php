@@ -73,7 +73,6 @@
                             <div class="form-group text-right">
                                 <a href="{{ route('danh-muc-mon-an.index') }}" class="btn btn-primary btn-sm"><i
                                         class="fa fa-arrow-left"></i>
-
                                     Quay lại</a>
                             </div>
 

@@ -14,8 +14,8 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="javascript:void(0)">Table</a></li>
-                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Bootstrap</a></li>
+                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Danh mục món ăn</a></li>
                 </ol>
             </div>
         </div>
@@ -34,9 +34,12 @@
                             <a href="{{ route('danh-muc-mon-an.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
-                            <a href="#" class="btn btn-sm btn-secondary">
+                            <!-- Nút Nhập file sẽ hiển thị Modal -->
+                            <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
+                                data-target=".bd-example-modal-lg">
                                 <i class="fa fa-upload"></i> Nhập file
                             </a>
+
                             <a href="{{ route('danh-muc-mon-an.export') }}" class="btn btn-sm btn-success">
                                 <i class="fa fa-download"></i> Xuất file
                             </a>
@@ -76,6 +79,35 @@
 
         </div>
     </div>
+
+    <!-- Modal Nhập file -->
+    <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true" id="importFileModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importFileModalLabel">Nhập file</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal"
+                        aria-label="Close"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form nhập file -->
+                    <form action="{{ route('danh-muc-mon-an.import') }}" method="POST" enctype="multipart/form-data"
+                        id="importFileForm">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="fileUpload" class="form-label">Chọn file</label>
+                            <input type="file" name="file" id="fileUpload" class="form-control" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" form="importFileForm" class="btn btn-primary">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @include('admin.search-srcip')
     <!-- Hiển thị phân trang -->
     {{ $data->links('pagination::bootstrap-5') }}

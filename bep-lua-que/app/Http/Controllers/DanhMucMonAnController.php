@@ -8,6 +8,8 @@ use App\Http\Requests\UpdateDanhMucMonAnRequest;
 use Illuminate\Http\Request;
 use App\Exports\DanhMucMonAnExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\DanhMucMonAnImport;
+use Illuminate\Support\Facades\Storage;
 class DanhMucMonAnController extends Controller
 {
     /**
@@ -85,7 +87,23 @@ class DanhMucMonAnController extends Controller
      */
     public function update(UpdateDanhMucMonAnRequest $request, DanhMucMonAn $danhMucMonAn)
     {
-        //
+        $data = $request->validated();
+
+        // Kiểm tra nếu có file ảnh mới
+        if ($request->hasFile('hinh_anh')) {
+            // Xóa ảnh cũ nếu tồn tại
+            if ($danhMucMonAn->hinh_anh) {
+                Storage::disk('public')->delete($danhMucMonAn->hinh_anh);
+            }
+
+            // Lưu ảnh mới
+            $data['hinh_anh'] = $request->file('hinh_anh')->store('DanhMucImg', 'public');
+        }
+
+        // Cập nhật dữ liệu
+        $danhMucMonAn->update($data);
+
+        return back()->with('success', 'Cập nhật danh mục thành công!');
     }
 
     /**
@@ -110,5 +128,16 @@ class DanhMucMonAnController extends Controller
     {
         // Xuất file Excel với tên "DanhMucMonAn.xlsx"
         return Excel::download(new DanhMucMonAnExport, 'DanhMucMonAn.xlsx');
+    }
+
+    public function importDanhMucMonAn(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
+
+        Excel::import(new DanhMucMonAnImport, $request->file('file'));
+
+        return back()->with('success', 'Nhập dữ liệu thành công!');
     }
 }
