@@ -84,7 +84,7 @@
                     <li><a href="#">Nhân viên</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="#">Lịch làm việc</a></li>
+                    <li><a href="{{ route('ca-lam.index') }}">Lịch làm việc</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Chấm công</a></li>

@@ -18,7 +18,7 @@
                 url: route, // Sử dụng URL đã được truyền vào
                 method: "GET",
                 data: {
-                    ten: query // Gửi dữ liệu tìm kiếm theo query
+                    ten_ca: query // Gửi dữ liệu tìm kiếm theo query
                 },
                 success: function(response) {
                     // Cập nhật lại bảng dữ liệu sau khi tìm kiếm
