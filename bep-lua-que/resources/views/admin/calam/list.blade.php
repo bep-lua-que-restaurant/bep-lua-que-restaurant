@@ -40,7 +40,7 @@
                                 <i class="fa fa-upload"></i> Nhập file
                             </a>
 
-                            <a href="{{ route('danh-muc-mon-an.export') }}" class="btn btn-sm btn-success">
+                            <a href="{{ route('ca-lam.export') }}" class="btn btn-sm btn-success">
                                 <i class="fa fa-download"></i> Xuất file
                             </a>
                             <a href="#" class="btn btn-sm btn-info">
@@ -93,7 +93,7 @@
                 </div>
                 <div class="modal-body">
                     <!-- Form nhập file -->
-                    <form action="{{ route('danh-muc-mon-an.import') }}" method="POST" enctype="multipart/form-data"
+                    <form action="{{ route('ca-lam.import') }}" method="POST" enctype="multipart/form-data"
                         id="importFileForm">
                         @csrf
                         <div class="mb-3">

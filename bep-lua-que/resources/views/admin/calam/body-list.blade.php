@@ -46,27 +46,27 @@
         </td>
         <td>
             <div class="d-flex align-items-center">
-                <a href="{{ route('danh-muc-mon-an.show', $item->id) }}" class="btn btn-info btn-sm p-2 m-2">
+                <a href="{{ route('ca-lam.show', $item->id) }}" class="btn btn-info btn-sm p-2 m-2">
                     <i class="fa fa-eye"></i>
                 </a>
-                <a href="{{ route('danh-muc-mon-an.edit', $item->id) }}" class="btn btn-warning btn-sm p-2 m-2">
+                <a href="{{ route('ca-lam.edit', $item->id) }}" class="btn btn-warning btn-sm p-2 m-2">
                     <i class="fa fa-edit "></i>
                 </a>
                 @if ($item->deleted_at)
-                    <form action="{{ route('danh-muc-mon-an.restore', $item->id) }}" method="POST"
+                    <form action="{{ route('ca-lam.restore', $item->id) }}" method="POST"
                         style="display:inline;">
                         @csrf
-                        <button type="submit" onclick="return confirm('Bạn có chắc muốn khôi phục mục này không?')"
+                        <button type="submit" onclick="return confirm('Bạn có chắc muốn khôi mục này không?')"
                             class="btn btn-success btn-sm p-2 m-2" title="Khôi phục">
                             <i class="fa fa-recycle"></i> {{-- Icon khôi phục --}}
                         </button>
                     </form>
                 @else
-                    <form action="{{ route('danh-muc-mon-an.destroy', $item->id) }}" method="POST"
+                    <form action="{{ route('ca-lam.destroy', $item->id) }}" method="POST"
                         style="display:inline;">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" onclick="return confirm('Bạn muốn ngừng kinh doanh mục này chứ?')"
+                        <button type="submit" onclick="return confirm('Bạn muốn ngừng mục này chứ?')"
                             class="btn btn-danger btn-sm p-2 m-2" title="Xóa">
                             <i class="fa fa-trash"></i> {{-- Icon xóa --}}
                         </button>

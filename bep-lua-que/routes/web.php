@@ -27,6 +27,9 @@ Route::post('/import-danh-muc-mon-an', [DanhMucMonAnController::class, 'importDa
 
 // Ca làm
 Route::resource('ca-lam', CaLamController::class);
+Route::post('ca-lam/restore/{id}', [CaLamController::class, 'restore'])->name('ca-lam.restore');
+Route::get('export-ca-lam', [CaLamController::class, 'export'])->name('ca-lam.export');
+Route::post('/import-ca-lam', [CaLamController::class, 'importDanhMucMonAn'])->name('ca-lam.import');
 // Route::get('/', function () {
 //     return view('client.home');
 // });

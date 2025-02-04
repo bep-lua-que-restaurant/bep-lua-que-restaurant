@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\CaLamExport;
 use App\Models\CaLam;
 use App\Http\Requests\StoreCaLamRequest;
 use App\Http\Requests\UpdateCaLamRequest;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CaLamController extends Controller
 {
@@ -16,8 +20,8 @@ class CaLamController extends Controller
     {
         $query = CaLam::query();
 
-        if ($request->has('ten_ca') && $request->ten_ca != '') {
-            $query->where('ten_ca', 'like', '%' . $request->ten_ca . '%');
+        if ($request->has('ten') && $request->ten != '') {
+            $query->where('ten_ca', 'like', '%' . $request->ten . '%');
         }
 
         $data = $query->withTrashed()->latest('id')->paginate(15);
@@ -63,7 +67,7 @@ class CaLamController extends Controller
      */
     public function show(CaLam $caLam)
     {
-        //
+        return view('admin.calam.detail', compact('caLam'));
     }
 
     /**
@@ -71,7 +75,7 @@ class CaLamController extends Controller
      */
     public function edit(CaLam $caLam)
     {
-        //
+        return view('admin.calam.edit', compact('caLam'));
     }
 
     /**
@@ -79,7 +83,15 @@ class CaLamController extends Controller
      */
     public function update(UpdateCaLamRequest $request, CaLam $caLam)
     {
-        //
+        $data = $request->validated();
+
+        $data['gio_bat_dau'] = Carbon::createFromFormat('H:i', $data['gio_bat_dau'])->format('H:i:s');
+        $data['gio_ket_thuc'] = Carbon::createFromFormat('H:i', $data['gio_ket_thuc'])->format('H:i:s');
+
+        // Cập nhật dữ liệu
+        $caLam->update($data);
+
+        return back()->with('success', 'Cập nhật danh mục thành công!');
     }
 
     /**
@@ -87,6 +99,22 @@ class CaLamController extends Controller
      */
     public function destroy(CaLam $caLam)
     {
-        //
+        $caLam->delete();
+
+        return redirect()->route('ca-lam.index')->with('success', 'Xóa ca làm thành công!');
+    }
+
+    public function restore($id)
+    {
+        $caLam = CaLam::withTrashed()->findOrFail($id);
+        $caLam->restore();
+
+        return redirect()->route('ca-lam.index')->with('success', 'Khôi phục ca làm thành công!');
+    }
+
+    public function export()
+    {
+        // Xuất file Excel với tên "CaLam.xlsx"
+        return Excel::download(new CaLamExport, 'CaLam.xlsx');
     }
 }
