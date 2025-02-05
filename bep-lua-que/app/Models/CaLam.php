@@ -8,5 +8,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CaLam extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = [
+        'ten_ca',
+        'gio_bat_dau',
+        'gio_ket_thuc',
+        'mo_ta'
+    ];
 }
