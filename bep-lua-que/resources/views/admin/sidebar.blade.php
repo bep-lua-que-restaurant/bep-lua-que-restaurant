@@ -67,7 +67,7 @@
                     <li><a href="#">Tương tác</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="#">Nhà cung cấp</a></li>
+                    <li><a href="{{ route('nha-cung-cap.index') }}">Nhà cung cấp</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Đối tác giao hàng</a></li>
