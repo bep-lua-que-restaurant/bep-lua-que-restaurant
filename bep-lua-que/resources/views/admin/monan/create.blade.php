@@ -45,14 +45,7 @@
                 @enderror
             </div>
 
-            <div class="mb-3">
-                <label for="trang_thai" class="form-label">Trạng thái</label>
-                <select name="trang_thai" id="trang_thai" class="form-control">
-                    <option value="dang_ban">Đang bán</option>
-                    <option value="het_hang">Hết hàng</option>
-                    <option value="ngung_ban">Ngừng bán</option>
-                </select>
-            </div>
+            
 
             <div class="mb-3">
                 <label for="hinh_anh" class="form-label">Hình ảnh</label>

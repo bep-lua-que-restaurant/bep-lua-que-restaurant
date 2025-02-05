@@ -61,9 +61,9 @@
                                             </div>
                                         </th>
                                         <th><strong>ID.</strong></th>
-                                        <th><strong>Tên </strong></th>
-
-                                        <th><strong>Trạng thái</strong></th>
+                                        <th><strong>Tên</strong></th>
+                                        <th><strong>Trạng thái kinh doanh</strong></th>
+                                        <th><strong>Trạng thái món ăn</strong></th> <!-- Cột trạng thái món ăn -->
                                         <th><strong>Hành động</strong></th>
                                     </tr>
                                 </thead>
