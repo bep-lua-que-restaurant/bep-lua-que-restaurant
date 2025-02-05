@@ -81,7 +81,7 @@
                     <span class="nav-text">Nhân viên</span>
                 </a>
                 <ul aria-expanded="false">
-                    <li><a href="#">Nhân viên</a></li>
+                    <li><a href="{{ route('nhan-vien.index') }}">Nhân viên</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Lịch làm việc</a></li>
