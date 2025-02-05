@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\DanhMucMonAnController;
+use App\Http\Controllers\ComBoController;
 use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\BanAnController;
 use App\Http\Controllers\DatBanController;
@@ -35,6 +36,14 @@ Route::post('danh-muc-mon-an/restore/{id}', [DanhMucMonAnController::class, 'res
 Route::get('export-danh-muc-mon-an', [DanhMucMonAnController::class, 'export'])->name('danh-muc-mon-an.export');
 Route::post('/import-danh-muc-mon-an', [DanhMucMonAnController::class, 'importDanhMucMonAn'])->name('danh-muc-mon-an.import');
 
+
+Route::resource('com-bo', ComBoController::class);
+Route::post('com-bo/restore/{id}', [ComBoController::class, 'restore'])->name('com-bo.restore');
+Route::get('export-com-bo', [ComBoController::class, 'export'])->name('com-bo.export');
+Route::post('/import-com-bo', [ComBoController::class, 'importComBo'])->name('com-bo.import');
+
+
+
 //Dịch vụ
 Route::resource('dich-vu', DichVuController::class);
 Route::post('dich-vu/restore/{id}', [DichVuController::class, 'restore'])->name('dich-vu.restore');
@@ -51,6 +60,7 @@ Route::resource('nha-cung-cap', \App\Http\Controllers\NhaCungCapController::clas
 Route::post('nha-cung-cap/restore/{id}', [\App\Http\Controllers\NhaCungCapController::class, 'restore'])->name('nha-cung-cap.restore');
 Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'export'])->name('nha-cung-cap.export');
 //Route::post('/import-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha-cung-cap.import');
+
 
 // Route::get('/', function () {
 //     return view('client.home');
