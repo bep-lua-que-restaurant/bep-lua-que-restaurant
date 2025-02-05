@@ -1,12 +1,17 @@
 <?php
 
 
+use App\Http\Controllers\BanAnController;
+use App\Http\Controllers\DatBanController;
+
+
 use App\Http\Controllers\CaLamController;
 
 use App\Http\Controllers\ChiTietNhapKhoController;
 use App\Http\Controllers\MonAnController;
 use App\Http\Controllers\NguyenLieuController;
 use App\Http\Controllers\PhieuNhapKhoController;
+
 
 
 use Illuminate\Support\Facades\Route;
@@ -56,6 +61,15 @@ Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::c
 //     return view('client.home');
 // });
 
+
+Route::resource('ban-an', BanAnController::class);
+Route::get('/ban-an/{id}', [BanAnController::class, 'show'])->name('ban-an.show');
+Route::post('/ban-an/{banAn}/restore', [BanAnController::class, 'restore'])->name('ban-an.restore');
+
+Route::get('/ban-an-export', [BanAnController::class, 'export'])->name('ban-an.export');
+
+Route::post('/ban-an/import', [BanAnController::class, 'import'])->name('ban-an.import');
+
 // Món ăn
 Route::resource('mon-an', MonAnController::class);
 Route::post('mon-an/restore/{id}', [MonAnController::class, 'restore'])->name('mon-an.restore');
@@ -97,5 +111,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/thu-ngan', [ThuNganController::class, 'index'])->name('thungan.dashboard');
     // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 });
+
 
 

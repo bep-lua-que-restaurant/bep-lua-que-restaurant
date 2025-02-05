@@ -24,7 +24,7 @@
 
             {{-- Phòng bàn --}}
             <li>
-                <a class="ai-icon" href="#">
+                <a class="ai-icon" href="{{ route('ban-an.index') }}">
                     <i class="fa fa-table"></i> <!-- Icon phòng bàn -->
                     <span class="nav-text">Phòng bàn</span>
                 </a>
