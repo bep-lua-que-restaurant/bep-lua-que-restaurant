@@ -84,7 +84,7 @@
                     <li><a href="{{ route('nhan-vien.index') }}">Nhân viên</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="#">Lịch làm việc</a></li>
+                    <li><a href="{{ route('ca-lam.index') }}">Lịch làm việc</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Chấm công</a></li>
@@ -118,7 +118,7 @@
 
             {{-- Thu ngân --}}
             <li>
-                <a class="ai-icon" href="#">
+                <a class="ai-icon" href="/thu-ngan">
                     <i class="fa fa-cash-register"></i>
                     <span class="nav-text">Thu ngân</span>
                 </a>

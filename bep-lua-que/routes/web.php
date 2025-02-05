@@ -1,9 +1,13 @@
 <?php
 
+
+use App\Http\Controllers\CaLamController;
+
 use App\Http\Controllers\ChiTietNhapKhoController;
 use App\Http\Controllers\MonAnController;
 use App\Http\Controllers\NguyenLieuController;
 use App\Http\Controllers\PhieuNhapKhoController;
+
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BepController;
@@ -34,6 +38,13 @@ Route::resource('danh-muc-mon-an', DanhMucMonAnController::class);
 Route::post('danh-muc-mon-an/restore/{id}', [DanhMucMonAnController::class, 'restore'])->name('danh-muc-mon-an.restore');
 Route::get('export-danh-muc-mon-an', [DanhMucMonAnController::class, 'export'])->name('danh-muc-mon-an.export');
 Route::post('/import-danh-muc-mon-an', [DanhMucMonAnController::class, 'importDanhMucMonAn'])->name('danh-muc-mon-an.import');
+
+
+// Ca làm
+Route::resource('ca-lam', CaLamController::class);
+Route::post('ca-lam/restore/{id}', [CaLamController::class, 'restore'])->name('ca-lam.restore');
+Route::get('export-ca-lam', [CaLamController::class, 'export'])->name('ca-lam.export');
+Route::post('/import-ca-lam', [CaLamController::class, 'importDanhMucMonAn'])->name('ca-lam.import');
 
 
 Route::resource('nha-cung-cap', \App\Http\Controllers\NhaCungCapController::class);
