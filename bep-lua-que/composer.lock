@@ -6754,6 +6754,7 @@
         },
         {
             "name": "laravel/sail",
+
             "version": "v1.41.0",
             "source": {
                 "type": "git",
@@ -6764,6 +6765,7 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/sail/zipball/fe1a4ada0abb5e4bd99eb4e4b0d87906c00cdeec",
                 "reference": "fe1a4ada0abb5e4bd99eb4e4b0d87906c00cdeec",
+
                 "shasum": ""
             },
             "require": {
@@ -6813,7 +6815,9 @@
                 "issues": "https://github.com/laravel/sail/issues",
                 "source": "https://github.com/laravel/sail"
             },
+
             "time": "2025-01-24T15:45:36+00:00"
+
         },
         {
             "name": "mockery/mockery",
@@ -7495,6 +7499,7 @@
         },
         {
             "name": "phpunit/phpunit",
+
             "version": "10.5.44",
             "source": {
                 "type": "git",
@@ -7505,6 +7510,7 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/1381c62769be4bb88fa4c5aec1366c7c66ca4f36",
                 "reference": "1381c62769be4bb88fa4c5aec1366c7c66ca4f36",
+
                 "shasum": ""
             },
             "require": {
@@ -7576,7 +7582,9 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
+
                 "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.44"
+
             },
             "funding": [
                 {
@@ -7592,7 +7600,9 @@
                     "type": "tidelift"
                 }
             ],
+
             "time": "2025-01-31T07:00:38+00:00"
+
         },
         {
             "name": "sebastian/cli-parser",
