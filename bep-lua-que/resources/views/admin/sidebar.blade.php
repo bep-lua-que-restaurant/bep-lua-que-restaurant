@@ -13,7 +13,7 @@
                     <li><a href="#">Món ăn</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="#">Dịch vụ</a></li>
+                    <li><a href="{{ route('dich-vu.index') }}">Dịch vụ</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Combo - đóng gói</a></li>
