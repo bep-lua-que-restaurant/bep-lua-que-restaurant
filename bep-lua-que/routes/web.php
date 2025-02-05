@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\BanAnController;
 use App\Http\Controllers\DanhMucMonAnController;
+use App\Http\Controllers\DatBanController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,3 +28,11 @@ Route::post('/import-danh-muc-mon-an', [DanhMucMonAnController::class, 'importDa
 // Route::get('/', function () {
 //     return view('client.home');
 // });
+
+Route::resource('ban-an', BanAnController::class);
+Route::get('/ban-an/{id}', [BanAnController::class, 'show'])->name('ban-an.show');
+Route::post('/ban-an/{banAn}/restore', [BanAnController::class, 'restore'])->name('ban-an.restore');
+
+Route::get('/ban-an-export', [BanAnController::class, 'export'])->name('ban-an.export');
+
+Route::post('/ban-an/import', [BanAnController::class, 'import'])->name('ban-an.import');

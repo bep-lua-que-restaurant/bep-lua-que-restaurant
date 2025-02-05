@@ -6,11 +6,11 @@
         </div>
 
         <div>
-            <select class="btn btn-primary  btn-sm">
-                <option>Lựa chọn hiển thị</option>
-                <option>Đang kinh doanh</option>
-                <option>Ngừng kinh doanh</option>
-                <option>Tất cả</option>
+            <select id="statusFilter" class="btn btn-primary btn-sm">
+                <option value="">Lựa chọn hiển thị</option>
+                <option value="Đang kinh doanh">Đang kinh doanh</option>
+                <option value="Ngừng kinh doanh">Ngừng kinh doanh</option>
+                <option value="Tất cả">Tất cả</option>
             </select>
         </div>
     </div>
