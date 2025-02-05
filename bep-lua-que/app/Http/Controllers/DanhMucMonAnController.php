@@ -24,6 +24,14 @@ class DanhMucMonAnController extends Controller
             $query->where('ten', 'like', '%' . $request->ten . '%');
         }
 
+        if ($request->has('statusFilter') && $request->statusFilter != '') {
+            if ($request->statusFilter == 'Đang kinh doanh') {
+                $query->whereNull('deleted_at');
+            } elseif ($request->statusFilter == 'Ngừng kinh doanh') {
+                $query->whereNotNull('deleted_at');
+            }
+        }
+
         $data = $query->withTrashed()->latest('id')->paginate(15);
 
         // Xử lý trả về khi yêu cầu là Ajax
