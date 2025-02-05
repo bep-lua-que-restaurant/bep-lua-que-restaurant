@@ -40774,3 +40774,46 @@ $color_pallate_15: #ed0b4c; */
       color: #fff; }
 
 /*# sourceMappingURL=style.css.map */
+
+
+/* css phần ảnh */
+.image-upload-container {
+    width: 200px;
+    height: 200px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    background-color: #fff;
+    overflow: hidden;
+}
+
+.image-upload-container:hover {
+    border-color: #888;
+}
+
+.image-upload-label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.image-upload-label i.icon-camera {
+    font-size: 40px;
+    color: #aaa;
+}
+
+.image-upload-label img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

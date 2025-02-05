@@ -11,7 +11,7 @@ class StoreDanhMucMonAnRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,21 @@ class StoreDanhMucMonAnRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'ten' => ['required', 'unique:danh_muc_mon_ans', 'string', 'max:255'],
+            'mo_ta' => ['string','nullable'],
+            'hinh_anh' => ['image','nullable'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'ten.required' => 'Tên danh mục không được để trống',
+            'ten.unique' => 'Tên danh mục đã tồn tại',
+            'ten.string' => 'Tên danh mục phải là chuỗi',
+            'ten.max' => 'Tên danh mục không được quá 255 ký tự',
+            'mo_ta.string' => 'Mô tả phải là chuỗi',
+            'hinh_anh.image' => 'Hình ảnh phải là ảnh',
         ];
     }
 }
