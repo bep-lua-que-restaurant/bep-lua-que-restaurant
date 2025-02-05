@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-    Danh mục món ăn
+    Ca Làm
 @endsection
 
 @section('content')
@@ -15,7 +15,7 @@
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Danh mục món ăn</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Ca làm</a></li>
                 </ol>
             </div>
         </div>
@@ -31,17 +31,17 @@
                         <h4 class="card-title">Danh sách</h4>
 
                         <div class="btn-group">
-                            <a href="{{ route('danh-muc-mon-an.create') }}" class="btn btn-sm btn-primary">
+                            <a href="{{ route('ca-lam.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
                             <!-- Nút Nhập file sẽ hiển thị Modal -->
                             <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
                                 data-target=".bd-example-modal-lg">
-                                <i class="fa fa-download"></i> Nhập file
+                                <i class="fa fa-upload"></i> Nhập file
                             </a>
 
-                            <a href="{{ route('danh-muc-mon-an.export') }}" class="btn btn-sm btn-success">
-                                <i class="fa fa-upload"></i> Xuất file
+                            <a href="{{ route('ca-lam.export') }}" class="btn btn-sm btn-success">
+                                <i class="fa fa-download"></i> Xuất file
                             </a>
                             <a href="#" class="btn btn-sm btn-info">
                                 <i class="fa fa-list"></i> Danh sách
@@ -61,14 +61,16 @@
                                             </div>
                                         </th>
                                         <th><strong>ID.</strong></th>
-                                        <th><strong>Tên </strong></th>
+                                        <th><strong>Ca làm việc </strong></th>
+                                        <th><strong>Thời gian </strong></th>
 
+                                        <th><strong>Tổng giờ làm việc</strong></th>
                                         <th><strong>Trạng thái</strong></th>
                                         <th><strong>Hành động</strong></th>
                                     </tr>
                                 </thead>
                                 <tbody id="{{ $tableId }}">
-                                    @include('admin.danhmuc.body-list')
+                                    @include('admin.calam.body-list')
                                 </tbody>
 
                             </table>
@@ -91,7 +93,7 @@
                 </div>
                 <div class="modal-body">
                     <!-- Form nhập file -->
-                    <form action="{{ route('danh-muc-mon-an.import') }}" method="POST" enctype="multipart/form-data"
+                    <form action="{{ route('ca-lam.import') }}" method="POST" enctype="multipart/form-data"
                         id="importFileForm">
                         @csrf
                         <div class="mb-3">
