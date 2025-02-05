@@ -37,11 +37,11 @@
                             <!-- Nút Nhập file sẽ hiển thị Modal -->
                             <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
                                 data-target=".bd-example-modal-lg">
-                                <i class="fa fa-upload"></i> Nhập file
+                                <i class="fa fa-download"></i> Nhập file
                             </a>
 
                             <a href="{{ route('danh-muc-mon-an.export') }}" class="btn btn-sm btn-success">
-                                <i class="fa fa-download"></i> Xuất file
+                                <i class="fa fa-upload"></i> Xuất file
                             </a>
                             <a href="#" class="btn btn-sm btn-info">
                                 <i class="fa fa-list"></i> Danh sách
