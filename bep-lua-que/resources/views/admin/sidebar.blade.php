@@ -16,7 +16,7 @@
                     <li><a href="#">Dịch vụ</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="#">Combo - đóng gói</a></li>
+                    <li><a href="{{ route('com-bo.index') }}">Combo - đóng gói</a></li>
                 </ul>
             </li>
             {{-- Hàng hóa --}}
