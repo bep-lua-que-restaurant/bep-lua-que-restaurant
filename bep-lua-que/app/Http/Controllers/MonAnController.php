@@ -19,27 +19,28 @@ class MonAnController extends Controller
     {
         // Lấy tất cả món ăn (bao gồm cả món đã bị xóa mềm) nhưng bỏ món có danh mục bị xóa mềm
         $query = MonAn::with(['danhMuc', 'hinhAnhs'])->withTrashed();
-    
+
         // Loại bỏ món ăn có danh mục đã bị xóa mềm (deleted_at != NULL)
         $query->whereHas('danhMuc', function ($q) {
             $q->whereNull('deleted_at'); // Chỉ lấy danh mục chưa bị xóa mềm
         });
-    
+
+
         // Nếu có tìm kiếm theo tên
         if ($request->has('ten') && !empty($request->ten)) {
             $query->where('ten', 'like', '%' . $request->ten . '%');
         }
-    
+
         // Lấy danh sách món ăn với phân trang
         $data = $query->latest('id')->paginate(15);
-    
+
         // Nếu là request AJAX, trả về HTML của danh sách món ăn
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('admin.monan.body-list', compact('data'))->render(),
             ]);
         }
-    
+
         // Trả về view danh sách món ăn
         return view('admin.monan.list', [
             'data' => $data,
@@ -48,7 +49,7 @@ class MonAnController extends Controller
             'searchInputId' => 'search-name',
         ]);
     }
-    
+
 
 
     public function create()
@@ -147,23 +148,23 @@ class MonAnController extends Controller
         return redirect()->route('mon-an.index')->with('success', 'Khôi phục món ăn thành công!');
     }
     public function xoaHinhAnh($id)
-{
-    $hinhAnh = HinhAnhMonAn::find($id);
+    {
+        $hinhAnh = HinhAnhMonAn::find($id);
 
-    if (!$hinhAnh) {
-        return response()->json(['error' => 'Không tìm thấy ảnh'], 404);
+        if (!$hinhAnh) {
+            return response()->json(['error' => 'Không tìm thấy ảnh'], 404);
+        }
+
+        // Xóa file trong thư mục storage
+        if (Storage::disk('public')->exists($hinhAnh->hinh_anh)) {
+            Storage::disk('public')->delete($hinhAnh->hinh_anh);
+        }
+
+        // Xóa ảnh trong database
+        $hinhAnh->delete();
+
+        return response()->json(['success' => 'Ảnh đã được xóa thành công']);
     }
-
-    // Xóa file trong thư mục storage
-    if (Storage::disk('public')->exists($hinhAnh->hinh_anh)) {
-        Storage::disk('public')->delete($hinhAnh->hinh_anh);
-    }
-
-    // Xóa ảnh trong database
-    $hinhAnh->delete();
-
-    return response()->json(['success' => 'Ảnh đã được xóa thành công']);
-}
 
     /**
      * Xuất danh sách món ăn ra file Excel
@@ -172,7 +173,7 @@ class MonAnController extends Controller
     {
         return Excel::download(new MonAnExport, 'MonAn.xlsx');
     }
-     /**
+    /**
      * Nhập danh sách món ăn từ file Excel
      */
     public function importMonAn(Request $request)
