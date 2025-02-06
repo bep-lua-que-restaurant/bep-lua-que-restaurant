@@ -21,15 +21,25 @@ class MonAnController extends Controller
         // Tạo query lấy tất cả món ăn (bao gồm cả bị xóa mềm) và danh mục chưa bị xóa mềm
         $query = MonAn::with(['danhMuc', 'hinhAnhs'])->withTrashed();
 
+<<<<<<< HEAD
+=======
+        // Loại bỏ món ăn có danh mục đã bị xóa mềm (deleted_at != NULL)
+>>>>>>> origin/main
         $query->whereHas('danhMuc', function ($q) {
             $q->whereNull('deleted_at'); // Chỉ lấy danh mục chưa bị xóa mềm
         });
 
+<<<<<<< HEAD
         // Lọc theo tên món ăn
+=======
+
+        // Nếu có tìm kiếm theo tên
+>>>>>>> origin/main
         if ($request->has('ten') && !empty($request->ten)) {
             $query->where('ten', 'like', '%' . $request->ten . '%');
         }
 
+<<<<<<< HEAD
         // Lọc theo trạng thái kinh doanh (đã xóa mềm hay chưa)
         if ($request->has('trang_thai_kinh_doanh') && !empty($request->trang_thai_kinh_doanh)) {
             if ($request->trang_thai_kinh_doanh === 'ngung_kinh_doanh') {
@@ -48,6 +58,12 @@ class MonAnController extends Controller
         $data = $query->latest('id')->paginate(15);
 
         // Nếu là request AJAX, trả về HTML danh sách món ăn
+=======
+        // Lấy danh sách món ăn với phân trang
+        $data = $query->latest('id')->paginate(15);
+
+        // Nếu là request AJAX, trả về HTML của danh sách món ăn
+>>>>>>> origin/main
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('admin.monan.body-list', compact('data'))->render(),
@@ -63,7 +79,10 @@ class MonAnController extends Controller
         ]);
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 
 
     public function create()

@@ -10,6 +10,7 @@ use App\Exports\DanhMucMonAnExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\DanhMucMonAnImport;
 use Illuminate\Support\Facades\Storage;
+
 class DanhMucMonAnController extends Controller
 {
     /**
@@ -21,6 +22,14 @@ class DanhMucMonAnController extends Controller
 
         if ($request->has('ten') && $request->ten != '') {
             $query->where('ten', 'like', '%' . $request->ten . '%');
+        }
+
+        if ($request->has('statusFilter') && $request->statusFilter != '') {
+            if ($request->statusFilter == 'Đang kinh doanh') {
+                $query->whereNull('deleted_at');
+            } elseif ($request->statusFilter == 'Ngừng kinh doanh') {
+                $query->whereNotNull('deleted_at');
+            }
         }
 
         $data = $query->withTrashed()->latest('id')->paginate(15);

@@ -17,6 +17,7 @@ class NhaCungCapFactory extends Factory
     public function definition(): array
     {
         return [
+
             'ten_nha_cung_cap' => $this->faker->unique()->company,
             'so_dien_thoai' => $this->faker->unique()->numerify('09########'),
             'email' => $this->faker->unique()->safeEmail,
@@ -24,6 +25,9 @@ class NhaCungCapFactory extends Factory
             'mo_ta' => $this->faker->sentence(10),
             'created_at' => now(),
             'updated_at' => now(),
+
+          
+
         ];
     }
 }
