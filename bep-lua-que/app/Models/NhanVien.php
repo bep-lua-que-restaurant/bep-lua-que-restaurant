@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class NhanVien extends Authenticatable
 {
+<<<<<<< HEAD
     use HasFactory, SoftDeletes;
 
     protected $table = 'nhan_viens';
@@ -30,4 +31,29 @@ class NhanVien extends Authenticatable
     {
         return $this->belongsTo(ChucVu::class, 'chuc_vu_id');
     }
+=======
+    use HasFactory,SoftDeletes;
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'so_dien_thoai',
+        'dia_chi',
+        'chuc_vu',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * Mỗi nhân viên có thể nhập nhiều phiếu nhập kho.
+     */
+    public function phieuNhapKho()
+    {
+        return $this->hasMany(PhieuNhapKho::class, 'nhan_vien_id');
+    }
+
+>>>>>>> 0b4c452 (fix crud mon an)
 }
