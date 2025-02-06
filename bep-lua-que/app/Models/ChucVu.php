@@ -8,5 +8,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ChucVu extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = ['ten_chuc_vu', 'mo_ta'];
+
+    public function nhanViens()
+    {
+        return $this->hasMany(NhanVien::class, 'chuc_vu_id');
+    }
 }
