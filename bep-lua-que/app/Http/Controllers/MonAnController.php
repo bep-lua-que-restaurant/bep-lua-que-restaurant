@@ -10,9 +10,11 @@ use App\Models\MonAn;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreMonAnRequest;
 use App\Http\Requests\UpdateMonAnRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Validators\ValidationException;
 
 class MonAnController extends Controller
 {
@@ -21,49 +23,30 @@ class MonAnController extends Controller
         // Tạo query lấy tất cả món ăn (bao gồm cả bị xóa mềm) và danh mục chưa bị xóa mềm
         $query = MonAn::with(['danhMuc', 'hinhAnhs'])->withTrashed();
 
-<<<<<<< HEAD
-=======
+
         // Loại bỏ món ăn có danh mục đã bị xóa mềm (deleted_at != NULL)
->>>>>>> origin/main
+
         $query->whereHas('danhMuc', function ($q) {
             $q->whereNull('deleted_at'); // Chỉ lấy danh mục chưa bị xóa mềm
         });
 
-<<<<<<< HEAD
         // Lọc theo tên món ăn
-=======
-
-        // Nếu có tìm kiếm theo tên
->>>>>>> origin/main
-        if ($request->has('ten') && !empty($request->ten)) {
+        if ($request->has('ten') && $request->ten != '') {
             $query->where('ten', 'like', '%' . $request->ten . '%');
         }
 
-<<<<<<< HEAD
-        // Lọc theo trạng thái kinh doanh (đã xóa mềm hay chưa)
-        if ($request->has('trang_thai_kinh_doanh') && !empty($request->trang_thai_kinh_doanh)) {
-            if ($request->trang_thai_kinh_doanh === 'ngung_kinh_doanh') {
-                $query->onlyTrashed(); // Chỉ lấy món đã xóa mềm
-            } else {
-                $query->whereNull('deleted_at'); // Chỉ lấy món đang kinh doanh
+        if ($request->has('statusFilter') && $request->statusFilter != '') {
+            if ($request->statusFilter == 'Đang kinh doanh') {
+                $query->whereNull('deleted_at');
+            } elseif ($request->statusFilter == 'Ngừng kinh doanh') {
+                $query->whereNotNull('deleted_at');
             }
         }
-
-        // Lọc theo trạng thái món ăn (trong bảng)
-        if ($request->has('trang_thai') && !empty($request->trang_thai)) {
-            $query->where('trang_thai', $request->trang_thai);
-        }
-
         // Phân trang và lấy danh sách món ăn
-        $data = $query->latest('id')->paginate(15);
-
-        // Nếu là request AJAX, trả về HTML danh sách món ăn
-=======
-        // Lấy danh sách món ăn với phân trang
-        $data = $query->latest('id')->paginate(15);
+        $data = $query->withTrashed()->latest('id')->paginate(15);
 
         // Nếu là request AJAX, trả về HTML của danh sách món ăn
->>>>>>> origin/main
+
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('admin.monan.body-list', compact('data'))->render(),
@@ -73,16 +56,13 @@ class MonAnController extends Controller
         // Trả về view danh sách món ăn
         return view('admin.monan.list', [
             'data' => $data,
-            'route' => route('mon-an.index'),
-            'tableId' => 'list-container',
-            'searchInputId' => 'search-name',
+            'route' => route('mon-an.index'), // URL route cho AJAX
+            'tableId' => 'list-container', // ID của bảng
+            'searchInputId' => 'search-name', // ID của ô tìm kiếm
         ]);
     }
 
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
 
 
     public function create()
@@ -139,56 +119,57 @@ class MonAnController extends Controller
 
 
 
-    public function update(UpdateMonAnRequest $request, MonAn $monAn)
-    {
-        Log::info(" Dữ liệu nhận từ form:", $request->all());
-
-        // Kiểm tra danh mục có tồn tại và không bị xóa mềm
-        $danhMuc = DanhMucMonAn::find($request->danh_muc_mon_an_id);
-        if (!$danhMuc || $danhMuc->deleted_at !== null) {
-            return redirect()->back()->withErrors(['danh_muc_mon_an_id' => 'Danh mục này không tồn tại hoặc đã bị xóa.']);
-        }
-
-        // Lấy dữ liệu đã validate
-        $validatedData = $request->validated();
-
-        // Cập nhật trạng thái món ăn (dang_ban, het_hang, ngung_ban)
-        if ($request->has('trang_thai')) {
-            $validatedData['trang_thai'] = $request->trang_thai;
-        }
-
-        Log::info("Dữ liệu sau khi xử lý:", $validatedData);
-
-        // Cập nhật món ăn
-        $monAn->update($validatedData);
-
-        // Xử lý hình ảnh nếu có file mới tải lên
-        if ($request->hasFile('hinh_anh')) {
-            // Xóa ảnh cũ trước khi thêm ảnh mới
-            foreach ($monAn->hinhAnhs as $hinhAnh) {
-                Storage::disk('public')->delete($hinhAnh->hinh_anh);
-                $hinhAnh->delete();
-            }
-
-            // Thêm ảnh mới
-            foreach ($request->file('hinh_anh') as $image) {
-                $path = $image->store('mon_an_images', 'public');
-                HinhAnhMonAn::create([
-                    'mon_an_id' => $monAn->id,
-                    'hinh_anh' => $path
-                ]);
-            }
-        }
-
-        Log::info("Món ăn đã được cập nhật thành công, ID: " . $monAn->id);
-
-        return redirect()->route('mon-an.index')->with('success', 'Cập nhật món ăn thành công!');
-    }
-
-
-
-
-
+     // Cập nhật món ăn
+     public function update(UpdateMonAnRequest $request, MonAn $monAn)
+     {
+         $data = $request->validated();
+     
+         // Cập nhật các trường thông tin cơ bản của món ăn
+         $monAn->update($data);
+     
+         // Xử lý xóa hình ảnh nếu có hình ảnh cần xóa
+         if ($request->has('remove_images') && is_array($request->remove_images)) {
+             // Duyệt qua từng ID hình ảnh cần xóa
+             foreach ($request->remove_images as $imageId) {
+                 $image = $monAn->hinhAnhs()->find($imageId);
+                 if ($image) {
+                     // Xóa file vật lý nếu cần thiết
+                     Storage::delete('public/' . $image->hinh_anh);
+                     
+                     // Xóa bản ghi trong cơ sở dữ liệu
+                     $image->delete();
+                 }
+             }
+         }
+     
+         // Xử lý thêm hình ảnh mới nếu người dùng chọn
+         if ($request->hasFile('hinh_anh')) {
+             foreach ($request->file('hinh_anh') as $file) {
+                 $path = $file->store('mon_an_images', 'public');
+                 $monAn->hinhAnhs()->create(['hinh_anh' => $path]);
+             }
+         }
+     
+         return redirect()->route('mon-an.index')->with('success', 'Cập nhật món ăn thành công.');
+     }
+     
+ 
+     // Xóa ảnh hiện tại
+     public function xoaHinhAnh($hinhAnhId)
+     {
+         // Tìm ảnh theo ID
+         $hinhAnh = HinhAnhMonAn::findOrFail($hinhAnhId);
+ 
+         // Xóa ảnh khỏi thư mục public
+         Storage::disk('public')->delete($hinhAnh->hinh_anh);
+ 
+         // Xóa ảnh khỏi cơ sở dữ liệu
+         $hinhAnh->delete();
+ 
+         // Trả về phản hồi thành công
+         return response()->json(['success' => true]);
+     }
+ 
     public function destroy(MonAn $monAn)
     {
         // Xóa tất cả ảnh món ăn trước khi xóa món ăn
@@ -216,24 +197,7 @@ class MonAnController extends Controller
 
         return redirect()->route('mon-an.index')->with('success', 'Khôi phục món ăn thành công!');
     }
-    public function xoaHinhAnh($id)
-    {
-        $hinhAnh = HinhAnhMonAn::find($id);
 
-        if (!$hinhAnh) {
-            return response()->json(['error' => 'Không tìm thấy ảnh'], 404);
-        }
-
-        // Xóa file trong thư mục storage
-        if (Storage::disk('public')->exists($hinhAnh->hinh_anh)) {
-            Storage::disk('public')->delete($hinhAnh->hinh_anh);
-        }
-
-        // Xóa ảnh trong database
-        $hinhAnh->delete();
-
-        return response()->json(['success' => 'Ảnh đã được xóa thành công']);
-    }
 
     /**
      * Xuất danh sách món ăn ra file Excel
@@ -257,7 +221,7 @@ class MonAnController extends Controller
             Log::info("Import file thành công!");
 
             return back()->with('success', 'Nhập dữ liệu món ăn thành công!');
-        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+        } catch (ValidationException $e) {
             Log::error("Lỗi nhập file: " . json_encode($e->failures()));
 
             return back()->withErrors(['file' => 'Lỗi khi nhập dữ liệu. Hãy kiểm tra lại file.']);

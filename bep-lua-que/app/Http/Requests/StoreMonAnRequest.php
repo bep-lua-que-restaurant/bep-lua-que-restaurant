@@ -30,24 +30,14 @@ class StoreMonAnRequest extends FormRequest
             'hinh_anh.*' => 'nullable|image|max:2048'
         ];
     }
-    public function attributes()
-    {
-        return [
-            'required' => 'Không được đê trống',
-            'unique' => 'Đã tồn tại',
-            'numeric' => 'Phải là số',
-            'max:255' => 'quá số ký tự',
-            'min:0' => 'không được nhỏ hơn 0',
-            'mimes:jpeg,png,jpg,gif' => 'không phải là tệp ảnh',
-            'max:2048' => 'dữ liệu quá lớn',
-        ];
-    }
+    
     public function messages()
     {
         return [
             'danh_muc_mon_an_id' => 'Danh mục món ăn ',
-            'ten' => ' Tên món ăn',
-            'gia' => ' Giá món',
+            'ten.required' => ' Tên món ăn Không được để trống',
+            'gia.required' => ' Giá món Không được để trống',
+            'gia.numeric'=> 'Giá nhập vào phải là số',
             'trang_thai' => 'Trạng thái món',
             'hinh_anhs' => 'Hình ảnh món',
 

@@ -13,7 +13,7 @@
                 <label for="ten" class="form-label">Tên món ăn</label>
                 <input type="text" name="ten" id="ten" class="form-control" value="{{ old('ten') }}">
                 @error('ten')
-                    <div class="text-danger">{{ $message }}</div>
+                    <div class="text-danger">*{{ $message }}</div>
                 @enderror
             </div>
 
@@ -25,7 +25,7 @@
                     @endforeach
                 </select>
                 @error('danh_muc_mon_an_id')
-                    <div class="text-danger">{{ $message }}</div>
+                    <div class="text-danger">*{{ $message }}</div>
                 @enderror
             </div>
 
@@ -41,7 +41,7 @@
                 <label for="gia" class="form-label">Giá</label>
                 <input type="number" name="gia" id="gia" class="form-control" value="{{ old('gia') }}">
                 @error('gia')
-                    <div class="text-danger">{{ $message }}</div>
+                    <div class="text-danger">*{{ $message }}</div>
                 @enderror
             </div>
 
