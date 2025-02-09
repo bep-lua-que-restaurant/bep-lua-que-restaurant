@@ -8,16 +8,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MonAn extends Model
 {
-    use HasFactory,SoftDeletes;
-    protected $fillable=[
+    use HasFactory, SoftDeletes;
+    protected $fillable = [
         'danh_muc_mon_an_id',
         'ten',
         'mo_ta',
         'gia',
-        'trang_thai',   
+        'trang_thai',
 
     ];
-     /**
+    /**
      * Quan hệ với bảng DanhMucMonAn
      */
     public function danhMuc()
@@ -31,5 +31,11 @@ class MonAn extends Model
     public function hinhAnhs()
     {
         return $this->hasMany(HinhAnhMonAn::class, 'mon_an_id', 'id');
+    }
+
+
+    public function chiTietHoaDons()
+    {
+        return $this->hasMany(ChiTietHoaDon::class, 'mon_an_id');
     }
 }
