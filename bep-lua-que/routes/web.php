@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\DanhMucMonAnController;
 use App\Http\Controllers\ComBoController;
 use App\Http\Controllers\DichVuController;
@@ -101,9 +102,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
     Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
+    Route::post('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
     Route::get('/thu-ngan', [ThuNganController::class, 'index'])->name('thungan.dashboard');
     // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 });
-
-
-
