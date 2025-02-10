@@ -79,7 +79,7 @@ Route::resource('mon-an', MonAnController::class);
 Route::post('mon-an/restore/{id}', [MonAnController::class, 'restore'])->name('mon-an.restore');
 Route::get('export-mon-an', [MonAnController::class, 'exportMonAn'])->name('mon-an.export');
 Route::post('/import-mon-an', [MonAnController::class, 'importMonAn'])->name('mon-an.import');
-Route::delete('/mon-an/xoa-hinh-anh/{id}', [MonAnController::class, 'xoaHinhAnh'])->name('mon-an.xoa-hinh-anh');
+Route::delete('/mon-an/xoa-hinh-anh/{hinhAnhId}', [MonAnController::class, 'xoaHinhAnh'])->name('mon-an.xoa-hinh-anh');
 
 // // phiếu nhập nguyên liệu
 // Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
@@ -107,4 +107,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/thu-ngan/get-thuc-don', [ThunganController::class, 'getThucDon'])->name('thungan.getThucDon');
     Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 });
+
 

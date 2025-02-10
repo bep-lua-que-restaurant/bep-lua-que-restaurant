@@ -11,4 +11,11 @@ class BanAn extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = ['ten_ban', 'so_ghe', 'mo_ta', 'vi_tri'];
+
+    public function hoaDons()
+    {
+        return $this->belongsToMany(HoaDon::class, 'hoa_don_bans', 'ban_an_id', 'hoa_don_id')
+            ->withPivot('trang_thai')
+            ->withTimestamps();
+    }
 }
