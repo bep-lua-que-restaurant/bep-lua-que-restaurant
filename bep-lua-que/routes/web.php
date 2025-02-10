@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\DanhMucMonAnController;
 use App\Http\Controllers\ComBoController;
 use App\Http\Controllers\DichVuController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\NguyenLieuController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BepController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\HoaDonController;
 use App\Http\Controllers\QuanLyController;
 use App\Http\Controllers\ThuNganController;
 use App\Http\Controllers\NhanVienController;
@@ -95,15 +97,14 @@ Route::delete('/nhan-vien/destroy/{id}', [NhanVienController::class, 'destroy'])
 Route::post('nhan-vien/{id}/nghi-viec', [NhanVienController::class, 'nghiViec'])->name('nhan-vien.nghi-viec');
 Route::post('nhan-vien/{id}/khoi-phuc', [NhanVienController::class, 'khoiPhuc'])->name('nhan-vien.khoi-phuc');
 
-// Đăng nhập phân quyền
+// // Đăng nhập phân quyền
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
     Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
-    Route::get('/thu-ngan', [ThuNganController::class, 'index'])->name('thungan.dashboard');
-    // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
+    Route::get('/thu-ngan', [ThunganController::class, 'getBanAn'])->name('thungan.getBanAn');
+    Route::get('/thu-ngan/get-thuc-don', [ThunganController::class, 'getThucDon'])->name('thungan.getThucDon');
+    Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 });
-
-
 
