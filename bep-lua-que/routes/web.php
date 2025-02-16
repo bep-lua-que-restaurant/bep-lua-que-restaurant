@@ -103,9 +103,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
     Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
+    Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
     Route::get('/thu-ngan', [ThunganController::class, 'getBanAn'])->name('thungan.getBanAn');
     Route::get('/thu-ngan/get-thuc-don', [ThunganController::class, 'getThucDon'])->name('thungan.getThucDon');
     Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 });
-
-
