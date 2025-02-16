@@ -15,9 +15,6 @@ class LoaiNguyenLieu extends Model
         'mo_ta',
     ];
 
-    /**
-     * Mỗi loại nguyên liệu có nhiều nguyên liệu.
-     */
     public function nguyenLieus()
     {
         return $this->hasMany(NguyenLieu::class, 'loai_nguyen_lieu_id');
