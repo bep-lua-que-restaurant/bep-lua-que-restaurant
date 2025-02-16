@@ -10,7 +10,7 @@
                     <li><a href="{{ route('danh-muc-mon-an.index') }}">Danh mục</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="#">Món ăn</a></li>
+                    <li><a href="{{ route('mon-an.index') }}">Món ăn</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Dịch vụ</a></li>
@@ -62,7 +62,7 @@
                     <li><a href="#">Trả hàng</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="#">Nhập hàng</a></li>
+                    <li><a href="{{ route('phieu-nhap-kho.index') }}">Nhập hàng</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Trả hàng nhập</a></li>
@@ -85,7 +85,7 @@
                     <li><a href="#">Tương tác</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="#">Nhà cung cấp</a></li>
+                    <li><a href="{{ route('nha-cung-cap.index') }}">Nhà cung cấp</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Đối tác giao hàng</a></li>
@@ -99,10 +99,10 @@
                     <span class="nav-text">Nhân viên</span>
                 </a>
                 <ul aria-expanded="false">
-                    <li><a href="#">Nhân viên</a></li>
+                    <li><a href="{{ route('nhan-vien.index') }}">Nhân viên</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="#">Lịch làm việc</a></li>
+                    <li><a href="{{ route('ca-lam.index') }}">Lịch làm việc</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Chấm công</a></li>
@@ -136,7 +136,7 @@
 
             {{-- Thu ngân --}}
             <li>
-                <a class="ai-icon" href="#">
+                <a class="ai-icon" href="/thu-ngan">
                     <i class="fa fa-cash-register"></i>
                     <span class="nav-text">Thu ngân</span>
                 </a>

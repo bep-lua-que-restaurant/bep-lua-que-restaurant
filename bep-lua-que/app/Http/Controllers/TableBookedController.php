@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\TableBooked;
+use App\Models\DatBan;
 use App\Models\Table;
 use Illuminate\Http\Request;
 
@@ -10,7 +11,7 @@ class TableBookedController extends Controller
 {
     public function broadcastTableBooking(Request $request)
     {
-        $table = Table::find($request->table_id);
+        $table = DatBan::find($request->table_id);
 
         if (!$table) {
             return response()->json(['message' => 'Bàn không tồn tại!'], 404);
