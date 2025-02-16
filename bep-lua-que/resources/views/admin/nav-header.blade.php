@@ -1,5 +1,5 @@
 <div class="nav-header">
-    <a href="index.html" class="brand-logo">
+    <a href="/" class="brand-logo">
 
         <div class="brand-title">BLQ</div>
     </a>

@@ -25,9 +25,8 @@ class HoaDon extends Model
 
     public function banAns()
     {
-        return $this->belongsToMany(BanAn::class, 'hoa_don_bans', 'hoa_don_id', 'ban_an_id')
 
-        ->withPivot('trang_thai') // Nếu bảng trung gian có cột trang_thai
-        ->withTimestamps(); // Tự động quản lý timestamps trong bảng trung gian
+        return $this->belongsToMany(BanAn::class, 'hoa_don_bans', 'hoa_don_id', 'ban_an_id');
+
     }
 }

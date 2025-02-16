@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('hoa_don_bans', function (Blueprint $table) {
-          
+
 
             // Đảm bảo cột có kiểu dữ liệu phù hợp
             $table->unsignedBigInteger('hoa_don_id')->change();
