@@ -25,6 +25,8 @@ class HoaDon extends Model
 
     public function banAns()
     {
+
         return $this->belongsToMany(BanAn::class, 'hoa_don_bans', 'hoa_don_id', 'ban_an_id');
+
     }
 }

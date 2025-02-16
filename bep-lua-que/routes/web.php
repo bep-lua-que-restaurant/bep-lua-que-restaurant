@@ -9,7 +9,7 @@ use App\Http\Controllers\CaLamController;
 use App\Http\Controllers\ChiTietNhapKhoController;
 use App\Http\Controllers\MonAnController;
 use App\Http\Controllers\NguyenLieuController;
-use App\Http\Controllers\PhieuNhapKhoController;
+// use App\Http\Controllers\PhieuNhapKhoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BepController;
 use App\Http\Controllers\AuthController;
@@ -17,6 +17,7 @@ use App\Http\Controllers\HoaDonController;
 use App\Http\Controllers\QuanLyController;
 use App\Http\Controllers\ThuNganController;
 use App\Http\Controllers\NhanVienController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -39,10 +40,14 @@ Route::get('export-danh-muc-mon-an', [DanhMucMonAnController::class, 'export'])-
 Route::post('/import-danh-muc-mon-an', [DanhMucMonAnController::class, 'importDanhMucMonAn'])->name('danh-muc-mon-an.import');
 
 
+
+
 Route::resource('com-bo', ComBoController::class);
 Route::post('com-bo/restore/{id}', [ComBoController::class, 'restore'])->name('com-bo.restore');
 Route::get('export-com-bo', [ComBoController::class, 'export'])->name('com-bo.export');
 Route::post('/import-com-bo', [ComBoController::class, 'importComBo'])->name('com-bo.import');
+
+
 
 
 
@@ -81,10 +86,12 @@ Route::get('export-mon-an', [MonAnController::class, 'exportMonAn'])->name('mon-
 Route::post('/import-mon-an', [MonAnController::class, 'importMonAn'])->name('mon-an.import');
 Route::delete('/mon-an/xoa-hinh-anh/{hinhAnhId}', [MonAnController::class, 'xoaHinhAnh'])->name('mon-an.xoa-hinh-anh');
 
+
 // // phiếu nhập nguyên liệu
 Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
 Route::post('/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore'); // Khôi phục phiếu nhập
 Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'exportPhieuNhapKho'])->name('phieu-nhap-kho.export');
+
 
 // Quản lí nhân viên
 Route::get('/nhan-vien', [NhanVienController::class, 'index'])->name('nhan-vien.index');
@@ -103,6 +110,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
     Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
+
+
     Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 });
 
@@ -113,4 +122,6 @@ Route::get('/thu-ngan/hoa-don', [ThunganController::class, 'getHoaDon'])->name('
 Route::get('/hoa-don/get-id', [ThuNganController::class, 'getHoaDonId'])->name('thungan.getHoaDonBan');
 Route::get('/hoa-don/get-details', [ThuNganController::class, 'getHoaDonDetails'])->name('thungan.getChiTietHoaDon');
 
+
 Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])->name('thungan.destroy');
+

@@ -8,6 +8,7 @@ use App\Models\ChiTietHoaDon;
 use App\Models\MonAn;
 use App\Models\HoaDon;
 use App\Models\HoaDonBan;
+
 use Illuminate\Http\Request;
 
 class ThuNganController extends Controller
@@ -133,7 +134,6 @@ class ThuNganController extends Controller
             'searchInputId' => 'search-name', // ID của ô tìm kiếm
         ]);
     }
-
     public function show(Request $request)
     {
         $banAnId = $request->get('id'); // Lấy ID bàn từ request
@@ -158,5 +158,6 @@ class ThuNganController extends Controller
             return response()->json(['success' => true]);
         }
         return response()->json(['success' => false, 'message' => 'Hóa đơn không tồn tại']);
+
     }
 }

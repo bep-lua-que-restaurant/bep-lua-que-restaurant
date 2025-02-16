@@ -29,5 +29,6 @@ class NguyenLieu extends Model
     public function chiTietPhieuNhapKhos()
     {
         return $this->hasMany(ChiTietPhieuNhapKho::class, 'nguyen_lieu_id');
+
     }
 }

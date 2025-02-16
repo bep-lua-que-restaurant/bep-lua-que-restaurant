@@ -4,7 +4,9 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
+
     "content-hash": "617df3f34b54ba83a1d4d49498549779",
+
     "packages": [
         {
             "name": "brick/math",
@@ -7726,7 +7728,9 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
+
                 "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.45"
+
             },
             "funding": [
                 {
@@ -7742,7 +7746,9 @@
                     "type": "tidelift"
                 }
             ],
+
             "time": "2025-02-06T16:08:12+00:00"
+
         },
         {
             "name": "sebastian/cli-parser",

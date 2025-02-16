@@ -14,8 +14,10 @@
                                         class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
                                     <!-- Tên món -->
                                     <h6 class="card-title" style="font-size: 12px;">{{ $monAn->ten }}</h6>
+
                                     <p class="card-text badge badge-danger " style="font-size: 10px;">
                                         {{ number_format($monAn->gia) }} VNĐ
+
                                     </p>
                                     <!-- Nút Thêm món -->
                                     <button type="submit" class="btn btn-primary btn-sm add-mon-btn"
@@ -54,6 +56,7 @@
         swiper.slidePrev();
     });
 
+
     // tạo hóa đơn 
 
     $(document).ready(function() {
@@ -90,4 +93,5 @@
             });
         });
     });
+
 </script>

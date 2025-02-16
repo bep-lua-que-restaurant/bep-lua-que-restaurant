@@ -175,6 +175,58 @@ class MonAnController extends Controller
         return response()->json(['success' => true]);
     }
 
+
+     // Cập nhật món ăn
+     public function update(UpdateMonAnRequest $request, MonAn $monAn)
+     {
+         $data = $request->validated();
+     
+         // Cập nhật các trường thông tin cơ bản của món ăn
+         $monAn->update($data);
+     
+         // Xử lý xóa hình ảnh nếu có hình ảnh cần xóa
+         if ($request->has('remove_images') && is_array($request->remove_images)) {
+             // Duyệt qua từng ID hình ảnh cần xóa
+             foreach ($request->remove_images as $imageId) {
+                 $image = $monAn->hinhAnhs()->find($imageId);
+                 if ($image) {
+                     // Xóa file vật lý nếu cần thiết
+                     Storage::delete('public/' . $image->hinh_anh);
+                     
+                     // Xóa bản ghi trong cơ sở dữ liệu
+                     $image->delete();
+                 }
+             }
+         }
+     
+         // Xử lý thêm hình ảnh mới nếu người dùng chọn
+         if ($request->hasFile('hinh_anh')) {
+             foreach ($request->file('hinh_anh') as $file) {
+                 $path = $file->store('mon_an_images', 'public');
+                 $monAn->hinhAnhs()->create(['hinh_anh' => $path]);
+             }
+         }
+     
+         return redirect()->route('mon-an.index')->with('success', 'Cập nhật món ăn thành công.');
+     }
+     
+ 
+     // Xóa ảnh hiện tại
+     public function xoaHinhAnh($hinhAnhId)
+     {
+         // Tìm ảnh theo ID
+         $hinhAnh = HinhAnhMonAn::findOrFail($hinhAnhId);
+ 
+         // Xóa ảnh khỏi thư mục public
+         Storage::disk('public')->delete($hinhAnh->hinh_anh);
+ 
+         // Xóa ảnh khỏi cơ sở dữ liệu
+         $hinhAnh->delete();
+ 
+         // Trả về phản hồi thành công
+         return response()->json(['success' => true]);
+     }
+ 
     public function destroy(MonAn $monAn)
     {
         // Xóa tất cả ảnh món ăn trước khi xóa món ăn
@@ -208,7 +260,9 @@ class MonAnController extends Controller
         // Khôi phục món ăn
         $monAn->restore();
 
+
         broadcast(new ThucDonUpdated($monAn))->toOthers();
+
 
         return redirect()->route('mon-an.index')->with('success', 'Khôi phục món ăn thành công!');
     }

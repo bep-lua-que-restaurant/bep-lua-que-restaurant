@@ -1,17 +1,22 @@
 <div class="swiper mySwiper">
     <div class="swiper-wrapper">
         @foreach ($data->chunk(12) as $chunk)
+
+
             <div class="swiper-slide">
                 <div class="row">
                     @foreach ($chunk as $banAn)
                         <div class="col-md-2 col-4 mb-2">
+
                             <div class="ban cardd card text-center p-1" data-id="{{ $banAn->id }}"
                                 id="ban-{{ $banAn->id }}">
+
                                 <div class="card-body p-2">
                                     <h5><i class="fas fa-utensils" style="font-size: 24px;"></i></h5>
                                     <h6 class="card-title" style="font-size: 12px;">{{ $banAn->ten_ban }}</h6>
                                     @if ($banAn->trang_thai == 'trong')
                                         <p class="badge badge-success" style="font-size: 10px;">Có sẵn</p>
+
                                     @elseif ($banAn->trang_thai == 'co_khach')
                                         <p class="badge badge-warning" style="font-size: 10px;">Có khách</p>
                                     @elseif ($banAn->trang_thai == 'da_dat_truoc')
@@ -20,6 +25,7 @@
                                         <p class="badge badge-secondary" style="font-size: 10px;">Không xác định</p>
                                     @endif
 
+
                                 </div>
                             </div>
                         </div>
@@ -27,6 +33,8 @@
                 </div>
             </div>
         @endforeach
+
+
 
     </div>
 </div>
@@ -37,6 +45,8 @@
     <button id="prevBtn" class="btn btn-primary btn-sm px-4">⬅ </button>
     <button id="nextBtn" class="btn btn-primary btn-sm px-4"> ➡</button>
 </div>
+
+
 
 
 <script>
@@ -54,6 +64,7 @@
     document.getElementById("prevBtn").addEventListener("click", function() {
         swiper.slidePrev();
     });
+
 
     $(document).ready(function() {
         $('.ban').on('click', function() {
@@ -134,4 +145,5 @@
             });
         }
     });
+
 </script>

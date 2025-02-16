@@ -30,6 +30,7 @@ class StorePhieuNhapKhoRequest extends FormRequest
     public function messages()
     {
         return [
+
             'nhan_vien_id.required' => 'Nhân viên nhập kho là bắt buộc.',
             'nha_cung_cap_id.required' => 'Nhà cung cấp là bắt buộc.',
             'ngay_nhap.required' => 'Ngày nhập kho là bắt buộc.',

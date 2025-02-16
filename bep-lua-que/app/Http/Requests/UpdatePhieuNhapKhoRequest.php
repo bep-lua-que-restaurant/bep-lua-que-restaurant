@@ -14,6 +14,7 @@ class UpdatePhieuNhapKhoRequest extends FormRequest
     public function rules()
     {
         return [
+
             'nhan_vien_id' => 'required|exists:nhan_viens,id',
             'nha_cung_cap_id' => 'required|exists:nha_cung_caps,id',
             'ngay_nhap' => 'required|date',
@@ -24,6 +25,7 @@ class UpdatePhieuNhapKhoRequest extends FormRequest
             'chi_tiet.*.so_luong' => 'required|integer|min:1',
             'chi_tiet.*.don_gia' => 'required|numeric|min:0',
             'chi_tiet.*.han_su_dung' => 'nullable|date|after_or_equal:today',
+
         ];
     }
 }

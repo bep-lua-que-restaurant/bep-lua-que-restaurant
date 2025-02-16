@@ -38,13 +38,17 @@
                 </a>
 
                 <ul aria-expanded="false">
-                    <li><a href="#">Hóa đơn</a></li>
+                    <li><a href="{{ route('hoa-don.index') }}">Hóa đơn</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Trả hàng</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="{{ route('phieu-nhap-kho.index') }}">Nhập hàng</a></li>
+
+                    {{-- <li><a href="{{ route('phieu-nhap-kho.index') }}">Nhập hàng</a></li> --}}
+
+
+
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Trả hàng nhập</a></li>
