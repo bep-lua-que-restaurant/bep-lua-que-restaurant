@@ -178,10 +178,10 @@ class MonAnController extends Controller
     public function destroy(MonAn $monAn)
     {
         // Xóa tất cả ảnh món ăn trước khi xóa món ăn
-        foreach ($monAn->hinhAnhs as $image) {
-            Storage::disk('public')->delete($image->hinh_anh);
-            $image->delete();
-        }
+        // foreach ($monAn->hinhAnhs as $image) {
+        //     Storage::disk('public')->delete($image->hinh_anh);
+        //     $image->delete();
+        // }
 
         $monAn->delete();
 

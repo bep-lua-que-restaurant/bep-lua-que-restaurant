@@ -29,14 +29,11 @@
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">Danh sách nhập kho</h4>
+                        <h4 class="card-title">Danh sách phiếu nhập kho</h4>
 
                         <div class="btn-group">
                             <a href="{{ route('phieu-nhap-kho.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm phiếu nhập
-                            </a>
-                            <a href="{{ route('phieu-nhap-kho.export') }}" class="btn btn-sm btn-success">
-                                <i class="fa fa-upload"></i> Xuất file
                             </a>
                         </div>
                     </div>
@@ -55,7 +52,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="list-container">
-                                    @include('admin.phieunhap.body-list')
+                                    @include('admin.phieunhap.body-list', ['data' => $data])
                                 </tbody>
                             </table>
                         </div>
@@ -69,18 +66,4 @@
             {{ $data->links('pagination::bootstrap-5') }}
         </div>
     </div>
-
-    <!-- AJAX để cập nhật danh sách -->
-    <script>
-        document.getElementById("search-phieu-nhap").addEventListener("keyup", function() {
-            let keyword = this.value;
-            fetch("{{ route('phieu-nhap-kho.index') }}?ma_phieu_nhap=" + keyword, {
-                headers: { "X-Requested-With": "XMLHttpRequest" }
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("list-container").innerHTML = data.html;
-            });
-        });
-    </script>
 @endsection

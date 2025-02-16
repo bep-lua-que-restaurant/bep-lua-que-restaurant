@@ -13,18 +13,21 @@ class NguyenLieu extends Model
     protected $fillable = [
         'ma_nguyen_lieu',
         'ten_nguyen_lieu',
+        'loai_nguyen_lieu_id',
         'don_vi_tinh',
         'so_luong_ton',
-        'so_luong_ton_toi_thieu',
-        'so_luong_ton_toi_da',
         'gia_nhap',
         'hinh_anh',
         'mo_ta',
     ];
 
-    // Quan hệ với bảng nhập kho (Chi tiết nhập hàng)
-    public function chiTietNhapKho()
+    public function loaiNguyenLieu()
     {
-        return $this->hasMany(ChiTietNhapKho::class, 'nguyen_lieu_id');
+        return $this->belongsTo(LoaiNguyenLieu::class, 'loai_nguyen_lieu_id');
+    }
+
+    public function chiTietPhieuNhapKhos()
+    {
+        return $this->hasMany(ChiTietPhieuNhapKho::class, 'nguyen_lieu_id');
     }
 }
