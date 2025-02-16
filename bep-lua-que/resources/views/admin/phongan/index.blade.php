@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-    Danh mục Bàn Ăn
+    Danh mục Phòng Ăn
 @endsection
 
 @section('content')
@@ -15,7 +15,7 @@
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Danh mục bàn ăn</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Danh mục phòng ăn</a></li>
                 </ol>
             </div>
         </div>
@@ -34,7 +34,7 @@
 
                         <div class="btn-group">
                             <!-- Nút Thêm mới -->
-                            <a href="{{ route('ban-an.create') }}" class="btn btn-sm btn-primary">
+                            <a href="{{ route('phong-an.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
 
@@ -45,12 +45,16 @@
                             </a>
 
                             <!-- Nút Xuất file -->
-                            <a href="{{ route('ban-an.export') }}" class="btn btn-sm btn-success">
+                            <a href="
+                            {{-- {{ route('phong-an.export') }} --}}
+                            
+                            "
+                                class="btn btn-sm btn-success">
                                 <i class="fa fa-download"></i> Xuất file
                             </a>
 
                             <!-- Nút Danh sách -->
-                            <a href="{{ route('ban-an.index') }}" class="btn btn-sm btn-info">
+                            <a href="{{ route('phong-an.index') }}" class="btn btn-sm btn-info">
                                 <i class="fa fa-list"></i> Danh sách
                             </a>
                         </div>
@@ -67,8 +71,12 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="{{ route('ban-an.import') }}" method="POST"
-                                            enctype="multipart/form-data">
+                                        <form
+                                            action="
+                                        {{-- {{ route('phong-an.import') }} --}}
+                                        
+                                        "
+                                            method="POST" enctype="multipart/form-data">
                                             @csrf
                                             <div class="form-group">
                                                 <label for="file">Chọn file Excel (.xlsx, .xls)</label>
@@ -106,11 +114,7 @@
                                             </div>
                                         </th>
                                         <th><strong>ID.</strong></th>
-                                        <th><strong>Tên bàn </strong></th>
-                                        <th><strong>Số ghế </strong></th>
-                                        {{-- <th><strong>Vị trí </strong></th> --}}
-
-
+                                        <th><strong>Tên Phòng </strong></th>
                                         <th><strong>Trạng Thái</strong></th>
                                         <th><strong>Hành động</strong></th>
                                     </tr>
@@ -118,7 +122,7 @@
 
 
                                 <tbody id="{{ $tableId }}">
-                                    @include('admin.banan.body-list')
+                                    @include('admin.phongan.body-list')
                                 </tbody>
 
                             </table>
@@ -130,7 +134,42 @@
         </div>
     </div>
 
-    @include('admin.search-srcip')
+    {{-- @include('admin.search-srcip') --}}
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function fetchFilteredData() {
+                let searchQuery = $('#search-name').val();
+                let statusFilter = $('#statusFilter').val();
+
+                $.ajax({
+                    url: "{{ route('phong-an.index') }}", // ✅ Đổi route cho đúng
+                    method: "GET",
+                    data: {
+                        ten: searchQuery,
+                        statusFilter: statusFilter,
+                    },
+                    success: function(response) {
+                        $('#list-container').html(response.html);
+                    },
+                    error: function(xhr) {
+                        console.error("Lỗi khi tải dữ liệu:", xhr);
+                    }
+                });
+            }
+
+            // Gửi yêu cầu khi người dùng nhập vào ô tìm kiếm
+            $('#search-name').on('input', function() {
+                fetchFilteredData();
+            });
+
+            // Gửi yêu cầu khi chọn bộ lọc trạng thái
+            $('#statusFilter').on('change', function() {
+                fetchFilteredData();
+            });
+        });
+    </script>
+
     <!-- Hiển thị phân trang -->
     {{ $data->links('pagination::bootstrap-5') }}
 @endsection
