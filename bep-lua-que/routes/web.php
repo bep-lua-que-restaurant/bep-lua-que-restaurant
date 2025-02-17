@@ -21,6 +21,7 @@ use App\Http\Controllers\HoaDonController;
 use App\Http\Controllers\QuanLyController;
 use App\Http\Controllers\ThuNganController;
 use App\Http\Controllers\NhanVienController;
+use App\Http\Controllers\PhieuNhapKhoController;
 
 use App\Http\Controllers\LichLamViecController;
 
