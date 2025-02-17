@@ -28,7 +28,7 @@ class DatBanController extends Controller
 
     public function datBan(Request $request)
     {
-        $table = DatBan::find($request->table_id);
+        $table = Table::find($request->table_id);
 
         if (!$table || $table->status == 'booked') {
             return response()->json(['message' => 'Bàn này đã được đặt!'], 400);
