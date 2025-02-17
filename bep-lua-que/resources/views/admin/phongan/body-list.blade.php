@@ -8,22 +8,16 @@
             </div>
         </td>
 
-        <!-- ID của bàn ăn -->
+        <!-- ID của phòng ăn -->
         <td><strong>{{ $item->id }}</strong></td>
 
-        <!-- Tên bàn ăn -->
+        <!-- Tên phòng ăn -->
         <td>
-            <div class="d-flex align-items-center"><span class="w-space-no">{{ $item->ten_ban }}</span></div>
+            <div class="d-flex align-items-center"><span class="w-space-no">{{ $item->ten_phong_an }}</span></div>
         </td>
-
-        <!-- Số ghế -->
-        <td>
-            <div class="d-flex align-items-center"><span class="w-space-no">{{ $item->so_ghe }}</span></div>
-        </td>
-
 
         <!-- Trạng thái (Đang sử dụng / Ngừng sử dụng) -->
-        {{-- <td>
+        <td>
             @if ($item->deleted_at != null)
                 <div class="d-flex align-items-center">
                     <i class="fa fa-circle text-danger mr-1"></i> Ngừng sử dụng
@@ -33,33 +27,13 @@
                     <i class="fa fa-circle text-success mr-1"></i> Đang sử dụng
                 </div>
             @endif
-        </td> --}}
-        <td>
-            @if ($item->deleted_at)
-                <div class="d-flex align-items-center">
-                    <i class="fa fa-circle text-danger mr-1"></i> Ngừng sử dụng
-                </div>
-            @elseif ($item->phongAn && $item->phongAn->deleted_at)
-                <div class="d-flex align-items-center">
-                    <i class="fa fa-circle text-warning mr-1"></i> Bàn không thuộc phòng nào
-                </div>
-            @else
-                <div class="d-flex align-items-center">
-                    <i class="fa fa-circle text-success mr-1"></i> Đang sử dụng
-                </div>
-            @endif
         </td>
-
-
-
-
-
 
         <!-- Hành động: Xem, Sửa, Xóa, Khôi phục -->
         <td>
             <div class="d-flex align-items-center">
                 <!-- Nút xem chi tiết -->
-                <a href="{{ route('ban-an.show', $item->id) }}" class="btn btn-info btn-sm p-2 m-2"
+                <a href="{{ route('phong-an.show', $item->id) }}" class="btn btn-info btn-sm p-2 m-2"
                     title="Xem chi tiết">
                     <i class="fa fa-eye"></i>
                 </a>
@@ -67,15 +41,16 @@
 
                 <!-- Nút chỉnh sửa -->
                 @if (!$item->deleted_at)
-                    <a href="{{ route('ban-an.edit', $item->id) }}" class="btn btn-warning btn-sm p-2 m-2">
+                    <a href="{{ route('phong-an.edit', $item->id) }}" class="btn btn-warning btn-sm p-2 m-2">
                         <i class="fa fa-edit"></i>
                     </a>
                 @endif
 
 
+
                 @if ($item->deleted_at)
                     <!-- Nút khôi phục nếu bàn ăn đã bị xóa -->
-                    <form action="{{ route('ban-an.restore', $item->id) }}" method="POST" style="display:inline;">
+                    <form action="{{ route('phong-an.restore', $item->id) }}" method="POST" style="display:inline;">
                         @csrf
                         <button type="submit" onclick="return confirm('Bạn có chắc muốn khôi phục bàn ăn này không?')"
                             class="btn btn-success btn-sm p-2 m-2" title="Khôi phục">
@@ -84,7 +59,7 @@
                     </form>
                 @else
                     <!-- Nút xóa (Ngừng sử dụng bàn ăn) -->
-                    <form action="{{ route('ban-an.destroy', $item->id) }}" method="POST" style="display:inline;">
+                    <form action="{{ route('phong-an.destroy', $item->id) }}" method="POST" style="display:inline;">
                         @csrf
                         @method('DELETE')
                         <button type="submit"

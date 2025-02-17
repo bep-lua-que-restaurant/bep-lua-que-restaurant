@@ -20,6 +20,10 @@
         type="text/css" />
     <link href="{{ asset('admin') }}/css/style.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -142,6 +146,7 @@
         Scripts
     ***********************************-->
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.ckeditor.com/ckeditor5/35.3.0/classic/ckeditor.js"></script>
     <script src="{{ asset('admin') }}/vendor/global/global.min.js" type="text/javascript"></script>
     <script src="{{ asset('admin') }}/vendor/bootstrap-select/dist/js/bootstrap-select.min.js" type="text/javascript">
@@ -155,6 +160,7 @@
     <script src="{{ asset('admin') }}/js/demo.js" type="text/javascript"></script>
     <script src="{{ asset('admin') }}/js/styleSwitcher.js" type="text/javascript"></script>
     <script src="{{ asset('admin') }}/js/app.js" type="text/javascript"></script>
+
 
 </body>
 

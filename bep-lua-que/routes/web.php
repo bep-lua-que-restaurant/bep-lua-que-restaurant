@@ -5,6 +5,10 @@ use App\Http\Controllers\ComBoController;
 use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\BanAnController;
 use App\Http\Controllers\DatBanController;
+use App\Http\Controllers\PhongAnController;
+use App\Models\PhongAn;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TableBookedController;
 use App\Http\Controllers\CaLamController;
 use App\Http\Controllers\ChiTietNhapKhoController;
 use App\Http\Controllers\MonAnController;
@@ -17,6 +21,7 @@ use App\Http\Controllers\HoaDonController;
 use App\Http\Controllers\QuanLyController;
 use App\Http\Controllers\ThuNganController;
 use App\Http\Controllers\NhanVienController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -73,11 +78,39 @@ Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::c
 //     return view('client.home');
 // });
 
+
+// Phong an 
+Route::resource('phong-an', PhongAnController::class);
+Route::post('/phong-an/{banAn}/restore', [PhongAnController::class, 'restore'])->name('phong-an.restore');
+//Phong an
+
+// Bàn ăn 
 Route::resource('ban-an', BanAnController::class);
 Route::get('/ban-an/{id}', [BanAnController::class, 'show'])->name('ban-an.show');
 Route::post('/ban-an/{banAn}/restore', [BanAnController::class, 'restore'])->name('ban-an.restore');
 Route::get('/ban-an-export', [BanAnController::class, 'export'])->name('ban-an.export');
 Route::post('/ban-an/import', [BanAnController::class, 'import'])->name('ban-an.import');
+
+// Bàn ăn
+
+// Đặt bàn
+Route::resource('dat-ban', DatBanController::class);
+
+
+// Route để tìm kiếm khách hàng
+Route::get('/dat-ban/search-customer', [DatBanController::class, 'searchCustomer'])->name('admin.datban.search');
+Route::get('admin/khachhang/search', [DatBanController::class, 'searchCustomer'])->name('admin.khachhang.search');
+
+
+Route::get('admin/dat-ban/create', [DatBanController::class, 'create'])->name('admin.datban.create');
+Route::get('admin/khachhang/search', [DatBanController::class, 'searchCustomer'])->name('admin.khachhang.search');
+
+Route::get('/admin/datban/filter', [DatBanController::class, 'filterBanAnByTime'])->name('admin.datban.filter');
+
+Route::get('/filter-datban', [DatBanController::class, 'filterDatBan'])->name('datban.filter');
+
+Route::post('/table/booked/broadcast', [TableBookedController::class, 'broadcastTableBooking'])->name('table.booked.broadcast');
+
 
 // Món ăn
 Route::resource('mon-an', MonAnController::class);

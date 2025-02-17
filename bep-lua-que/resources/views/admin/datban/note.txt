@@ -28,7 +28,7 @@ class DatBanController extends Controller
 
     public function datBan(Request $request)
     {
-        $table = DatBan::find($request->table_id);
+        $table = Table::find($request->table_id);
 
         if (!$table || $table->status == 'booked') {
             return response()->json(['message' => 'Bàn này đã được đặt!'], 400);
@@ -277,7 +277,19 @@ class DatBanController extends Controller
         }
 
         // Lưu đơn đặt bàn
+        // foreach ($request->ban_an_ids as $banAnId) {
+        //     $datBan = DatBan::create([
+        //         'khach_hang_id' => $customer->id,
+        //         'so_dien_thoai' => $customer->so_dien_thoai,
+        //         'thoi_gian_den' => $request->thoi_gian_den,
+        //         'mo_ta' => $request->mo_ta,
+        //         'so_nguoi' => $request->num_people,
+        //         'ban_an_id' => $banAnId,  // Lưu thông tin bàn ăn
+        //     ]);
+        // }
+
         foreach ($request->ban_an_ids as $banAnId) {
+            // Tạo bản ghi mới trong bảng DatBan
             $datBan = DatBan::create([
                 'khach_hang_id' => $customer->id,
                 'so_dien_thoai' => $customer->so_dien_thoai,
@@ -286,7 +298,16 @@ class DatBanController extends Controller
                 'so_nguoi' => $request->num_people,
                 'ban_an_id' => $banAnId,  // Lưu thông tin bàn ăn
             ]);
+
+            // Cập nhật trạng thái của bàn ăn tương ứng thành 'da_dat_truoc'
+            $banAn = BanAn::find($banAnId);
+            if ($banAn) {
+                $banAn->update([
+                    'trang_thai' => 'da_dat_truoc',  // Cập nhật trạng thái
+                ]);
+            }
         }
+
 
         return redirect()->route('dat-ban.index')->with('success', 'Đặt bàn thành công!');
     }
