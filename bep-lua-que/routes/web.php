@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\DanhMucMonAnController;
 use App\Http\Controllers\ComBoController;
 use App\Http\Controllers\DichVuController;
@@ -106,11 +107,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/thu-ngan', [ThuNganController::class, 'index'])->name('thungan.dashboard');
     // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 
-//lịch làm việc
+    //lịch làm việc
 
-Route::resource('lich-lam-viec', LichLamViecController::class);
-Route::get('lich-lam-viec/export', [LichLamViecController::class, 'export'])->name('lich-lam-viec.export');
+    Route::resource('lich-lam-viec', LichLamViecController::class);
+    Route::get('lich-lam-viec/export', [LichLamViecController::class, 'export'])->name('lich-lam-viec.export');
 });
-
-
-
