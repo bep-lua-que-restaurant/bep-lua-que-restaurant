@@ -4,64 +4,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giao Diện Bếp</title>
+    <title>Giao diện bếp</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
+
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #004080;
         }
 
-        .kitchen-container {
-            display: flex;
-            gap: 20px;
-            padding: 20px;
-        }
-
-        .order-column {
-            flex: 1;
-            background: white;
-            padding: 15px;
+        .container-custom {
+            background-color: white;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            height: 80vh;
+            overflow-y: auto;
         }
 
-        .order-header {
-            font-weight: bold;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #dc3545;
-            color: #dc3545;
-        }
-
-        .order-card {
-            border-left: 5px solid #dc3545;
-            margin-top: 10px;
-            padding: 10px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        .status-btn {
+            min-width: 100px;
         }
     </style>
 </head>
 
 <body>
-    <h2 class="text-center">Giao Diện Bếp</h2>
-    <div class="container-fluid">
-        <div class="kitchen-container">
-            <div class="order-column">
-                <div class="order-header">Đơn hàng chờ chế biến</div>
-                <div class="order-card">Món: Phở bò - Bàn 5</div>
-                <div class="order-card">Món: Gà rán - Bàn 2</div>
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Cột Trái: Chờ chế biến -->
+            <div class="col-md-6">
+                <div class="container-custom">
+                    <h5 class="text-primary">Chờ chế biến</h5>
+                    <div class="list-group" id="cho-che-bien-list">
+                        @foreach ($monAnChoCheBien as $mon)
+                            <div id="dish-{{ $mon->id }}"
+                                class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ $mon->monAn ? $mon->monAn->ten : 'Không xác định' }}</strong> -
+                                    @if ($mon->hoaDon && $mon->hoaDon->banAns->isNotEmpty())
+                                        @foreach ($mon->hoaDon->banAns as $ban)
+                                            Bàn {{ $ban->ten_ban }}@if (!$loop->last)
+                                                ,
+                                            @endif
+                                        @endforeach
+                                    @else
+                                        <span class="text-danger">Chưa có bàn</span>
+                                    @endif
+                                    <br> <small>Số lượng: {{ $mon->so_luong }}</small>
+                                </div>
+                                <div class="status-buttons">
+                                    <button class="btn btn-warning btn-sm status-btn"
+                                        onclick="updateStatus({{ $mon->id }}, 'dang_nau')">
+                                        Đang nấu
+                                    </button>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
-            <div class="order-column">
-                <div class="order-header">Đang chế biến</div>
-                <div class="order-card">Món: Cơm gà - Bàn 3</div>
-            </div>
-            <div class="order-column">
-                <div class="order-header">Đã hoàn thành</div>
-                <div class="order-card">Món: Bún chả - Bàn 1</div>
+
+            <!-- Cột Phải: Đang nấu -->
+            <div class="col-md-6">
+                <div class="container-custom">
+                    <h5 class="text-primary">Đang nấu</h5>
+                    <div class="list-group" id="dang-nau-list">
+                        @foreach ($monAnDangNau as $mon)
+                            <div id="dish-{{ $mon->id }}"
+                                class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ $mon->monAn ? $mon->monAn->ten : 'Không xác định' }}</strong> -
+                                    @if ($mon->hoaDon && $mon->hoaDon->banAns->isNotEmpty())
+                                        @foreach ($mon->hoaDon->banAns as $ban)
+                                            Bàn {{ $ban->ten_ban }}@if (!$loop->last)
+                                                ,
+                                            @endif
+                                        @endforeach
+                                    @else
+                                        <span class="text-danger">Chưa có bàn</span>
+                                    @endif
+                                    <br> <small>Số lượng: {{ $mon->so_luong }}</small>
+                                </div>
+                                <div class="status-buttons">
+                                    <button class="btn btn-success btn-sm status-btn"
+                                        onclick="updateStatus({{ $mon->id }}, 'hoan_thanh')">
+                                        Hoàn thành
+                                    </button>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Laravel Echo -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/laravel-echo/1.11.2/echo.iife.min.js"></script>
+
+    <script>
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+        function updateStatus(id, status) {
+            let message = status === "dang_nau" ? "Bạn có chắc muốn bắt đầu nấu món này?" : "Món này đã hoàn thành?";
+            if (!confirm(message)) return;
+
+            fetch(`/bep/update/${id}`, {
+                    method: "PUT",
+                    headers: {
+                        "X-CSRF-TOKEN": csrfToken,
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({
+                        trang_thai: status
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        moveDish(id, status);
+                    } else {
+                        alert("Cập nhật thất bại: " + data.message);
+                    }
+                })
+                .catch(error => console.error("Lỗi cập nhật:", error));
+        }
+
+
+        function moveDish(id, newStatus) {
+            let dishElement = document.getElementById(`dish-${id}`);
+            if (!dishElement) return;
+
+            // Xóa món khỏi danh sách cũ
+            dishElement.remove();
+
+            // Thêm vào danh sách mới
+            if (newStatus === "dang_nau") {
+                document.getElementById("dang-nau-list").appendChild(dishElement);
+            } else if (newStatus === "hoan_thanh") {
+                return; // Nếu hoàn thành thì ẩn đi
+            }
+
+            // Cập nhật lại nút bấm
+            let buttonContainer = dishElement.querySelector(".status-buttons");
+            buttonContainer.innerHTML = newStatus === "dang_nau" ?
+                `<button class="btn btn-success btn-sm status-btn" onclick="updateStatus(${id}, 'hoan_thanh')">Hoàn thành</button>` :
+                "";
+
+        }
+
+        // Kết nối với Pusher
+        var pusher = new Pusher("{{ env('PUSHER_APP_KEY') }}", {
+            cluster: "{{ env('PUSHER_APP_CLUSTER') }}",
+            forceTLS: true
+        });
+
+
+        var channel = pusher.subscribe("bep-channel");
+
+        channel.bind("trang-thai-cap-nhat", function(data) {
+            console.log("🔥 Cập nhật trạng thái món:", data);
+
+            moveDish(data.monAn.id, data.monAn.trang_thai);
+        });
+
+
+
+
+        // Nhận sự kiện món mới được thêm vào
+        window.Echo.channel("bep-channel")
+            .listen(".mon-moi-duoc-them", (data) => {
+                console.log("🔥 Món mới được thêm:", data);
+                addNewDish(data.monAn);
+            });
+
+        function addNewDish(mon) {
+            let newDish = document.createElement("div");
+            newDish.id = `dish-${mon.id}`;
+            newDish.className = "list-group-item d-flex justify-content-between align-items-center";
+            newDish.innerHTML = `
+        <div>
+            <strong>${mon.mon_an.ten}</strong> - 
+            ${mon.hoa_don && mon.hoa_don.ban_ans.length > 0 
+                ? "Bàn " + mon.hoa_don.ban_ans.map(ban => ban.ten_ban).join(", ") 
+                : '<span class="text-danger">Chưa có bàn</span>'}
+            <br> <small>Số lượng: ${mon.so_luong}</small>
+        </div>
+        <div class="status-buttons">
+            <button class="btn btn-warning btn-sm status-btn"
+                onclick="updateStatus(${mon.id}, 'dang_nau')">
+                Đang nấu
+            </button>
+        </div>
+    `;
+
+            document.getElementById("cho-che-bien-list").appendChild(newDish);
+        }
+    </script>
 
 </body>
 

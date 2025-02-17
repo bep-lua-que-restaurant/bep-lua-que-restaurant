@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
+
 use App\Models\NhaCungCap;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+
 
 class NhaCungCapSeeder extends Seeder
 {
@@ -13,8 +15,9 @@ class NhaCungCapSeeder extends Seeder
      */
     public function run(): void
     {
-        NhaCungCap::factory()
-            ->count(10)
-            ->create();
+
+         // Tạo ngẫu nhiên 5 nhà cung cấp
+         NhaCungCap::factory()->count(5)->create();
+
     }
 }

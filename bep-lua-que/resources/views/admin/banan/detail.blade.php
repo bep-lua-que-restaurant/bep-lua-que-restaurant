@@ -47,10 +47,22 @@
                                 <th>Mô tả</th>
                                 <td>{{ $banAn->mo_ta ?? 'Không có mô tả' }}</td>
                             </tr>
-                            <tr>
+                            {{-- <tr>
                                 <th>Vị trí</th>
-                                <td>{{ $banAn->vi_tri }}</td>
+                                <td>
+                                    @if ($phongAn)
+                                        {{ $phongAn->ten_phong_an }}
+                                        @if ($phongAn->deleted_at)
+                                            <small class="text-danger">* Phòng không còn sử dụng</small>
+                                        @endif
+                                    @else
+                                        <span class="text-danger">Không tìm thấy phòng ăn</span>
+                                    @endif
+                                </td>
                             </tr>
+
+
+
                             <tr>
                                 <th>Trạng thái</th>
                                 <td>
@@ -60,7 +72,37 @@
                                         <span class="badge badge-success">Đang sử dụng</span>
                                     @endif
                                 </td>
+                            </tr> --}}
+
+                            <tr class="{{ $phongAn && $phongAn->deleted_at ? 'table-danger' : '' }}">
+                                <th>Vị trí</th>
+                                <td>
+                                    @if ($phongAn)
+                                        {{ $phongAn->ten_phong_an }}
+                                        @if ($phongAn->deleted_at)
+                                            <small class="text-danger">* Phòng không còn sử dụng</small>
+                                        @endif
+                                    @else
+                                        <span class="text-danger">Không tìm thấy phòng ăn</span>
+                                    @endif
+                                </td>
                             </tr>
+
+                            <tr class="{{ $banAn->deleted_at ? 'table-danger' : '' }}">
+                                <th>Trạng thái</th>
+                                <td>
+                                    @if ($banAn->deleted_at)
+                                        <span class="badge badge-danger">Ngừng sử dụng</span>
+                                    @else
+                                        <span class="badge badge-success">Đang sử dụng</span>
+                                        @if ($phongAn && $phongAn->deleted_at)
+                                            <span class="badge badge-warning">Phòng đã ngừng hoạt động</span>
+                                        @endif
+                                    @endif
+                                </td>
+                            </tr>
+
+
                         </table>
 
                         <hr>
@@ -73,9 +115,11 @@
 
                             <div>
                                 <!-- Nút chỉnh sửa -->
-                                <a href="{{ route('ban-an.edit', $banAn->id) }}" class="btn btn-warning">
-                                    <i class="fa fa-edit"></i> Chỉnh sửa
-                                </a>
+                                @if (!$banAn->deleted_at)
+                                    <a href="{{ route('ban-an.edit', $banAn->id) }}" class="btn btn-warning">
+                                        <i class="fa fa-edit"></i> Chỉnh sửa
+                                    </a>
+                                @endif
 
                                 @if ($banAn->deleted_at)
                                     <!-- Nút khôi phục nếu bàn ăn đã bị xóa -->

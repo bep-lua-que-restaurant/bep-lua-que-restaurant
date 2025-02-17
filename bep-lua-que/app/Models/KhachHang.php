@@ -8,5 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class KhachHang extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = ['ho_ten', 'email', 'so_dien_thoai', 'dia_chi', 'can_cuoc'];
 }
