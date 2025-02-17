@@ -22,6 +22,7 @@ use App\Http\Controllers\QuanLyController;
 use App\Http\Controllers\ThuNganController;
 use App\Http\Controllers\NhanVienController;
 
+use App\Http\Controllers\LichLamViecController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,6 +38,7 @@ use App\Http\Controllers\NhanVienController;
 Route::get('/', function () {
     return view('admin.dashboard');
 });
+
 
 // Danh mục món ăn
 Route::resource('danh-muc-mon-an', DanhMucMonAnController::class);
@@ -120,10 +122,12 @@ Route::post('/import-mon-an', [MonAnController::class, 'importMonAn'])->name('mo
 Route::delete('/mon-an/xoa-hinh-anh/{hinhAnhId}', [MonAnController::class, 'xoaHinhAnh'])->name('mon-an.xoa-hinh-anh');
 
 
+
 // // phiếu nhập nguyên liệu
 Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
 Route::post('/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore'); // Khôi phục phiếu nhập
 Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'exportPhieuNhapKho'])->name('phieu-nhap-kho.export');
+
 
 
 // Quản lí nhân viên
@@ -147,7 +151,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 });
     Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
+
 });
+
+//lịch làm việc
+
+Route::resource('lich-lam-viec', LichLamViecController::class);
+Route::get('lich-lam-viec/export', [LichLamViecController::class, 'export'])->name('lich-lam-viec.export');
 
 Route::get('/thu-ngan', [ThunganController::class, 'getBanAn'])->name('thungan.getBanAn');
 Route::get('/thu-ngan/get-thuc-don', [ThunganController::class, 'getThucDon'])->name('thungan.getThucDon');

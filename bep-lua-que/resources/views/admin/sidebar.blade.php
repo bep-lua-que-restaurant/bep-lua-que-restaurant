@@ -62,11 +62,7 @@
                     <li><a href="#">Trả hàng</a></li>
                 </ul>
                 <ul aria-expanded="false">
-
                     {{-- <li><a href="{{ route('phieu-nhap-kho.index') }}">Nhập hàng</a></li> --}}
-
-
-
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Trả hàng nhập</a></li>
@@ -106,7 +102,7 @@
                     <li><a href="{{ route('nhan-vien.index') }}">Nhân viên</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="{{ route('ca-lam.index') }}">Lịch làm việc</a></li>
+                    <li><a href="{{ route('lich-lam-viec.index') }}">Lịch làm việc</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Chấm công</a></li>
