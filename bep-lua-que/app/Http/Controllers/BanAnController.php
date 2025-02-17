@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\BanAnUpdated;
 use App\Models\BanAn;
 use App\Http\Requests\StoreBanAnRequest;
 use App\Http\Requests\UpdateBanAnRequest;
@@ -80,7 +81,9 @@ class BanAnController extends Controller
         $data = $request->validated();
         // dd($data);
 
-        BanAn::create(attributes: $data);
+        $banAn = BanAn::create($data);
+
+        broadcast(new BanAnUpdated($banAn))->toOthers();
 
         return redirect()->route('ban-an.index')->with('success', 'Thêm bàn ăn thành công!');
     }
@@ -125,6 +128,7 @@ class BanAnController extends Controller
         // Cập nhật thông tin bàn ăn
         $banAn->update($validatedData);
 
+        broadcast(new BanAnUpdated($banAn))->toOthers();
         return redirect()->route('ban-an.index')->with('success', 'Cập nhật bàn ăn thành công!');
     }
 
@@ -135,6 +139,8 @@ class BanAnController extends Controller
     {
         $banAn->delete(); // Xóa mềm bàn ăn
 
+        broadcast(new BanAnUpdated($banAn))->toOthers();
+
         return redirect()->route('ban-an.index')->with('success', 'Bàn ăn đã được ngừng sử dụng!');
     }
 
@@ -144,8 +150,10 @@ class BanAnController extends Controller
 
         if ($banAn->deleted_at) {
             $banAn->restore(); // Khôi phục bàn ăn
+            broadcast(new BanAnUpdated($banAn))->toOthers();
             return redirect()->route('ban-an.index')->with('success', 'Bàn ăn đã được khôi phục!');
         }
+
 
         return redirect()->route('ban-an.index')->with('error', 'Bàn ăn này chưa bị xóa!');
     }

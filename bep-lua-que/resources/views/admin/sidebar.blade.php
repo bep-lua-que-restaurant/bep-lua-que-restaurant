@@ -13,10 +13,10 @@
                     <li><a href="{{ route('mon-an.index') }}">Món ăn</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="#">Dịch vụ</a></li>
+                    <li><a href="{{ route('dich-vu.index') }}">Dịch vụ</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="#">Combo - đóng gói</a></li>
+                    <li><a href="{{ route('com-bo.index') }}">Combo - đóng gói</a></li>
                 </ul>
             </li>
             {{-- Hàng hóa --}}
@@ -56,13 +56,17 @@
                 </a>
 
                 <ul aria-expanded="false">
-                    <li><a href="#">Hóa đơn</a></li>
+                    <li><a href="{{ route('hoa-don.index') }}">Hóa đơn</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Trả hàng</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="{{ route('phieu-nhap-kho.index') }}">Nhập hàng</a></li>
+
+                    {{-- <li><a href="{{ route('phieu-nhap-kho.index') }}">Nhập hàng</a></li> --}}
+
+
+
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Trả hàng nhập</a></li>

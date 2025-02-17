@@ -13,6 +13,7 @@ class BanAn extends Model
     protected $fillable = ['ten_ban', 'so_ghe', 'mo_ta', 'vi_tri'];
 
 
+
     // BanAn model
     public function phongAn()
     {
@@ -21,5 +22,11 @@ class BanAn extends Model
     public function datBans()
     {
         return $this->hasMany(DatBan::class, 'ban_an_id');
+
+    public function hoaDons()
+    {
+        return $this->belongsToMany(HoaDon::class, 'hoa_don_bans', 'ban_an_id', 'hoa_don_id')
+            ->withPivot('trang_thai')
+            ->withTimestamps();
     }
 }
