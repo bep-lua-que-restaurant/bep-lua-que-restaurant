@@ -1,8 +1,7 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <div class="swiper mySwiper">
     <div class="swiper-wrapper">
         @foreach ($data->chunk(12) as $chunk)
-
-
             <div class="swiper-slide">
                 <div class="row">
                     @foreach ($chunk as $banAn)
@@ -16,7 +15,6 @@
                                     <h6 class="card-title" style="font-size: 12px;">{{ $banAn->ten_ban }}</h6>
                                     @if ($banAn->trang_thai == 'trong')
                                         <p class="badge badge-success" style="font-size: 10px;">Có sẵn</p>
-
                                     @elseif ($banAn->trang_thai == 'co_khach')
                                         <p class="badge badge-warning" style="font-size: 10px;">Có khách</p>
                                     @elseif ($banAn->trang_thai == 'da_dat_truoc')
@@ -48,6 +46,10 @@
 
 
 
+<!-- Thêm jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
 <script>
     var swiper = new Swiper(".mySwiper", {
@@ -145,5 +147,4 @@
             });
         }
     });
-
 </script>

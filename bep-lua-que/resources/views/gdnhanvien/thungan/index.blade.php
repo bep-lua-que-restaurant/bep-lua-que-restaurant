@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -113,9 +112,6 @@
                     </div>
                 </div>
 
-                <div class="card-body" id="list-container">
-                    @include('gdnhanvien.thungan.body-list')
-                </div>
 
             </div>
 
@@ -155,6 +151,7 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     @vite('resources/js/public.js')
     <script>
         var apiUrl = "{{ route('thungan.getBanAn') }}";
