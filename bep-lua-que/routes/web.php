@@ -17,6 +17,7 @@ use App\Http\Controllers\HoaDonController;
 use App\Http\Controllers\QuanLyController;
 use App\Http\Controllers\ThuNganController;
 use App\Http\Controllers\NhanVienController;
+use App\Http\Controllers\ThongKeController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -107,5 +108,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/thu-ngan/get-thuc-don', [ThunganController::class, 'getThucDon'])->name('thungan.getThucDon');
     Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 });
+
+
+
+Route::get('/', [ThongKeController::class, 'index'])->name('dashboard');
+
+
 
 
