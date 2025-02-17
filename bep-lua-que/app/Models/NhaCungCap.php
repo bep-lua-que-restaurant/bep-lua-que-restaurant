@@ -10,8 +10,18 @@ class NhaCungCap extends Model
 {
     use HasFactory, SoftDeletes;
     protected $fillable = [
-        'ten',
-        'moTa',
-        'hinhAnh',
+
+        'ma_nha_cung_cap',
+        'ten_nha_cung_cap',
+        'dia_chi',
+        'so_dien_thoai',
+        'email',
+        'ghi_chu',
     ];
+
+    public function phieuNhapKhos()
+    {
+        return $this->hasMany(PhieuNhapKho::class, 'nha_cung_cap_id');
+    }
+
 }

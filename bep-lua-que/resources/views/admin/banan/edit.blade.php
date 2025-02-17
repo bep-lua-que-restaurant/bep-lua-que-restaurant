@@ -64,12 +64,24 @@
                             <!-- Vị trí -->
                             <div class="form-group">
                                 <label for="vi_tri">Vị trí</label>
-                                <input type="text" id="vi_tri" name="vi_tri" class="form-control"
-                                    value="{{ old('vi_tri', $banAn->vi_tri) }}">
+                                <select name="vi_tri" id="vi_tri" class="form-control">
+                                    <option value="">Chọn vị trí bàn</option>
+                                    @foreach ($phongAns as $phongAn)
+                                        <option value="{{ $phongAn->id }}"
+                                            {{ old('vi_tri', $banAn->vi_tri) == $phongAn->id ? 'selected' : '' }}>
+                                            {{ $phongAn->ten_phong_an }}
+                                            @if ($phongAn->deleted_at)
+                                                (Phòng không còn sử dụng)
+                                            @endif
+                                        </option>
+                                    @endforeach
+                                </select>
+
                                 @if ($errors->has('vi_tri'))
                                     <small class="text-danger">*{{ $errors->first('vi_tri') }}</small>
                                 @endif
                             </div>
+
 
                             <!-- Nút lưu -->
                             <div class="form-group text-right">

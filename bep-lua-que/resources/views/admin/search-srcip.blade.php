@@ -6,7 +6,7 @@
             let statusFilter = $('#statusFilter').val();
 
             $.ajax({
-                url: "{{ route('ban-an.index') }}",
+                url: "{{ $route }}",
                 method: "GET",
                 data: {
                     ten: searchQuery,

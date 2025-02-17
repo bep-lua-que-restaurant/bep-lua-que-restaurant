@@ -16,3 +16,11 @@ use Illuminate\Support\Facades\Broadcast;
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+
+Broadcast::channel('banan-channel', function () {
+    return true;
+});
+
+Broadcast::channel('hoa-don-channel', function ($user) {
+    return true; // Cho phép tất cả người dùng lắng nghe
+});
