@@ -377,7 +377,7 @@
 
 
 
-    @include('admin.search-srcip')
+    {{-- @include('admin.search-srcip') --}}
     <!-- Hiển thị phân trang -->
     {{-- {{ $banPhong->links('pagination::bootstrap-5') }} --}}
 @endsection

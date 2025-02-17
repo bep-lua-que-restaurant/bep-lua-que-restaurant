@@ -56,13 +56,13 @@
                 </a>
 
                 <ul aria-expanded="false">
-                    <li><a href="">Hóa đơn</a></li>
+                    <li><a href="{{route('hoa-don.index')}}">Hóa đơn</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Trả hàng</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    {{-- <li><a href="{{ route('phieu-nhap-kho.index') }}">Nhập hàng</a></li> --}}
+                    <li><a href="{{ route('phieu-nhap-kho.index') }}">Nhập hàng</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Trả hàng nhập</a></li>
@@ -102,7 +102,7 @@
                     <li><a href="{{ route('nhan-vien.index') }}">Nhân viên</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="{{ route('lich-lam-viec.index') }}">Lịch làm việc</a></li>
+                    <li><a href="{{ route('ca-lam.index') }}">Lịch làm việc</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Chấm công</a></li>
@@ -118,7 +118,7 @@
 
             {{-- Nhà bếp --}}
             <li>
-                <a class="ai-icon" href="#">
+                <a class="ai-icon" href="{{ route('bep.dashboard') }}">
                     <i class="fa fa-utensils"></i>
                     <span class="nav-text">Nhà bếp</span>
                 </a>

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('dat_bans', function (Blueprint $table) {
             $table->unsignedBigInteger('ban_an_id')->nullable(); // Thêm cột ban_an_id, có thể NULL
-            $table->foreign('ban_an_id')->references('id')->on('ban_ans')->onDelete('cascade'); // Thiết lập khóa ngoại (nếu cần)
+            $table->foreign('ban_an_id')->references(columns: 'id')->on('ban_ans')->onDelete('cascade'); // Thiết lập khóa ngoại (nếu cần)
         });
     }
 

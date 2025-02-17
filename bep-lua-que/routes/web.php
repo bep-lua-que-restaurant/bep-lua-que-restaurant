@@ -14,7 +14,7 @@ use App\Http\Controllers\ChiTietNhapKhoController;
 use App\Http\Controllers\MonAnController;
 use App\Http\Controllers\NguyenLieuController;
 // use App\Http\Controllers\PhieuNhapKhoController;
-use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\BepController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HoaDonController;
@@ -142,18 +142,14 @@ Route::delete('/nhan-vien/destroy/{id}', [NhanVienController::class, 'destroy'])
 Route::post('nhan-vien/{id}/nghi-viec', [NhanVienController::class, 'nghiViec'])->name('nhan-vien.nghi-viec');
 Route::post('nhan-vien/{id}/khoi-phuc', [NhanVienController::class, 'khoiPhuc'])->name('nhan-vien.khoi-phuc');
 
-// // Đăng nhập phân quyền
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::middleware(['auth'])->group(function () {
-    Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
-    Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
-    Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
-});
-    Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 
-});
+Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
+Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
+Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
+
+
+
+
 
 //lịch làm việc
 
@@ -166,7 +162,9 @@ Route::post('/thu-ngan/tao-hoa-don', [HoaDonController::class, 'createHoaDon'])-
 Route::get('/thu-ngan/hoa-don', [ThunganController::class, 'getHoaDon'])->name('thungan.getHoaDon');
 Route::get('/hoa-don/get-id', [ThuNganController::class, 'getHoaDonId'])->name('thungan.getHoaDonBan');
 Route::get('/hoa-don/get-details', [ThuNganController::class, 'getHoaDonDetails'])->name('thungan.getChiTietHoaDon');
-
-
 Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])->name('thungan.destroy');
 
+
+Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
+Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
+Route::get('/hoa-don/search',[HoaDonController::class, 'search'])->name('hoa-don.search');

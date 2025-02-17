@@ -22,6 +22,7 @@ class BanAn extends Model
     public function datBans()
     {
         return $this->hasMany(DatBan::class, 'ban_an_id');
+    }
 
     public function hoaDons()
     {
