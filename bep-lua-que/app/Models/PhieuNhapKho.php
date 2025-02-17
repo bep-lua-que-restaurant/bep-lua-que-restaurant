@@ -17,25 +17,25 @@ class PhieuNhapKho extends Model
         'nhan_vien_id',
         'nha_cung_cap_id',
         'ngay_nhap',
-        'tong_tien',
-        'trang_thai'
+
+        'ghi_chu',
     ];
 
-    // Quan hệ với nhân viên
-    public function nhanVien()
-    {
-        return $this->belongsTo(User::class, 'nhan_vien_id');
-    }
 
-    // Quan hệ với nhà cung cấp
     public function nhaCungCap()
     {
         return $this->belongsTo(NhaCungCap::class, 'nha_cung_cap_id');
     }
 
-    // Quan hệ với chi tiết nhập kho
-    public function chiTietNhapKho()
+
+    public function chiTietPhieuNhapKho()
     {
-        return $this->hasMany(ChiTietNhapKho::class, 'phieu_nhap_kho_id');
+        return $this->hasMany(ChiTietPhieuNhapKho::class, 'phieu_nhap_kho_id');
     }
+     // Quan hệ với nhân viên
+     public function nhanVien()
+     {
+         return $this->belongsTo(NhanVien::class, 'nhan_vien_id');
+     }
+
 }

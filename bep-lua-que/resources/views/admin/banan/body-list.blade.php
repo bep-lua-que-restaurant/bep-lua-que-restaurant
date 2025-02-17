@@ -23,7 +23,7 @@
 
 
         <!-- Trạng thái (Đang sử dụng / Ngừng sử dụng) -->
-        <td>
+        {{-- <td>
             @if ($item->deleted_at != null)
                 <div class="d-flex align-items-center">
                     <i class="fa fa-circle text-danger mr-1"></i> Ngừng sử dụng
@@ -33,7 +33,27 @@
                     <i class="fa fa-circle text-success mr-1"></i> Đang sử dụng
                 </div>
             @endif
+        </td> --}}
+        <td>
+            @if ($item->deleted_at)
+                <div class="d-flex align-items-center">
+                    <i class="fa fa-circle text-danger mr-1"></i> Ngừng sử dụng
+                </div>
+            @elseif ($item->phongAn && $item->phongAn->deleted_at)
+                <div class="d-flex align-items-center">
+                    <i class="fa fa-circle text-warning mr-1"></i> Bàn không thuộc phòng nào
+                </div>
+            @else
+                <div class="d-flex align-items-center">
+                    <i class="fa fa-circle text-success mr-1"></i> Đang sử dụng
+                </div>
+            @endif
         </td>
+
+
+
+
+
 
         <!-- Hành động: Xem, Sửa, Xóa, Khôi phục -->
         <td>
@@ -46,9 +66,11 @@
 
 
                 <!-- Nút chỉnh sửa -->
-                <a href="{{ route('ban-an.edit', $item->id) }}" class="btn btn-warning btn-sm p-2 m-2">
-                    <i class="fa fa-edit"></i>
-                </a>
+                @if (!$item->deleted_at)
+                    <a href="{{ route('ban-an.edit', $item->id) }}" class="btn btn-warning btn-sm p-2 m-2">
+                        <i class="fa fa-edit"></i>
+                    </a>
+                @endif
 
 
                 @if ($item->deleted_at)

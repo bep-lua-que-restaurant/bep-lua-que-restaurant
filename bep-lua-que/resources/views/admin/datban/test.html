@@ -1,0 +1,24 @@
+@foreach ($banPhong as $item)
+<div class="grid-row">
+    @for ($j = 8; $j <= 22; $j++) @php $timeSlot = sprintf('%02d', $j) . ':00';
+    // Kiểm tra thông tin đơn đặt bàn cho ngày và thời gian trong tuần
+    $datBanWeek = $datBansWeek->firstWhere(function ($datBan) use ( $item, $d,
+    $timeSlot, ) { return $datBan->ban_an_id == $item->id &&
+    Carbon::parse($datBan->thoi_gian_den)->format('Y-m-d H:i') ==
+    Carbon::parse($d['date'] . ' ' . $timeSlot)->format( 'Y-m-d H:i', ); });
+    @endphp
+
+    <!-- Truyền tham số vào URL với đúng định dạng -->
+    <a
+        href="{{ route('dat-ban.create', [
+            'ten_ban' => $item->ten_ban ?? 'Không xác định',
+            'id_ban' => $item->id ?? '',
+            'time' => $timeSlot,
+            'date' => $d['date'],
+        ]) }}"
+        class="grid-item time-item @if ($datBanWeek) @switch($datBanWeek->trang_thai) @case('dang_xu_ly') bg-warning @break @case('xa_nhan') bg-success @break @case('da_huy') bg-danger @break @default bg-secondary @endswitch @endif"
+    >
+    </a>
+    @endfor
+</div>
+@endforeach

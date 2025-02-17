@@ -20,17 +20,6 @@
             </div>
         </div>
 
-        <!-- Hiển thị thông báo lỗi chung -->
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
         <div class="row">
             <div class="col-12">
                 <div class="card">
@@ -70,12 +59,18 @@
                             <!-- Vị trí (THÊM TRƯỜNG BỊ THIẾU) -->
                             <div class="form-group">
                                 <label for="vi_tri">Vị trí</label>
-                                <input type="text" id="vi_tri" name="vi_tri" class="form-control"
-                                    placeholder="Nhập vị trí bàn" value="{{ old('vi_tri') }}">
+                                <select name="vi_tri" id="vi_tri" class="form-control">
+                                    <option value="">Chọn vị trí bàn</option> <!-- Đặt ngoài vòng lặp -->
+                                    @foreach ($phongAn as $item)
+                                        <option value="{{ $item->id }}">{{ $item->ten_phong_an }}</option>
+                                    @endforeach
+                                </select>
+
                                 @if ($errors->has('vi_tri'))
                                     <small class="text-danger">*{{ $errors->first('vi_tri') }}</small>
                                 @endif
                             </div>
+
 
                             <!-- Nút submit -->
                             <div class="form-group text-right">

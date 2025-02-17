@@ -11,17 +11,14 @@ class NhaCungCap extends Model
     use HasFactory, SoftDeletes;
     protected $fillable = [
 
+        'ma_nha_cung_cap',
         'ten_nha_cung_cap',
+        'dia_chi',
         'so_dien_thoai',
         'email',
-        'dia_chi',
-        'mo_ta',
-        'hinhAnh',
+        'ghi_chu',
     ];
 
-    /**
-     * Một nhà cung cấp có thể có nhiều phiếu nhập kho.
-     */
     public function phieuNhapKhos()
     {
         return $this->hasMany(PhieuNhapKho::class, 'nha_cung_cap_id');

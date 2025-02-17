@@ -14,7 +14,10 @@
                                         class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
                                     <!-- Tên món -->
                                     <h6 class="card-title" style="font-size: 12px;">{{ $monAn->ten }}</h6>
-                                    <p class="card-text" style="font-size: 10px;">{{ number_format($monAn->gia) }} VNĐ
+
+                                    <p class="card-text badge badge-danger " style="font-size: 10px;">
+                                        {{ number_format($monAn->gia) }} VNĐ
+
                                     </p>
                                     <!-- Nút Thêm món -->
                                     <button type="submit" class="btn btn-primary btn-sm add-mon-btn"
@@ -52,4 +55,43 @@
     document.getElementById("prevBtn").addEventListener("click", function() {
         swiper.slidePrev();
     });
+
+
+    // tạo hóa đơn 
+
+    $(document).ready(function() {
+        $('.add-mon-btn').on('click', function() {
+            var card = $(this).closest('.card'); // Lấy phần tử card chứa món ăn
+            var banId = $('#ten-ban').data('currentBan'); // Lấy ID bàn hiện tại
+            var monAnId = card.data('banan-id'); // Lấy ID món ăn
+            var giaMon = parseInt(card.find('.card-text').text().replace(/[^0-9]/g, "")); // Lấy giá món
+
+            // Kiểm tra nếu chưa chọn bàn
+            if (!banId) {
+                alert("Vui lòng chọn bàn trước khi thêm món!");
+                return;
+            }
+
+            // Gửi AJAX để tạo hóa đơn và thêm món ăn
+            $.ajax({
+                url: "{{ route('thungan.createHoaDon') }}",
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    ban_an_id: banId,
+                    mon_an_id: monAnId,
+                    gia: giaMon
+                },
+                success: function(response) {
+                    console.log("Món đã thêm vào hóa đơn!");
+                    alert("Món đã được thêm vào hóa đơn!");
+                  
+                },
+                error: function(error) {
+                    console.error("Lỗi khi thêm món vào hóa đơn:", error);
+                }
+            });
+        });
+    });
+
 </script>

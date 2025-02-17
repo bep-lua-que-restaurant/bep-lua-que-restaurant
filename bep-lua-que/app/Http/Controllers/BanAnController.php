@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\BanAnUpdated;
 use App\Models\BanAn;
 use App\Http\Requests\StoreBanAnRequest;
 use App\Http\Requests\UpdateBanAnRequest;
@@ -11,7 +12,7 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\BanAnExport;
 use App\Imports\BanAnImport;
-
+use App\Models\PhongAn;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\HeadingRowImport;
 
@@ -23,7 +24,11 @@ class BanAnController extends Controller
 
     public function index(Request $request)
     {
-        $query = BanAn::query();
+        $query = BanAn::with([
+            'phongAn' => function ($q) {
+                $q->withTrashed(); // Lấy cả phòng đã bị xóa mềm
+            }
+        ]);
 
         // Lọc theo tên
         if ($request->has('ten') && $request->ten != '') {
@@ -50,20 +55,22 @@ class BanAnController extends Controller
 
         return view('admin.banan.index', [
             'data' => $data,
-            'route' => route('ban-an.index'), // URL route cho AJAX
-            'tableId' => 'list-container', // ID của bảng
-            'searchInputId' => 'search-name', // ID của ô tìm kiếm
+            'route' => route('ban-an.index'),
+            'tableId' => 'list-container',
+            'searchInputId' => 'search-name',
         ]);
     }
+
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        //
-        return view('admin.banan.create');
+        $phongAn = PhongAn::withoutTrashed()->get(); // Chỉ lấy bản ghi chưa bị xóa mềm
+        return view('admin.banan.create', compact('phongAn'));
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -74,7 +81,9 @@ class BanAnController extends Controller
         $data = $request->validated();
         // dd($data);
 
-        BanAn::create($data);
+        $banAn = BanAn::create($data);
+
+        broadcast(new BanAnUpdated($banAn))->toOthers();
 
         return redirect()->route('ban-an.index')->with('success', 'Thêm bàn ăn thành công!');
     }
@@ -86,19 +95,26 @@ class BanAnController extends Controller
      */
     public function show($id)
     {
+        // Lấy thông tin Bàn ăn, kể cả khi bị xóa mềm
         $banAn = BanAn::withTrashed()->findOrFail($id);
 
-        return view('admin.banan.detail', compact('banAn'));
+        // Lấy thông tin Phòng ăn từ `vi_tri` (chứa ID của Phòng ăn)
+        $phongAn = PhongAn::withTrashed()->find($banAn->vi_tri);
+
+        return view('admin.banan.detail', compact('banAn', 'phongAn'));
     }
+
 
     /**
      * Show the form for editing the specified resource.
-     */
-    public function edit(BanAn $banAn)
+     */ public function edit(BanAn $banAn)
     {
-        //
-        return view('admin.banan.edit', compact('banAn'));
+        // Lấy danh sách Phòng ăn chưa bị xóa mềm
+        $phongAns = PhongAn::withoutTrashed()->get();
+
+        return view('admin.banan.edit', compact('banAn', 'phongAns'));
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -112,6 +128,7 @@ class BanAnController extends Controller
         // Cập nhật thông tin bàn ăn
         $banAn->update($validatedData);
 
+        broadcast(new BanAnUpdated($banAn))->toOthers();
         return redirect()->route('ban-an.index')->with('success', 'Cập nhật bàn ăn thành công!');
     }
 
@@ -122,6 +139,8 @@ class BanAnController extends Controller
     {
         $banAn->delete(); // Xóa mềm bàn ăn
 
+        broadcast(new BanAnUpdated($banAn))->toOthers();
+
         return redirect()->route('ban-an.index')->with('success', 'Bàn ăn đã được ngừng sử dụng!');
     }
 
@@ -131,8 +150,10 @@ class BanAnController extends Controller
 
         if ($banAn->deleted_at) {
             $banAn->restore(); // Khôi phục bàn ăn
+            broadcast(new BanAnUpdated($banAn))->toOthers();
             return redirect()->route('ban-an.index')->with('success', 'Bàn ăn đã được khôi phục!');
         }
+
 
         return redirect()->route('ban-an.index')->with('error', 'Bàn ăn này chưa bị xóa!');
     }

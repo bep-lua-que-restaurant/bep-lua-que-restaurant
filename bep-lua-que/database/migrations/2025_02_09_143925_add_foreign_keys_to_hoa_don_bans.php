@@ -9,14 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('hoa_don_bans', function (Blueprint $table) {
-            // Kiểm tra và xóa khóa ngoại cũ nếu tồn tại
-            if (Schema::hasColumn('hoa_don_bans', 'hoa_don_id')) {
-                $table->dropForeign(['hoa_don_id']);
-            }
 
-            if (Schema::hasColumn('hoa_don_bans', 'ban_an_id')) {
-                $table->dropForeign(['ban_an_id']);
-            }
 
             // Đảm bảo cột có kiểu dữ liệu phù hợp
             $table->unsignedBigInteger('hoa_don_id')->change();
