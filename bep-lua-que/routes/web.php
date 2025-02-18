@@ -14,7 +14,7 @@ use App\Http\Controllers\ChiTietNhapKhoController;
 use App\Http\Controllers\MonAnController;
 use App\Http\Controllers\NguyenLieuController;
 // use App\Http\Controllers\PhieuNhapKhoController;
-use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\BepController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HoaDonController;
@@ -151,9 +151,9 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
     Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 });
-    Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
+Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 
-});
+
 
 //lịch làm việc
 
@@ -169,4 +169,3 @@ Route::get('/hoa-don/get-details', [ThuNganController::class, 'getHoaDonDetails'
 
 
 Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])->name('thungan.destroy');
-
