@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id(); // Khóa chính tự động tăng
             $table->string('ma_nguyen_lieu', 50)->unique(); // Mã nguyên liệu duy nhất
             $table->string('ten_nguyen_lieu', 255)->unique(); // Tên nguyên liệu
-            $table->foreignId('loai_nguyen_lieu_id')->nullable()->constrained('loai_nguyen_lieu')->onDelete('set null'); // FK đến bảng loai_nguyen_lieu
+            $table->foreignId('loai_nguyen_lieu_id')->constrained('loai_nguyen_lieu')->onDelete('set null'); // FK đến bảng loai_nguyen_lieu
             $table->string('don_vi_tinh', 50); // Đơn vị tính
             $table->decimal('so_luong_ton', 15, 2)->default(0); // Số lượng tồn kho
             $table->decimal('gia_nhap', 15, 2)->default(0); // Giá nhập nguyên liệu

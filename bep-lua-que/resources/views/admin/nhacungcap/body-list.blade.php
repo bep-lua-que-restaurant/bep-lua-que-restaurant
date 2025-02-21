@@ -8,7 +8,7 @@
         </td>
         <td><strong>{{ $item->id }}</strong></td>
         <td>
-            <div class="d-flex align-items-center"><span class="w-space-no">{{ $item->ten }}</span></div>
+            <div class="d-flex align-items-center"><span class="w-space-no">{{ $item->ten_nha_cung_cap }}</span></div>
         </td>
 
         <td>

@@ -131,6 +131,7 @@ class PhieuNhapKhoController extends Controller
                         'loai_nguyen_lieu_id' => $chiTiet['loai_nguyen_lieu_id'],
                         'don_vi_tinh' => $chiTiet['don_vi_tinh'],
                         'so_luong_ton' => $chiTiet['so_luong'],
+                        'gia_nhap' => $chiTiet['don_gia'],
                         'hinh_anh' => $hinhAnhPath, // Lưu đường dẫn ảnh
                     ]);
                 } else {
@@ -176,6 +177,24 @@ class PhieuNhapKhoController extends Controller
         return view('admin.phieunhap.detail', compact('phieuNhapKho'));
     }
 
+    public function xemChiTietNguyenLieu($phieuNhapId, $nguyenLieuId)
+{
+    // Lấy chi tiết nguyên liệu từ bảng chi tiết phiếu nhập
+    $chiTiet = ChiTietPhieuNhapKho::where('phieu_nhap_kho_id', $phieuNhapId)
+        ->where('nguyen_lieu_id', $nguyenLieuId)
+        ->with('nguyenLieu.loaiNguyenLieu')
+        ->first();
+
+    if (!$chiTiet) {
+        return redirect()->route('phieu-nhap-kho.show', ['id' => $phieuNhapId])
+            ->with('error', 'Nguyên liệu không tồn tại trong phiếu nhập.');
+    }
+
+    // Lấy số lượng tồn từ bảng nguyên liệu
+    $soLuongTon = $chiTiet->nguyenLieu->so_luong_ton ?? 0;
+
+    return view('admin.phieunhap.detail-nguyenlieu', compact('chiTiet', 'phieuNhapId', 'soLuongTon'));
+}
 
 
     // /**

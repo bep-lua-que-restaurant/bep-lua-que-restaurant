@@ -5,6 +5,7 @@ use App\Http\Controllers\ComBoController;
 use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\BanAnController;
 use App\Http\Controllers\DatBanController;
+use App\Http\Controllers\LoaiNguyenLieuController;
 use App\Http\Controllers\PhongAnController;
 use App\Models\PhongAn;
 use Illuminate\Support\Facades\Route;
@@ -122,12 +123,20 @@ Route::get('export-mon-an', [MonAnController::class, 'exportMonAn'])->name('mon-
 Route::post('/import-mon-an', [MonAnController::class, 'importMonAn'])->name('mon-an.import');
 Route::delete('/mon-an/xoa-hinh-anh/{hinhAnhId}', [MonAnController::class, 'xoaHinhAnh'])->name('mon-an.xoa-hinh-anh');
 
-
+// loại nguyên liêu
+Route::resource('loai-nguyen-lieu', LoaiNguyenLieuController::class);
+Route::get('export-loai-nguyen-lieu', [LoaiNguyenLieuController::class, 'export'])->name('loai-nguyen-lieu.export');
+Route::post('loai-nguyen-lieu/{id}/restore', [LoaiNguyenLieuController::class, 'restore'])->name('loai-nguyen-lieu.restore');
 
 // // phiếu nhập nguyên liệu
 Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
 Route::post('/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore'); // Khôi phục phiếu nhập
 Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'exportPhieuNhapKho'])->name('phieu-nhap-kho.export');
+
+// Route để xem chi tiết nguyên liệu
+Route::get('phieu-nhap-kho/{phieuNhapId}/nguyen-lieu/{nguyenLieuId}', 
+    [PhieuNhapKhoController::class, 'xemChiTietNguyenLieu'])
+    ->name('phieu-nhap-kho.chitiet-nguyenlieu');
 
 
 
