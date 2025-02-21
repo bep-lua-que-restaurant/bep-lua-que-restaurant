@@ -17,13 +17,16 @@ class PhieuNhapKho extends Model
         'nhan_vien_id',
         'nha_cung_cap_id',
         'ngay_nhap',
+
         'ghi_chu',
     ];
+
 
     public function nhaCungCap()
     {
         return $this->belongsTo(NhaCungCap::class, 'nha_cung_cap_id');
     }
+
 
     public function chiTietPhieuNhapKho()
     {
@@ -34,4 +37,5 @@ class PhieuNhapKho extends Model
      {
          return $this->belongsTo(NhanVien::class, 'nhan_vien_id');
      }
+
 }

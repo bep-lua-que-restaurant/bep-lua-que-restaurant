@@ -29,12 +29,16 @@
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-header">
+
                         <h4 class="card-title">Danh sách phiếu nhập kho</h4>
+
 
                         <div class="btn-group">
                             <a href="{{ route('phieu-nhap-kho.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm phiếu nhập
                             </a>
+
+
                         </div>
                     </div>
                     <div class="card-body">
@@ -52,7 +56,9 @@
                                     </tr>
                                 </thead>
                                 <tbody id="list-container">
+
                                     @include('admin.phieunhap.body-list', ['data' => $data])
+
                                 </tbody>
                             </table>
                         </div>
@@ -66,4 +72,6 @@
             {{ $data->links('pagination::bootstrap-5') }}
         </div>
     </div>
+
+
 @endsection

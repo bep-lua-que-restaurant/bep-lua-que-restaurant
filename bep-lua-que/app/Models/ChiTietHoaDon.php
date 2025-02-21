@@ -8,5 +8,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ChiTietHoaDon extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = ['hoa_don_id', 'mon_an_id', 'so_luong', 'don_gia', 'thanh_tien', 'trang_thai'];
+
+    public function monAn()
+    {
+        return $this->belongsTo(MonAn::class, 'mon_an_id');
+    }
+
+    public function hoaDon()
+    {
+        return $this->belongsTo(HoaDon::class, 'hoa_don_id');
+    }
 }

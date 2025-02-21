@@ -4,84 +4,326 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giao diện Thu Ngân</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Thu ngân</title>
+
+    <!-- Import Bootstrap mới nhất -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('admin') }}/images/favicon.png">
+    <link href="{{ asset('admin') }}/vendor/chartist/css/chartist.min.css" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('admin') }}/vendor/bootstrap-select/dist/css/bootstrap-select.min.css" rel="stylesheet"
+        type="text/css" />
+    <link href="{{ asset('admin') }}/css/style.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
     <style>
         body {
-            background-color: #b71c1c;
-            color: white;
+            background-color: #004080;
+            color: #fff;
         }
 
-        .container {
-            max-width: 1200px;
+        .cardd:hover {
+            border-color: #FF6347 !important;
+            box-shadow: 0 4px 10px rgba(255, 99, 71, 0.3);
+            cursor: pointer;
         }
 
-        .card {
-            background: white;
-            color: black;
-            border-radius: 10px;
-            padding: 20px;
+        .add-mon-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            padding: 0;
+            font-size: 14px;
+            border: none;
+            transition: 0.3s;
         }
 
-        .btn-custom {
-            background: #388e3c;
-            color: white;
-        }
-
-        .btn-custom:hover {
-            background: #2e7d32;
+        .add-btn:hover {
+            background-color: #007bff;
         }
     </style>
 </head>
 
 <body>
-    <div class="container mt-4">
-        <h2 class="text-center">Giao Diện Thu Ngân</h2>
-        <div class="row mt-4">
-            <!-- Danh sách bàn hoặc đơn hàng -->
-            <div class="col-md-6">
-                <div class="card">
-                    <h4>Danh sách đơn hàng</h4>
-                    <input type="text" class="form-control mb-2" placeholder="Tìm kiếm đơn hàng...">
-                    <ul class="list-group">
-                        <li class="list-group-item">Đơn #001 - Bàn 5</li>
-                        <li class="list-group-item">Đơn #002 - Bàn 3</li>
-                        <li class="list-group-item">Đơn #003 - Mang về</li>
-                    </ul>
+    <header>
+        <div class="container-fluid">
+            <!-- Tìm kiếm + Lọc trạng thái -->
+            <section class="row my-4">
+                <div class="col-lg-6">
+                    <div class="input-group">
+                        <input type="text" id="search-name" class="form-control border-0 "
+                            placeholder="Tìm kiếm ...">
+                    </div>
                 </div>
-            </div>
-            <!-- Chi tiết đơn hàng -->
-            <div class="col-md-6">
-                <div class="card">
-                    <h4>Chi tiết đơn hàng</h4>
-                    <p>Khách hàng: Nguyễn Văn A</p>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Món ăn</th>
-                                <th>Số lượng</th>
-                                <th>Giá</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Phở bò</td>
-                                <td>2</td>
-                                <td>50,000đ</td>
-                            </tr>
-                            <tr>
-                                <td>Bún chả</td>
-                                <td>1</td>
-                                <td>40,000đ</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <h5 class="text-end">Tổng tiền: 90,000đ</h5>
-                    <button class="btn btn-custom w-100">Thanh Toán</button>
+                <div class="col-lg-6 d-flex justify-content-end">
+                    <select id="statusFilter" class="btn btn-primary btn-sm ">
+
+                        <option value="Tất cả">Tất cả</option>
+                        <option value="trong">Bàn trống</option>
+                        <option value="co_khach">Bàn có khách</option>
+                        <option value="da_dat_truoc">Đã đặt trước</option>
+
+                    </select>
                 </div>
-            </div>
+            </section>
+
+            <!-- Danh sách Bàn ăn / Thực đơn -->
+            <section class="row">
+                <div class="col-lg-12 my-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group">
+                            <button id="btn-ban-an" class="btn btn-sm btn-primary active ">
+                                <i class="fa fa-utensils"></i> Bàn ăn
+                            </button>
+
+                            <button id="btn-thuc-don" class="btn btn-sm btn-secondary ">
+                                <i class="fa fa-ellipsis-v"></i> Thực đơn
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+            </section>
         </div>
-    </div>
+    </header>
+
+    <main>
+        <section class="container-fluid">
+            <!-- Card Bàn ăn / Thực đơn -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header">
+                            <h4 class="card-title mb-0">Danh sách</h4>
+                        </div>
+
+                        <div class="card-body" id="list-container">
+                            @include('gdnhanvien.thungan.body-list')
+                        </div>
+
+                    </div>
+                </div>
+
+
+            </div>
+
+
+            <!-- Card Hóa đơn -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header">
+                            <h4 class="card-title mb-0">Hóa đơn</h4>
+                        </div>
+                        <div id="hoaDon-body" class="card-body">
+                            @include('gdnhanvien.thungan.hoa-don-list')
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+        </section>
+    </main>
+
+    <footer>
+        <!-- Footer content (nếu cần) -->
+    </footer>
+
+    <!-- Script -->
+
+    <script src="{{ asset('admin') }}/vendor/bootstrap-select/dist/js/bootstrap-select.min.js" type="text/javascript">
+    </script>
+
+    <script src="{{ asset('admin') }}/vendor/peity/jquery.peity.min.js" type="text/javascript"></script>
+    <script src="{{ asset('admin') }}/vendor/apexchart/apexchart.js" type="text/javascript"></script>
+    <script src="{{ asset('admin') }}/js/dashboard/dashboard-1.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    @vite('resources/js/public.js')
+    <script>
+        var apiUrl = "{{ route('thungan.getBanAn') }}";
+
+        var apiUrlThucDon = "{{ route('thungan.getThucDon') }}";
+
+        var apiUrlHoaDon = "{{ route('thungan.getHoaDon') }}";
+
+        var apiUrlChiTietHoaDon = "{{ route('thungan.getChiTietHoaDon') }}";
+
+        document.getElementById('btn-ban-an').addEventListener('click', function() {
+            fetch('{{ route('thungan.getBanAn') }}', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('list-container').innerHTML = data.html;
+                })
+                .catch(error => console.error('Lỗi:', error));
+        });
+
+        document.getElementById('btn-thuc-don').addEventListener('click', function() {
+            fetch('{{ route('thungan.getThucDon') }}', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('list-container').innerHTML = data.html;
+                })
+                .catch(error => console.error('Lỗi:', error));
+        });
+
+        $(document).ready(function() {
+            let currentType = 'ban'; // Mặc định hiển thị danh sách bàn
+
+            function fetchFilteredData() {
+                let searchQuery = $('#search-name').val();
+                let statusFilter = $('#statusFilter').val();
+                $('#list-container').html('<div class="text-center">Đang tải dữ liệu...</div>');
+
+                $.ajax({
+                    url: currentType === 'ban' ? "{{ route('thungan.getBanAn') }}" :
+                        "{{ route('thungan.getThucDon') }}",
+                    method: "GET",
+                    data: {
+                        ten: searchQuery,
+                        statusFilter: currentType === 'ban' ? statusFilter : null
+                    },
+                    success: function(response) {
+                        $('#list-container').html(response.html);
+                    },
+                    error: function(xhr) {
+                        console.error("Lỗi khi tải dữ liệu:", xhr);
+                    }
+                });
+            }
+
+            $('#search-name').on('input', function() {
+                fetchFilteredData();
+            });
+
+            $('#statusFilter').on('change', function() {
+                if (currentType === 'ban') {
+                    fetchFilteredData();
+                }
+            });
+
+            $('#btn-ban-an').on('click', function() {
+                currentType = 'ban';
+                $('#statusFilter').parent().show();
+                fetchFilteredData();
+            });
+
+            $('#btn-thuc-don').on('click', function() {
+                currentType = 'menu';
+                $('#statusFilter').parent().hide();
+                fetchFilteredData();
+            });
+
+            fetchFilteredData();
+        });
+    </script>
 </body>
 
-</html>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
+</script>
+<script>
+    document.getElementById('btn-ban-an').addEventListener('click', function() {
+        fetch('{{ route('thungan.getBanAn') }}', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('list-container').innerHTML = data.html;
+            })
+            .catch(error => console.error('Lỗi:', error));
+    });
+
+    document.getElementById('btn-thuc-don').addEventListener('click', function() {
+        fetch('{{ route('thungan.getThucDon') }}', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('list-container').innerHTML = data.html;
+            })
+            .catch(error => console.error('Lỗi:', error));
+    });
+    $(document).ready(function() {
+        let currentType = 'ban'; // Mặc định hiển thị danh sách bàn
+
+        function fetchFilteredData() {
+            let searchQuery = $('#search-name').val();
+            let statusFilter = $('#statusFilter').val();
+            $('#list-container').html('<div class="text-center">Đang tải dữ liệu...</div>');
+
+            $.ajax({
+                url: currentType === 'ban' ? "{{ route('thungan.getBanAn') }}" :
+                    "{{ route('thungan.getThucDon') }}",
+                method: "GET",
+                data: {
+                    ten: searchQuery,
+                    statusFilter: currentType === 'ban' ? statusFilter : null
+                },
+                success: function(response) {
+                    $('#list-container').html(response.html);
+                },
+                error: function(xhr) {
+                    console.error("Lỗi khi tải dữ liệu:", xhr);
+                }
+            });
+        }
+
+        $('#search-name').on('input', function() {
+            fetchFilteredData();
+        });
+
+        $('#statusFilter').on('change', function() {
+            if (currentType === 'ban') {
+                fetchFilteredData();
+            }
+        });
+
+        $('#btn-ban-an').on('click', function() {
+            currentType = 'ban';
+            $('#statusFilter').parent().show();
+            fetchFilteredData();
+        });
+
+        $('#btn-thuc-don').on('click', function() {
+            currentType = 'menu';
+            $('#statusFilter').parent().hide();
+            fetchFilteredData();
+        });
+
+        fetchFilteredData();
+    });
+
+    //
+</script>

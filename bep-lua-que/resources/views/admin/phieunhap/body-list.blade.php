@@ -1,3 +1,4 @@
+
 @foreach ($data as $index => $item)
     <tr data-toggle="collapse" data-target="#detail{{ $index }}" class="clickable-row">
         
@@ -42,7 +43,7 @@
                             <i class="fa fa-trash"></i>
                         </button>
                     </form>
-                @endif --}}
+
             </div>
         </td>
     </tr>

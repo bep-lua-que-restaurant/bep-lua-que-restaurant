@@ -23,12 +23,30 @@
 
 
             {{-- Phòng bàn --}}
-            <li>
-                <a class="ai-icon" href="{{ route('ban-an.index') }}">
-                    <i class="fa fa-table"></i> <!-- Icon phòng bàn -->
-                    <span class="nav-text">Phòng bàn</span>
+            <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                    <i class="fa fa-list"></i> <!-- Icon danh mục -->
+                    <span class="nav-text">Phòng\Bàn</span>
                 </a>
+                <ul aria-expanded="false">
+                    <li>
+                        <a class="ai-icon" href="{{ route('phong-an.index') }}">
+                            <i class="fa fa-table"></i> <!-- Icon phòng  -->
+                            <span class="nav-text">Phòng Ăn</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul aria-expanded="false">
+                    <li>
+                        <a class="ai-icon" href="{{ route('ban-an.index') }}">
+                            <i class="fa fa-table"></i> <!-- Icon  bàn -->
+                            <span class="nav-text">Bàn Ăn</span>
+                        </a>
+                    </li>
+                </ul>
+
             </li>
+
+
             {{-- Phòng bàn --}}
 
             {{-- Giao dịch --}}
@@ -38,7 +56,7 @@
                 </a>
 
                 <ul aria-expanded="false">
-                    <li><a href="#">Hóa đơn</a></li>
+                    <li><a href="{{route('hoa-don.index')}}">Hóa đơn</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Trả hàng</a></li>
@@ -100,7 +118,7 @@
 
             {{-- Nhà bếp --}}
             <li>
-                <a class="ai-icon" href="#">
+                <a class="ai-icon" href="{{ route('bep.dashboard') }}">
                     <i class="fa fa-utensils"></i>
                     <span class="nav-text">Nhà bếp</span>
                 </a>
@@ -109,7 +127,7 @@
 
             {{-- Lễ tân --}}
             <li>
-                <a class="ai-icon" href="#">
+                <a class="ai-icon" href="{{ route('dat-ban.index') }}">
                     <i class="fa fa-concierge-bell"></i>
                     <span class="nav-text">Lễ tân</span>
                 </a>
