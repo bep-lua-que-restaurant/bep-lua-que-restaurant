@@ -27,24 +27,40 @@ class NhanVienController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'ho_ten' => 'required',
-            'email' => 'required|email|unique:nhan_viens',
-            'so_dien_thoai' => 'required|unique:nhan_viens',
-            'chuc_vu_id' => 'required',
+            'ho_ten' => 'required|string|max:255',
+            'email' => 'required|email|unique:nhan_viens,email',
+            'so_dien_thoai' => 'required|unique:nhan_viens,so_dien_thoai',
+            'chuc_vu_id' => 'required|exists:chuc_vus,id',
             'password' => 'required|min:6',
+            'gioi_tinh' => 'required|in:nam,nu',
+            'ngay_sinh' => 'nullable|date',
+            'ngay_vao_lam' => 'nullable|date',
+            'dia_chi' => 'nullable|string|max:255',
+            'hinh_thuc_luong' => 'required|in:thang,ca,gio',
+            'muc_luong' => 'required|numeric|min:0',
         ]);
 
-        // Tạo mã nhân viên tự động
+
+
         $maNhanVien = 'NV' . str_pad(NhanVien::count() + 1, 4, '0', STR_PAD_LEFT);
 
         // Tạo nhân viên
-        NhanVien::create([
+        $nhanVien = NhanVien::create([
             'ma_nhan_vien' => $maNhanVien,
             'ho_ten' => $request->ho_ten,
             'email' => $request->email,
             'so_dien_thoai' => $request->so_dien_thoai,
             'chuc_vu_id' => $request->chuc_vu_id,
-            'password' => Hash::make($request->password), // Mã hóa mật khẩu trước khi lưu
+            'gioi_tinh' => $request->gioi_tinh,
+            'ngay_sinh' => $request->ngay_sinh,
+            'ngay_vao_lam' => $request->ngay_vao_lam,
+            'dia_chi' => $request->dia_chi,
+            'password' => Hash::make($request->password),
+        ]);
+
+        $nhanVien->luong()->create([
+            'hinh_thuc' => $request->hinh_thuc_luong,
+            'muc_luong' => $request->muc_luong,
         ]);
 
         return redirect()->route('nhan-vien.index')->with('success', 'Thêm nhân viên thành công!');
@@ -68,26 +84,52 @@ class NhanVienController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'ho_ten' => 'required',
+            'ho_ten' => 'required|string|max:255',
             'email' => 'required|email|unique:nhan_viens,email,' . $id,
             'so_dien_thoai' => 'required|unique:nhan_viens,so_dien_thoai,' . $id,
-            'chuc_vu_id' => 'required',
-            'password' => 'nullable|min:6', // Không bắt buộc nhập mật khẩu, nếu nhập phải ít nhất 6 ký tự
+            'chuc_vu_id' => 'required|exists:chuc_vus,id',
+            'password' => 'nullable|min:6',
+            'gioi_tinh' => 'required|in:nam,nu',
+            'ngay_sinh' => 'nullable|date',
+            'ngay_vao_lam' => 'nullable|date',
+            'dia_chi' => 'nullable|string|max:255',
+            'hinh_thuc_luong' => 'required|in:thang,ca,gio',
+            'muc_luong' => 'required|numeric|min:0',
         ]);
 
         $nhanVien = NhanVien::findOrFail($id);
 
-        $data = $request->only(['ho_ten', 'email', 'so_dien_thoai', 'chuc_vu_id']);
+        $data = $request->only([
+            'ho_ten',
+            'email',
+            'so_dien_thoai',
+            'chuc_vu_id',
+            'gioi_tinh',
+            'ngay_sinh',
+            'ngay_vao_lam',
+            'dia_chi'
+        ]);
 
         // Nếu có nhập mật khẩu mới, mã hóa và cập nhật
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }
 
+        // Cập nhật thông tin nhân viên
         $nhanVien->update($data);
+
+        // Cập nhật lương của nhân viên
+        $nhanVien->luong()->updateOrCreate(
+            ['nhan_vien_id' => $nhanVien->id],
+            [
+                'hinh_thuc' => $request->hinh_thuc_luong,
+                'muc_luong' => $request->muc_luong,
+            ]
+        );
 
         return redirect()->route('nhan-vien.index')->with('success', 'Cập nhật nhân viên thành công!');
     }
+
 
 
     public function destroy($id)
