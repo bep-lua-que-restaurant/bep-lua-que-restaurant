@@ -12,19 +12,18 @@ use App\Models\PhongAn;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-
-
 use App\Models\Table;
 use Illuminate\Support\Facades\Http;
+
+use App\Events\DatBanStored;
+use App\Events\DatBanUpdated;
+use App\Events\DatBanDeleted;
 
 class DatBanController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-
-    //  use Carbon\Carbon;
-    //  use App\Models\DatBan;
 
     public function datBan(Request $request)
     {
@@ -104,6 +103,10 @@ class DatBanController extends Controller
         return view('admin.datban.index', compact('banPhong', 'datBansToday', 'datBansWeek', 'datBansMonth', 'today', 'banhSachDatban'));
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
+
     public function filterDatBan(Request $request)
     {
         $today = Carbon::today();
@@ -113,6 +116,7 @@ class DatBanController extends Controller
         $trang_thai = $request->input('trang_thai');
 
         $query = DatBan::select(
+            DB::raw('MIN(dat_bans.id) as id'), // Lấy ID nhỏ nhất để dùng cho Sửa, Xóa
             'dat_bans.thoi_gian_den',
             'khach_hangs.ho_ten',
             'khach_hangs.so_dien_thoai',
@@ -139,16 +143,9 @@ class DatBanController extends Controller
             $query->where('dat_bans.trang_thai', $trang_thai);
         }
 
-        $banhSachDatban = $query->get();
-
-        return response()->json($banhSachDatban);
+        // Trả về dữ liệu dưới dạng JSON
+        return response()->json($query->get());
     }
-
-
-    /**
-     * Show the form for creating a new resource.
-     */
-
 
     public function create(Request $request)
     {
@@ -287,47 +284,109 @@ class DatBanController extends Controller
                 'ban_an_id' => $banAnId,  // Lưu thông tin bàn ăn
             ]);
         }
+        // Phát sự kiện khi đơn đặt bàn được lưu
+        broadcast(new DatBanStored($datBan));
 
         return redirect()->route('dat-ban.index')->with('success', 'Đặt bàn thành công!');
     }
 
 
 
-
-    /**
-     * Store a newly created resource in storage.
-     */
-
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(DatBan $datBan)
+    public function show($id)
     {
-        //
+        // Lấy thông tin đặt bàn của khách hàng theo ID
+        $datBan = DatBan::with(['khachHang', 'banAn', 'banAn.phongAn'])
+            ->find($id);
+
+        // Kiểm tra nếu không tìm thấy đặt bàn
+        if (!$datBan) {
+            return redirect()->route('dat-ban.index')->with('error', 'Không tìm thấy đặt bàn!');
+        }
+
+        // Lấy tất cả các bàn đã đặt của khách hàng trong cùng thời gian đến
+        $datBans = DatBan::where('khach_hang_id', $datBan->khach_hang_id)
+            ->where('thoi_gian_den', $datBan->thoi_gian_den)
+            ->with(['banAn', 'banAn.phongAn']) // Load các bàn và phòng
+            ->get();
+
+        // Trả về view với thông tin đặt bàn và bàn đã chọn
+        return view('admin.datban.show', compact('datBan', 'datBans'));
     }
+
+
+
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(DatBan $datBan)
+    public function edit($id)
     {
-        //
+        // Lấy thông tin đặt bàn chính
+        $datBan = DatBan::with('khachHang')->find($id);
+
+        if (!$datBan) {
+            return redirect()->route('dat-ban.index')->with('error', 'Không tìm thấy đặt bàn!');
+        }
+
+        // Lấy tất cả các bàn mà khách hàng này đã đặt trong cùng thời gian đến
+        $datBans = DatBan::where('khach_hang_id', $datBan->khach_hang_id)
+            ->where('thoi_gian_den', $datBan->thoi_gian_den)
+            ->pluck('ban_an_id')
+            ->toArray();
+
+        // Lấy tất cả bàn ăn để hiển thị
+        $banAns = BanAn::all();
+
+        return view('admin.datban.edit', compact('datBan', 'banAns', 'datBans'));
     }
 
     /**
      * Update the specified resource in storage.
      */
+
     public function update(UpdateDatBanRequest $request, DatBan $datBan)
     {
-        //
+        // Kiểm tra trạng thái hiện tại của đơn đặt bàn
+        if ($datBan->trang_thai === 'dang_xu_ly') {
+            // Cập nhật trạng thái sang 'xac_nhan' cho tất cả các đơn có cùng 'thoi_gian_den', 'so_dien_thoai', và 'created_at'
+            DatBan::where('thoi_gian_den', $datBan->thoi_gian_den)
+                ->where('so_dien_thoai', $datBan->so_dien_thoai)
+                ->where('created_at', $datBan->created_at)
+                ->update(['trang_thai' => 'xac_nhan']);
+            // Phát sự kiện khi đơn đặt bàn được cập nhật
+            broadcast(new DatBanUpdated($datBan));
+
+            // Thông báo thành công
+            return redirect()->back()->with('success', 'Cập nhật trạng thái thành công! Trạng thái đã được chuyển sang "Đã xác nhận".');
+        } else {
+            // Nếu trạng thái không phải 'dang_xu_ly', thông báo lỗi
+            return redirect()->back()->with('error', 'Không thể cập nhật, trạng thái hiện tại không phải là "Đang xử lý".');
+        }
     }
+
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(DatBan $datBan)
     {
-        //
+        // Kiểm tra trạng thái của đơn đặt bàn trước khi thực hiện
+        if ($datBan->trang_thai === 'dang_xu_ly') {
+            // Cập nhật trạng thái 'da_huy' cho tất cả các đơn đặt bàn có cùng 'thoi_gian_den', 'so_dien_thoai' và 'created_at'
+            DatBan::where('thoi_gian_den', $datBan->thoi_gian_den)
+                ->where('so_dien_thoai', $datBan->so_dien_thoai)
+                ->where('created_at', $datBan->created_at)
+                ->update(['trang_thai' => 'da_huy']);
+
+            // Phát sự kiện khi đơn đặt bàn bị hủy
+            broadcast(new DatBanDeleted($datBan));
+
+            // Thông báo thành công
+            return redirect()->back()->with('success', 'Tất cả các đơn đặt bàn đã được hủy thành công!');
+        } else {
+            // Nếu trạng thái không phải 'dang_xu_ly', thông báo lỗi
+            return redirect()->back()->with('error', 'Không thể hủy, trạng thái không phải "Đang xử lý".');
+        }
     }
 }
