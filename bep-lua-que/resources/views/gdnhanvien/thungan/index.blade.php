@@ -64,10 +64,12 @@
                 </div>
                 <div class="col-lg-6 d-flex justify-content-end">
                     <select id="statusFilter" class="btn btn-primary btn-sm ">
+
                         <option value="Tất cả">Tất cả</option>
                         <option value="trong">Bàn trống</option>
                         <option value="co_khach">Bàn có khách</option>
                         <option value="da_dat_truoc">Đã đặt trước</option>
+
                     </select>
                 </div>
             </section>
@@ -106,9 +108,13 @@
                         <div class="card-body" id="list-container">
                             @include('gdnhanvien.thungan.body-list')
                         </div>
+
                     </div>
                 </div>
+
+
             </div>
+
 
             <!-- Card Hóa đơn -->
             <div class="row">
@@ -120,10 +126,12 @@
                         <div id="hoaDon-body" class="card-body">
                             @include('gdnhanvien.thungan.hoa-don-list')
                         </div>
+
                     </div>
                 </div>
 
             </div>
+
 
         </section>
     </main>
@@ -143,6 +151,7 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     @vite('resources/js/public.js')
     <script>
         var apiUrl = "{{ route('thungan.getBanAn') }}";
@@ -231,4 +240,90 @@
     </script>
 </body>
 
-</html>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
+</script>
+<script>
+    document.getElementById('btn-ban-an').addEventListener('click', function() {
+        fetch('{{ route('thungan.getBanAn') }}', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('list-container').innerHTML = data.html;
+            })
+            .catch(error => console.error('Lỗi:', error));
+    });
+
+    document.getElementById('btn-thuc-don').addEventListener('click', function() {
+        fetch('{{ route('thungan.getThucDon') }}', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('list-container').innerHTML = data.html;
+            })
+            .catch(error => console.error('Lỗi:', error));
+    });
+    $(document).ready(function() {
+        let currentType = 'ban'; // Mặc định hiển thị danh sách bàn
+
+        function fetchFilteredData() {
+            let searchQuery = $('#search-name').val();
+            let statusFilter = $('#statusFilter').val();
+            $('#list-container').html('<div class="text-center">Đang tải dữ liệu...</div>');
+
+            $.ajax({
+                url: currentType === 'ban' ? "{{ route('thungan.getBanAn') }}" :
+                    "{{ route('thungan.getThucDon') }}",
+                method: "GET",
+                data: {
+                    ten: searchQuery,
+                    statusFilter: currentType === 'ban' ? statusFilter : null
+                },
+                success: function(response) {
+                    $('#list-container').html(response.html);
+                },
+                error: function(xhr) {
+                    console.error("Lỗi khi tải dữ liệu:", xhr);
+                }
+            });
+        }
+
+        $('#search-name').on('input', function() {
+            fetchFilteredData();
+        });
+
+        $('#statusFilter').on('change', function() {
+            if (currentType === 'ban') {
+                fetchFilteredData();
+            }
+        });
+
+        $('#btn-ban-an').on('click', function() {
+            currentType = 'ban';
+            $('#statusFilter').parent().show();
+            fetchFilteredData();
+        });
+
+        $('#btn-thuc-don').on('click', function() {
+            currentType = 'menu';
+            $('#statusFilter').parent().hide();
+            fetchFilteredData();
+        });
+
+        fetchFilteredData();
+    });
+
+    //
+</script>

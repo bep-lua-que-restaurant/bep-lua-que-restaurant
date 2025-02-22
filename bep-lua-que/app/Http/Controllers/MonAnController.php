@@ -175,6 +175,7 @@ class MonAnController extends Controller
         return response()->json(['success' => true]);
     }
 
+
     public function destroy(MonAn $monAn)
     {
         // Xóa tất cả ảnh món ăn trước khi xóa món ăn
@@ -208,7 +209,9 @@ class MonAnController extends Controller
         // Khôi phục món ăn
         $monAn->restore();
 
+
         broadcast(new ThucDonUpdated($monAn))->toOthers();
+
 
         return redirect()->route('mon-an.index')->with('success', 'Khôi phục món ăn thành công!');
     }

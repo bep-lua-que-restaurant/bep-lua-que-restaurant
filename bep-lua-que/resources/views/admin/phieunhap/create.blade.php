@@ -1,5 +1,6 @@
 @extends('layouts.admin')
 
+
 @section('title', 'Thêm Phiếu Nhập Kho')
 
 @section('content')
@@ -150,10 +151,12 @@
                             </div>
                         </form>
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
+
 
     <script>
         let nguyenLieuIndex = 1;
@@ -257,6 +260,7 @@
             }
         });
     </script>
+
 
 
 @endsection

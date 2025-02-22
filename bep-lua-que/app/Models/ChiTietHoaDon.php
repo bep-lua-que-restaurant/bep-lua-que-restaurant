@@ -10,7 +10,7 @@ class ChiTietHoaDon extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['hoa_don_id', 'mon_an_id', 'so_luong', 'don_gia', 'thanh_tien'];
+    protected $fillable = ['hoa_don_id', 'mon_an_id', 'so_luong', 'don_gia', 'thanh_tien', 'trang_thai'];
 
     public function monAn()
     {

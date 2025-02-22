@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <div class="swiper mySwiper">
     <div class="swiper-wrapper">
         @foreach ($data->chunk(12) as $chunk)
@@ -5,8 +6,10 @@
                 <div class="row">
                     @foreach ($chunk as $banAn)
                         <div class="col-md-2 col-4 mb-2">
+
                             <div class="ban cardd card text-center p-1" data-id="{{ $banAn->id }}"
                                 id="ban-{{ $banAn->id }}">
+
                                 <div class="card-body p-2">
                                     <h5><i class="fas fa-utensils" style="font-size: 24px;"></i></h5>
                                     <h6 class="card-title" style="font-size: 12px;">{{ $banAn->ten_ban }}</h6>
@@ -20,6 +23,7 @@
                                         <p class="badge badge-secondary" style="font-size: 10px;">Không xác định</p>
                                     @endif
 
+
                                 </div>
                             </div>
                         </div>
@@ -27,6 +31,8 @@
                 </div>
             </div>
         @endforeach
+
+
 
     </div>
 </div>
@@ -38,6 +44,12 @@
     <button id="nextBtn" class="btn btn-primary btn-sm px-4"> ➡</button>
 </div>
 
+
+
+<!-- Thêm jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
 <script>
     var swiper = new Swiper(".mySwiper", {
@@ -54,6 +66,7 @@
     document.getElementById("prevBtn").addEventListener("click", function() {
         swiper.slidePrev();
     });
+
 
     $(document).ready(function() {
         $('.ban').on('click', function() {

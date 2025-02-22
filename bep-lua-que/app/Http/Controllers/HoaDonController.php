@@ -16,10 +16,27 @@ class HoaDonController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = HoaDon::query();
+    
+        if ($request->has('search') && $request->search != '') {
+            $query->where('ma_hoa_don', 'like', '%' . $request->search . '%')
+                  ->orWhere('khach_hang_id', 'like', '%' . $request->search . '%');
+        }
+
+        $hoa_don = $query->latest('id')->paginate(10);
+    
+        // Nếu là Ajax request, trả về HTML của bảng luôn
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('admin.hoadon.index', compact('hoa_don'))->render(),
+            ]);
+        }
+    
+        return view('admin.hoadon.index', compact('hoa_don'));
     }
+    
 
     private function generateMaHoaDon()
     {
@@ -123,10 +140,12 @@ class HoaDonController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(HoaDon $hoaDon)
-    {
-        //
-    }
+    public function show($id)
+{
+    $hoaDon = HoaDon::with(['chiTietHoaDons.monAn','banAns'])->findOrFail($id);
+   
+    return view('admin.hoadon.show', compact('hoaDon'));
+}
 
     /**
      * Show the form for editing the specified resource.

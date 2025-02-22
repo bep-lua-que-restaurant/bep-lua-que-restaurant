@@ -10,6 +10,8 @@ return new class extends Migration
     {
         Schema::table('chi_tiet_hoa_dons', function (Blueprint $table) {
             // Xóa khóa ngoại cũ nếu tồn tại
+
+
             // Thêm lại khóa ngoại đúng chuẩn
             $table->foreign('hoa_don_id')->references('id')->on('hoa_dons')->onDelete('cascade');
             $table->foreign('mon_an_id')->references('id')->on('mon_ans')->onDelete('cascade');
