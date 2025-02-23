@@ -214,6 +214,7 @@
                                         <th>Số Người</th>
                                         <th>Danh Sách Bàn</th>
                                         <th>Trạng Thái</th>
+                                        {{-- <th>Mô Tả</th> --}}
                                         <th>Mô Tả</th>
                                     </tr>
                                 </thead>
@@ -243,6 +244,19 @@
                                         let rows = '';
                                         if (response.length > 0) {
                                             $.each(response, function(index, datban) {
+                                                // Kiểm tra trạng thái của đơn đặt bàn
+                                                let trangThaiText = '';
+                                                if (datban.trang_thai === 'dang_xu_ly') {
+                                                    trangThaiText = 'Đang xử lý';
+                                                } else if (datban.trang_thai === 'xa_nhan') {
+                                                    trangThaiText = 'Đã xác nhận';
+                                                } else if (datban.trang_thai === 'da_huy') {
+                                                    trangThaiText = 'Đã hủy';
+                                                } else {
+                                                    trangThaiText = 'Đã xác nhận';
+                                                }
+
+                                                // Thêm hàng vào bảng và thêm các đường link Xem, Sửa, Xóa
                                                 rows += `
                             <tr>
                                 <td>${datban.thoi_gian_den}</td>
@@ -250,14 +264,40 @@
                                 <td>${datban.so_dien_thoai}</td>
                                 <td>${datban.so_nguoi}</td>
                                 <td>${datban.danh_sach_ban}</td>
-                                <td>${datban.trang_thai}</td>
-                                <td>${datban.mo_ta}</td>
+                                <td>${trangThaiText}</td>
+                                <td>
+                                    <!-- Liên kết Xem -->
+                                    <a href="/dat-ban/${datban.id}" class="btn btn-info btn-sm" title="Xem chi tiết">Xem</a>
+                        `;
+
+                                                // Nếu trạng thái là 'dang_xu_ly', hiển thị nút Xác nhận và Hủy đặt
+                                                if (datban.trang_thai === 'dang_xu_ly') {
+                                                    rows += `
+                                <!-- Liên kết Xác nhận -->
+                                <form action="/dat-ban/${datban.id}" method="post">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="submit" class="btn btn-warning btn-sm" value="Xác nhận">
+                                </form>
+
+                                <!-- Liên kết Xóa -->
+                                <form action="/dat-ban/${datban.id}" method="post">
+                                    @csrf
+                                    @method('DELETE')
+                                    <input type="submit" class="btn btn-danger btn-sm mt-22" value="Hủy đặt">
+                                </form>
+                            `;
+                                                }
+
+
+                                                rows += `
+                                </td>
                             </tr>
                         `;
                                             });
                                         } else {
                                             rows =
-                                                `<tr><td colspan="7" class="text-center">Không tìm thấy dữ liệu</td></tr>`;
+                                                `<tr><td colspan="8" class="text-center">Không tìm thấy dữ liệu</td></tr>`;
                                         }
                                         $('#tableBody').html(rows);
                                     }
@@ -278,6 +318,8 @@
                             });
                         });
                     </script>
+
+
 
                     <script>
                         function switchTab(tabName) {

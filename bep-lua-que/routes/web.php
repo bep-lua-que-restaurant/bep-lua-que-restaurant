@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\DanhMucMonAnController;
 use App\Http\Controllers\ComBoController;
 use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\BanAnController;
@@ -8,7 +7,7 @@ use App\Http\Controllers\DatBanController;
 use App\Http\Controllers\LoaiNguyenLieuController;
 use App\Http\Controllers\PhongAnController;
 use App\Models\PhongAn;
-use Illuminate\Support\Facades\Route;
+// use Illuminate\Support\Facades\Route;  // Dòng này đã bị xóa
 use App\Http\Controllers\TableBookedController;
 use App\Http\Controllers\CaLamController;
 use App\Http\Controllers\ChiTietNhapKhoController;
@@ -16,6 +15,8 @@ use App\Http\Controllers\MonAnController;
 use App\Http\Controllers\NguyenLieuController;
 // use App\Http\Controllers\PhieuNhapKhoController;
 
+// use App\Http\Controllers\PhieuNhapKhoController;
+use Illuminate\Support\Facades\Route;  // Giữ lại một lần duy nhất
 use App\Http\Controllers\BepController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HoaDonController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\ThongKeController;
 use App\Http\Controllers\PhieuNhapKhoController;
 
 use App\Http\Controllers\LichLamViecController;
+use App\Http\Controllers\DanhMucMonAnController;
 
 
 /*
@@ -92,17 +94,19 @@ Route::resource('phong-an', PhongAnController::class);
 Route::post('/phong-an/{banAn}/restore', [PhongAnController::class, 'restore'])->name('phong-an.restore');
 //Phong an
 
-// Bàn ăn
+
 Route::resource('ban-an', BanAnController::class);
 Route::get('/ban-an/{id}', [BanAnController::class, 'show'])->name('ban-an.show');
 Route::post('/ban-an/{banAn}/restore', [BanAnController::class, 'restore'])->name('ban-an.restore');
 Route::get('/ban-an-export', [BanAnController::class, 'export'])->name('ban-an.export');
 Route::post('/ban-an/import', [BanAnController::class, 'import'])->name('ban-an.import');
 
+
 // Bàn ăn
 
 // Đặt bàn
 Route::resource('dat-ban', DatBanController::class);
+Route::get('/dat-ban/{dat_ban}/edit', [DatBanController::class, 'edit'])->name('dat-ban.edit');
 
 
 // Route để tìm kiếm khách hàng
@@ -112,13 +116,15 @@ Route::get('admin/khachhang/search', [DatBanController::class, 'searchCustomer']
 
 Route::get('admin/dat-ban/create', [DatBanController::class, 'create'])->name('admin.datban.create');
 Route::get('admin/khachhang/search', [DatBanController::class, 'searchCustomer'])->name('admin.khachhang.search');
-
 Route::get('/admin/datban/filter', [DatBanController::class, 'filterBanAnByTime'])->name('admin.datban.filter');
+Route::get('/admin/datban/get-ban-an-for-edit', [DatBanController::class, 'getBanAnForEdit'])->name('admin.datban.getBanAnForEdit');
 
 Route::get('/filter-datban', [DatBanController::class, 'filterDatBan'])->name('datban.filter');
-
 Route::post('/table/booked/broadcast', [TableBookedController::class, 'broadcastTableBooking'])->name('table.booked.broadcast');
 
+// routes/web.php
+
+Route::put('/dat-ban/{id}', [DatBanController::class, 'update'])->name('datban.update');
 
 // Món ăn
 Route::resource('mon-an', MonAnController::class);
@@ -136,6 +142,10 @@ Route::post('loai-nguyen-lieu/{id}/restore', [LoaiNguyenLieuController::class, '
 Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
 Route::post('/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore'); // Khôi phục phiếu nhập
 Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'exportPhieuNhapKho'])->name('phieu-nhap-kho.export');
+// phiếu nhập nguyên liệu
+// Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
+// Route::post('/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore'); // Khôi phục phiếu nhập
+// Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'exportPhieuNhapKho'])->name('phieu-nhap-kho.export');
 
 // Route để xem chi tiết nguyên liệu
 Route::get('phieu-nhap-kho/{phieuNhapId}/nguyen-lieu/{nguyenLieuId}', 
@@ -193,5 +203,19 @@ Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])
 
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
+
+Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
+
+// Đăng nhập phân quyền
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
+    Route::get('/thu-ngan', [ThuNganController::class, 'index'])->name('thungan.dashboard');
+    // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
+});
+
 Route::get('/hoa-don/search',[HoaDonController::class, 'search'])->name('hoa-don.search');
+
 
