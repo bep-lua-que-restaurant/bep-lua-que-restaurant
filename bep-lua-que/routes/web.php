@@ -1,12 +1,13 @@
 <?php
 
+use App\Http\Controllers\ChamCongController;
 use App\Http\Controllers\DanhMucMonAnController;
 use App\Http\Controllers\ComBoController;
 use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\BanAnController;
 use App\Http\Controllers\DatBanController;
 use App\Http\Controllers\PhongAnController;
-use App\Models\PhongAn;
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TableBookedController;
 use App\Http\Controllers\CaLamController;
@@ -168,3 +169,28 @@ Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
 Route::get('/hoa-don/search',[HoaDonController::class, 'search'])->name('hoa-don.search');
+
+//Chấm công
+
+
+Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
+
+Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('chamcong.store');
+
+// Lấy dữ liệu chấm công để hiển thị trong modal
+Route::get('/cham-cong/edit/{nhanVienId}/{ca}/{ngay}', [ChamCongController::class, 'edit']);
+
+
+
+Route::get('/lich-su-cham-cong', [ChamCongController::class, 'getLichSuChamCong']);
+
+
+
+
+Route::get('/chamcong/change-week', [ChamCongController::class, 'changeWeek'])->name('chamcong.changeWeek');
+
+Route::resource('cham-cong', ChamCongController::class);
+
+
+Route::get('export-cham-cong', [ChamCongController::class, 'export'])->name('cham-cong.export');
+Route::post('/import-cham-cong', [ChamCongController::class, 'importDichVu'])->name('cham-cong.import');

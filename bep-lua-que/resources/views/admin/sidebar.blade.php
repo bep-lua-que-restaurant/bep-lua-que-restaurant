@@ -56,7 +56,7 @@
                 </a>
 
                 <ul aria-expanded="false">
-                    <li><a href="{{route('hoa-don.index')}}">Hóa đơn</a></li>
+                    <li><a href="{{ route('hoa-don.index') }}">Hóa đơn</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Trả hàng</a></li>
@@ -105,7 +105,7 @@
                     <li><a href="{{ route('ca-lam.index') }}">Lịch làm việc</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="#">Chấm công</a></li>
+                    <li><a href="{{ route('cham-cong.index') }}">Chấm công</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Bảng tính công</a></li>
