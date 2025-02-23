@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('phong_ans', function (Blueprint $table) {
+        Schema::create('luongs', function (Blueprint $table) {
             $table->id();
-            $table->string('ten_phong_an', 50)->unique();
-            $table->softDeletes();
+            $table->foreignId('nhan_vien_id')->constrained('nhan_viens')->onDelete('cascade');
+            $table->enum('hinh_thuc', ['ca', 'gio', 'thang'])->default('ca');
+            $table->decimal('muc_luong', 10, 2);
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('phong_ans');
+        Schema::dropIfExists('luongs');
     }
 };

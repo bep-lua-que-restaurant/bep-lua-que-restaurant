@@ -8,7 +8,7 @@
     $dates = [];
 
     // Lấy tất cả các ngày từ hôm nay đến hết tuần
-    for ($i = 0; $i <= $endOfWeek->diffInDays($today); $i++) {
+    for ($i = 1; $i <= $endOfWeek->diffInDays($today); $i++) {
         $date = Carbon::now()->addDays($i)->format('Y-m-d');
         $dayOfWeek = $daysOfWeek[Carbon::parse($date)->dayOfWeek];
         $dates[] = ['date' => $date, 'day' => $dayOfWeek];
@@ -64,33 +64,92 @@
                                         @endphp
 
                                         <!-- Truyền tham số vào URL với đúng định dạng -->
-                                        <a href="{{ route('dat-ban.create', [
-                                            'ten_ban' => $item->ten_ban ?? 'Không xác định',
-                                            'id_ban' => $item->id ?? '',
-                                            'time' => $timeSlot,
-                                            'date' => $d['date'],
-                                        ]) }}"
-                                            class="grid-item time-item 
-                                @if ($datBanWeek) @switch($datBanWeek->trang_thai)
-                                        @case('dang_xu_ly')
-                                            bg-warning
-                                            @break
-                                        @case('xa_nhan')
-                                            bg-success
-                                            @break
-                                        @case('da_huy')
-                                            bg-danger
-                                            @break
-                                        @default
-                                            bg-secondary
-                                    @endswitch @endif">
 
-                                            <!-- Hiển thị giờ phút nếu có -->
-                                            @if ($datBanWeek)
-                                                <span>{{ Carbon::parse($datBanWeek->thoi_gian_den)->format('H:i') }}</span>
+                                        <div class="grid-item time-item
+                                        @if ($datBanWeek) @switch($datBanWeek->trang_thai)
+                                                @case('dang_xu_ly') bg-warning @break
+                                                @case('xa_nhan') bg-success @break
+                                                {{-- @case('da_huy') bg-danger @break --}}
+                                                {{-- @default bg-secondary --}}
+                                            @endswitch @endif"
+                                            data-bid="{{ $item->id }}" data-time="{{ $timeSlot }}"
+                                            data-date="{{ $d['date'] }}"
+                                            data-datban-id="{{ $datBanWeek ? $datBanWeek->id : '' }}">
+
+                                            @if (!$datBanWeek || $datBanWeek->trang_thai == 'da_huy')
+                                                <!-- Nếu chưa có đặt bàn, hiển thị liên kết tới tạo đặt bàn -->
+                                                <a href="{{ route('dat-ban.create', [
+                                                    'ten_ban' => $item->ten_ban ?? 'Không xác định',
+                                                    'id_ban' => $item->id ?? '',
+                                                    'time' => $timeSlot,
+                                                    'date' => $d['date'],
+                                                ]) }}"
+                                                    style="width: 100%; height: 100%;">
+                                                    +
+                                                </a>
+                                            @else
+                                                <!-- Nếu đã có đặt bàn, chỉ hiển thị nút button -->
+                                                <a class="btn-view-details" data-datban-id="{{ $datBanWeek->id }}">
+                                                    Thông tin
+                                                </a>
+
+                                                <!-- Form hiển thị thông tin đặt bàn (ẩn mặc định) -->
+                                                <div id="datBanDetail-{{ $datBanWeek->id }}" class="dat-ban-detail"
+                                                    style="display: none;">
+                                                    <div class="modal-overlay"></div> <!-- Overlay để làm mờ nền -->
+                                                    <div class="modal-content">
+                                                        <h4>Thông tin đặt bàn</h4>
+                                                        <p><strong>Số điện thoại:</strong>
+                                                            {{ $datBanWeek->so_dien_thoai }}</p>
+                                                        <p><strong>Bàn:</strong> {{ $item->ten_ban }}</p>
+                                                        <p><strong>Giờ:</strong>
+                                                            {{ Carbon::parse($datBanWeek->thoi_gian_den)->format('H:i') }}
+                                                        </p>
+                                                        <p><strong>Số người:</strong> {{ $datBanWeek->so_nguoi }}</p>
+                                                        <p><strong>Trạng thái:</strong>
+                                                            @switch($datBanWeek->trang_thai)
+                                                                @case('dang_xu_ly')
+                                                                    Đang xử lý
+                                                                @break
+
+                                                                @case('xa_nhan')
+                                                                    Đã xác nhận
+                                                                @break
+
+                                                                @case('da_huy')
+                                                                    Đã hủy
+                                                                @break
+
+                                                                @default
+                                                                    Chưa xác định
+                                                            @endswitch
+                                                        </p>
+
+                                                        <!-- Nút hủy đặt bàn -->
+                                                        @if ($datBanWeek && $datBanWeek->trang_thai != 'da_huy')
+                                                            <form method="POST"
+                                                                action="{{ route('dat-ban.destroy', $datBanWeek->id) }}">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <div class="d-flex justify-content-center">
+                                                                    <label for="mo_ta" class="p-2">Ghi chú:
+                                                                    </label>
+                                                                    <input type="text" name="mo_ta" id="mo_ta"
+                                                                        placeholder="Ghi chú...">
+                                                                </div>
+                                                                <button type="submit" class="btn btn-danger mt-3"
+                                                                    onclick="return confirm('Bạn chắc chắn muốn hủy đặt bàn này?')">Hủy
+                                                                    đặt bàn</button>
+                                                            </form>
+                                                        @endif
+                                                    </div>
+                                                </div>
                                             @endif
-                                        </a>
+
+                                        </div>
                                     @endfor
+
+
                                 </div>
                             @endforeach
                         </div>

@@ -2,99 +2,71 @@
     <div class="deznav-scroll">
         <ul class="metismenu" id="menu">
             {{-- Hàng hóa --}}
-            <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                    <i class="fa fa-list"></i> <!-- Icon danh mục -->
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                    <i class="fa fa-credit-card"></i>
                     <span class="nav-text">Hàng hóa</span>
                 </a>
                 <ul aria-expanded="false">
                     <li><a href="{{ route('danh-muc-mon-an.index') }}">Danh mục</a></li>
-                </ul>
-                <ul aria-expanded="false">
                     <li><a href="{{ route('mon-an.index') }}">Món ăn</a></li>
-                </ul>
-                <ul aria-expanded="false">
                     <li><a href="{{ route('dich-vu.index') }}">Dịch vụ</a></li>
-                </ul>
-                <ul aria-expanded="false">
                     <li><a href="{{ route('com-bo.index') }}">Combo - đóng gói</a></li>
                 </ul>
+                <ul aria-expanded="false">
+                    <li><a href="{{ route('loai-nguyen-lieu.index') }}">Loại nguyên liệu</a></li>
+                </ul>
             </li>
-            {{-- Hàng hóa --}}
-
 
             {{-- Phòng bàn --}}
-            <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                    <i class="fa fa-list"></i> <!-- Icon danh mục -->
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                    <i class="fa fa-list"></i>
                     <span class="nav-text">Phòng\Bàn</span>
                 </a>
                 <ul aria-expanded="false">
-                    <li>
-                        <a class="ai-icon" href="{{ route('phong-an.index') }}">
-                            <i class="fa fa-table"></i> <!-- Icon phòng  -->
-                            <span class="nav-text">Phòng Ăn</span>
-                        </a>
-                    </li>
+                    <li><a href="{{ route('phong-an.index') }}">Phòng Ăn</a></li>
+                    <li><a href="{{ route('ban-an.index') }}">Bàn Ăn</a></li>
                 </ul>
-                <ul aria-expanded="false">
-                    <li>
-                        <a class="ai-icon" href="{{ route('ban-an.index') }}">
-                            <i class="fa fa-table"></i> <!-- Icon  bàn -->
-                            <span class="nav-text">Bàn Ăn</span>
-                        </a>
-                    </li>
-                </ul>
-
             </li>
 
-
-            {{-- Phòng bàn --}}
-
             {{-- Giao dịch --}}
-            <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                     <i class="fa fa-credit-card"></i>
                     <span class="nav-text">Giao dịch</span>
                 </a>
 
                 <ul aria-expanded="false">
-                    <li><a href="{{route('hoa-don.index')}}">Hóa đơn</a></li>
+                    <li><a href="{{ route('hoa-don.index') }}">Hóa đơn</a></li>
                 </ul>
+
                 <ul aria-expanded="false">
+                    <li><a href="#">Hóa đơn</a></li>
                     <li><a href="#">Trả hàng</a></li>
-                </ul>
-                <ul aria-expanded="false">
-                    <li><a href="{{ route('phieu-nhap-kho.index') }}">Nhập hàng</a></li>
-                </ul>
-                <ul aria-expanded="false">
+
                     <li><a href="#">Trả hàng nhập</a></li>
-                </ul>
-                <ul aria-expanded="false">
                     <li><a href="#">Xuất hàng</a></li>
                 </ul>
             </li>
-            {{-- Giao dịch --}}
 
             {{-- Đối tác --}}
-            <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                     <i class="fa fa-briefcase"></i>
                     <span class="nav-text">Đối tác</span>
                 </a>
                 <ul aria-expanded="false">
                     <li><a href="#">Khách hàng</a></li>
-                </ul>
-                <ul aria-expanded="false">
                     <li><a href="#">Tương tác</a></li>
-                </ul>
-                <ul aria-expanded="false">
                     <li><a href="{{ route('nha-cung-cap.index') }}">Nhà cung cấp</a></li>
-                </ul>
-                <ul aria-expanded="false">
                     <li><a href="#">Đối tác giao hàng</a></li>
                 </ul>
             </li>
-            {{-- Đối tác --}}
 
             {{-- Nhân viên --}}
-            <li><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                     <i class="fa fa-users"></i>
                     <span class="nav-text">Nhân viên</span>
                 </a>
@@ -105,16 +77,14 @@
                     <li><a href="{{ route('ca-lam.index') }}">Lịch làm việc</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="#">Chấm công</a></li>
+                    <li><a href="{{ route('cham-cong.index') }}">Chấm công</a></li>
                 </ul>
                 <ul aria-expanded="false">
+
                     <li><a href="#">Bảng tính công</a></li>
-                </ul>
-                <ul aria-expanded="false">
                     <li><a href="#">Thiết lập nhân viên</a></li>
                 </ul>
             </li>
-            {{-- Nhân viên --}}
 
             {{-- Nhà bếp --}}
             <li>
@@ -123,7 +93,6 @@
                     <span class="nav-text">Nhà bếp</span>
                 </a>
             </li>
-            {{-- Nhà bếp --}}
 
             {{-- Lễ tân --}}
             <li>
@@ -132,7 +101,6 @@
                     <span class="nav-text">Lễ tân</span>
                 </a>
             </li>
-            {{-- Lễ tân --}}
 
             {{-- Thu ngân --}}
             <li>
@@ -141,10 +109,17 @@
                     <span class="nav-text">Thu ngân</span>
                 </a>
             </li>
-            {{-- Thu ngân --}}
         </ul>
-
-
-
     </div>
 </div>
+
+<style>
+    [data-primary="color_3"] .deznav .metismenu>li.mm-active>a i {
+        font-weight: normal;
+        /* Đảm bảo icon không bị quá mỏng */
+        background: none !important;
+        /* Xóa nền icon */
+        color: black !important;
+        /* Đổi màu icon thành đen (hoặc màu khác tùy ý) */
+    }
+</style>

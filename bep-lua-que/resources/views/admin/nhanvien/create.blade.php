@@ -79,9 +79,44 @@
                     <label>Mật khẩu</label>
                     <input type="password" name="password" class="form-control" required>
                 </div>
+
+                <!-- Hình thức lương -->
+                <div class="col-md-6 mb-3">
+                    <label>Hình thức lương</label>
+                    <select name="hinh_thuc_luong" class="form-control" id="hinhThucLuong" required>
+                        <option value="thang">Lương tháng</option>
+                        <option value="ca">Lương theo ca</option>
+                        <option value="gio">Lương theo giờ</option>
+                    </select>
+                </div>
+
+                <!-- Mức lương -->
+                <div class="col-md-6 mb-3">
+                    <label>Mức lương</label>
+                    <div class="input-group">
+                        <input type="number" name="muc_luong" class="form-control" id="mucLuong" required>
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="donViLuong">VNĐ / Tháng</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <button type="submit" class="btn btn-success">Thêm</button>
         </form>
     </div>
+
+    <script>
+        document.getElementById('hinhThucLuong').addEventListener('change', function() {
+            var donViLuong = document.getElementById('donViLuong');
+            if (this.value === 'ca') {
+                donViLuong.textContent = 'VNĐ / Ca';
+            } else if (this.value === 'gio') {
+                donViLuong.textContent = 'VNĐ / Giờ';
+            } else {
+                donViLuong.textContent = 'VNĐ / Tháng';
+            }
+        });
+    </script>
 @endsection

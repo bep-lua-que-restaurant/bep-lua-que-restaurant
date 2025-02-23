@@ -15,20 +15,20 @@ class NguyenLieuController extends Controller
      */
     public function index(Request $request)
     {
-        $query = NguyenLieu::query();
+        // $query = NguyenLieu::query();
 
-        if ($request->has('ten') && $request->ten != '') {
-            $query->where('ten_nguyen_lieu', 'like', '%' . $request->ten . '%');
-        }
+        // if ($request->has('ten') && $request->ten != '') {
+        //     $query->where('ten_nguyen_lieu', 'like', '%' . $request->ten . '%');
+        // }
 
-        $data = $query->withTrashed()->latest('id')->paginate(15);
+        // $data = $query->withTrashed()->latest('id')->paginate(15);
 
-        return view('admin.nguyenlieu.list', compact('data'));
+        // return view('admin.nguyenlieu.list', compact('data'));
     }
     public function getNguyenLieuByLoai($loai_id)
     {
-        $nguyenLieus = NguyenLieu::where('loai_nguyen_lieu_id', $loai_id)->get();
-        return response()->json($nguyenLieus);
+        // $nguyenLieus = NguyenLieu::where('loai_nguyen_lieu_id', $loai_id)->get();
+        // return response()->json($nguyenLieus);
     }
 
 
@@ -37,7 +37,7 @@ class NguyenLieuController extends Controller
      */
     public function create()
     {
-        return view('admin.nguyenlieu.create');
+        // return view('admin.nguyenlieu.create');
     }
 
     /**
@@ -45,31 +45,40 @@ class NguyenLieuController extends Controller
      */
     public function store(StoreNguyenLieuRequest $request)
     {
-        $data = $request->validated();
+        // $data = $request->validated();
 
-        if ($request->hasFile('hinh_anh')) {
-            $data['hinh_anh'] = $request->file('hinh_anh')->store('NguyenLieuImg', 'public');
-        }
+        // if ($request->hasFile('hinh_anh')) {
+        //     $data['hinh_anh'] = $request->file('hinh_anh')->store('NguyenLieuImg', 'public');
+        // }
 
-        NguyenLieu::create($data);
+        // NguyenLieu::create($data);
 
-        return redirect()->route('nguyen-lieu.index')->with('success', 'Thêm nguyên liệu thành công!');
+        // return redirect()->route('nguyen-lieu.index')->with('success', 'Thêm nguyên liệu thành công!');
     }
 
     /**
      * Hiển thị thông tin chi tiết nguyên liệu.
      */
-    public function show(NguyenLieu $nguyenLieu)
+
+    public function show($id)
     {
-        return view('admin.nguyenlieu.detail', compact('nguyenLieu'));
+        // Tìm nguyên liệu dựa vào ID
+        $nguyenLieu = NguyenLieu::with('loaiNguyenLieu')->find($id);
+
+        if (!$nguyenLieu) {
+            return redirect()->back()->with('error', 'Nguyên liệu không tồn tại.');
+        }
+
+        return view('nguyen-lieu.detail', compact('nguyenLieu'));
     }
+
 
     /**
      * Hiển thị form sửa nguyên liệu.
      */
     public function edit(NguyenLieu $nguyenLieu)
     {
-        return view('admin.nguyenlieu.edit', compact('nguyenLieu'));
+        // return view('admin.nguyenlieu.edit', compact('nguyenLieu'));
     }
 
     /**
@@ -77,18 +86,18 @@ class NguyenLieuController extends Controller
      */
     public function update(UpdateNguyenLieuRequest $request, NguyenLieu $nguyenLieu)
     {
-        $data = $request->validated();
+        // $data = $request->validated();
 
-        if ($request->hasFile('hinh_anh')) {
-            if ($nguyenLieu->hinh_anh) {
-                Storage::disk('public')->delete($nguyenLieu->hinh_anh);
-            }
-            $data['hinh_anh'] = $request->file('hinh_anh')->store('NguyenLieuImg', 'public');
-        }
+        // if ($request->hasFile('hinh_anh')) {
+        //     if ($nguyenLieu->hinh_anh) {
+        //         Storage::disk('public')->delete($nguyenLieu->hinh_anh);
+        //     }
+        //     $data['hinh_anh'] = $request->file('hinh_anh')->store('NguyenLieuImg', 'public');
+        // }
 
-        $nguyenLieu->update($data);
+        // $nguyenLieu->update($data);
 
-        return back()->with('success', 'Cập nhật nguyên liệu thành công!');
+        // return back()->with('success', 'Cập nhật nguyên liệu thành công!');
     }
 
     /**
@@ -96,9 +105,9 @@ class NguyenLieuController extends Controller
      */
     public function destroy(NguyenLieu $nguyenLieu)
     {
-        $nguyenLieu->delete();
+        // $nguyenLieu->delete();
 
-        return redirect()->route('nguyen-lieu.index')->with('success', 'Xóa nguyên liệu thành công!');
+        // return redirect()->route('nguyen-lieu.index')->with('success', 'Xóa nguyên liệu thành công!');
     }
 
     /**
@@ -106,9 +115,9 @@ class NguyenLieuController extends Controller
      */
     public function restore($id)
     {
-        $nguyenLieu = NguyenLieu::withTrashed()->findOrFail($id);
-        $nguyenLieu->restore();
+        //     $nguyenLieu = NguyenLieu::withTrashed()->findOrFail($id);
+        //     $nguyenLieu->restore();
 
-        return redirect()->route('nguyen-lieu.index')->with('success', 'Khôi phục nguyên liệu thành công!');
+        //     return redirect()->route('nguyen-lieu.index')->with('success', 'Khôi phục nguyên liệu thành công!');
     }
 }

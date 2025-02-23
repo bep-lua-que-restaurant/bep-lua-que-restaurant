@@ -29,6 +29,16 @@ class NguyenLieu extends Model
     public function chiTietPhieuNhapKhos()
     {
         return $this->hasMany(ChiTietPhieuNhapKho::class, 'nguyen_lieu_id');
-
     }
+
+    public function phieuNhap()
+    {
+        return $this->belongsToMany(PhieuNhapKho::class, 'chi_tiet_phieu_nhap', 'nguyen_lieu_id', 'phieu_nhap_id');
+    }
+
+     // Phương thức lấy đường dẫn hình ảnh
+     public function getHinhAnhUrlAttribute()
+     {
+         return $this->hinh_anh ? asset('storage/images/nguyen_lieu/' . $this->hinh_anh) : asset('images/no-image.png');
+     }
 }

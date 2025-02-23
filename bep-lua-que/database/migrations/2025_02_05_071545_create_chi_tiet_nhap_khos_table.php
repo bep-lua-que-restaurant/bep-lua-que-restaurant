@@ -23,14 +23,13 @@ return new class extends Migration
             $table->boolean('da_nhap_kho')->default(false); //false-> Nguyên liệu chưa nhập vào kho
             $table->softDeletes();
             $table->timestamps();
-        
+
             // Khóa ngoại
             $table->foreign('phieu_nhap_kho_id')->references('id')->on('phieu_nhap_khos')->onDelete('cascade');
             $table->foreign('nguyen_lieu_id')->references('id')->on('nguyen_lieus')->onDelete('cascade');
             $table->foreign('loai_nguyen_lieu_id')->references('id')->on('loai_nguyen_lieus')->onDelete('set null');
             $table->foreign('kho_id')->references('id')->on('khos')->onDelete('cascade');
         });
-        
     }
 
     /**

@@ -41,11 +41,12 @@
                             <li class="list-group-item"><strong>Địa chỉ:</strong>
                                 {{ $nhanVien->dia_chi ?? 'Không có thông tin' }}</li>
                             <li class="list-group-item"><strong>Ngày sinh:</strong>
-                                {{ $nhanVien->ngay_sinh ? $nhanVien->ngay_sinh->format('d/m/Y') : 'Không có thông tin' }}
+                                {{ $nhanVien->ngay_sinh ? \Carbon\Carbon::parse($nhanVien->ngay_sinh)->format('d/m/Y') : 'Không có thông tin' }}
                             </li>
                             <li class="list-group-item"><strong>Ngày vào làm:</strong>
-                                {{ $nhanVien->ngay_vao_lam ? $nhanVien->ngay_vao_lam->format('d/m/Y') : 'Không có thông tin' }}
+                                {{ $nhanVien->ngay_vao_lam ? \Carbon\Carbon::parse($nhanVien->ngay_vao_lam)->format('d/m/Y') : 'Không có thông tin' }}
                             </li>
+
                             <li class="list-group-item"><strong>Ngày tạo:</strong>
                                 {{ $nhanVien->created_at->format('d/m/Y') }}</li>
                             <li class="list-group-item"><strong>Ngày cập nhật:</strong>
@@ -53,11 +54,33 @@
                         </ul>
                     </div>
                 </div>
+
+                <!-- Thông tin lương -->
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <h4>Thông tin lương</h4>
+                        <ul class="list-group">
+                            <li class="list-group-item"><strong>Hình thức lương:</strong>
+                                @if ($nhanVien->luong)
+                                    {{ $nhanVien->luong->hinh_thuc == 'ca' ? 'Lương theo ca' : ($nhanVien->luong->hinh_thuc == 'gio' ? 'Lương theo giờ' : 'Lương tháng') }}
+                                @else
+                                    <span class="text-danger">Chưa thiết lập</span>
+                                @endif
+                            </li>
+                            <li class="list-group-item"><strong>Mức lương:</strong>
+                                @if ($nhanVien->luong)
+                                    {{ number_format($nhanVien->luong->muc_luong, 0, ',', '.') }} VNĐ
+                                @else
+                                    <span class="text-danger">Chưa thiết lập</span>
+                                @endif
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
             <div class="card-footer d-flex justify-content-end">
                 <a href="{{ route('nhan-vien.edit', $nhanVien->id) }}" class="btn btn-success "
-                    style="margin-right: 10px; height: 56px;">Cập nhật</a>
-
+                    style="margin-right: 10px; height: 40px;">Cập nhật</a>
 
                 <!-- Nút Nghỉ việc / Khôi phục -->
                 @if ($nhanVien->trang_thai === 'dang_lam_viec')
@@ -84,8 +107,6 @@
                     <button type="submit" class="btn btn-danger"
                         onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?')">Xóa nhân viên</button>
                 </form>
-                <a href="{{ route('nhan-vien.index') }}" class="btn btn-secondary" style=" height: 56px;">Trở lại danh
-                    sách</a>
 
             </div>
         </div>

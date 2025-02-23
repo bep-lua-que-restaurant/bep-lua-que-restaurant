@@ -51,7 +51,7 @@
                                         <th><strong>Nhân viên nhập</strong></th>
                                         <th><strong>Nhà cung cấp</strong></th>
                                         <th><strong>Ngày nhập</strong></th>
-                                        <th><strong>Trạng thái</strong></th>
+                                        {{-- <th><strong>Trạng thái</strong></th> --}}
                                         <th><strong>Hành động</strong></th>
                                     </tr>
                                 </thead>

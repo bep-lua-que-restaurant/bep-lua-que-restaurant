@@ -40,18 +40,18 @@
 
                         <!-- Thông tin nguyên liệu -->
                         <h5 class="text-primary mt-4">Danh Sách Nguyên Liệu</h5>
-                        <table class="table table-striped table-bordered">
+                        <table class="table  table-bordered">
                             <thead>
                                 <tr>
                                     <th>ID</th>
                                     <th>Mã Nguyên Liệu</th>
                                     <th>Tên Nguyên Liệu</th>
                                     <th>Loại Nguyên Liệu</th>
-                                    <th>Đơn Vị Tính</th>
                                     <th>Số Lượng nhập</th>
                                     <th>Giá Nhập</th>
-                                    <th>Hạn Sử Dụng</th>
                                     <th>Thành Tiền</th>
+                                    <th>Hành động</th>
+
                                 </tr>
                             </thead>
                             <tbody>
@@ -61,13 +61,17 @@
                                         <td>{{ $chiTiet->nguyenLieu->ma_nguyen_lieu ?? 'Không xác định' }}</td>
                                         <td>{{ $chiTiet->nguyenLieu->ten_nguyen_lieu ?? 'Không xác định' }}</td>
                                         <td>{{ $chiTiet->nguyenLieu->loaiNguyenLieu->ten_loai ?? 'Không xác định' }}</td>
-                                        <td>{{ $chiTiet->nguyenLieu->don_vi_tinh ?? 'Không xác định' }}</td>
                                         <td>{{ $chiTiet->so_luong }}</td>
                                         <td>{{ number_format($chiTiet->don_gia, 0, ',', '.') }} VNĐ</td>
-                                        <td>
-                                            {{ $chiTiet->han_su_dung ? \Carbon\Carbon::parse($chiTiet->han_su_dung)->format('d/m/Y') : 'Không xác định' }}
-                                        </td>
+                                        
                                         <td>{{ number_format($chiTiet->tong_tien, 0, ',', '.') }} VNĐ</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                            <a href="{{ route('phieu-nhap-kho.chitiet-nguyenlieu', ['phieuNhapId' => $phieuNhapKho->id, 'nguyenLieuId' => $chiTiet->nguyenLieu->id]) }}" class="btn btn-info btn-sm p-2 m-2">
+                                                <i class="fa fa-eye"></i>
+                                            </a>
+                                            </div>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>

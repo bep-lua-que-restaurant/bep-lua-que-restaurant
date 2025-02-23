@@ -12,6 +12,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="csrf-token" content="3pvIDLSX29wd150Hxi6MALt7d8F4BtSQooZ74xzA">
     <meta name="description" content="Some description for the page" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title>@yield('title')</title>
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('admin') }}/images/favicon.png">
@@ -23,9 +25,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
 
 </head>
 
@@ -151,7 +154,7 @@
     <script src="{{ asset('admin') }}/vendor/global/global.min.js" type="text/javascript"></script>
     <script src="{{ asset('admin') }}/vendor/bootstrap-select/dist/js/bootstrap-select.min.js" type="text/javascript">
     </script>
-    <script src="{{ asset('admin') }}/vendor/chart.js/Chart.bundle.min.js" type="text/javascript"></script>
+{{--    <script src="{{ asset('admin') }}/vendor/chart.js/Chart.bundle.min.js" type="text/javascript"></script>--}}
     <script src="{{ asset('admin') }}/vendor/peity/jquery.peity.min.js" type="text/javascript"></script>
     <script src="{{ asset('admin') }}/vendor/apexchart/apexchart.js" type="text/javascript"></script>
     <script src="{{ asset('admin') }}/js/dashboard/dashboard-1.js" type="text/javascript"></script>
