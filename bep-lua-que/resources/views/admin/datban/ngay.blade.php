@@ -37,7 +37,7 @@
                 <div class="grid-row">
                     @for ($j = 8; $j <= 22; $j++)
                         @php
-                            $timeSlot = sprintf('%02d', $j) . ':00'; // Giờ tương ứng
+                            $timeSlot = sprintf('%02d', $j) . ':00'; // Tạo thời gian
                             $datBanToday = $datBansToday->firstWhere(function ($datBan) use (
                                 $item,
                                 $fullDate,
@@ -49,29 +49,95 @@
                             });
                         @endphp
 
-                        <a href="{{ route('dat-ban.create', [
-                            'ten_ban' => $item->ten_ban ?? 'Không xác định',
-                            'id_ban' => $item->id ?? '',
-                            'time' => $timeSlot,
-                            'date' => $fullDate,
-                        ]) }}"
-                            class="grid-item time-item
-                    @if ($datBanToday) @switch($datBanToday->trang_thai)
-                        @case('dang_xu_ly') bg-warning @break
-                        @case('xa_nhan') bg-success @break
-                        @case('da_huy') bg-danger @break
-                        @default bg-secondary
-                    @endswitch @endif">
+                        <div class="grid-item time-item
+                        @if ($datBanToday) @switch($datBanToday->trang_thai)
+                                @case('dang_xu_ly') bg-warning @break
+                                @case('xa_nhan') bg-success @break
+                                {{-- @case('da_huy') bg-danger @break --}}
+                                {{-- @default bg-secondary --}}
+                            @endswitch @endif"
+                            data-bid="{{ $item->id }}" data-time="{{ $timeSlot }}"
+                            data-date="{{ $fullDate }}" data-datban-id="{{ $datBanToday ? $datBanToday->id : '' }}">
 
-                            <!-- Hiển thị giờ phút nếu có -->
-                            @if ($datBanToday)
-                                <span>{{ Carbon::parse($datBanToday->thoi_gian_den)->format('H:i') }}</span>
+                            @if (!$datBanToday || $datBanToday->trang_thai == 'da_huy')
+                                <!-- Nếu chưa có đặt bàn, hiển thị liên kết tới tạo đặt bàn -->
+                                <a href="{{ route('dat-ban.create', [
+                                    'ten_ban' => $item->ten_ban ?? 'Không xác định',
+                                    'id_ban' => $item->id ?? '',
+                                    'time' => $timeSlot,
+                                    'date' => $fullDate,
+                                ]) }}"
+                                    style="width: 100%; height: 100%;">
+                                    +
+                                </a>
+                            @else
+                                <!-- Nếu đã có đặt bàn, chỉ hiển thị nút button -->
+                                <a class="btn-view-details" data-datban-id="{{ $datBanToday->id }}">
+                                    Thông tin
+                                </a>
+
+                                <!-- Form hiển thị thông tin đặt bàn (ẩn mặc định) -->
+                                <div id="datBanDetail-{{ $datBanToday->id }}" class="dat-ban-detail"
+                                    style="display: none;">
+                                    <div class="modal-overlay"></div> <!-- Overlay để làm mờ nền -->
+                                    <div class="modal-content">
+                                        <h4>Thông tin đặt bàn</h4>
+                                        <p><strong>Số điện thoại:</strong> {{ $datBanToday->so_dien_thoai }}</p>
+                                        <p><strong>Bàn:</strong> {{ $item->ten_ban }}</p>
+                                        <p><strong>Giờ:</strong>
+                                            {{ Carbon::parse($datBanToday->thoi_gian_den)->format('H:i') }}</p>
+                                        <p><strong>Số người:</strong> {{ $datBanToday->so_nguoi }}</p>
+                                        <p><strong>Trạng thái:</strong>
+                                            @switch($datBanToday->trang_thai)
+                                                @case('dang_xu_ly')
+                                                    Đang xử lý
+                                                @break
+
+                                                @case('xa_nhan')
+                                                    Đã xác nhận
+                                                @break
+
+                                                @case('da_huy')
+                                                    Đã hủy
+                                                @break
+
+                                                @default
+                                                    Chưa xác định
+                                            @endswitch
+                                        </p>
+                                    </div>
+                                </div>
                             @endif
-                        </a>
+
+                        </div>
                     @endfor
                 </div>
             @endforeach
 
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+            <script>
+                $(document).ready(function() {
+                    // Gắn sự kiện click vào nút "Xem thông tin"
+                    $('.btn-view-details').on('click', function() {
+                        var datBanId = $(this).data('datban-id'); // Lấy id đặt bàn
+                        var detailDiv = $('#datBanDetail-' + datBanId); // Lấy phần tử chứa thông tin đặt bàn
+                        var overlay = detailDiv.find('.modal-overlay'); // Lấy overlay của modal
+
+                        // Toggle (ẩn/hiện) modal (form thông tin)
+                        detailDiv.toggle();
+
+                        // Hiển thị overlay khi form được mở
+                        overlay.show();
+
+                        // Khi click vào overlay (nền mờ), ẩn modal
+                        overlay.on('click', function() {
+                            detailDiv.hide();
+                            overlay.hide();
+                        });
+                    });
+                });
+            </script>
         </div>
     </div>
 </div>
@@ -141,6 +207,10 @@
         /* Bạn có thể thay đổi giá trị này để điều chỉnh chiều rộng */
     }
 
+    .time-item:hover {
+        background-color: rgb(176, 198, 238);
+    }
+
     /* Style cho link trong các ô */
     .grid-item a {
         text-decoration: none;
@@ -152,4 +222,51 @@
     .grid-item a:hover {
         color: blue;
     }
+</style>
+<style>
+    /* Modal Overlay (mờ nền khi hiển thị modal) */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        /* Màu nền mờ */
+        display: none;
+        /* Ẩn mặc định */
+        z-index: 999;
+        /* Đảm bảo ở trên các phần tử khác */
+    }
+
+    /* Nội dung Modal (form thông tin đặt bàn) */
+    .modal-content {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        /* Căn giữa chính xác */
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        width: 400px;
+        max-width: 90%;
+    }
+
+    /* Ẩn form thông tin đặt bàn mặc định */
+    .dat-ban-detail {
+        display: none;
+    }
+
+    /* Chỉnh sửa nút và form nếu cần */
+    /* button {
+        margin-top: 20px;
+    } */
+    /* .btn-view-details:hover {
+        background-color: yellow;
+        width: 100%;
+        height: 100%;
+    } */
 </style>

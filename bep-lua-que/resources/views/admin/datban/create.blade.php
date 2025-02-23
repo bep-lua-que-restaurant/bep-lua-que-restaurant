@@ -31,8 +31,6 @@
                     <div class="card-header">
                         <h4 class="card-title">Đặt bàn</h4>
 
-
-
                         <div class="btn-group">
                             <!-- Nút Thêm mới -->
                             <a href="{{ route('ban-an.create') }}" class="btn btn-sm btn-primary">
@@ -184,142 +182,185 @@
                             <button type="submit" class="btn btn-primary" id="submitBtn">Đặt bàn</button>
                         </form>
 
-                        <script>
-                            $(document).ready(function() {
-                                var now = new Date();
-                                var currentDateTime = now.toISOString().slice(0, 16); // Lấy định dạng YYYY-MM-DDTHH:MM
-
-                                // Đặt min cho input datetime-local
-                                $('#thoi_gian_den').attr('min', currentDateTime);
-
-                                // Kiểm tra thời gian đã chọn
-                                $('#thoi_gian_den').on('change', function() {
-                                    var selectedDateTime = $(this).val();
-                                    if (selectedDateTime < currentDateTime) {
-                                        alert('Không thể chọn thời gian trong quá khứ!');
-                                        $(this).val(''); // Xóa giá trị không hợp lệ
-                                    }
-                                });
-                            });
-                        </script>
-
-                        <script>
-                            $(document).on('click', '#banAnButtons button', function() {
-                                var button = $(this);
-                                var banAnId = button.data('id');
-                                var soGhe = button.data('so-ghe');
-
-                                var selectedBans = $('#banAnButtons button.selected');
-                                var totalSeats = 0;
-
-                                selectedBans.each(function() {
-                                    totalSeats += parseInt($(this).data('so-ghe'));
-                                });
-
-                                if (button.hasClass('selected')) {
-                                    // Bỏ chọn bàn
-                                    button.removeClass('selected');
-                                    button.prop('disabled', false); // Mở khóa bàn ăn
-                                    totalSeats -= soGhe;
-
-                                    // Xóa input ẩn
-                                    $('#selectedBanInputs input[value="' + banAnId + '"]').remove();
-                                } else {
-                                    // Chọn bàn mới
-                                    button.addClass('selected');
-                                    button.prop('disabled', true);
-                                    totalSeats += soGhe;
-
-                                    // Thêm input ẩn
-                                    $('#selectedBanInputs').append(
-                                        '<input type="hidden" name="ban_an_ids[]" value="' + banAnId + '">'
-                                    );
-                                }
-
-                                // Cập nhật tổng số ghế đã chọn
-                                console.log('Tổng số ghế đã chọn: ', totalSeats);
-                            });
-                        </script>
-
-                        <script>
-                            // Lắng nghe sự thay đổi thời gian
-                            $('#thoi_gian_den').on('change', async function() {
-                                var thoiGianDen = $(this).val();
-                                var formattedTime = moment(thoiGianDen, "YYYY-MM-DDTHH:mm").format("YYYY-MM-DD HH:mm:ss");
-
-                                try {
-                                    // Gửi AJAX để lấy các bàn ăn chưa bị đặt trong khoảng thời gian này
-                                    const response = await $.ajax({
-                                        url: '{{ route('admin.datban.filter') }}',
-                                        method: 'GET',
-                                        data: {
-                                            thoi_gian_den: formattedTime
-                                        }
-                                    });
-
-                                    // Clear previous buttons
-                                    $('#banAnButtons').html('');
-
-                                    // Gộp các bàn ăn theo phòng và tạo button
-                                    var groupedBanAns = {};
-
-                                    $.each(response, function(index, banAn) {
-                                        if (!groupedBanAns[banAn.ten_phong_an]) {
-                                            groupedBanAns[banAn.ten_phong_an] = [];
-                                        }
-                                        groupedBanAns[banAn.ten_phong_an].push(banAn);
-                                    });
-
-                                    // Hiển thị các button cho mỗi phòng
-                                    $.each(groupedBanAns, function(tenPhongAn, banAns) {
-                                        var roomContainer = $('<div class="room-container"></div>');
-                                        var roomTitle = $('<h5>' + tenPhongAn + '</h5>');
-                                        roomContainer.append(roomTitle);
-
-                                        $.each(banAns, function(index, banAn) {
-                                            var button = $(
-                                                '<button type="button" class="btn btn-primary m-1" data-id="' +
-                                                banAn.id + '" data-so-ghe="' + banAn.so_ghe + '">' +
-                                                banAn.ten_ban + ' (' + banAn.so_ghe + ' ghế)' + '</button>');
-                                            roomContainer.append(button);
-                                        });
-
-                                        $('#banAnButtons').append(roomContainer);
-                                    });
-
-                                } catch (error) {
-                                    console.error('Lỗi khi xử lý AJAX: ', error);
-                                    alert('Có lỗi xảy ra, vui lòng thử lại sau.');
-                                }
-                            });
-
-                            // Xử lý khi click vào bàn ăn
-                            $(document).on('click', '#banAnButtons button', function() {
-                                var button = $(this);
-                                var banAnId = button.data('id');
-                                var soGhe = button.data('so-ghe');
-                                var numPeople = parseInt($('#numPeople').val());
-
-                                var selectedBans = $('#banAnButtons button.selected');
-
-                                var totalSeats = 0;
-                                selectedBans.each(function() {
-                                    totalSeats += parseInt($(this).data('so-ghe'));
-                                });
-
-                                if (totalSeats + soGhe > numPeople) {
-                                    $('#error-message').hide(); // Ẩn lỗi nếu đã đủ số ghế
-                                } else {
-                                    // Chọn bàn ăn
-                                    button.addClass('selected');
-                                    button.prop('disabled', true); // Vô hiệu hóa bàn ăn đã chọn
-                                    totalSeats += soGhe;
-                                }
-                            });
-                        </script>
 
 
                     </div>
+
+                    <script>
+                        $(document).ready(function() {
+                            var now = new Date();
+                            var currentDateTime = now.toISOString().slice(0, 16); // Lấy định dạng YYYY-MM-DDTHH:MM
+
+                            // Đặt min cho input datetime-local
+                            $('#thoi_gian_den').attr('min', currentDateTime);
+
+                            // Kiểm tra thời gian đã chọn
+                            $('#thoi_gian_den').on('change', function() {
+                                var selectedDateTime = $(this).val();
+                                if (selectedDateTime < currentDateTime) {
+                                    alert('Không thể chọn thời gian trong quá khứ!');
+                                    $(this).val(''); // Xóa giá trị không hợp lệ
+                                }
+                            });
+                        });
+                    </script>
+
+                    <script>
+                        $(document).on('click', '#banAnButtons button', function() {
+                            var button = $(this);
+                            var banAnId = button.data('id');
+                            var soGhe = button.data('so-ghe');
+
+                            var selectedBans = $('#banAnButtons button.selected');
+                            var totalSeats = 0;
+
+                            selectedBans.each(function() {
+                                totalSeats += parseInt($(this).data('so-ghe'));
+                            });
+
+                            if (button.hasClass('selected')) {
+                                // Bỏ chọn bàn
+                                button.removeClass('selected');
+                                //button.prop('disabled', false); // Mở khóa bàn ăn
+                                totalSeats -= soGhe;
+
+                                // Xóa input ẩn
+                                $('#selectedBanInputs input[value="' + banAnId + '"]').remove();
+                            } else {
+                                // Chọn bàn mới
+                                button.addClass('selected');
+                                //button.prop('disabled', true);
+                                totalSeats += soGhe;
+
+                                // Thêm input ẩn
+                                $('#selectedBanInputs').append(
+                                    '<input type="hidden" name="ban_an_ids[]" value="' + banAnId + '">'
+                                );
+                            }
+
+                            // Cập nhật tổng số ghế đã chọn
+                            console.log('Tổng số ghế đã chọn: ', totalSeats);
+                        });
+                    </script>
+
+                    {{-- <script>
+                        // Lắng nghe sự thay đổi thời gian
+                        $('#thoi_gian_den').on('change', async function() {
+                            var thoiGianDen = $(this).val();
+                            var formattedTime = moment(thoiGianDen, "YYYY-MM-DDTHH:mm").format("YYYY-MM-DD HH:mm:ss");
+
+                            try {
+                                // Gửi AJAX để lấy các bàn ăn chưa bị đặt trong khoảng thời gian này
+                                const response = await $.ajax({
+                                    url: '{{ route('admin.datban.filter') }}',
+                                    method: 'GET',
+                                    data: {
+                                        thoi_gian_den: formattedTime
+                                    }
+                                });
+
+                                // Clear previous buttons
+                                $('#banAnButtons').html('');
+
+                                // Gộp các bàn ăn theo phòng và tạo button
+                                var groupedBanAns = {};
+
+                                $.each(response, function(index, banAn) {
+                                    if (!groupedBanAns[banAn.ten_phong_an]) {
+                                        groupedBanAns[banAn.ten_phong_an] = [];
+                                    }
+                                    groupedBanAns[banAn.ten_phong_an].push(banAn);
+                                });
+
+                                // Hiển thị các button cho mỗi phòng
+                                $.each(groupedBanAns, function(tenPhongAn, banAns) {
+                                    var roomContainer = $('<div class="room-container"></div>');
+                                    var roomTitle = $('<h5>' + tenPhongAn + '</h5>');
+                                    roomContainer.append(roomTitle);
+
+                                    $.each(banAns, function(index, banAn) {
+                                        var button = $(
+                                            '<button type="button" class="btn btn-primary m-1" data-id="' +
+                                            banAn.id + '" data-so-ghe="' + banAn.so_ghe + '">' +
+                                            banAn.ten_ban + ' (' + banAn.so_ghe + ' ghế)' + '</button>');
+                                        roomContainer.append(button);
+                                    });
+
+                                    $('#banAnButtons').append(roomContainer);
+                                });
+
+                            } catch (error) {
+                                console.error('Lỗi khi xử lý AJAX: ', error);
+                                alert('Có lỗi xảy ra, vui lòng thử lại sau.');
+                            }
+                        });
+                    </script> --}}
+
+                    <script>
+                        // Lắng nghe sự thay đổi thời gian
+                        $('#thoi_gian_den').on('change', async function() {
+                            var thoiGianDen = $(this).val();
+                            var selectedTime = moment(thoiGianDen, "YYYY-MM-DDTHH:mm");
+                            var currentTime = moment(); // Lấy thời gian hiện tại
+
+                            // **Kiểm tra nếu thời gian được chọn nhỏ hơn thời gian hiện tại**
+                            if (selectedTime.isBefore(currentTime)) {
+                                // Xóa danh sách bàn đã hiển thị (nếu có)
+                                $('#banAnButtons').html('');
+                                // Thông báo cho người dùng rằng thời gian không hợp lệ
+                                alert(
+                                    "⚠️ **Thời gian được chọn không hợp lệ!** Vui lòng chọn thời gian sau thời gian hiện tại.");
+                                return; // Dừng xử lý nếu điều kiện không thỏa mãn
+                            }
+
+                            // Nếu thời gian hợp lệ, tiếp tục xử lý
+                            var formattedTime = selectedTime.format("YYYY-MM-DD HH:mm:ss");
+
+                            try {
+                                // Gửi AJAX để lấy danh sách bàn ăn chưa bị đặt trong khoảng thời gian này
+                                const response = await $.ajax({
+                                    url: '{{ route('admin.datban.filter') }}',
+                                    method: 'GET',
+                                    data: {
+                                        thoi_gian_den: formattedTime
+                                    }
+                                });
+
+                                // Xóa danh sách bàn trước đó
+                                $('#banAnButtons').html('');
+
+                                // **Nhóm các bàn ăn theo phòng**
+                                var groupedBanAns = {};
+                                $.each(response, function(index, banAn) {
+                                    if (!groupedBanAns[banAn.ten_phong_an]) {
+                                        groupedBanAns[banAn.ten_phong_an] = [];
+                                    }
+                                    groupedBanAns[banAn.ten_phong_an].push(banAn);
+                                });
+
+                                // **Hiển thị các bàn ăn theo phòng**
+                                $.each(groupedBanAns, function(tenPhongAn, banAns) {
+                                    var roomContainer = $('<div class="room-container"></div>');
+                                    var roomTitle = $('<h5 style="color: #007bff;">' + tenPhongAn + '</h5>');
+                                    roomContainer.append(roomTitle);
+
+                                    $.each(banAns, function(index, banAn) {
+                                        var button = $(
+                                            '<button type="button" class="btn btn-primary m-1" data-id="' +
+                                            banAn.id + '" data-so-ghe="' + banAn.so_ghe + '">' +
+                                            banAn.ten_ban + ' (' + banAn.so_ghe + ' ghế)' + '</button>');
+                                        roomContainer.append(button);
+                                    });
+
+                                    $('#banAnButtons').append(roomContainer);
+                                });
+
+                            } catch (error) {
+                                console.error('Lỗi khi xử lý AJAX: ', error);
+                                alert('Có lỗi xảy ra, vui lòng thử lại sau.');
+                            }
+                        });
+                    </script>
 
 
                     <script>
@@ -388,6 +429,7 @@
                             });
                         });
                     </script>
+
 
                 </div>
             </div>

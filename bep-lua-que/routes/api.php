@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\ChamCongController;
+
+use App\Http\Controllers\BanAnController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BepController;
@@ -22,4 +25,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/them-mon', [BepController::class, 'themMon']);
 
+
 Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('chamcong.store');
+
+Route::get('/get-so-luong-ban', [BanAnController::class, 'getSoLuongBan']);
+

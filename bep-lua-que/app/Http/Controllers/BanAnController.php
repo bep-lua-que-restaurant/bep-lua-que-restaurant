@@ -61,12 +61,33 @@ class BanAnController extends Controller
         ]);
     }
 
+    public function getSoLuongBan(Request $request)
+    {
+        $phongId = $request->vi_tri;
+
+        if (!$phongId) {
+            return response()->json(['error' => 'Vui lòng chọn vị trí phòng.'], 400);
+        }
+
+        // Đếm số lượng bàn theo loại trong phòng
+        $soLuongBan = BanAn::where('vi_tri', $phongId)
+            ->selectRaw('so_ghe, COUNT(*) as count')
+            ->groupBy('so_ghe')
+            ->pluck('count', 'so_ghe');
+
+        return response()->json([
+            'success' => true,
+            'soLuongBan' => $soLuongBan
+        ]);
+    }
+
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
+        // một phòng có tối đa bàn loại 4 ghế là 6 , tối đa bàn loại 8 ghế là 4, tối đa bàn loại 10 ghế là 2
         $phongAn = PhongAn::withoutTrashed()->get(); // Chỉ lấy bản ghi chưa bị xóa mềm
         return view('admin.banan.create', compact('phongAn'));
     }
@@ -81,6 +102,9 @@ class BanAnController extends Controller
         $data = $request->validated();
         // dd($data);
 
+
+
+        // gioi han 1 phong
         $banAn = BanAn::create($data);
 
         broadcast(new BanAnUpdated($banAn))->toOthers();

@@ -18,6 +18,9 @@
                 <ul aria-expanded="false">
                     <li><a href="{{ route('com-bo.index') }}">Combo - đóng gói</a></li>
                 </ul>
+                <ul aria-expanded="false">
+                    <li><a href="{{ route('loai-nguyen-lieu.index') }}">Loại nguyên liệu</a></li>
+                </ul>
             </li>
             {{-- Hàng hóa --}}
 
@@ -62,6 +65,7 @@
                     <li><a href="#">Trả hàng</a></li>
                 </ul>
                 <ul aria-expanded="false">
+                    {{-- <li><a href="">Nhập hàng</a></li> --}}
                     <li><a href="{{ route('phieu-nhap-kho.index') }}">Nhập hàng</a></li>
                 </ul>
                 <ul aria-expanded="false">

@@ -12,8 +12,15 @@ class DatBan extends Model
 
     protected $fillable = ['khach_hang_id', 'so_dien_thoai', 'thoi_gian_den', 'so_nguoi', 'trang_thai', 'ban_an_id', 'mo_ta'];
 
+
+
     public function banAn()
     {
         return $this->belongsTo(BanAn::class, 'ban_an_id');
+    }
+
+    public function khachHang()
+    {
+        return $this->belongsTo(KhachHang::class, 'khach_hang_id');
     }
 }
