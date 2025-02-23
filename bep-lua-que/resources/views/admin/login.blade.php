@@ -30,6 +30,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="csrf-token" content="3pvIDLSX29wd150Hxi6MALt7d8F4BtSQooZ74xzA">
     <meta name="description" content="Some description for the page" />
+
     <title>Uena | Login 2</title>
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="public/images/favicon.png">
