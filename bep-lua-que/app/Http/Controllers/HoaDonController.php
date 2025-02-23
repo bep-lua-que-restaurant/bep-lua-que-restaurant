@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\HoaDonAdded;
 use App\Events\HoaDonUpdated;
 use App\Models\HoaDon;
 use App\Http\Requests\StoreHoaDonRequest;
 use App\Http\Requests\UpdateHoaDonRequest;
 use App\Models\BanAn;
 use App\Models\ChiTietHoaDon;
+use App\Models\DatBan;
 use App\Models\HoaDonBan;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class HoaDonController extends Controller
 {
@@ -19,24 +22,24 @@ class HoaDonController extends Controller
     public function index(Request $request)
     {
         $query = HoaDon::query();
-    
+
         if ($request->has('search') && $request->search != '') {
             $query->where('ma_hoa_don', 'like', '%' . $request->search . '%')
-                  ->orWhere('khach_hang_id', 'like', '%' . $request->search . '%');
+                ->orWhere('khach_hang_id', 'like', '%' . $request->search . '%');
         }
 
         $hoa_don = $query->latest('id')->paginate(10);
-    
+
         // Nếu là Ajax request, trả về HTML của bảng luôn
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('admin.hoadon.index', compact('hoa_don'))->render(),
             ]);
         }
-    
+
         return view('admin.hoadon.index', compact('hoa_don'));
     }
-    
+
 
     private function generateMaHoaDon()
     {
@@ -57,7 +60,6 @@ class HoaDonController extends Controller
         $banAnId = $request->input('ban_an_id'); // ID bàn ăn
         $monAnId = $request->input('mon_an_id'); // ID món ăn
         $giaMon = $request->input('gia'); // Giá món ăn
-
         if (!$banAnId || !$monAnId || !$giaMon) {
             return response()->json(['error' => 'Thiếu thông tin đầu vào!'], 400);
         }
@@ -79,6 +81,7 @@ class HoaDonController extends Controller
                 'phuong_thuc_thanh_toan' => 'tien_mat',
                 'mo_ta' => null
             ]);
+            // Nạp luôn chi tiết hóa đơn để gửi đầy đủ dữ liệu
 
             // Liên kết hóa đơn với bàn ăn (trạng thái `dang_xu_ly`)
             $hoaDonBan = HoaDonBan::create([
@@ -87,6 +90,8 @@ class HoaDonController extends Controller
                 'trang_thai' => 'dang_xu_ly'
             ]);
         }
+
+
 
         // Kiểm tra xem món ăn đã có trong hóa đơn chưa
         $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)
@@ -105,10 +110,11 @@ class HoaDonController extends Controller
                 'so_luong' => 1,
                 'don_gia' => $giaMon,
                 'thanh_tien' => $giaMon,
-                'trang_thai' => 'cho_che_bien'
+                'trang_thai' => 'cho_xac_nhan'
             ]);
+            $hoaDon = HoaDon::with('chiTietHoaDons')->find($hoaDon->id);
+            event(new HoaDonAdded($hoaDon));
         }
-
         // Cập nhật tổng tiền trong bảng `hoa_don`
         $tongTien = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)->sum('thanh_tien');
         $hoaDon->update(['tong_tien' => $tongTien]);
@@ -119,6 +125,19 @@ class HoaDonController extends Controller
             BanAn::where('id', $banAnId)->update(['trang_thai' => 'co_khach']);
         }
 
+        DatBan::create([
+            'ban_an_id' => $banAnId,
+            'khach_hang_id' => 0, // Nếu không có khách hàng thì để null
+            'so_dien_thoai' =>  '0', // Nếu không có số điện thoại thì để null
+            'thoi_gian_den' => Carbon::now(), // Sử dụng Carbon để lấy thời gian hiện tại theo múi giờ Việt Nam
+            'so_nguoi' => 1, // Sử dụng số người từ request hoặc mặc định là 1
+            'trang_thai' => 'dang_xu_ly', // Trạng thái mặc định là 'dang_xu_ly'
+            'mo_ta' => null, // Nếu không có mô tả, để null
+        ]);
+
+
+        // Nạp luôn chi tiết hóa đơn để gửi đầy đủ dữ liệu
+        $hoaDon = HoaDon::with('chiTietHoaDons')->find($hoaDon->id);
 
         event(new HoaDonUpdated($hoaDon));
 
@@ -141,11 +160,11 @@ class HoaDonController extends Controller
      * Display the specified resource.
      */
     public function show($id)
-{
-    $hoaDon = HoaDon::with(['chiTietHoaDons.monAn','banAns'])->findOrFail($id);
-   
-    return view('admin.hoadon.show', compact('hoaDon'));
-}
+    {
+        $hoaDon = HoaDon::with(['chiTietHoaDons.monAn', 'banAns'])->findOrFail($id);
+
+        return view('admin.hoadon.show', compact('hoaDon'));
+    }
 
     /**
      * Show the form for editing the specified resource.

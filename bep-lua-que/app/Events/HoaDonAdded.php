@@ -8,11 +8,11 @@ use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 
-class HoaDonUpdated implements ShouldBroadcastNow
+class HoaDonAdded implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -25,13 +25,13 @@ class HoaDonUpdated implements ShouldBroadcastNow
 
     public function broadcastOn()
     {
-        return new Channel('hoa-don-channel'); // Kênh broadcast cho hóa đơn
+        return new Channel('hoa-don-channel'); // Dùng chung kênh
     }
 
     public function broadcastWith()
     {
         return [
-            'type' => 'hoa_don_updated', // Đánh dấu loại sự kiện
+            'type' => 'hoa_don_added', // Đánh dấu loại sự kiện
             'hoa_don' => $this->hoaDon->toArray(),
         ];
     }
