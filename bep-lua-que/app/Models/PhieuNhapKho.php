@@ -32,10 +32,15 @@ class PhieuNhapKho extends Model
     {
         return $this->hasMany(ChiTietPhieuNhapKho::class, 'phieu_nhap_kho_id');
     }
-     // Quan hệ với nhân viên
-     public function nhanVien()
-     {
-         return $this->belongsTo(NhanVien::class, 'nhan_vien_id');
-     }
+    // Quan hệ với nhân viên
+    public function nhanVien()
+    {
+        return $this->belongsTo(NhanVien::class, 'nhan_vien_id');
+    }
 
+    public function nguyenLieu()
+    {
+        return $this->belongsToMany(NguyenLieu::class, 'chi_tiet_phieu_nhap', 'phieu_nhap_id', 'nguyen_lieu_id')
+            ->withPivot('so_luong', 'gia'); // Nếu có thông tin phụ trong bảng trung gian
+    }
 }
