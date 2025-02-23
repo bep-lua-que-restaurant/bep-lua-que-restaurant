@@ -101,27 +101,84 @@ function fetchUpdatedMenu() {
     });
 }
 
+window.Echo.channel("hoa-don-channel")
+    .listen("HoaDonAdded", (data) => {
+        if (data.type === "hoa_don_added") {
+            let hoaDonId = data.hoa_don.id;
+            loadChiTietHoaDon(hoaDonId);
+            console.log("Hóa đơn mới được thêm:", data.hoa_don);
+        }
+    })
+    .listen("HoaDonUpdated", (data) => {
+        if (data.type === "hoa_don_updated") {
+            console.log("Hóa đơn đã được cập nhật:", data.hoa_don);
+            let hoaDonId = $("#ten-ban").data("hoaDonId");
+            if (hoaDonId && hoaDonId == data.hoa_don.id) {
+                loadChiTietHoaDon(hoaDonId);
+            }
+        }
+    });
+
 // Lắng nghe sự kiện real-time từ server
-window.Echo.channel("hoa-don-channel").listen("HoaDonUpdated", (data) => {
-    console.log("🔥 Hóa đơn được cập nhật real-time:", data);
+// window.Echo.channel("hoa-don-channel").listen("HoaDonUpdated", (data) => {
+//     console.log("🔔 Có thông báo mới từ server:", data);
+//     let hoaDonId = $("#ten-ban").data("hoaDonId");
+//     if (hoaDonId && hoaDonId == data.hoa_don.id) {
+//         loadChiTietHoaDon(hoaDonId);
+//     }
+// });
 
-    let hoaDonId = $("#ten-ban").data("hoaDonId");
-    if (hoaDonId && hoaDonId == data.id) {
-        console.log("🔄 Cập nhật danh sách hóa đơn...");
-        fetchUpdatedHoaDon(hoaDonId);
-    }
-});
-
-function fetchUpdatedHoaDon(hoaDonId) {
+function loadChiTietHoaDon(hoaDonId) {
     $.ajax({
-        url: apiUrlChiTietHoaDon,
+        url: "/hoa-don/get-details",
         method: "GET",
-        data: { hoa_don_id: hoaDonId },
+        data: {
+            hoa_don_id: hoaDonId,
+        },
         success: function (response) {
-            $("#hoa-don-body").html(response.html);
+            let hoaDonBody = $("#hoa-don-body");
+            hoaDonBody.empty();
+
+            let offcanvasBody = $(".offcanvas-body tbody"); // Lấy phần bảng trong offcanvas
+            offcanvasBody.empty(); // Xóa nội dung cũ
+            var soNguoi = response.so_nguoi;
+
+            let tongTien = 0;
+            if (response.chi_tiet_hoa_don.length > 0) {
+                let index = 1;
+                response.chi_tiet_hoa_don.forEach((item) => {
+                    let row = `
+                <tr id="mon-${item.id}">
+                     <td>${index}</td>
+                    <td>${item.tenMon}</td>
+                    <td class="text-center">${item.so_luong}</td>
+                    <td class="text-end">${item.don_gia.toLocaleString()} VNĐ</td>
+                    <td class="text-end">${(
+                        item.so_luong * item.don_gia
+                    ).toLocaleString()} VNĐ</td>
+                </tr>`;
+                    hoaDonBody.append(row);
+                    offcanvasBody.append(row);
+                    tongTien += item.so_luong * item.don_gia;
+                    index++;
+                });
+            } else {
+                let emptyRow =
+                    '<tr><td colspan="4" class="text-center">Chưa có món nào</td></tr>';
+                hoaDonBody.html(emptyRow);
+                offcanvasBody.html(emptyRow);
+            }
+
+            $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
+            $(".so-nguoi").text(`👥 ${soNguoi}`);
+            $("#totalAmount").val(tongTien.toLocaleString() + " VND"); // Cập nhật tổng tiền trong offcanvas
+
+            if (response.ten_ban) {
+                $("#tableInfo").text(`Bàn ${response.ten_ban}`);
+            }
         },
         error: function (xhr) {
-            console.error("🔥 Lỗi khi tải hóa đơn:", xhr.responseText);
+            console.error("🔥 Lỗi khi tải chi tiết hóa đơn:", xhr.responseText);
         },
     });
 }

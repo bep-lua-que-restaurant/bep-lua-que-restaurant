@@ -13,6 +13,7 @@
                                 <div class="card-body p-2">
                                     <h5><i class="fas fa-utensils" style="font-size: 24px;"></i></h5>
                                     <h6 class="card-title" style="font-size: 12px;">{{ $banAn->ten_ban }}</h6>
+
                                     @if ($banAn->trang_thai == 'trong')
                                         <p class="badge badge-success" style="font-size: 10px;">Có sẵn</p>
                                     @elseif ($banAn->trang_thai == 'co_khach')
@@ -47,9 +48,7 @@
 
 
 <!-- Thêm jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
 <script>
     var swiper = new Swiper(".mySwiper", {
@@ -74,11 +73,10 @@
             var tenBan = $(this).find('.card-title').text(); // Lấy tên bàn
 
             console.log("🔥 Bàn được chọn:", banId);
-
             // Lưu ID bàn vào dataset để sử dụng khi thêm món
             $('#ten-ban').data('currentBan', banId);
             $('#ten-ban').text(tenBan);
-
+            $('#tableInfo').text(tenBan)
             // Gọi AJAX để lấy hóa đơn ID của bàn này
             $.ajax({
                 url: "/hoa-don/get-id",
@@ -89,6 +87,7 @@
                 success: function(response) {
                     if (response.hoa_don_id) {
                         console.log("🔥 Hóa đơn ID:", response.hoa_don_id);
+
                         $('#ten-ban').data('hoaDonId', response.hoa_don_id);
 
                         // Gọi API để lấy chi tiết hóa đơn
@@ -100,6 +99,7 @@
                             '<tr><td colspan="5" class="text-center">Chưa có món nào trong đơn</td></tr>'
                         );
                         $('#tong-tien').text("0 VNĐ");
+                        $('.so-nguoi').text("👥 0");
                     }
                 },
                 error: function(xhr) {
@@ -108,43 +108,60 @@
             });
         });
 
-        function loadChiTietHoaDon(hoaDonId) {
-            $.ajax({
-                url: "/hoa-don/get-details",
-                method: "GET",
-                data: {
-                    hoa_don_id: hoaDonId
-                },
-                success: function(response) {
-                    let hoaDonBody = $("#hoa-don-body");
-                    hoaDonBody.empty();
+            function loadChiTietHoaDon(hoaDonId) {
+                $.ajax({
+                    url: "/hoa-don/get-details",
+                    method: "GET",
+                    data: {
+                        hoa_don_id: hoaDonId
+                    },
+                    success: function(response) {
+                        let hoaDonBody = $("#hoa-don-body");
+                        hoaDonBody.empty();
 
-                    let tongTien = 0;
-                    if (response.length > 0) {
-                        response.forEach((item) => {
-                            let row = `
-                        <tr id="mon-${item.id}">
-                            <td>#</td>
-                            <td>${item.tenMon}</td>
-                            <td class="text-center">${item.so_luong}</td>
-                            <td class="text-end">${item.don_gia.toLocaleString()} VNĐ</td>
-                            <td class="text-end">${(item.so_luong * item.don_gia).toLocaleString()} VNĐ</td>
-                        </tr>`;
-                            hoaDonBody.append(row);
-                            tongTien += item.so_luong * item.don_gia;
-                        });
-                    } else {
-                        hoaDonBody.html(
-                            '<tr><td colspan="5" class="text-center">Chưa có món nào trong đơn</td></tr>'
-                        );
+                        let offcanvasBody = $(".offcanvas-body tbody"); // Lấy phần bảng trong offcanvas
+                        offcanvasBody.empty(); // Xóa nội dung cũ
+                        var soNguoi = response.so_nguoi
+
+                        let tongTien = 0;
+                        if (response.chi_tiet_hoa_don.length > 0) {
+                            let index = 1;
+                            response.chi_tiet_hoa_don.forEach((item) => {
+                                let row = `
+                            <tr id="mon-${item.id}">
+                                <td>${index}</td>
+                                <td>${item.tenMon}</td>
+                                <td class="text-center">${item.so_luong}</td>
+                                <td class="text-end">${item.don_gia.toLocaleString()} VNĐ</td>
+                                <td class="text-end">${(item.so_luong * item.don_gia).toLocaleString()} VNĐ</td>
+                            </tr>`;
+                                hoaDonBody.append(row);
+                                offcanvasBody.append(row);
+                                tongTien += item.so_luong * item.don_gia;
+                                index++;
+                            });
+                        } else {
+                            let emptyRow =
+                                '<tr><td colspan="4" class="text-center">Chưa có món nào</td></tr>';
+                            hoaDonBody.html(emptyRow);
+                            offcanvasBody.html(emptyRow);
+                        }
+
+                        $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
+                        $('.so-nguoi').text(`👥 ${soNguoi}`);
+                        $("#totalAmount").val(tongTien.toLocaleString() +
+                            " VND"); // Cập nhật tổng tiền trong offcanvas
+
+                        if (response.ten_ban) {
+                            $("#tableInfo").text(`Bàn ${response.ten_ban}`);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error("🔥 Lỗi khi tải chi tiết hóa đơn:", xhr.responseText);
                     }
-
-                    $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
-                },
-                error: function(xhr) {
-                    console.error("🔥 Lỗi khi tải chi tiết hóa đơn:", xhr.responseText);
-                }
-            });
-        }
+                });
+            }
     });
+
+    
 </script>

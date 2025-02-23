@@ -1,4 +1,8 @@
-import "./bootstrap";
+
+import './bootstrap';
+import './thungan.js';  // Đảm bảo thungan.js thực sự có trong thư mục resources/js
+
+
 
 // Import axios để gửi các request HTTP
 import axios from "axios";

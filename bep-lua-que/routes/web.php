@@ -206,6 +206,7 @@ Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboar
 Route::resource('lich-lam-viec', LichLamViecController::class);
 Route::get('lich-lam-viec/export', [LichLamViecController::class, 'export'])->name('lich-lam-viec.export');
 
+
 Route::get('/thu-ngan', [ThunganController::class, 'getBanAn'])->name('thungan.getBanAn');
 Route::get('/thu-ngan/get-thuc-don', [ThunganController::class, 'getThucDon'])->name('thungan.getThucDon');
 Route::post('/thu-ngan/tao-hoa-don', [HoaDonController::class, 'createHoaDon'])->name('thungan.createHoaDon');
@@ -227,10 +228,20 @@ Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])
 
 
 Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])->name('thungan.destroy');
-
+Route::post('/hoa-don/update-status', [ThuNganController::class, 'updateStatus'])->name('thungan.thongBaoBep');
+Route::post('/update-ban-status', [ThuNganController::class, 'updateBanStatus'])->name('thungan.updateBanStatus');
+Route::post('/add-customer', [ThuNganController::class, 'addCustomer'])->name('thungan.addCustomer');
+Route::get('thu-ngan-get-ban', [ThuNganController::class, 'getBanDeGhep'])->name('thungan.getBanDeGhep');
+Route::get('thu-ngan-get-bill-ban/{id}', [ThuNganController::class, 'getBillBan'])
+    ->name('thungan.getBillBan');
+Route::post('thu-ngan-ghep-ban', [ThuNganController::class, 'ghepBan'])
+    ->name('thungan.ghepBan');
 
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
+
+Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
+
 
 Route::get('/hoa-don/search',[HoaDonController::class, 'search'])->name('hoa-don.search');
 
@@ -273,6 +284,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('/hoa-don/search',[HoaDonController::class, 'search'])->name('hoa-don.search');
+
 
 
 

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title>Thu ngân</title>
 
     <!-- Import Bootstrap mới nhất -->
@@ -53,6 +54,8 @@
 
 <body>
     <header>
+        <audio id="ding-sound" src="{{ asset('sounds/ding.mp3') }}" preload="auto"></audio>
+
         <div class="container-fluid">
             <!-- Tìm kiếm + Lọc trạng thái -->
             <section class="row my-4">
@@ -140,6 +143,19 @@
         <!-- Footer content (nếu cần) -->
     </footer>
 
+    {{-- toast --}}
+    <div class="position-fixed top-0 start-0 p-3" style="z-index: 1050">
+        <div id="toastMessage" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <!-- Nội dung thông báo -->
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    
+
     <!-- Script -->
 
     <script src="{{ asset('admin') }}/vendor/bootstrap-select/dist/js/bootstrap-select.min.js" type="text/javascript">
@@ -148,11 +164,10 @@
     <script src="{{ asset('admin') }}/vendor/peity/jquery.peity.min.js" type="text/javascript"></script>
     <script src="{{ asset('admin') }}/vendor/apexchart/apexchart.js" type="text/javascript"></script>
     <script src="{{ asset('admin') }}/js/dashboard/dashboard-1.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    @vite('resources/js/public.js')
     <script>
         var apiUrl = "{{ route('thungan.getBanAn') }}";
 
@@ -162,168 +177,17 @@
 
         var apiUrlChiTietHoaDon = "{{ route('thungan.getChiTietHoaDon') }}";
 
-        document.getElementById('btn-ban-an').addEventListener('click', function() {
-            fetch('{{ route('thungan.getBanAn') }}', {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('list-container').innerHTML = data.html;
-                })
-                .catch(error => console.error('Lỗi:', error));
-        });
+        var apiUrlGetBanAn = "{{ route('thungan.getBanAn') }}";
 
-        document.getElementById('btn-thuc-don').addEventListener('click', function() {
-            fetch('{{ route('thungan.getThucDon') }}', {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('list-container').innerHTML = data.html;
-                })
-                .catch(error => console.error('Lỗi:', error));
-        });
+        var apiUrlGetThucDon = "{{ route('thungan.getThucDon') }}";
 
-        $(document).ready(function() {
-            let currentType = 'ban'; // Mặc định hiển thị danh sách bàn
+        var apiUrlThongBaoBep = "{{ route('thungan.thongBaoBep') }}";
 
-            function fetchFilteredData() {
-                let searchQuery = $('#search-name').val();
-                let statusFilter = $('#statusFilter').val();
-                $('#list-container').html('<div class="text-center">Đang tải dữ liệu...</div>');
-
-                $.ajax({
-                    url: currentType === 'ban' ? "{{ route('thungan.getBanAn') }}" :
-                        "{{ route('thungan.getThucDon') }}",
-                    method: "GET",
-                    data: {
-                        ten: searchQuery,
-                        statusFilter: currentType === 'ban' ? statusFilter : null
-                    },
-                    success: function(response) {
-                        $('#list-container').html(response.html);
-                    },
-                    error: function(xhr) {
-                        console.error("Lỗi khi tải dữ liệu:", xhr);
-                    }
-                });
-            }
-
-            $('#search-name').on('input', function() {
-                fetchFilteredData();
-            });
-
-            $('#statusFilter').on('change', function() {
-                if (currentType === 'ban') {
-                    fetchFilteredData();
-                }
-            });
-
-            $('#btn-ban-an').on('click', function() {
-                currentType = 'ban';
-                $('#statusFilter').parent().show();
-                fetchFilteredData();
-            });
-
-            $('#btn-thuc-don').on('click', function() {
-                currentType = 'menu';
-                $('#statusFilter').parent().hide();
-                fetchFilteredData();
-            });
-
-            fetchFilteredData();
-        });
+        var dingSoundUrl = "{{ asset('sounds/ding.mp3') }}";
     </script>
+    @vite('resources/js/public.js')
+    @vite('resources/js/thungan.js')
+
 </body>
 
-
-</div>
-
-
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
-</script>
-<script>
-    document.getElementById('btn-ban-an').addEventListener('click', function() {
-        fetch('{{ route('thungan.getBanAn') }}', {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('list-container').innerHTML = data.html;
-            })
-            .catch(error => console.error('Lỗi:', error));
-    });
-
-    document.getElementById('btn-thuc-don').addEventListener('click', function() {
-        fetch('{{ route('thungan.getThucDon') }}', {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('list-container').innerHTML = data.html;
-            })
-            .catch(error => console.error('Lỗi:', error));
-    });
-    $(document).ready(function() {
-        let currentType = 'ban'; // Mặc định hiển thị danh sách bàn
-
-        function fetchFilteredData() {
-            let searchQuery = $('#search-name').val();
-            let statusFilter = $('#statusFilter').val();
-            $('#list-container').html('<div class="text-center">Đang tải dữ liệu...</div>');
-
-            $.ajax({
-                url: currentType === 'ban' ? "{{ route('thungan.getBanAn') }}" :
-                    "{{ route('thungan.getThucDon') }}",
-                method: "GET",
-                data: {
-                    ten: searchQuery,
-                    statusFilter: currentType === 'ban' ? statusFilter : null
-                },
-                success: function(response) {
-                    $('#list-container').html(response.html);
-                },
-                error: function(xhr) {
-                    console.error("Lỗi khi tải dữ liệu:", xhr);
-                }
-            });
-        }
-
-        $('#search-name').on('input', function() {
-            fetchFilteredData();
-        });
-
-        $('#statusFilter').on('change', function() {
-            if (currentType === 'ban') {
-                fetchFilteredData();
-            }
-        });
-
-        $('#btn-ban-an').on('click', function() {
-            currentType = 'ban';
-            $('#statusFilter').parent().show();
-            fetchFilteredData();
-        });
-
-        $('#btn-thuc-don').on('click', function() {
-            currentType = 'menu';
-            $('#statusFilter').parent().hide();
-            fetchFilteredData();
-        });
-
-        fetchFilteredData();
-    });
-
-    //
-</script>
+</html>
