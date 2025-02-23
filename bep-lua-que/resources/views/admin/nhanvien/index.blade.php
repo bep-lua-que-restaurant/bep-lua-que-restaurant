@@ -21,7 +21,26 @@
         </div>
         <!-- row -->
         <div class="row">
-            @include('admin.filter')
+            {{-- @include('admin.filter') --}}
+            <div class="col-lg-12 my-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <!-- Ô tìm kiếm nhân viên -->
+                    <div class="input-group">
+                        <input type="text" id="searchInput" class="form-control border-0"
+                            placeholder="Tìm kiếm theo tên..." onkeyup="filterEmployees()">
+                    </div>
+
+                    <!-- Lựa chọn trạng thái làm việc -->
+                    <div>
+                        <select id="statusFilter" class="btn btn-primary btn-sm" onchange="filterEmployees()">
+                            <option value="">Lọc theo trạng thái</option>
+                            <option value="Đang làm việc">Đang làm việc</option>
+                            <option value="Nghỉ việc">Đã nghỉ việc</option>
+                            <option value="Tất cả">Tất cả</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="row">
@@ -64,9 +83,9 @@
 
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="employeeTable">
                                     @foreach ($nhanViens as $nhanVien)
-                                        <tr>
+                                        <tr class="employee-row">
                                             <td>
                                                 <div class="custom-control custom-checkbox checkbox-success">
                                                     <input type="checkbox" class="custom-control-input"
@@ -76,12 +95,11 @@
                                                 </div>
                                             </td>
                                             <td>{{ $nhanVien->ma_nhan_vien }}</td>
-                                            <td>{{ $nhanVien->ho_ten }}</td>
+                                            <td class="employee-name">{{ $nhanVien->ho_ten }}</td>
                                             <td>{{ $nhanVien->email }}</td>
                                             <td>{{ $nhanVien->so_dien_thoai }}</td>
                                             <td>{{ $nhanVien->chucVu->ten_chuc_vu }}</td>
-                                            <td>
-                                                <!-- Hiển thị trạng thái -->
+                                            <td class="employee-status">
                                                 @switch($nhanVien->trang_thai)
                                                     @case('dang_lam_viec')
                                                         <span class="badge bg-success">Đang làm việc</span>
@@ -95,11 +113,11 @@
                                             <td>
                                                 <a href="{{ route('nhan-vien.detail', $nhanVien->id) }}"
                                                     class="btn btn-primary btn-sm"> <i class="fa fa-eye"></i></a>
-
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
+
                             </table>
                         </div>
                     </div>
@@ -138,3 +156,24 @@
     <!-- Hiển thị phân trang -->
     {{ $nhanViens->links('pagination::bootstrap-5') }}
 @endsection
+<script>
+    function filterEmployees() {
+        let searchInput = document.getElementById("searchInput").value.toLowerCase();
+        let statusFilter = document.getElementById("statusFilter").value;
+        let rows = document.querySelectorAll("#employeeTable .employee-row");
+
+        rows.forEach(row => {
+            let name = row.querySelector(".employee-name").textContent.toLowerCase();
+            let status = row.querySelector(".employee-status").textContent.trim();
+
+            let matchesName = name.includes(searchInput);
+            let matchesStatus = (statusFilter === "" || statusFilter === "Tất cả" || status === statusFilter);
+
+            if (matchesName && matchesStatus) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+</script>

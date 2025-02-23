@@ -64,7 +64,8 @@
                 <div class="col-md-6 mb-3">
                     <label>Ngày sinh</label>
                     <input type="date" name="ngay_sinh" class="form-control"
-                        value="{{ $nhanVien->ngay_sinh ? $nhanVien->ngay_sinh->format('Y-m-d') : '' }}">
+                        value="{{ old('ngay_sinh', optional($nhanVien->ngay_sinh)->format('Y-m-d')) }}">
+
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -75,7 +76,9 @@
 
                 <div class="col-md-6 mb-3">
                     <label>Địa chỉ</label>
-                    <input type="text" name="dia_chi" class="form-control" value="{{ $nhanVien->dia_chi }}">
+                    <input type="text" name="dia_chi" class="form-control"
+                        value="{{ old('dia_chi', $nhanVien->dia_chi) }}">
+
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -91,10 +94,56 @@
                     <label>Mật khẩu (nếu thay đổi)</label>
                     <input type="password" name="password" class="form-control">
                 </div>
+
+                <!-- Hình thức lương -->
+                <div class="col-md-6 mb-3">
+                    <label>Hình thức lương</label>
+                    <select name="hinh_thuc_luong" class="form-control" id="hinhThucLuong" required>
+                        <option value="thang" {{ optional($nhanVien->luong)->hinh_thuc == 'thang' ? 'selected' : '' }}>
+                            Lương tháng</option>
+                        <option value="ca" {{ optional($nhanVien->luong)->hinh_thuc == 'ca' ? 'selected' : '' }}>Lương
+                            theo ca</option>
+                        <option value="gio" {{ optional($nhanVien->luong)->hinh_thuc == 'gio' ? 'selected' : '' }}>Lương
+                            theo giờ</option>
+                    </select>
+                </div>
+
+                <!-- Mức lương -->
+                <div class="col-md-6 mb-3">
+                    <label>Mức lương</label>
+                    <div class="input-group">
+                        <input type="number" name="muc_luong" class="form-control" id="mucLuong"
+                            value="{{ optional($nhanVien->luong)->muc_luong }}" required>
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="donViLuong">VNĐ / Tháng</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <button type="submit" class="btn btn-primary">Cập nhật</button>
             <a href="{{ route('nhan-vien.index') }}" class="btn btn-secondary">Trở lại danh sách</a>
         </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var hinhThucLuong = document.getElementById('hinhThucLuong');
+            var donViLuong = document.getElementById('donViLuong');
+
+            function updateDonViLuong() {
+                if (hinhThucLuong.value === 'ca') {
+                    donViLuong.textContent = 'VNĐ / Ca';
+                } else if (hinhThucLuong.value === 'gio') {
+                    donViLuong.textContent = 'VNĐ / Giờ';
+                } else {
+                    donViLuong.textContent = 'VNĐ / Tháng';
+                }
+            }
+
+            hinhThucLuong.addEventListener('change', updateDonViLuong);
+            updateDonViLuong();
+        });
+    </script>
 @endsection

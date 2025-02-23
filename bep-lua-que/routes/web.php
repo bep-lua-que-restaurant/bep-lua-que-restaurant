@@ -25,8 +25,10 @@ use App\Http\Controllers\MonAnController;
 use App\Http\Controllers\NguyenLieuController;
 // use App\Http\Controllers\PhieuNhapKhoController;
 
+
 // use App\Http\Controllers\PhieuNhapKhoController;
-use Illuminate\Support\Facades\Route;  // Giữ lại một lần duy nhất
+ // Giữ lại một lần duy nhất
+
 use App\Http\Controllers\BepController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HoaDonController;
@@ -39,7 +41,7 @@ use App\Http\Controllers\ThongKeController;
 use App\Http\Controllers\PhieuNhapKhoController;
 
 use App\Http\Controllers\LichLamViecController;
-use App\Http\Controllers\DanhMucMonAnController;
+
 
 
 /*
@@ -176,10 +178,25 @@ Route::post('nhan-vien/{id}/nghi-viec', [NhanVienController::class, 'nghiViec'])
 Route::post('nhan-vien/{id}/khoi-phuc', [NhanVienController::class, 'khoiPhuc'])->name('nhan-vien.khoi-phuc');
 
 
+
 Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
 Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
 Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 
+
+
+
+
+// // Đăng nhập phân quyền
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
+    Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
+    Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
+});
+Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 
 
 
@@ -206,6 +223,7 @@ Route::get('/', [ThongKeController::class, 'index'])->name('dashboard');
 
 
 Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])->name('thungan.destroy');
+
 
 
 Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])->name('thungan.destroy');
@@ -255,6 +273,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('/hoa-don/search',[HoaDonController::class, 'search'])->name('hoa-don.search');
+
 
 
 
