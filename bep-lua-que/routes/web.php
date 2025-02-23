@@ -21,9 +21,13 @@ use App\Http\Controllers\HoaDonController;
 use App\Http\Controllers\QuanLyController;
 use App\Http\Controllers\ThuNganController;
 use App\Http\Controllers\NhanVienController;
+
+use App\Http\Controllers\ThongKeController;
+
 use App\Http\Controllers\PhieuNhapKhoController;
 
 use App\Http\Controllers\LichLamViecController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -82,12 +86,12 @@ Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::c
 // });
 
 
-// Phong an 
+// Phong an
 Route::resource('phong-an', PhongAnController::class);
 Route::post('/phong-an/{banAn}/restore', [PhongAnController::class, 'restore'])->name('phong-an.restore');
 //Phong an
 
-// Bàn ăn 
+// Bàn ăn
 Route::resource('ban-an', BanAnController::class);
 Route::get('/ban-an/{id}', [BanAnController::class, 'show'])->name('ban-an.show');
 Route::post('/ban-an/{banAn}/restore', [BanAnController::class, 'restore'])->name('ban-an.restore');
@@ -162,9 +166,23 @@ Route::post('/thu-ngan/tao-hoa-don', [HoaDonController::class, 'createHoaDon'])-
 Route::get('/thu-ngan/hoa-don', [ThunganController::class, 'getHoaDon'])->name('thungan.getHoaDon');
 Route::get('/hoa-don/get-id', [ThuNganController::class, 'getHoaDonId'])->name('thungan.getHoaDonBan');
 Route::get('/hoa-don/get-details', [ThuNganController::class, 'getHoaDonDetails'])->name('thungan.getChiTietHoaDon');
+
+
+
+
+Route::get('/', [ThongKeController::class, 'index'])->name('dashboard');
+
+
+
+
+
+Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])->name('thungan.destroy');
+
+
 Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])->name('thungan.destroy');
 
 
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
 Route::get('/hoa-don/search',[HoaDonController::class, 'search'])->name('hoa-don.search');
+
