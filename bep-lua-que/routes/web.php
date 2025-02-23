@@ -4,6 +4,7 @@ use App\Http\Controllers\ComBoController;
 use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\BanAnController;
 use App\Http\Controllers\DatBanController;
+use App\Http\Controllers\LoaiNguyenLieuController;
 use App\Http\Controllers\PhongAnController;
 use App\Models\PhongAn;
 // use Illuminate\Support\Facades\Route;  // Dòng này đã bị xóa
@@ -22,10 +23,14 @@ use App\Http\Controllers\HoaDonController;
 use App\Http\Controllers\QuanLyController;
 use App\Http\Controllers\ThuNganController;
 use App\Http\Controllers\NhanVienController;
+
+use App\Http\Controllers\ThongKeController;
+
 use App\Http\Controllers\PhieuNhapKhoController;
 
 use App\Http\Controllers\LichLamViecController;
 use App\Http\Controllers\DanhMucMonAnController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -84,12 +89,11 @@ Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::c
 // });
 
 
-// Phong an 
+// Phong an
 Route::resource('phong-an', PhongAnController::class);
 Route::post('/phong-an/{banAn}/restore', [PhongAnController::class, 'restore'])->name('phong-an.restore');
 //Phong an
 
-// Bàn ăn 
 
 Route::resource('ban-an', BanAnController::class);
 Route::get('/ban-an/{id}', [BanAnController::class, 'show'])->name('ban-an.show');
@@ -129,7 +133,10 @@ Route::get('export-mon-an', [MonAnController::class, 'exportMonAn'])->name('mon-
 Route::post('/import-mon-an', [MonAnController::class, 'importMonAn'])->name('mon-an.import');
 Route::delete('/mon-an/xoa-hinh-anh/{hinhAnhId}', [MonAnController::class, 'xoaHinhAnh'])->name('mon-an.xoa-hinh-anh');
 
-
+// loại nguyên liêu
+Route::resource('loai-nguyen-lieu', LoaiNguyenLieuController::class);
+Route::get('export-loai-nguyen-lieu', [LoaiNguyenLieuController::class, 'export'])->name('loai-nguyen-lieu.export');
+Route::post('loai-nguyen-lieu/{id}/restore', [LoaiNguyenLieuController::class, 'restore'])->name('loai-nguyen-lieu.restore');
 
 // // phiếu nhập nguyên liệu
 Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
@@ -139,6 +146,11 @@ Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'exportPhieu
 // Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
 // Route::post('/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore'); // Khôi phục phiếu nhập
 // Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'exportPhieuNhapKho'])->name('phieu-nhap-kho.export');
+
+// Route để xem chi tiết nguyên liệu
+Route::get('phieu-nhap-kho/{phieuNhapId}/nguyen-lieu/{nguyenLieuId}', 
+    [PhieuNhapKhoController::class, 'xemChiTietNguyenLieu'])
+    ->name('phieu-nhap-kho.chitiet-nguyenlieu');
 
 
 
@@ -173,11 +185,25 @@ Route::post('/thu-ngan/tao-hoa-don', [HoaDonController::class, 'createHoaDon'])-
 Route::get('/thu-ngan/hoa-don', [ThunganController::class, 'getHoaDon'])->name('thungan.getHoaDon');
 Route::get('/hoa-don/get-id', [ThuNganController::class, 'getHoaDonId'])->name('thungan.getHoaDonBan');
 Route::get('/hoa-don/get-details', [ThuNganController::class, 'getHoaDonDetails'])->name('thungan.getChiTietHoaDon');
+
+
+
+
+Route::get('/', [ThongKeController::class, 'index'])->name('dashboard');
+
+
+
+
+
+Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])->name('thungan.destroy');
+
+
 Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])->name('thungan.destroy');
 
 
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
+
 Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
 
 // Đăng nhập phân quyền
@@ -189,3 +215,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/thu-ngan', [ThuNganController::class, 'index'])->name('thungan.dashboard');
     // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 });
+
+Route::get('/hoa-don/search',[HoaDonController::class, 'search'])->name('hoa-don.search');
+
+

@@ -9,13 +9,13 @@
         <td>{{ \Carbon\Carbon::parse($item->ngay_nhap)->format('d/m/Y') }}</td>
 
         <!-- Trạng thái phiếu nhập -->
-        <td>
+        {{-- <td>
             @if ($item->deleted_at)
                 <div class="d-flex align-items-center"><i class="fa fa-circle text-danger mr-1"></i> Đã xóa</div>
             @else
                 <div class="d-flex align-items-center"><i class="fa fa-circle text-success mr-1"></i> Hoạt động</div>
             @endif
-        </td>
+        </td> --}}
 
         <td>
             <div class="d-flex align-items-center">
@@ -26,7 +26,7 @@
                 {{-- <a href="{{ route('phieu-nhap-kho.edit', $item->id) }}" class="btn btn-warning btn-sm p-2 m-2">
                     <i class="fa fa-edit"></i>
                 </a> --}}
-                @if ($item->deleted_at)
+                {{-- @if ($item->deleted_at)
                     <form action="{{ route('phieu-nhap-kho.restore', $item->id) }}" method="POST" style="display:inline;">
                         @csrf
                         <button type="submit" onclick="return confirm('Bạn có chắc muốn khôi phục phiếu nhập này không?')"
@@ -43,7 +43,8 @@
                             <i class="fa fa-trash"></i>
                         </button>
                     </form>
-                @endif
+
+                @endif --}}
 
             </div>
         </td>

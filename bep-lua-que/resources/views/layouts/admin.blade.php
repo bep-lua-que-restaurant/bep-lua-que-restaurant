@@ -152,7 +152,7 @@
     <script src="{{ asset('admin') }}/vendor/global/global.min.js" type="text/javascript"></script>
     <script src="{{ asset('admin') }}/vendor/bootstrap-select/dist/js/bootstrap-select.min.js" type="text/javascript">
     </script>
-    <script src="{{ asset('admin') }}/vendor/chart.js/Chart.bundle.min.js" type="text/javascript"></script>
+{{--    <script src="{{ asset('admin') }}/vendor/chart.js/Chart.bundle.min.js" type="text/javascript"></script>--}}
     <script src="{{ asset('admin') }}/vendor/peity/jquery.peity.min.js" type="text/javascript"></script>
     <script src="{{ asset('admin') }}/vendor/apexchart/apexchart.js" type="text/javascript"></script>
     <script src="{{ asset('admin') }}/js/dashboard/dashboard-1.js" type="text/javascript"></script>
