@@ -1,7 +1,6 @@
-
 @foreach ($data as $index => $item)
     <tr data-toggle="collapse" data-target="#detail{{ $index }}" class="clickable-row">
-        
+
         <td><strong>{{ $item->id }}</strong></td>
         <td><strong>{{ $item->ma_phieu_nhap }}</strong></td>
         <td>{{ $item->nhanVien->ho_ten ?? 'N/A' }}</td>
@@ -9,19 +8,35 @@
         <td>{{ \Carbon\Carbon::parse($item->ngay_nhap)->format('d/m/Y') }}</td>
 
         <!-- Trạng thái phiếu nhập -->
-        {{-- <td>
-            @if ($item->deleted_at)
-                <div class="d-flex align-items-center"><i class="fa fa-circle text-danger mr-1"></i> Đã xóa</div>
+        <td>
+            @if ($item->trang_thai == 'cho_duyet')
+                <span class="badge bg-warning">Chờ duyệt</span>
+            @elseif ($item->trang_thai == 'da_duyet')
+                <span class="badge bg-success">Đã duyệt</span>
             @else
-                <div class="d-flex align-items-center"><i class="fa fa-circle text-success mr-1"></i> Hoạt động</div>
+                <span class="badge bg-danger">Hủy</span>
             @endif
-        </td> --}}
+        </td>
 
         <td>
             <div class="d-flex align-items-center">
                 <a href="{{ route('phieu-nhap-kho.show', $item->id) }}" class="btn btn-info btn-sm p-2 m-2">
                     <i class="fa fa-eye"></i>
                 </a>
+                @if ($item->trang_thai == 'cho_duyet')
+                    <form action="{{ route('phieu-nhap-kho.duyet', $item->id) }}" method="POST" style="display:inline;">
+                        @csrf
+                        @method('PUT')
+                        <button type="submit" class="btn btn-success btn-sm">Duyệt</button>
+                    </form>
+                    <form action="{{ route('phieu-nhap-kho.huy', $item->id) }}" method="POST" style="display:inline;">
+                        @csrf
+                        @method('PUT')
+                        <button type="submit" class="btn btn-danger btn-sm">Hủy</button>
+                    </form>
+                @else
+                    <button class="btn btn-secondary btn-sm" disabled>Không thể sửa</button>
+                @endif
                 {{-- Nếu cần chức năng sửa, bỏ comment phần này --}}
                 {{-- <a href="{{ route('phieu-nhap-kho.edit', $item->id) }}" class="btn btn-warning btn-sm p-2 m-2">
                     <i class="fa fa-edit"></i>

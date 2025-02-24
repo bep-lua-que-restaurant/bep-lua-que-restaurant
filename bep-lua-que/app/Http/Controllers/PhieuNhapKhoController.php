@@ -178,25 +178,39 @@ class PhieuNhapKhoController extends Controller
     }
 
     public function xemChiTietNguyenLieu($phieuNhapId, $nguyenLieuId)
-{
-    // Lấy chi tiết nguyên liệu từ bảng chi tiết phiếu nhập
-    $chiTiet = ChiTietPhieuNhapKho::where('phieu_nhap_kho_id', $phieuNhapId)
-        ->where('nguyen_lieu_id', $nguyenLieuId)
-        ->with('nguyenLieu.loaiNguyenLieu')
-        ->first();
+    {
+        // Lấy chi tiết nguyên liệu từ bảng chi tiết phiếu nhập
+        $chiTiet = ChiTietPhieuNhapKho::where('phieu_nhap_kho_id', $phieuNhapId)
+            ->where('nguyen_lieu_id', $nguyenLieuId)
+            ->with('nguyenLieu.loaiNguyenLieu')
+            ->first();
 
-    if (!$chiTiet) {
-        return redirect()->route('phieu-nhap-kho.show', ['id' => $phieuNhapId])
-            ->with('error', 'Nguyên liệu không tồn tại trong phiếu nhập.');
+        if (!$chiTiet) {
+            return redirect()->route('phieu-nhap-kho.show', ['id' => $phieuNhapId])
+                ->with('error', 'Nguyên liệu không tồn tại trong phiếu nhập.');
+        }
+
+        // Lấy số lượng tồn từ bảng nguyên liệu
+        $soLuongTon = $chiTiet->nguyenLieu->so_luong_ton ?? 0;
+
+        return view('admin.phieunhap.detail-nguyenlieu', compact('chiTiet', 'phieuNhapId', 'soLuongTon'));
     }
 
-    // Lấy số lượng tồn từ bảng nguyên liệu
-    $soLuongTon = $chiTiet->nguyenLieu->so_luong_ton ?? 0;
+    public function duyet($id)
+    {
+        $phieu = PhieuNhapKho::findOrFail($id);
+        $phieu->update(['trang_thai' => 'da_duyet']);
 
-    return view('admin.phieunhap.detail-nguyenlieu', compact('chiTiet', 'phieuNhapId', 'soLuongTon'));
-}
+        return redirect()->route('phieu-nhap-kho.index')->with('success', 'Phiếu nhập đã được duyệt!');
+    }
 
+    public function huy($id)
+    {
+        $phieu = PhieuNhapKho::findOrFail($id);
+        $phieu->update(['trang_thai' => 'huy']);
 
+        return redirect()->route('phieu-nhap-kho.index')->with('error', 'Phiếu nhập đã bị hủy!');
+    }
     // /**
     //  * Hiển thị form chỉnh sửa phiếu nhập kho.
     //  */

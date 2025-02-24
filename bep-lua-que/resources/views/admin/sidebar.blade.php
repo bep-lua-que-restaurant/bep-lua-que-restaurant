@@ -42,10 +42,8 @@
                 </ul>
 
                 <ul aria-expanded="false">
-                    <li><a href="#">Hóa đơn</a></li>
-                    <li><a href="#">Trả hàng</a></li>
-
-                    <li><a href="#">Trả hàng nhập</a></li>
+                    <li><a href="{{ route('phieu-nhap-kho.index') }}">Nhập hàng</a></li>
+                    {{-- <li><a href="#">Trả hàng nhập</a></li> --}}
                     <li><a href="#">Xuất hàng</a></li>
                 </ul>
             </li>
