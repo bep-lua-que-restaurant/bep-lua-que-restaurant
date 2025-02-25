@@ -14,10 +14,13 @@ return new class extends Migration
         Schema::create('ma_giam_gias', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique(); // Mã giảm giá
-            $table->integer('discount'); // Số tiền giảm hoặc phần trăm giảm
-            $table->enum('type', ['percent', 'fixed']); // Kiểu giảm giá
-            $table->integer('quantity')->default(1); // Số lượng mã có thể dùng
-            $table->dateTime('expires_at')->nullable(); // Hạn sử dụng
+            $table->enum('type', ['percentage', 'fixed']); // Loại giảm giá: phần trăm hoặc số tiền
+            $table->decimal('value', 8, 2); // Giá trị giảm
+            $table->decimal('min_order_value', 8, 2)->nullable(); // Đơn hàng tối thiểu (nếu có)
+            $table->dateTime('start_date'); // Ngày bắt đầu hiệu lực
+            $table->dateTime('end_date'); // Ngày kết thúc hiệu lực
+            $table->integer('usage_limit')->default(0); // Giới hạn lượt sử dụng (0: không giới hạn)
+            $table->integer('used')->default(0); // Số lượt đã sử dụng
             $table->timestamps();
         });
     }

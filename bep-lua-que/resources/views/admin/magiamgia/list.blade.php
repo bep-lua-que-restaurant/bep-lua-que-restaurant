@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-    Mã giảm giá
+    Mã giảm 
 @endsection
 
 @section('content')
@@ -15,7 +15,7 @@
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-                    <li class="breadcrumb-item active"><a href="javascript:void(0)"> Mã giảm gián</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">MaGiaGia</a></li>
                 </ol>
             </div>
         </div>
@@ -37,11 +37,11 @@
                             <!-- Nút Nhập file sẽ hiển thị Modal -->
                             <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
                                 data-target=".bd-example-modal-lg">
-                                <i class="fa fa-download"></i> Nhập file
+                                <i class="fa fa-upload"></i> Nhập file
                             </a>
 
-                            <a href="{{ route('danh-muc-mon-an.export') }}" class="btn btn-sm btn-success">
-                                <i class="fa fa-upload"></i> Xuất file
+                            <a href="{{ route('ma-giam-gia.export') }}" class="btn btn-sm btn-success">
+                                <i class="fa fa-download"></i> Xuất file
                             </a>
                             <a href="#" class="btn btn-sm btn-info">
                                 <i class="fa fa-list"></i> Danh sách
@@ -60,15 +60,19 @@
                                                 <label class="custom-control-label" for="checkAll"></label>
                                             </div>
                                         </th>
-                                        <th><strong>ID.</strong></th>
-                                        <th><strong>Mã </strong></th>
-                                        <th><strong>Mức giảm </strong></th>
-                                        <th><strong>Trạng thái</strong></th>
-                                        <th><strong>Hành động</strong></th>
+                                        {{-- <tr style="border: 40px;;">
+                                        <th>ID</th>
+                                        <th>Mã</th>
+                                        <th>Loại</th>
+                                        <th>Giá trị</th>
+                                        <th>Hiệu lực</th>
+                                        <th>Số lượt đã dùng</th>
+                                        <th>Hành động</th>
+                                    </tr> --}}
                                     </tr>
                                 </thead>
                                 <tbody id="{{ $tableId }}">
-                                    @include('admin.danhmuc.body-list')
+                                    @include('admin.magiamgia.body-list')
                                 </tbody>
 
                             </table>
@@ -90,8 +94,8 @@
                         aria-label="Close"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <!-- Form nhập file -->
-                    <form action="{{ route('danh-muc-mon-an.import') }}" method="POST" enctype="multipart/form-data"
+                     {{-- ///Form nhập file --> --}}
+                <form action="{{ route('ma-giam-gia.import') }}" method="POST" enctype="multipart/form-data"
                         id="importFileForm">
                         @csrf
                         <div class="mb-3">

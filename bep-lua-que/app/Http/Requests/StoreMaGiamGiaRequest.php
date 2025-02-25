@@ -6,23 +6,22 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreMaGiamGiaRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
+    public function authorize()
     {
-        return false;
+        // Nếu không có logic kiểm tra đặc biệt, trả về true
+        return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
-    public function rules(): array
+    public function rules()
     {
         return [
-            //
+            'code'            => 'required|string|max:20|unique:ma_giam_gias,code',
+            'type'            => 'required|in:percentage,fixed',
+            'value'           => 'required|numeric|min:0.01',
+            'min_order_value' => 'nullable|numeric|min:0',
+            'start_date'      => 'required|date|after_or_equal:today',
+            'end_date'        => 'required|date|after:start_date',
+            'usage_limit'     => 'nullable|integer|min:0',
         ];
     }
 }

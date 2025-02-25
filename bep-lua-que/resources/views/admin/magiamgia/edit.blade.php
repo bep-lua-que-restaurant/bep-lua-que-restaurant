@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-    Sửa danh mục
+    Sửa mã giảm giá
 @endsection
 
 @section('content')
@@ -9,13 +9,13 @@
         <div class="row page-titles mx-0">
             <div class="col-sm-6 p-md-0">
                 <div class="welcome-text">
-                    <h4> Sửa danh mục</h4>
+                    <h4> Sửa mã giảm giá</h4>
                 </div>
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-                    <li class="breadcrumb-item active"><a href="javascript:void(0)"> Sửa danh mục</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Sửa mã giảm giá</a></li>
                 </ol>
             </div>
         </div>
@@ -24,66 +24,92 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ route('danh-muc-mon-an.update', $danhMucMonAn) }}" method="POST"
-                            enctype="multipart/form-data">
+                        <!-- Hiển thị lỗi nếu có -->
+                        @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+            
+                        <form action="{{ route('ma-giam-gia.update', $maGiamGia->id) }}" method="POST">
                             @csrf
                             @method('PUT')
-                            <!-- Tên danh mục -->
-                            <div class="form-group">
-                                <label for="name">Tên danh mục</label>
-                                <input type="text" id="name" name="ten" class="form-control"
-                                    value="{{ $danhMucMonAn->ten }}">
-                                @if ($errors->has('ten'))
-                                    <small class="text-danger">*{{ $errors->first('ten') }}</small>
-                                @endif
-                            </div>
-
-                            <!-- Mô tả -->
-                            <div class="form-group">
-                                <label for="description">Mô tả</label>
-                                <textarea id="description" name="mo_ta" class="form-control" placeholder="Nhập mô tả">{{ $danhMucMonAn->mo_ta }}</textarea>
-                                @if ($errors->has('mo_ta'))
-                                    <small class="text-danger">*{{ $errors->first('mo_ta') }}</small>
-                                @endif
-                            </div>
-
-
-                            <!-- Hình ảnh -->
-                            <div class="form-group">
-                                <label for="image">Ảnh hiện tại</label>
-                                <div class="image-container">
-                                    @if ($danhMucMonAn->hinh_anh)
-                                        <img src="{{ asset('storage/' . $danhMucMonAn->hinh_anh) }}"
-                                            alt="{{ $danhMucMonAn->ten }}" class="img-fluid rounded border"
-                                            style="max-width: 250px; max-height: 250px;">
-                                    @else
-                                        <p>Mục này chưa có ảnh</p>
-                                    @endif
+            
+                            <div class="row">
+                                <!-- Mã Giảm Giá -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="code">Mã Giảm Giá:</label>
+                                        <input type="text" class="form-control" name="code" value="{{ old('code', $maGiamGia->code) }}" required>
+                                    </div>
+                                </div>
+            
+                                <!-- Loại Giảm Giá -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="type">Loại Giảm Giá:</label>
+                                        <select name="type" class="form-control" required>
+                                            <option value="percentage" {{ old('type', $maGiamGia->type) == 'percentage' ? 'selected' : '' }}>Phần trăm</option>
+                                            <option value="fixed" {{ old('type', $maGiamGia->type) == 'fixed' ? 'selected' : '' }}>Số tiền</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-
-                            <div class="form-group">
-                                <label for="image">Tải lên hình ảnh</label>
-                                <div class="image-upload-container">
-                                    <label for="image-upload" class="image-upload-label">
-                                        <i class="icon-camera"></i>
-                                        <img id="preview-image" alt="Preview" style="display: none;">
-                                    </label>
-                                    <input name="hinh_anh" type="file" id="image-upload" accept="image/*"
-                                        style="display: none;">
-                                    @if ($errors->has('hinh_anh'))
-                                        <small class="text-danger">{{ $errors->first('hinh_anh') }}</small>
-                                    @endif
+            
+                            <div class="row">
+                                <!-- Giá Trị Giảm -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="value">Giá Trị Giảm:</label>
+                                        <input type="number" step="0.01" class="form-control" name="value" value="{{ old('value', $maGiamGia->value) }}" required>
+                                    </div>
+                                </div>
+            
+                                <!-- Đơn Hàng Tối Thiểu -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="min_order_value">Đơn Hàng Tối Thiểu:</label>
+                                        <input type="number" step="0.01" class="form-control" name="min_order_value" value="{{ old('min_order_value', $maGiamGia->min_order_value) }}">
+                                    </div>
                                 </div>
                             </div>
-
-                            <!-- Nút submit -->
-                            <div class="form-group text-right">
-                                <a href="{{route('danh-muc-mon-an.index' )}}" class="btn btn-primary btn-sm"> <i class="fa fa-arrow-left"></i> Quay lại
+            
+                            <div class="row">
+                                <!-- Ngày Bắt Đầu -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="start_date">Ngày Bắt Đầu:</label>
+                                        <input type="datetime-local" class="form-control" name="start_date" value="{{ old('start_date', \Carbon\Carbon::parse($maGiamGia->start_date)->format('Y-m-d\TH:i')) }}" required>
+                                    </div>
+                                </div>
+            
+                                <!-- Ngày Kết Thúc -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="end_date">Ngày Kết Thúc:</label>
+                                        <input type="datetime-local" class="form-control" name="end_date" value="{{ old('end_date', \Carbon\Carbon::parse($maGiamGia->end_date)->format('Y-m-d\TH:i')) }}" required>
+                                    </div>
+                                </div>
+                            </div>
+            
+                            <!-- Giới Hạn Lượt Sử Dụng -->
+                            <div class="form-group">
+                                <label for="usage_limit">Giới Hạn Lượt Sử Dụng (0: Không giới hạn):</label>
+                                <input type="number" class="form-control" name="usage_limit" value="{{ old('usage_limit', $maGiamGia->usage_limit) }}">
+                            </div>
+            
+                            <!-- Nút Submit -->
+                            <div class="d-flex justify-content-between mt-4">
+                                <a href="{{ route('ma-giam-gia.index') }}" class="btn btn-secondary">
+                                    <i class="fa fa-arrow-left"></i> Quay lại
                                 </a>
-                                <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-save"></i> Lưu
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fa fa-save"></i> Cập Nhật Mã Giảm Giá
                                 </button>
-
                             </div>
                         </form>
                     </div>

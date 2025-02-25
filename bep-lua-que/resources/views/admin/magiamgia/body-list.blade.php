@@ -1,60 +1,76 @@
-@foreach ($data as $index => $item)
-    <tr data-toggle="collapse" data-target="#detail{{ $index }}" class="clickable-row">
-        <td>
-            <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
-                <input type="checkbox" class="custom-control-input" id="customCheckBox2" required="">
-                <label class="custom-control-label" for="customCheckBox2"></label>
-            </div>
-        </td>
-        <td><strong>{{ $item->id }}</strong></td>
-        <td>
-            <div class="d-flex align-items-center"><span class="w-space-no">{{ $item->ten }}</span></div>
-        </td>
-
-        <td>
-            @if ($item->deleted_at != null)
-                <div class="d-flex align-items-center"><i class="fa fa-circle text-danger mr-1"></i> Đã ngừng kinh doanh
-                </div>
-            @else
-                <div class="d-flex align-items-center"><i class="fa fa-circle text-success mr-1"></i> Đang kinh doanh
-                </div>
-                {{ $item->deleted_at }}
-            @endif
-
-        </td>
-        <td>
-            <div class="d-flex align-items-center">
-                <a href="{{ route('danh-muc-mon-an.show', $item->id) }}" class="btn btn-info btn-sm p-2 m-2">
-                    <i class="fa fa-eye"></i>
-                </a>
-                <a href="{{ route('danh-muc-mon-an.edit', $item->id) }}" class="btn btn-warning btn-sm p-2 m-2">
-                    <i class="fa fa-edit "></i>
-                </a>
-                @if ($item->deleted_at)
-                    <form action="{{ route('danh-muc-mon-an.restore', $item->id) }}" method="POST"
-                        style="display:inline;">
-                        @csrf
-                        <button type="submit" onclick="return confirm('Bạn có chắc muốn khôi phục mục này không?')"
-                            class="btn btn-success btn-sm p-2 m-2" title="Khôi phục">
-                            <i class="fa fa-recycle"></i> {{-- Icon khôi phục --}}
-                        </button>
-                    </form>
-                @else
-                    <form action="{{ route('danh-muc-mon-an.destroy', $item->id) }}" method="POST"
-                        style="display:inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" onclick="return confirm('Bạn muốn ngừng kinh doanh mục này chứ?')"
-                            class="btn btn-danger btn-sm p-2 m-2" title="Xóa">
-                            <i class="fa fa-trash"></i> {{-- Icon xóa --}}
-                        </button>
-                    </form>
-                @endif
-            </div>
-        </td>
-
-
-    </tr>
- 
-
-@endforeach
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Mã</th>
+            <th>Loại</th>
+            <th>Giá trị</th>
+            <th>Hiệu lực</th>
+            <th>Số lượt đã dùng</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($data as $index => $item)
+            <tr data-toggle="collapse" data-target="#detail{{ $index }}" class="clickable-row">
+                <td>{{ $item->id }}</td>
+                <td>{{ $item->code }}</td>
+                <td>{{ $item->type }}</td>
+                <td>{{ $item->value }}</td>
+                <td>
+                    @if($item->start_date && $item->end_date)
+                        Từ: {{ \Carbon\Carbon::parse($item->start_date)->format('d/m/Y') }}<br>
+                        Đến: {{ \Carbon\Carbon::parse($item->end_date)->format('d/m/Y') }}
+                    @else
+                        Không xác định
+                    @endif
+                </td>
+                <td>{{ $item->usage_count ?? 0 }}</td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <a href="{{ route('ma-giam-gia.show', $item->id) }}" class="btn btn-info btn-sm m-1">
+                            <i class="fa fa-eye"></i>
+                        </a>
+                        <a href="{{ route('ma-giam-gia.edit', $item->id) }}" class="btn btn-warning btn-sm m-1">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                        @if ($item->deleted_at)
+                            <form action="{{ route('ma-giam-gia.restore', $item->id) }}" method="POST" style="display:inline;">
+                                @csrf
+                                <button type="submit" onclick="return confirm('Bạn có chắc muốn khôi phục mục này không?')"
+                                    class="btn btn-success btn-sm m-1" title="Khôi phục">
+                                    <i class="fa fa-recycle"></i>
+                                </button>
+                            </form>
+                        @else
+                            <form action="{{ route('ma-giam-gia.destroy', $item->id) }}" method="POST" style="display:inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" onclick="return confirm('Bạn muốn ngừng mã giảm này chứ?')"
+                                    class="btn btn-danger btn-sm m-1" title="Xóa">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                </td>
+            </tr>
+            <!-- Nếu muốn có hàng chi tiết ẩn hiện, bạn có thể thêm row dưới dạng collapse -->
+            <tr id="detail{{ $index }}" class="collapse">
+                <td colspan="7">
+                    <!-- Nội dung chi tiết của row, có thể hiển thị thêm thông tin nếu cần -->
+                    <strong>Mã giảm giá:</strong> {{ $item->code }} <br>
+                    <strong>Loại:</strong> {{ $item->type }} <br>
+                    <strong>Giá trị:</strong> {{ $item->value }} <br>
+                    <strong>Hiệu lực:</strong> 
+                        @if($item->start_date && $item->end_date)
+                            Từ {{ \Carbon\Carbon::parse($item->start_date)->format('d/m/Y') }} đến {{ \Carbon\Carbon::parse($item->end_date)->format('d/m/Y') }}
+                        @else
+                            Không xác định
+                        @endif <br>
+                    <strong>Số lượt đã dùng:</strong> {{ $item->usage_count ?? 0 }}
+                </td>
+            </tr>
+        @endforeach
+    </tbody>
+</table>

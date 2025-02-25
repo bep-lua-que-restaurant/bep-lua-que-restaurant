@@ -19,7 +19,7 @@
                     <li><a href="{{ route('com-bo.index') }}">Combo - đóng gói</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="#">Mã giảm giá</a></li>
+                    <li><a href="{{ route('ma-giam-gia.index') }}">Mã giảm giá</a></li>
                 </ul>
             </li>
             {{-- Hàng hóa --}}

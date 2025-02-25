@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChamCongController;
 use App\Http\Controllers\DanhMucMonAnController;
 use App\Http\Controllers\ComBoController;
 use App\Http\Controllers\DichVuController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\QuanLyController;
 use App\Http\Controllers\ThuNganController;
 use App\Http\Controllers\NhanVienController;
 use App\Http\Controllers\PhieuNhapKhoController;
+use App\Http\Controllers\MaGiamGiaController;
 
 use App\Http\Controllers\LichLamViecController;
 
@@ -152,13 +154,18 @@ Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboar
 
 
 //lịch làm việc
+Route::get('/lich-lam-viec', [ChamCongController::class, 'index'])->name('lich-lam-viec.index');
+
+Route::post('/lich-lam-viec/store', [ChamCongController::class, 'store'])->name('lich-lam-viec.store');
+///Mã giảm giảm
+
+Route::resource('ma-giam-gia', MaGiamGiaController::class);
+Route::post('ma-giam-gia/restore/{id}', [MaGiamGiaController::class, 'restore'])->name('ma-giam-gia.restore');
+Route::get('export-ma-giam-gia', [MaGiamGiaController::class, 'export'])->name('ma-giam-gia.export');
+Route::post('/import-ma-giam-gia', [MaGiamGiaController::class, 'importMaGiamGia'])->name('ma-giam-gia.import');
 
 
-Route::resource('lich-lam-viec', LichLamViecController::class);
-Route::get('lich-lam-viec/export', [LichLamViecController::class, 'export'])->name('lich-lam-viec.export');
 
-Route::resource('lich-lam-viec', LichLamViecController::class);
-Route::get('lich-lam-viec/export', [LichLamViecController::class, 'export'])->name('lich-lam-viec.export');
 
 Route::get('/thu-ngan', [ThunganController::class, 'getBanAn'])->name('thungan.getBanAn');
 Route::get('/thu-ngan/get-thuc-don', [ThunganController::class, 'getThucDon'])->name('thungan.getThucDon');
