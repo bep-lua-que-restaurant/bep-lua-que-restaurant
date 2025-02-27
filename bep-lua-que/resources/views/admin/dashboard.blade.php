@@ -11,9 +11,9 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-4 text-center">
-                        <h5>Đơn đã xong</h5>
-                        <p class="text-danger" style="font-size: 24px; font-weight: bold;">3,886,000</p>
-                        <small class="text-muted">Hôm qua: 6,055,000</small>
+                        <h5>Đơn đã xong hôm nay</h5>
+                        <p class="text-danger" style="font-size: 24px; font-weight: bold;">{{ number_format(array_sum($data), 0, ',', '.') }} VND</p>
+{{--                        <small class="text-muted">Hôm qua: 6,055,000</small>--}}
                     </div>
                     <div class="col-md-4 text-center">
                         <h5>Đơn đang phục vụ</h5>
@@ -58,20 +58,23 @@
         </div>
 
         <div class="card mt-4">
-    <div class="card-body">
-        <h5 class="card-title fw-bold">So sánh Doanh số</h5>
-        <div class="row">
-            <div class="col-md-3 text-center">
-                <h6>Tháng này vs Tháng trước</h6>
-                <canvas id="pieChartMonth"></canvas>
-            </div>
-            <div class="col-md-3 text-center">
-                <h6>Tuần này vs Tuần trước</h6>
-                <canvas id="pieChartWeek"></canvas>
-            </div>
+            <div class="card-body">
+                <h5 class="card-title fw-bold">So sánh Doanh số</h5>
+                <div class="row d-flex justify-content-center">
+                    <div class="col-md-3 text-center">
+                        <h6>Tháng này vs Tháng trước</h6>
+                        <canvas id="pieChartMonth"></canvas>
+                        <p id="monthPercentage" class="fw-bold"></p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h6>Tuần này vs Tuần trước</h6>
+                        <canvas id="pieChartWeek"></canvas>
+                        <p id="weekPercentage" class="fw-bold"></p>
+                    </div>
+                </div>
         </div>
-    </div>
 </div>
+
 
     </div>
 
@@ -108,7 +111,7 @@
                 });
             }
 
-            function updatePieChart(chart, canvasId, data, labels) {
+            function updatePieChart(chart, canvasId, data, labels, percentageId, percentage) {
                 if (chart) {
                     chart.destroy();
                 }
@@ -126,6 +129,15 @@
                         responsive: true
                     }
                 });
+
+                // Hiển thị phần trăm chênh lệch
+                let changeText = percentage > 0
+                    ? `Tăng ${percentage}% so với kỳ trước 🔼`
+                    : percentage < 0
+                        ? `Giảm ${Math.abs(percentage)}% so với kỳ trước 🔽`
+                        : `Không thay đổi 📊`;
+
+                document.getElementById(percentageId).innerText = changeText;
                 return chart;
             }
 
@@ -142,13 +154,19 @@
                         updateChart(response.labels, response.data);
 
                         // Cập nhật biểu đồ tròn
-                        pieChartMonth = updatePieChart(pieChartMonth, 'pieChartMonth',
+                        pieChartMonth = updatePieChart(
+                            pieChartMonth, 'pieChartMonth',
                             [response.monthComparison.currentMonth, response.monthComparison.lastMonth],
-                            ['Tháng này', 'Tháng trước']);
+                            ['Tháng này', 'Tháng trước'],
+                            'monthPercentage', response.monthComparison.percentage
+                        );
 
-                        pieChartWeek = updatePieChart(pieChartWeek, 'pieChartWeek',
+                        pieChartWeek = updatePieChart(
+                            pieChartWeek, 'pieChartWeek',
                             [response.weekComparison.currentWeek, response.weekComparison.lastWeek],
-                            ['Tuần này', 'Tuần trước']);
+                            ['Tuần này', 'Tuần trước'],
+                            'weekPercentage', response.weekComparison.percentage
+                        );
                     },
                     error: function () {
                         alert('Lỗi tải dữ liệu, vui lòng thử lại.');
@@ -158,13 +176,20 @@
 
             // Khởi tạo biểu đồ ban đầu
             updateChart(@json($labels), @json($data));
-            pieChartMonth = updatePieChart(null, 'pieChartMonth',
-                [@json($currentMonthRevenue), @json($lastMonthRevenue)],
-                ['Tháng này', 'Tháng trước']);
 
-            pieChartWeek = updatePieChart(null, 'pieChartWeek',
+            pieChartMonth = updatePieChart(
+                null, 'pieChartMonth',
+                [@json($currentMonthRevenue), @json($lastMonthRevenue)],
+                ['Tháng này', 'Tháng trước'],
+                'monthPercentage', @json($monthPercentage)
+            );
+
+            pieChartWeek = updatePieChart(
+                null, 'pieChartWeek',
                 [@json($currentWeekRevenue), @json($lastWeekRevenue)],
-                ['Tuần này', 'Tuần trước']);
+                ['Tuần này', 'Tuần trước'],
+                'weekPercentage', @json($weekPercentage)
+            );
         });
     </script>
 

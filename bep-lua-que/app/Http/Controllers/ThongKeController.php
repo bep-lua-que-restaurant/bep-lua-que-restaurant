@@ -75,6 +75,15 @@ class ThongKeController extends Controller
         $lastWeekRevenue = HoaDon::whereBetween('created_at', [Carbon::now()->subWeek()->startOfWeek(), Carbon::now()->subWeek()->endOfWeek()])
             ->sum('tong_tien');
 
+        // Tính phần trăm chênh lệch
+        $monthPercentage = $lastMonthRevenue > 0
+            ? (($currentMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100
+            : 0;
+
+        $weekPercentage = $lastWeekRevenue > 0
+            ? (($currentWeekRevenue - $lastWeekRevenue) / $lastWeekRevenue) * 100
+            : 0;
+
         if ($request->ajax()) {
             return response()->json([
                 'labels' => $labels,
@@ -82,16 +91,18 @@ class ThongKeController extends Controller
                 'totalSales' => number_format(array_sum($data), 0, ',', '.') . ' VND',
                 'monthComparison' => [
                     'currentMonth' => $currentMonthRevenue,
-                    'lastMonth' => $lastMonthRevenue
+                    'lastMonth' => $lastMonthRevenue,
+                    'percentage' => round($monthPercentage, 2)
                 ],
                 'weekComparison' => [
                     'currentWeek' => $currentWeekRevenue,
-                    'lastWeek' => $lastWeekRevenue
+                    'lastWeek' => $lastWeekRevenue,
+                    'percentage' => round($weekPercentage, 2)
                 ]
             ]);
         }
 
-        return view('admin.dashboard', compact('labels', 'data', 'filterType', 'currentMonthRevenue', 'lastMonthRevenue', 'currentWeekRevenue', 'lastWeekRevenue'));
+        return view('admin.dashboard', compact('labels', 'data', 'filterType', 'currentMonthRevenue', 'lastMonthRevenue', 'currentWeekRevenue', 'lastWeekRevenue', 'monthPercentage', 'weekPercentage'));
     }
 
 }
