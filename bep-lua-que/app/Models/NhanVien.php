@@ -48,6 +48,10 @@ class NhanVien extends Authenticatable
 
     public function luong()
     {
-        return $this->hasOne(Luong::class);
+        return $this->hasOne(Luong::class,'nhan_vien_id','id');
+    }
+    public function chamCongs()
+    {
+        return $this->hasMany(ChamCong::class, 'nhan_vien_id', 'id');
     }
 }

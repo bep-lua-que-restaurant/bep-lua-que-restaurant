@@ -34,14 +34,14 @@
                             <label for="modalGhiChu" class="form-label">Ghi chú</label>
                             <input type="text" class="form-control" id="modalGhiChu">
                         </div>
-                        <div class="mb-3">
+                        {{-- <div class="mb-3">
                             <label for="modalGioVao" class="form-label">Giờ vào</label>
                             <input type="time" class="form-control" id="modalGioVao">
                         </div>
                         <div class="mb-3">
                             <label for="modalGioRa" class="form-label">Giờ ra</label>
                             <input type="time" class="form-control" id="modalGioRa">
-                        </div>
+                        </div> --}}
 
                     </div>
 
@@ -54,6 +54,7 @@
                                     <th>Trạng thái</th>
                                     <th>Hình thức</th>
                                     <th>Ghi chú</th>
+
                                 </tr>
                             </thead>
                             <tbody id="modalLichSuChamCong">
@@ -65,9 +66,11 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" id="deleteButton">Xóa</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+
+
                 <button type="button" class="btn btn-primary" id="btnLuuChamCong">Lưu</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+
             </div>
         </div>
     </div>
@@ -118,5 +121,7 @@
 
             });
         });
+
+
     });
 </script>
