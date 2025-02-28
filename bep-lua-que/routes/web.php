@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Http\Controllers\BangTinhLuongController;
 use App\Http\Controllers\ChamCongController;
 use App\Http\Controllers\DanhMucMonAnController;
 
@@ -11,7 +12,7 @@ use App\Http\Controllers\BanAnController;
 use App\Http\Controllers\DatBanController;
 use App\Http\Controllers\LoaiNguyenLieuController;
 use App\Http\Controllers\PhongAnController;
-
+use App\Http\Controllers\LuongController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -247,7 +248,6 @@ Route::get('/hoa-don/search',[HoaDonController::class, 'search'])->name('hoa-don
 
 //Chấm công
 
-
 Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
 
 Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('chamcong.store');
@@ -255,20 +255,51 @@ Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('cham
 // Lấy dữ liệu chấm công để hiển thị trong modal
 Route::get('/cham-cong/edit/{nhanVienId}/{ca}/{ngay}', [ChamCongController::class, 'edit']);
 
+//Update chấm công
+Route::patch('/cham-cong/update/{nhan_vien_id}/{ca}/{ngay}', 
+    [ChamCongController::class, 'updateChamCong']
+);
 
+//Kiểm cho chấm công
+Route::get('/cham-cong/check/{nhan_vien_id}/{ca}/{ngay}', [ChamCongController::class, 'checkChamCong']);
 
 Route::get('/lich-su-cham-cong', [ChamCongController::class, 'getLichSuChamCong']);
-
-
-
-
+//thay đổi tuần
 Route::get('/chamcong/change-week', [ChamCongController::class, 'changeWeek'])->name('chamcong.changeWeek');
+//xóa mềm chấm cống
+Route::post('/cham-cong/restore', [ChamCongController::class, 'restore'])->name('cham-cong.restore');
+
+Route::delete('/cham-cong/delete', [ChamCongController::class, 'softDelete'])->name('cham-cong.softDelete');
+
+Route::get('/cham-cong/danhsach', [ChamCongController::class, 'danhsach'])->name('cham-cong.danhsach');
+
+
+
 
 Route::resource('cham-cong', ChamCongController::class);
 
 
 Route::get('export-cham-cong', [ChamCongController::class, 'export'])->name('cham-cong.export');
 Route::post('/import-cham-cong', [ChamCongController::class, 'importDichVu'])->name('cham-cong.import');
+
+//Tính lương
+
+
+Route::get('/luong', [BangTinhLuongController::class, 'index'])->name('luong.index');
+Route::get('/luong/create', [BangTinhLuongController::class, 'create'])->name('luong.create');
+Route::post('/luong/store', [BangTinhLuongController::class, 'store'])->name('luong.store');
+
+Route::get('/luong/{id}', [BangTinhLuongController::class, 'show'])->name('luong.show');
+
+//lọc
+Route::get('/bang-luong/filter', [BangTinhLuongController::class, 'filter'])->name('bang-luong.filter');
+
+
+Route::get('luong/export', [BangTinhLuongController::class, 'export'])->name('luong.export');
+Route::post('luong/import', [BangTinhLuongController::class, 'import'])->name('luong.import');
+
+
+
 
 
 Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ChamCong extends Model
 {
     use HasFactory,SoftDeletes;
-
+    use SoftDeletes;
     protected $table = 'cham_congs';
 
     protected $fillable = [
@@ -20,9 +20,12 @@ class ChamCong extends Model
         'gio_ket_thuc',
         'mo_ta',
     ];
-
+    protected $dates = ['deleted_at'];
     //Liên kết với model Nhân viên
     public function nhanVien(){
-        return $this->belongsTo(NhanVien::class, 'nhan_vien_id');
+        return $this->belongsTo(NhanVien::class, 'nhan_vien_id','id');
+    }
+    public function caLam(){
+        return $this->belongsTo(CaLam::class, 'ca_lam_id');
     }
 }
