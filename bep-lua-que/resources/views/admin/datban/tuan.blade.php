@@ -132,14 +132,14 @@
                                                                 @csrf
                                                                 @method('DELETE')
                                                                 <div class="d-flex justify-content-center">
-                                                                    <label for="mo_ta" class="p-2">Ghi chú:
+                                                                    {{-- <label for="mo_ta" class="p-2">Ghi chú:
                                                                     </label>
                                                                     <input type="text" name="mo_ta" id="mo_ta"
-                                                                        placeholder="Ghi chú...">
+                                                                        placeholder="Ghi chú..."> --}}
                                                                 </div>
-                                                                <button type="submit" class="btn btn-danger mt-3"
+                                                                {{-- <button type="submit" class="btn btn-danger mt-3"
                                                                     onclick="return confirm('Bạn chắc chắn muốn hủy đặt bàn này?')">Hủy
-                                                                    đặt bàn</button>
+                                                                    đặt bàn</button> --}}
                                                             </form>
                                                         @endif
                                                     </div>
