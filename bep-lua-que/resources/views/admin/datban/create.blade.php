@@ -1,58 +1,17 @@
-@extends('layouts.admin')
+@extends('admin.datban.layout')
 
 @section('title')
     Danh mục Bàn Ăn
 @endsection
 
 @section('content')
-    <h1>Ban An</h1>
     <div class="container-fluid">
-        <div class="row page-titles mx-0">
-            <div class="col-sm-6 p-md-0">
-                <div class="welcome-text">
-                    <h4>Hi, welcome back!</h4>
-                </div>
-            </div>
-            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Danh mục bàn ăn</a></li>
-                </ol>
-            </div>
-        </div>
-        <!-- row -->
-        <div class="row">
-            {{-- @include('admin.filter') --}}
-        </div>
 
         <div class="row">
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-header">
                         <h4 class="card-title">Đặt bàn</h4>
-
-                        <div class="btn-group">
-                            <!-- Nút Thêm mới -->
-                            <a href="{{ route('ban-an.create') }}" class="btn btn-sm btn-primary">
-                                <i class="fa fa-plus"></i> Thêm mới
-                            </a>
-
-                            <!-- Nút Nhập file (Mở Modal) -->
-                            <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
-                                data-target="#importExcelModal">
-                                <i class="fa fa-upload"></i> Nhập file
-                            </a>
-
-                            <!-- Nút Xuất file -->
-                            <a href="{{ route('ban-an.export') }}" class="btn btn-sm btn-success">
-                                <i class="fa fa-download"></i> Xuất file
-                            </a>
-
-                            <!-- Nút Danh sách -->
-                            <a href="{{ route('ban-an.index') }}" class="btn btn-sm btn-info">
-                                <i class="fa fa-list"></i> Danh sách
-                            </a>
-                        </div>
 
                         <!-- Modal Nhập File -->
                         <div class="modal fade" id="importExcelModal" tabindex="-1" role="dialog"
@@ -149,8 +108,7 @@
                             <!-- Thông tin đặt bàn -->
                             <div class="mb-3">
                                 <label class="form-label">Thời gian đến:</label>
-                                <input type="datetime-local" class="form-control" name="thoi_gian_den"
-                                    id="thoi_gian_den"
+                                <input type="datetime-local" class="form-control" name="thoi_gian_den" id="thoi_gian_den"
                                     value="{{ old('thoi_gian_den', \Carbon\Carbon::parse($thoiGianDen)->format('Y-m-d\TH:i')) }}">
                                 @error('thoi_gian_den')
                                     <span class="text-danger">{{ $message }}</span>
@@ -309,7 +267,8 @@
                                 $('#banAnButtons').html('');
                                 // Thông báo cho người dùng rằng thời gian không hợp lệ
                                 alert(
-                                    "⚠️ **Thời gian được chọn không hợp lệ!** Vui lòng chọn thời gian sau thời gian hiện tại.");
+                                    "⚠️ **Thời gian được chọn không hợp lệ!** Vui lòng chọn thời gian sau thời gian hiện tại."
+                                );
                                 return; // Dừng xử lý nếu điều kiện không thỏa mãn
                             }
 

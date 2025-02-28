@@ -2,48 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DatBanCreated;
 use App\Models\DatBan;
-use App\Http\Requests\StoreDatBanRequest;
 use App\Http\Requests\UpdateDatBanRequest;
 use App\Models\BanAn;
 // use Flasher\Laravel\Http\Request;
 use App\Models\KhachHang;
-use App\Models\PhongAn;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use App\Models\Table;
-use Illuminate\Support\Facades\Http;
 
-use App\Events\DatBanStored;
-use App\Events\DatBanUpdated;
-use App\Events\DatBanDeleted;
+
+
 
 class DatBanController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-
-    public function datBan(Request $request)
-    {
-        $table = Table::find($request->table_id);
-
-        if (!$table || $table->status == 'booked') {
-            return response()->json(['message' => 'Bàn này đã được đặt!'], 400);
-        }
-
-        $table->status = 'booked';
-        $table->save();
-
-        // Gửi request đến TableBookedController để phát sự kiện realtime
-        Http::post(route('table.booked.broadcast'), ['table_id' => $table->id]);
-
-        return response()->json([
-            'message' => 'Bàn đã được đặt thành công!',
-            'table' => $table
-        ]);
-    }
     public function index()
     {
         // Lấy danh sách bàn
@@ -84,10 +60,14 @@ class DatBanController extends Controller
             ->whereNull('deleted_at')
             ->get();
         // dd($datBansMonth->toArray());
+        return view('admin.datban.index', compact('banPhong', 'datBansToday', 'datBansWeek', 'datBansMonth', 'today'));
+    }
 
+    public function DanhSach()
+    {
         $banhSachDatban = DatBan::select(
             'dat_bans.thoi_gian_den',
-            'khach_hangs.ho_ten', // Thêm họ tên khách hàng
+            'khach_hangs.ho_ten',
             'khach_hangs.so_dien_thoai',
             'dat_bans.so_nguoi',
             DB::raw("GROUP_CONCAT(ban_ans.ten_ban ORDER BY ban_ans.ten_ban SEPARATOR ', ') as danh_sach_ban"),
@@ -96,17 +76,24 @@ class DatBanController extends Controller
         )
             ->join('khach_hangs', 'dat_bans.khach_hang_id', '=', 'khach_hangs.id')
             ->join('ban_ans', 'dat_bans.ban_an_id', '=', 'ban_ans.id')
-            ->groupBy('dat_bans.thoi_gian_den', 'khach_hangs.ho_ten', 'khach_hangs.so_dien_thoai', 'dat_bans.so_nguoi', 'dat_bans.trang_thai', 'dat_bans.mo_ta')
-            ->orderByRaw("CASE WHEN DATE(dat_bans.thoi_gian_den) = ? THEN 0 ELSE 1 END, dat_bans.thoi_gian_den ASC", [$today])
-            ->get();
+            ->groupBy(
+                'dat_bans.id',
+                'dat_bans.thoi_gian_den',
+                'khach_hangs.ho_ten',
+                'khach_hangs.so_dien_thoai',
+                'dat_bans.so_nguoi',
+                'dat_bans.trang_thai',
+                'dat_bans.mo_ta'
+            )
+            ->orderBy('dat_bans.id', 'desc') // Sắp xếp theo ID mới nhất
+            ->paginate(10);
 
-        return view('admin.datban.index', compact('banPhong', 'datBansToday', 'datBansWeek', 'datBansMonth', 'today', 'banhSachDatban'));
+        return view('admin.datban.danhsach', compact('banhSachDatban'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
-
     public function filterDatBan(Request $request)
     {
         $today = Carbon::today();
@@ -256,8 +243,6 @@ class DatBanController extends Controller
             'ban_an_ids.min' => 'Cần chọn ít nhất một bàn ăn.',
         ]);
 
-
-
         // Kiểm tra khách hàng đã tồn tại
         $customer = KhachHang::where('so_dien_thoai', $request->customer_phone)
             ->where('can_cuoc', $request->customer_cancuoc)
@@ -283,14 +268,16 @@ class DatBanController extends Controller
                 'so_nguoi' => $request->num_people,
                 'ban_an_id' => $banAnId,  // Lưu thông tin bàn ăn
             ]);
+
+            // Phát sự kiện ngay sau khi tạo bản ghi
+            // broadcast(new DatBanCreated($datBan))->toOthers();
+            event(new DatBanCreated($datBan));
         }
-        // Phát sự kiện khi đơn đặt bàn được lưu
-        broadcast(new DatBanStored($datBan));
+
+
 
         return redirect()->route('dat-ban.index')->with('success', 'Đặt bàn thành công!');
     }
-
-
 
     public function show($id)
     {
@@ -312,9 +299,6 @@ class DatBanController extends Controller
         // Trả về view với thông tin đặt bàn và bàn đã chọn
         return view('admin.datban.show', compact('datBan', 'datBans'));
     }
-
-
-
 
     /**
      * Show the form for editing the specified resource.
@@ -354,7 +338,6 @@ class DatBanController extends Controller
                 ->where('created_at', $datBan->created_at)
                 ->update(['trang_thai' => 'xac_nhan']);
             // Phát sự kiện khi đơn đặt bàn được cập nhật
-            broadcast(new DatBanUpdated($datBan));
 
             // Thông báo thành công
             return redirect()->back()->with('success', 'Cập nhật trạng thái thành công! Trạng thái đã được chuyển sang "Đã xác nhận".');
@@ -363,8 +346,6 @@ class DatBanController extends Controller
             return redirect()->back()->with('error', 'Không thể cập nhật, trạng thái hiện tại không phải là "Đang xử lý".');
         }
     }
-
-
 
     /**
      * Remove the specified resource from storage.
@@ -380,7 +361,6 @@ class DatBanController extends Controller
                 ->update(['trang_thai' => 'da_huy']);
 
             // Phát sự kiện khi đơn đặt bàn bị hủy
-            broadcast(new DatBanDeleted($datBan));
 
             // Thông báo thành công
             return redirect()->back()->with('success', 'Tất cả các đơn đặt bàn đã được hủy thành công!');

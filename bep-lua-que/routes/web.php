@@ -27,7 +27,7 @@ use App\Http\Controllers\NguyenLieuController;
 
 
 // use App\Http\Controllers\PhieuNhapKhoController;
- // Giữ lại một lần duy nhất
+// Giữ lại một lần duy nhất
 
 use App\Http\Controllers\BepController;
 use App\Http\Controllers\AuthController;
@@ -117,9 +117,12 @@ Route::post('/ban-an/import', [BanAnController::class, 'import'])->name('ban-an.
 // Bàn ăn
 
 // Đặt bàn
+// Route::post('/dat-ban', [DatBanController::class, 'datBan']);
+Route::get('/danh-sach-dat-ban', [DatBanController::class, 'DanhSach'])->name('datban.danhsach');
+
+
 Route::resource('dat-ban', DatBanController::class);
 Route::get('/dat-ban/{dat_ban}/edit', [DatBanController::class, 'edit'])->name('dat-ban.edit');
-
 
 // Route để tìm kiếm khách hàng
 Route::get('/dat-ban/search-customer', [DatBanController::class, 'searchCustomer'])->name('admin.datban.search');
@@ -129,14 +132,14 @@ Route::get('admin/khachhang/search', [DatBanController::class, 'searchCustomer']
 Route::get('admin/dat-ban/create', [DatBanController::class, 'create'])->name('admin.datban.create');
 Route::get('admin/khachhang/search', [DatBanController::class, 'searchCustomer'])->name('admin.khachhang.search');
 Route::get('/admin/datban/filter', [DatBanController::class, 'filterBanAnByTime'])->name('admin.datban.filter');
-Route::get('/admin/datban/get-ban-an-for-edit', [DatBanController::class, 'getBanAnForEdit'])->name('admin.datban.getBanAnForEdit');
+// Route::get('/admin/datban/get-ban-an-for-edit', [DatBanController::class, 'getBanAnForEdit'])->name('admin.datban.getBanAnForEdit');
 
 Route::get('/filter-datban', [DatBanController::class, 'filterDatBan'])->name('datban.filter');
 Route::post('/table/booked/broadcast', [TableBookedController::class, 'broadcastTableBooking'])->name('table.booked.broadcast');
 
+Route::put('/dat-ban/{id}', [DatBanController::class, 'update'])->name('datban.update');
 // routes/web.php
 
-Route::put('/dat-ban/{id}', [DatBanController::class, 'update'])->name('datban.update');
 
 // Món ăn
 Route::resource('mon-an', MonAnController::class);
@@ -160,8 +163,10 @@ Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'exportPhieu
 // Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'exportPhieuNhapKho'])->name('phieu-nhap-kho.export');
 
 // Route để xem chi tiết nguyên liệu
-Route::get('phieu-nhap-kho/{phieuNhapId}/nguyen-lieu/{nguyenLieuId}', 
-    [PhieuNhapKhoController::class, 'xemChiTietNguyenLieu'])
+Route::get(
+    'phieu-nhap-kho/{phieuNhapId}/nguyen-lieu/{nguyenLieuId}',
+    [PhieuNhapKhoController::class, 'xemChiTietNguyenLieu']
+)
     ->name('phieu-nhap-kho.chitiet-nguyenlieu');
 
 
@@ -243,7 +248,7 @@ Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.sh
 Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
 
 
-Route::get('/hoa-don/search',[HoaDonController::class, 'search'])->name('hoa-don.search');
+Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
 
 //Chấm công
 
@@ -283,9 +288,12 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 });
 
-Route::get('/hoa-don/search',[HoaDonController::class, 'search'])->name('hoa-don.search');
+Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
 
 
+use Illuminate\Support\Facades\Log;
 
-
-
+Route::get('/test-log', function () {
+    Log::info('Test ghi log Laravel');
+    return 'Đã ghi log!';
+});
