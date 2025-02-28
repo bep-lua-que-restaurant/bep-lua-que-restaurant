@@ -108,7 +108,7 @@
                     <li><a href="{{ route('ca-lam.index') }}">ca làm</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="{{ route('lich-lam-viec.index') }}">Lịch làm việc</a></li>
+                    <li><a href="{{ route('ca-lam-nhan-vien.index') }}">Quản lí ca </a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="#">Chấm công</a></li>

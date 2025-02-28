@@ -25,6 +25,7 @@ class MaGiamGiaController extends Controller
         }
 
         $data = $query->latest('id')->paginate(15);
+        
         // Xử lý trả về khi yêu cầu là Ajax
         if ($request->ajax()) {
             return response()->json([
