@@ -217,14 +217,6 @@ Route::get('/hoa-don/get-details', [ThuNganController::class, 'getHoaDonDetails'
 
 Route::get('/', [ThongKeController::class, 'index'])->name('dashboard');
 
-
-
-
-
-Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])->name('thungan.destroy');
-
-
-
 Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])->name('thungan.destroy');
 Route::post('/hoa-don/update-status', [ThuNganController::class, 'updateStatus'])->name('thungan.thongBaoBep');
 Route::post('/update-ban-status', [ThuNganController::class, 'updateBanStatus'])->name('thungan.updateBanStatus');
@@ -234,7 +226,8 @@ Route::get('thu-ngan-get-bill-ban/{id}', [ThuNganController::class, 'getBillBan'
     ->name('thungan.getBillBan');
 Route::post('thu-ngan-ghep-ban', [ThuNganController::class, 'ghepBan'])
     ->name('thungan.ghepBan');
-
+Route::post('/hoa-don/update-quantity',[ThuNganController::class, 'updateQuantity'])->name('thungan.updateQuantity');
+    
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
 
@@ -299,18 +292,18 @@ Route::post('luong/import', [BangTinhLuongController::class, 'import'])->name('l
 
 
 
-Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
 
-// Đăng nhập phân quyền
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::middleware(['auth'])->group(function () {
-    Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
-    Route::get('/thu-ngan', [ThuNganController::class, 'index'])->name('thungan.dashboard');
-    // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
-});
 
+// // Đăng nhập phân quyền
+// Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+// Route::post('/login', [AuthController::class, 'login']);
+// Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// Route::middleware(['auth'])->group(function () {
+   
+  
+//     // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
+// });
+Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
 Route::get('/hoa-don/search',[HoaDonController::class, 'search'])->name('hoa-don.search');
 
 
