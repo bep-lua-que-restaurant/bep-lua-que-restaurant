@@ -1,46 +1,48 @@
 <?php
 
 
-use App\Http\Controllers\ChamCongController;
-use App\Http\Controllers\DanhMucMonAnController;
+use App\Models\MonAn;
+use App\Models\PhongAn;
+
+use App\Events\MonMoiDuocThem;
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BepController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BanAnController;
+use App\Http\Controllers\CaLamController;
 
 
 use App\Http\Controllers\ComBoController;
-use App\Http\Controllers\DichVuController;
-use App\Http\Controllers\BanAnController;
-use App\Http\Controllers\DatBanController;
-use App\Http\Controllers\LoaiNguyenLieuController;
-use App\Http\Controllers\PhongAnController;
 
-
-use Illuminate\Support\Facades\Route;
-
-use App\Models\PhongAn;
+use App\Http\Controllers\MonAnController;
 // use Illuminate\Support\Facades\Route;  // Dòng này đã bị xóa
 
-use App\Http\Controllers\TableBookedController;
-use App\Http\Controllers\CaLamController;
-use App\Http\Controllers\ChiTietNhapKhoController;
-use App\Http\Controllers\MonAnController;
-use App\Http\Controllers\NguyenLieuController;
-// use App\Http\Controllers\PhieuNhapKhoController;
-
-
-// use App\Http\Controllers\PhieuNhapKhoController;
- // Giữ lại một lần duy nhất
-
-use App\Http\Controllers\BepController;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DatBanController;
+use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\HoaDonController;
 use App\Http\Controllers\QuanLyController;
-use App\Http\Controllers\ThuNganController;
-use App\Http\Controllers\NhanVienController;
+use App\Http\Controllers\PhongAnController;
+// use App\Http\Controllers\PhieuNhapKhoController;
+
+
+// use App\Http\Controllers\PhieuNhapKhoController;
+// Giữ lại một lần duy nhất
 
 use App\Http\Controllers\ThongKeController;
+use App\Http\Controllers\ThuNganController;
+use App\Http\Controllers\ChamCongController;
+use App\Http\Controllers\NhanVienController;
+use App\Http\Controllers\NguyenLieuController;
+use App\Http\Controllers\LichLamViecController;
+
+use App\Http\Controllers\TableBookedController;
+
+use App\Http\Controllers\DanhMucMonAnController;
 
 use App\Http\Controllers\PhieuNhapKhoController;
-
-use App\Http\Controllers\LichLamViecController;
+use App\Http\Controllers\ChiTietNhapKhoController;
+use App\Http\Controllers\LoaiNguyenLieuController;
 
 
 
@@ -160,8 +162,10 @@ Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'exportPhieu
 // Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'exportPhieuNhapKho'])->name('phieu-nhap-kho.export');
 
 // Route để xem chi tiết nguyên liệu
-Route::get('phieu-nhap-kho/{phieuNhapId}/nguyen-lieu/{nguyenLieuId}', 
-    [PhieuNhapKhoController::class, 'xemChiTietNguyenLieu'])
+Route::get(
+    'phieu-nhap-kho/{phieuNhapId}/nguyen-lieu/{nguyenLieuId}',
+    [PhieuNhapKhoController::class, 'xemChiTietNguyenLieu']
+)
     ->name('phieu-nhap-kho.chitiet-nguyenlieu');
 
 
@@ -181,6 +185,7 @@ Route::post('nhan-vien/{id}/khoi-phuc', [NhanVienController::class, 'khoiPhuc'])
 
 Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
 Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
+
 Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 
 
@@ -192,14 +197,14 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
-    Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
-    Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
+   
     Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 });
 Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 
 
-
+Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
+Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
 
 //lịch làm việc
 
@@ -243,7 +248,7 @@ Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.sh
 Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
 
 
-Route::get('/hoa-don/search',[HoaDonController::class, 'search'])->name('hoa-don.search');
+Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
 
 //Chấm công
 
@@ -279,13 +284,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
     Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
-    Route::get('/thu-ngan', [ThuNganController::class, 'index'])->name('thungan.dashboard');
+    // Route::get('/thu-ngan', [ThuNganController::class, 'index'])->name('thungan.dashboard');
     // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 });
 
-Route::get('/hoa-don/search',[HoaDonController::class, 'search'])->name('hoa-don.search');
-
-
-
-
-
+Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');

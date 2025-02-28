@@ -104,7 +104,7 @@
 
             {{-- Thu ngân --}}
             <li>
-                <a class="ai-icon" href="/thu-ngan">
+                <a class="ai-icon" href="{{ route('thungan.getBanAn') }}">
                     <i class="fa fa-cash-register"></i>
                     <span class="nav-text">Thu ngân</span>
                 </a>
