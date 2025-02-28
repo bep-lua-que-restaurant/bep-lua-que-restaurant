@@ -8,10 +8,23 @@ use Illuminate\Database\Eloquent\Model;
 class LichLamViec extends Model
 {
     use HasFactory;
-    protected $fillable = ['nhan_vien_id', 'ca', 'ngay'];
-    
+
+    protected $table = 'ca_lam_nhan_viens';
+
+    protected $fillable = [
+        'nhan_vien_id',
+        'ca_lam_id',
+        'ngay_lam',
+        'xac_nhan'
+    ];
+
     public function nhanVien()
     {
-        return $this->belongsTo(NhanVien::class);
+        return $this->belongsTo(NhanVien::class, 'nhan_vien_id');
+    }
+
+    public function caLam()
+    {
+        return $this->belongsTo(CaLam::class, 'ca_lam_id');
     }
 }

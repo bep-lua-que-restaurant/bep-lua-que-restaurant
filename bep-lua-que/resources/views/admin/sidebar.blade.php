@@ -15,6 +15,7 @@
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="{{ route('loai-nguyen-lieu.index') }}">Loại nguyên liệu</a></li>
+                    <li><a href="{{ route('ma-giam-gia.index') }}">Mã giảm giá</a></li>
                 </ul>
             </li>
 
@@ -39,6 +40,9 @@
 
                 <ul aria-expanded="false">
                     <li><a href="{{ route('hoa-don.index') }}">Hóa đơn</a></li>
+                </ul>
+                <ul aria-expanded="false">
+                    <li><a href="#">Trả hàng</a></li>
                 </ul>
 
                 <ul aria-expanded="false">
@@ -72,7 +76,10 @@
                     <li><a href="{{ route('nhan-vien.index') }}">Nhân viên</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="{{ route('ca-lam.index') }}">Lịch làm việc</a></li>
+                    <li><a href="{{ route('ca-lam.index') }}">ca làm</a></li>
+                </ul>
+                <ul aria-expanded="false">
+                    <li><a href="{{ route('ca-lam-nhan-vien.index') }}">Quản lí ca </a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="{{ route('cham-cong.index') }}">Chấm công</a></li>
