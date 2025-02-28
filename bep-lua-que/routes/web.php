@@ -154,11 +154,8 @@ Route::post('loai-nguyen-lieu/{id}/restore', [LoaiNguyenLieuController::class, '
 Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
 Route::post('/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore'); // Khôi phục phiếu nhập
 Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'exportPhieuNhapKho'])->name('phieu-nhap-kho.export');
-// phiếu nhập nguyên liệu
-// Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
-// Route::post('/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore'); // Khôi phục phiếu nhập
-// Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'exportPhieuNhapKho'])->name('phieu-nhap-kho.export');
-
+Route::put('/phieu-nhap-kho/{id}/duyet', [PhieuNhapKhoController::class, 'duyet'])->name('phieu-nhap-kho.duyet');
+Route::put('/phieu-nhap-kho/{id}/huy', [PhieuNhapKhoController::class, 'huy'])->name('phieu-nhap-kho.huy');
 // Route để xem chi tiết nguyên liệu
 Route::get('phieu-nhap-kho/{phieuNhapId}/nguyen-lieu/{nguyenLieuId}', 
     [PhieuNhapKhoController::class, 'xemChiTietNguyenLieu'])

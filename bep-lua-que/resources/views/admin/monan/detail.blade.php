@@ -20,7 +20,7 @@
 
     <div class="mb-3">
         <label class="form-label"><strong>Mô tả:</strong></label>
-        <div>{!!$monAn->mo_ta!!}</div>
+        <div>{!! $monAn->mo_ta !!}</div>
     </div>
 
     <div class="mb-3">
@@ -47,6 +47,33 @@
                 <p>Chưa có hình ảnh</p>
             @endforelse
         </div>
+    </div>
+
+    <!-- Danh sách nguyên liệu -->
+    <div class="mb-3">
+        <label class="form-label"><strong>Nguyên liệu:</strong></label>
+        @if ($monAn->nguyenLieus->isEmpty())
+            <p>Chưa có nguyên liệu</p>
+        @else
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Tên nguyên liệu</th>
+                        <th>Số lượng</th>
+                        <th>Đơn vị tính</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($monAn->nguyenLieus as $nguyenLieu)
+                        <tr>
+                            <td>{{ $nguyenLieu->ten_nguyen_lieu }}</td>
+                            <td>{{ $nguyenLieu->pivot->so_luong }}</td>
+                            <td>{{ $nguyenLieu->pivot->don_vi_tinh }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
     </div>
 
     <a href="{{ route('mon-an.index') }}" class="btn btn-secondary">Quay lại danh sách</a>

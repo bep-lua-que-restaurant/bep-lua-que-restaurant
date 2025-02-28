@@ -16,6 +16,8 @@ class ChiTietPhieuNhapKho extends Model
         'phieu_nhap_kho_id',
         'nguyen_lieu_id',
         'so_luong',
+        'don_vi_nhap',
+        'so_luong_quy_doi',
         'don_gia',
         'tong_tien',
         'han_su_dung',
