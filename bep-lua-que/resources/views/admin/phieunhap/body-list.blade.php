@@ -23,20 +23,7 @@
                 <a href="{{ route('phieu-nhap-kho.show', $item->id) }}" class="btn btn-info btn-sm p-2 m-2">
                     <i class="fa fa-eye"></i>
                 </a>
-                @if ($item->trang_thai == 'cho_duyet')
-                    <form action="{{ route('phieu-nhap-kho.duyet', $item->id) }}" method="POST" style="display:inline;">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit" class="btn btn-success btn-sm">Duyệt</button>
-                    </form>
-                    <form action="{{ route('phieu-nhap-kho.huy', $item->id) }}" method="POST" style="display:inline;">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit" class="btn btn-danger btn-sm">Hủy</button>
-                    </form>
-                @else
-                    <button class="btn btn-secondary btn-sm" disabled>Không thể sửa</button>
-                @endif
+               
                 {{-- Nếu cần chức năng sửa, bỏ comment phần này --}}
                 {{-- <a href="{{ route('phieu-nhap-kho.edit', $item->id) }}" class="btn btn-warning btn-sm p-2 m-2">
                     <i class="fa fa-edit"></i>
