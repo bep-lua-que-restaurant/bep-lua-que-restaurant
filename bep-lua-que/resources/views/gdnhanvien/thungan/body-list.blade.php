@@ -1,4 +1,15 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<style>
+    .ban.active {
+        border: 2px solid #007bff;
+        /* Viền màu xanh */
+        background-color: rgba(0, 123, 255, 0.1);
+        /* Nền nhạt */
+        box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+        /* Đổ bóng */
+    }
+</style>
+
 <div class="swiper mySwiper">
     <div class="swiper-wrapper">
         @foreach ($data->chunk(12) as $chunk)
@@ -8,11 +19,13 @@
                         <div class="col-md-2 col-4 mb-2">
 
                             <div class="ban cardd card text-center p-1" data-id="{{ $banAn->id }}"
-                                id="ban-{{ $banAn->id }}">
+                                id="ban-{{ $banAn->id }}" onclick="setActive(this)">
 
                                 <div class="card-body p-2">
                                     <h5><i class="fas fa-utensils" style="font-size: 24px;"></i></h5>
-                                    <h6 class="card-title" style="font-size: 12px;">{{ $banAn->ten_ban }}</h6>
+                                    <h6 class="card-title" style="font-size: 12px;">{{ $banAn->ten_ban }}
+                                        ({{ $banAn->so_ghe }} ghế)
+                                    </h6>
 
                                     @if ($banAn->trang_thai == 'trong')
                                         <p class="badge badge-success" style="font-size: 10px;">Có sẵn</p>
@@ -51,6 +64,15 @@
 
 
 <script>
+    function setActive(element) {
+        // Xóa class 'active' khỏi tất cả các bàn
+        document.querySelectorAll('.ban').forEach(el => el.classList.remove('active'));
+
+        // Thêm class 'active' vào bàn được chọn
+        element.classList.add('active');
+    }
+
+
     var swiper = new Swiper(".mySwiper", {
         slidesPerView: 1, // Mỗi lần hiển thị 1 nhóm 12 sản phẩm
         spaceBetween: 20, // Khoảng cách giữa các nhóm
@@ -72,7 +94,7 @@
             var banId = $(this).data('id'); // Lấy ID bàn
             var tenBan = $(this).find('.card-title').text(); // Lấy tên bàn
 
-            console.log("🔥 Bàn được chọn:", banId);
+            // console.log("🔥 Bàn được chọn:", banId);
             // Lưu ID bàn vào dataset để sử dụng khi thêm món
             $('#ten-ban').data('currentBan', banId);
             $('#ten-ban').text(tenBan);
@@ -86,14 +108,14 @@
                 },
                 success: function(response) {
                     if (response.hoa_don_id) {
-                        console.log("🔥 Hóa đơn ID:", response.hoa_don_id);
+                        // console.log("🔥 Hóa đơn ID:", response.hoa_don_id);
 
                         $('#ten-ban').data('hoaDonId', response.hoa_don_id);
 
                         // Gọi API để lấy chi tiết hóa đơn
                         loadChiTietHoaDon(response.hoa_don_id);
                     } else {
-                        console.log("🔥 Bàn này chưa có hóa đơn.");
+                        // console.log("🔥 Bàn này chưa có hóa đơn.");
                         $('#ten-ban').data('hoaDonId', null);
                         $('#hoa-don-body').html(
                             '<tr><td colspan="5" class="text-center">Chưa có món nào trong đơn</td></tr>'
@@ -108,59 +130,107 @@
             });
         });
 
-            function loadChiTietHoaDon(hoaDonId) {
-                $.ajax({
-                    url: "/hoa-don/get-details",
-                    method: "GET",
-                    data: {
-                        hoa_don_id: hoaDonId
-                    },
-                    success: function(response) {
-                        let hoaDonBody = $("#hoa-don-body");
-                        hoaDonBody.empty();
+        // Hàm cập nhật số lượng món ăn
+        function updateSoLuong(monAnId, thayDoi) {
+            $.ajax({
+                url: "/hoa-don/update-quantity",
+                method: "POST",
+                data: {
+                    mon_an_id: monAnId,
+                    thay_doi: thayDoi,
+                    _token: $('meta[name="csrf-token"]').attr("content") // Nếu dùng Laravel
+                },
+                success: function(response) {
+                    loadChiTietHoaDon(response
+                    .hoa_don_id); // Load lại chi tiết hóa đơn sau khi cập nhật
+                },
+                error: function(xhr) {
+                    console.error("❌ Lỗi khi cập nhật số lượng:", xhr.responseText);
+                },
+            });
+        }
 
-                        let offcanvasBody = $(".offcanvas-body tbody"); // Lấy phần bảng trong offcanvas
-                        offcanvasBody.empty(); // Xóa nội dung cũ
-                        var soNguoi = response.so_nguoi
+        function loadChiTietHoaDon(hoaDonId) {
+            $.ajax({
+                url: "/hoa-don/get-details",
+                method: "GET",
+                data: {
+                    hoa_don_id: hoaDonId
+                },
+                success: function(response) {
+                    let hoaDonBody = $("#hoa-don-body");
+                    hoaDonBody.empty();
 
-                        let tongTien = 0;
-                        if (response.chi_tiet_hoa_don.length > 0) {
-                            let index = 1;
-                            response.chi_tiet_hoa_don.forEach((item) => {
-                                let row = `
+                    let offcanvasBody = $(".offcanvas-body tbody"); // Lấy phần bảng trong offcanvas
+                    offcanvasBody.empty(); // Xóa nội dung cũ
+                    var soNguoi = response.so_nguoi
+                    let tongTien = 0;
+                    if (response.chi_tiet_hoa_don.length > 0) {
+                        let index = 1;
+                        response.chi_tiet_hoa_don.forEach((item) => {
+                            let row = `
                             <tr id="mon-${item.id}">
                                 <td>${index}</td>
                                 <td>${item.tenMon}</td>
-                                <td class="text-center">${item.so_luong}</td>
+                                                    <td class="text-center">
+                                <button class="btn btn-sm btn-outline-danger giam-soluong" data-id="${
+                                    item.id
+                                }">-</button>
+                                <span class="so-luong">${item.so_luong}</span>
+                                <button class="btn btn-sm btn-outline-success tang-soluong" data-id="${
+                                    item.id
+                                }">+</button>
+                            </td>
                                 <td class="text-end">${item.don_gia.toLocaleString()} VNĐ</td>
                                 <td class="text-end">${(item.so_luong * item.don_gia).toLocaleString()} VNĐ</td>
                             </tr>`;
-                                hoaDonBody.append(row);
-                                offcanvasBody.append(row);
-                                tongTien += item.so_luong * item.don_gia;
-                                index++;
-                            });
-                        } else {
-                            let emptyRow =
-                                '<tr><td colspan="4" class="text-center">Chưa có món nào</td></tr>';
-                            hoaDonBody.html(emptyRow);
-                            offcanvasBody.html(emptyRow);
-                        }
-
-                        $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
-                        $('.so-nguoi').text(`👥 ${soNguoi}`);
-                        $("#totalAmount").val(tongTien.toLocaleString() +
-                            " VND"); // Cập nhật tổng tiền trong offcanvas
-
-                        if (response.ten_ban) {
-                            $("#tableInfo").text(`Bàn ${response.ten_ban}`);
-                        }
-                    },
-                    error: function(xhr) {
-                        console.error("🔥 Lỗi khi tải chi tiết hóa đơn:", xhr.responseText);
+                            hoaDonBody.append(row);
+                            offcanvasBody.append(row);
+                            tongTien += item.so_luong * item.don_gia;
+                            index++;
+                        });
+                    } else {
+                        let emptyRow =
+                            '<tr><td colspan="4" class="text-center">Chưa có món nào</td></tr>';
+                        hoaDonBody.html(emptyRow);
+                        offcanvasBody.html(emptyRow);
                     }
-                });
-            }
+
+                    if (response.da_ghep == true) {
+                        $("#ten-ban").text(response.ten_ban_an + " (Đã ghép)");
+                    }
+
+                    if (response.ma_hoa_don) {
+                        $("#ma_hoa_don").text(response.ma_hoa_don);
+
+                    }
+
+                    $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
+                    $('.so-nguoi').text(`👥 ${soNguoi}`);
+                    $("#totalAmount").val(tongTien.toLocaleString() +
+                        " VND"); // Cập nhật tổng tiền trong offcanvas
+
+                    if (response.ten_ban) {
+                        $("#tableInfo").text(`Bàn ${response.ten_ban}`);
+                    }
+
+                    // Thêm sự kiện cho nút tăng giảm số lượng
+                    $(".tang-soluong").click(function() {
+                        let monAnId = $(this).data("id");
+                        updateSoLuong(monAnId, 1);
+                    });
+
+                    $(".giam-soluong").click(function() {
+                        let monAnId = $(this).data("id");
+                        updateSoLuong(monAnId, -1);
+                    });
+                },
+                error: function(xhr) {
+                    console.error("🔥 Lỗi khi tải chi tiết hóa đơn:", xhr.responseText);
+                }
+            });
+        }
+    
     });
 
     

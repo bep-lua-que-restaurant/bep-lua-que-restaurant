@@ -85,7 +85,7 @@
                 success: function(response) {
                     console.log("Món đã thêm vào hóa đơn!");
                     showToast("Đã thêm một món vào hóa đơn",
-                    "success"); // Thông báo thành công
+                        "success"); // Thông báo thành công
                 },
                 error: function(error) {
                     console.error("Lỗi khi thêm món vào hóa đơn:", error);
@@ -93,4 +93,6 @@
             });
         });
     });
+
+
 </script>

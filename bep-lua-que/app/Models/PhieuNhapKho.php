@@ -17,7 +17,7 @@ class PhieuNhapKho extends Model
         'nhan_vien_id',
         'nha_cung_cap_id',
         'ngay_nhap',
-
+        'trang_thai',
         'ghi_chu',
     ];
 

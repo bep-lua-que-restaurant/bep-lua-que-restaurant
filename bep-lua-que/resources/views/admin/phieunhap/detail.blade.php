@@ -35,6 +35,34 @@
                                     <th>Ghi Chú</th>
                                     <td>{{ $phieuNhapKho->ghi_chu ?? 'Không có ghi chú' }}</td>
                                 </tr>
+                                <tr<tr>
+                                    <th>Trạng thái</th>
+                                    <td>
+                                        @if ($phieuNhapKho->trang_thai == 'cho_duyet')
+                                            <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                                            <form action="{{ route('phieu-nhap-kho.duyet', $phieuNhapKho->id) }}"
+                                                method="POST" style="display:inline;">
+                                                @csrf
+                                                @method('PUT')
+                                                <button type="submit" class="btn btn-success btn-sm">Duyệt</button>
+                                            </form>
+                                            <form action="{{ route('phieu-nhap-kho.huy', $phieuNhapKho->id) }}"
+                                                method="POST" style="display:inline;">
+                                                @csrf
+                                                @method('PUT')
+                                                <button type="submit" class="btn btn-danger btn-sm">Hủy</button>
+                                            </form>
+                                        @elseif ($phieuNhapKho->trang_thai == 'da_duyet')
+                                            <span class="badge bg-success">Đã duyệt</span>
+                                        @elseif ($phieuNhapKho->trang_thai == 'da_huy')
+                                            <span class="badge bg-danger">Đã hủy</span>
+                                        @else
+                                            <span class="badge bg-secondary">Không xác định</span>
+                                        @endif
+                                    </td>
+                                    </tr>
+
+                                    </tr>
                             </tbody>
                         </table>
 
@@ -63,13 +91,14 @@
                                         <td>{{ $chiTiet->nguyenLieu->loaiNguyenLieu->ten_loai ?? 'Không xác định' }}</td>
                                         <td>{{ $chiTiet->so_luong }}</td>
                                         <td>{{ number_format($chiTiet->don_gia, 0, ',', '.') }} VNĐ</td>
-                                        
+
                                         <td>{{ number_format($chiTiet->tong_tien, 0, ',', '.') }} VNĐ</td>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                            <a href="{{ route('phieu-nhap-kho.chitiet-nguyenlieu', ['phieuNhapId' => $phieuNhapKho->id, 'nguyenLieuId' => $chiTiet->nguyenLieu->id]) }}" class="btn btn-info btn-sm p-2 m-2">
-                                                <i class="fa fa-eye"></i>
-                                            </a>
+                                                <a href="{{ route('phieu-nhap-kho.chitiet-nguyenlieu', ['phieuNhapId' => $phieuNhapKho->id, 'nguyenLieuId' => $chiTiet->nguyenLieu->id]) }}"
+                                                    class="btn btn-info btn-sm p-2 m-2">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
@@ -79,7 +108,7 @@
 
                         <!-- Tổng cộng -->
                         <div class="mt-4">
-                            <h5 class="text-danger">Tổng Tiền: 
+                            <h5 class="text-danger">Tổng Tiền:
                                 {{ number_format($phieuNhapKho->chiTietPhieuNhapKho->sum('tong_tien'), 0, ',', '.') }} VNĐ
                             </h5>
                         </div>

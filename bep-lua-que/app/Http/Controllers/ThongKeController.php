@@ -3,105 +3,106 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\HoaDon;
 
 class ThongKeController extends Controller
 {
     public function index(Request $request)
     {
-        $now = Carbon::now('Asia/Ho_Chi_Minh');
+        $filterType = $request->input('filterType', 'day');
+        $data = [];
+        $labels = [];
 
-        // Lấy dữ liệu thống kê theo ngày
-        $dataNgay = DB::table('hoa_dons')
-            ->select(DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '+07:00')) as label"),
-                DB::raw('SUM(tong_tien) as total'))
-            ->groupBy(DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '+07:00'))"))
-            ->orderBy('label', 'asc')
-            ->get();
+        // Thống kê theo năm, tháng, ngày
+        if ($filterType == 'year') {
+            $year = Carbon::now()->year;
+            $labels = array_map(fn($m) => "Tháng $m", range(1, 12));
+            $rawData = HoaDon::selectRaw('MONTH(created_at) as month, SUM(tong_tien) as revenue')
+                ->whereYear('created_at', $year)
+                ->groupBy('month')
+                ->orderBy('month')
+                ->pluck('revenue', 'month')
+                ->toArray();
 
+            foreach (range(1, 12) as $month) {
+                $data[] = $rawData[$month] ?? 0;
+            }
+        } elseif ($filterType == 'month') {
+            $year = Carbon::now()->year;
+            $month = Carbon::now()->month;
+            $daysInMonth = Carbon::now()->daysInMonth;
+            $labels = array_map(fn($d) => "Ngày $d", range(1, $daysInMonth));
+            $rawData = HoaDon::selectRaw('DAY(created_at) as day, SUM(tong_tien) as revenue')
+                ->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->groupBy('day')
+                ->orderBy('day')
+                ->pluck('revenue', 'day')
+                ->toArray();
 
-        // Lấy dữ liệu thống kê theo giờ
-        $dataGio = DB::table('hoa_dons')
-            ->select(
-                DB::raw('DATE(created_at) as date'), // Giữ nguyên ngày từ created_at
-                DB::raw('HOUR(created_at) as label'), // Giữ nguyên giờ từ created_at
-                DB::raw('SUM(tong_tien) as total')
-            )
-            ->groupBy(DB::raw('DATE(created_at)'), DB::raw('HOUR(created_at)'))
-            ->orderBy('date', 'asc')
-            ->orderBy('label', 'asc')
-            ->get();
+            foreach (range(1, $daysInMonth) as $day) {
+                $data[] = $rawData[$day] ?? 0;
+            }
+        } elseif ($filterType == 'day') {
+            $date = Carbon::now()->toDateString();
+            $labels = array_map(fn($h) => "$h:00", range(0, 23));
+            $rawData = HoaDon::selectRaw('HOUR(created_at) as hour, SUM(tong_tien) as revenue')
+                ->whereDate('created_at', $date)
+                ->groupBy('hour')
+                ->orderBy('hour')
+                ->pluck('revenue', 'hour')
+                ->toArray();
 
-
-
-        // Lấy dữ liệu thống kê theo thứ trong tuần
-//        $dataThu = DB::table('hoa_dons')
-//            ->select(DB::raw('DAYOFWEEK(CONVERT_TZ(created_at, ) as label'), DB::raw('SUM(tong_tien) as total'))
-//            ->groupBy(DB::raw('DAYOFWEEK(created_at)'))
-//            ->orderBy('label', 'asc')
-//            ->get();
-        $timeRange = request()->input('time_range'); // Lấy bộ lọc từ request
-
-        $query = DB::table('hoa_dons')
-            ->select(
-                DB::raw("DAYOFWEEK(created_at) as label"),  // Giữ nguyên UTC
-                DB::raw('SUM(tong_tien) as total'),
-                DB::raw("MIN(DATE(created_at)) as min_date"),
-                DB::raw("MAX(DATE(created_at)) as max_date")
-            );
-
-        // 👉 **Xử lý điều kiện lọc**
-        if ($timeRange === 'today') {
-            $start = now()->utc()->startOfDay();
-            $end = now()->utc()->endOfDay();
-        } elseif ($timeRange === 'yesterday') {
-            $start = now()->subDay()->utc()->startOfDay();
-            $end = now()->subDay()->utc()->endOfDay();
-        } elseif ($timeRange === 'last7days') {
-            $start = now()->subDays(6)->utc()->startOfDay(); // Lấy dữ liệu từ 7 ngày trước
-            $end = now()->utc()->endOfDay();
-        } elseif ($timeRange === 'thismonth') {
-            $start = now()->startOfMonth()->utc()->startOfDay();
-            $end = now()->utc()->endOfDay();
-        } elseif ($timeRange === 'lastmonth') {
-            $start = now()->subMonthNoOverflow()->startOfMonth()->utc()->startOfDay();
-            $end = now()->subMonthNoOverflow()->endOfMonth()->utc()->endOfDay();
-
-        } else {
-            // Mặc định lấy dữ liệu tháng này nếu không có bộ lọc hợp lệ
-            $start = now()->startOfMonth()->utc()->startOfDay();
-            $end = now()->utc()->endOfDay();
+            foreach (range(0, 23) as $hour) {
+                $data[] = $rawData[$hour] ?? 0;
+            }
         }
 
-        // 👉 **Chỉ áp dụng điều kiện lọc 1 lần duy nhất**
-        $query->whereBetween('created_at', [$start, $end]);
+        // **Thống kê doanh số tháng này vs tháng trước**
+        $currentMonthRevenue = HoaDon::whereYear('created_at', Carbon::now()->year)
+            ->whereMonth('created_at', Carbon::now()->month)
+            ->sum('tong_tien');
 
-        $dataThu = $query
-            ->groupBy(DB::raw("DAYOFWEEK(created_at)")) // Giữ nguyên UTC
-            ->orderBy('label', 'asc')
-            ->get();
+        $lastMonthRevenue = HoaDon::whereYear('created_at', Carbon::now()->year)
+            ->whereMonth('created_at', Carbon::now()->subMonth()->month)
+            ->sum('tong_tien');
 
-        // Chuyển đổi thứ trong tuần thành tên ngày
-        $labelsThu = [
-            1 => 'Chủ Nhật',
-            2 => 'Thứ Hai',
-            3 => 'Thứ Ba',
-            4 => 'Thứ Tư',
-            5 => 'Thứ Năm',
-            6 => 'Thứ Sáu',
-            7 => 'Thứ Bảy'
-        ];
+        // **Thống kê doanh số tuần này vs tuần trước**
+        $currentWeekRevenue = HoaDon::whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+            ->sum('tong_tien');
 
+        $lastWeekRevenue = HoaDon::whereBetween('created_at', [Carbon::now()->subWeek()->startOfWeek(), Carbon::now()->subWeek()->endOfWeek()])
+            ->sum('tong_tien');
 
-        foreach ($dataThu as $item) {
-            $item->label = $labelsThu[$item->label] ?? 'Không xác định';
+        // Tính phần trăm chênh lệch
+        $monthPercentage = $lastMonthRevenue > 0
+            ? (($currentMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100
+            : 0;
+
+        $weekPercentage = $lastWeekRevenue > 0
+            ? (($currentWeekRevenue - $lastWeekRevenue) / $lastWeekRevenue) * 100
+            : 0;
+
+        if ($request->ajax()) {
+            return response()->json([
+                'labels' => $labels,
+                'data' => $data,
+                'totalSales' => number_format(array_sum($data), 0, ',', '.') . ' VND',
+                'monthComparison' => [
+                    'currentMonth' => $currentMonthRevenue,
+                    'lastMonth' => $lastMonthRevenue,
+                    'percentage' => round($monthPercentage, 2)
+                ],
+                'weekComparison' => [
+                    'currentWeek' => $currentWeekRevenue,
+                    'lastWeek' => $lastWeekRevenue,
+                    'percentage' => round($weekPercentage, 2)
+                ]
+            ]);
         }
 
-        return view('admin.dashboard', [
-            'dataNgay' => $dataNgay,
-            'dataGio' => $dataGio,
-            'dataThu' => $dataThu
-        ]);
+        return view('admin.dashboard', compact('labels', 'data', 'filterType', 'currentMonthRevenue', 'lastMonthRevenue', 'currentWeekRevenue', 'lastWeekRevenue', 'monthPercentage', 'weekPercentage'));
     }
+
 }

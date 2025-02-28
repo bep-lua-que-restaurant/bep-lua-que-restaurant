@@ -9,14 +9,18 @@
         <span style="cursor: pointer;" class="mx-2 so-nguoi">👥 0</span>
 
         <span style="cursor: pointer;" class="mx-2">✏️</span>
-        <span style="cursor: pointer;" class="mx-2" data-bs-toggle="modal" data-bs-target="#modalGhepBan">➕ Tách
-            ghép</span>
+        <span style="cursor: pointer;" class="mx-2" data-bs-toggle="modal" data-bs-target="#modalGhepBan">➕ Ghép
+            bàn</span>
+        <span style="cursor: pointer;" class="mx-2 openTachBan" data-bs-toggle="modal" data-bs-target="#modalTachBan"
+            data-ban="1">➖ Tách bàn</span>
     </div>
 </div>
 
-<div class=" my-3">
-    <h5 class="text-success" id="ten-ban">Bàn </h5>
+<div class="my-2 p-2 border rounded bg-white">
+    <h6 class="text-success fw-semibold">Mã hóa đơn:</h6>
+    <p class="fs-6 text-dark mb-0" id="ma_hoa_don">Chưa có</p>
 </div>
+
 <table class="table table-bordered">
     <thead class="table-light">
         <tr>
@@ -235,7 +239,74 @@
     </div>
 </div>
 
+<!-- Modal Tách Bàn & Món -->
+<div class="modal fade" id="modalTachBan" tabindex="-1" aria-labelledby="modalTachBanLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTachBanLabel">Tách bàn & món</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <!-- Chọn bàn mới hoặc tạo hóa đơn -->
+                    <div class="row">
+                        <!-- Cột chọn hóa đơn -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="banMoi" class="form-label">Chọn hóa đơn</label>
+                                <select class="form-select" id="banMoi">
+                                    <option value="new" selected>Tạo hóa đơn mới</option>
+                                    <option value="2">Bàn 2</option>
+                                    <option value="3">Bàn 3</option>
+                                </select>
+                            </div>
+                        </div>
 
+                        <!-- Cột chọn bàn cần tách -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="banGoc" class="form-label">Chọn bàn</label>
+                                <select class="form-select" id="banGoc">
+                                    <option value="1" selected>Bàn 1</option>
+                                    <option value="2">Bàn 2</option>
+                                    <option value="3">Bàn 3</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Danh sách món ăn -->
+                    <div class="mb-3">
+                        <label class="form-label">Hóa đơn hiện tại:</label>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Tên món</th>
+                                    <th>Số lượng</th>
+                                    <th>Đơn giá</th>
+                                    <th>Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hoa-don-tach-body">
+                                <tr>
+                                    <td colspan="5" class="text-center">Chưa có hóa đơn</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                    <div class="text-end mt-3">
+                        <button type="submit" class="btn btn-primary btn-sm">Tách</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
@@ -284,7 +355,7 @@
                 success: function(response) {
                     if (response.success) {
 
-                        console.log("Khách hàng mới có ID:", response.customer_id);
+                        // console.log("Khách hàng mới có ID:", response.customer_id);
                         // Thêm khách mới vào select
                         $("#customerSelect").append(
                             `<option value="${response.customer_id}" selected>${name}</option>`
@@ -362,7 +433,8 @@
     function resetGiaoDienHoaDon() {
         $("#hoa-don-body").html('<tr><td colspan="5" class="text-center">Chưa có hóa đơn nào</td></tr>');
         $(".offcanvas-body tbody").html('<tr><td colspan="5" class="text-center">Chưa có hóa đơn nào</td></tr>');
-
+        $("#ten-ban").text("Bàn");
+        $("#ma_hoa_don").text("Chưa có");
         $("#tong-tien").text("0 VNĐ"); // Reset tổng tiền
         $('.so-nguoi').text("👥 0"); // Reset số người
         $("#totalAmount").val("0 VND"); // Reset tổng tiền trong offcanvas
@@ -430,7 +502,7 @@
         $('#chonBanGhep').on('change', function() {
             let idBan = $(this).val();
             $('#chonBanGhep').data('selectedBan', idBan);
-            console.log("Bàn muốn ghép:", $('#chonBanGhep').data('selectedBan'));
+            // console.log("Bàn muốn ghép:", $('#chonBanGhep').data('selectedBan'));
             if (idBan) {
                 let apiUrlGetBill = "{{ route('thungan.getBillBan', ':id') }}".replace(':id', idBan);
                 $.ajax({
@@ -483,7 +555,7 @@
                 success: function(response) {
                     $('#modalGhepBan').modal('hide'); // Đóng modal
                     showToast("Ghép bàn thành công", "success"); // Thông báo thành công
-                   
+
 
                 },
                 error: function(xhr) {
@@ -491,6 +563,85 @@
                     alert(xhr.responseJSON.error);
                 }
             });
+        });
+    });
+
+    //tách bàn
+    $(document).ready(function() {
+        $('#modalTachBan').on('shown.bs.modal', function() {
+            var idBanHienTai = $('#ten-ban').data('currentBan'); // Lấy ID bàn hiện tại
+            var apiUrlShowBanGhep = "{{ route('thungan.getBanDeGhep') }}"; // API lấy danh sách bàn
+            var hoaDonId = $('#ten-ban').data('hoaDonId'); // Lấy hóa đơn ID đã lưu
+            // console.log("🔥 Hóa đơn ID khi mở modal:", hoaDonId);
+            $.ajax({
+                url: apiUrlShowBanGhep,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    let selectBanGoc = $('#banGoc');
+                    selectBanGoc.empty(); // Xóa danh sách cũ
+
+                    // Lọc bỏ bàn hiện tại khỏi danh sách
+                    let danhSachBan = data.filter(ban => ban.id != idBanHienTai);
+
+                    if (danhSachBan.length === 0) {
+                        selectBanGoc.append('<option value="">Không có bàn nào</option>');
+                        return;
+                    }
+
+                    // Hiển thị danh sách bàn vào #banGoc
+                    danhSachBan.forEach(function(ban, index) {
+                        selectBanGoc.append(
+                            `<option value="${ban.id}" ${index === 0 ? "selected" : ""}>${ban.ten_ban} - ${ban.trang_thai}</option>`
+                        );
+                    });
+                },
+                error: function(xhr) {
+                    console.error("Lỗi API:", xhr.status, xhr.responseText);
+                    alert('Lỗi khi tải danh sách bàn!');
+                }
+            });
+
+            // Gọi API để lấy chi tiết hóa đơn và hiển thị vào modal
+            if (hoaDonId) {
+                $.ajax({
+                    url: "/hoa-don/get-details",
+                    method: "GET",
+                    data: {
+                        hoa_don_id: hoaDonId
+                    },
+                    success: function(response) {
+                        let hoaDonTachBody = $("#hoa-don-tach-body");
+                        hoaDonTachBody.empty();
+                        // console.log("Chi tiết hóa đơn:", response);
+                        if (response.chi_tiet_hoa_don.length > 0) {
+                            let index = 1;
+                            response.chi_tiet_hoa_don.forEach((item) => {
+                                let row = `
+                            <tr>
+                                <td>${index}</td>
+                                <td>${item.tenMon}</td>
+                                <td class="text-center">${item.so_luong}</td>
+                                <td class="text-end">${item.don_gia.toLocaleString()} VNĐ</td>
+                                <td class="text-end">${(item.so_luong * item.don_gia).toLocaleString()} VNĐ</td>
+                            </tr>`;
+                                hoaDonTachBody.append(row);
+                                index++;
+                            });
+                        } else {
+                            hoaDonTachBody.html(
+                                '<tr><td colspan="5" class="text-center">Chưa có món nào</td></tr>'
+                                );
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error("🔥 Lỗi khi tải chi tiết hóa đơn:", xhr.responseText);
+                    }
+                });
+            } else {
+                $("#hoa-don-tach-body").html(
+                    '<tr><td colspan="5" class="text-center">Chưa có hóa đơn</td></tr>');
+            }
         });
     });
 </script>

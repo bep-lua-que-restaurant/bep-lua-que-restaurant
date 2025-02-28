@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Http\Controllers\BangTinhLuongController;
 use App\Http\Controllers\ChamCongController;
 use App\Http\Controllers\DanhMucMonAnController;
 
@@ -11,7 +12,7 @@ use App\Http\Controllers\BanAnController;
 use App\Http\Controllers\DatBanController;
 use App\Http\Controllers\LoaiNguyenLieuController;
 use App\Http\Controllers\PhongAnController;
-
+use App\Http\Controllers\LuongController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -157,11 +158,8 @@ Route::post('loai-nguyen-lieu/{id}/restore', [LoaiNguyenLieuController::class, '
 Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
 Route::post('/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore'); // Khôi phục phiếu nhập
 Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'exportPhieuNhapKho'])->name('phieu-nhap-kho.export');
-// phiếu nhập nguyên liệu
-// Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
-// Route::post('/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore'); // Khôi phục phiếu nhập
-// Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'exportPhieuNhapKho'])->name('phieu-nhap-kho.export');
-
+Route::put('/phieu-nhap-kho/{id}/duyet', [PhieuNhapKhoController::class, 'duyet'])->name('phieu-nhap-kho.duyet');
+Route::put('/phieu-nhap-kho/{id}/huy', [PhieuNhapKhoController::class, 'huy'])->name('phieu-nhap-kho.huy');
 // Route để xem chi tiết nguyên liệu
 Route::get(
     'phieu-nhap-kho/{phieuNhapId}/nguyen-lieu/{nguyenLieuId}',
@@ -224,14 +222,6 @@ Route::get('/hoa-don/get-details', [ThuNganController::class, 'getHoaDonDetails'
 
 Route::get('/', [ThongKeController::class, 'index'])->name('dashboard');
 
-
-
-
-
-Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])->name('thungan.destroy');
-
-
-
 Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])->name('thungan.destroy');
 Route::post('/hoa-don/update-status', [ThuNganController::class, 'updateStatus'])->name('thungan.thongBaoBep');
 Route::post('/update-ban-status', [ThuNganController::class, 'updateBanStatus'])->name('thungan.updateBanStatus');
@@ -241,6 +231,7 @@ Route::get('thu-ngan-get-bill-ban/{id}', [ThuNganController::class, 'getBillBan'
     ->name('thungan.getBillBan');
 Route::post('thu-ngan-ghep-ban', [ThuNganController::class, 'ghepBan'])
     ->name('thungan.ghepBan');
+Route::post('/hoa-don/update-quantity', [ThuNganController::class, 'updateQuantity'])->name('thungan.updateQuantity');
 
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
@@ -252,7 +243,6 @@ Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-do
 
 //Chấm công
 
-
 Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
 
 Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('chamcong.store');
@@ -260,14 +250,27 @@ Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('cham
 // Lấy dữ liệu chấm công để hiển thị trong modal
 Route::get('/cham-cong/edit/{nhanVienId}/{ca}/{ngay}', [ChamCongController::class, 'edit']);
 
+//Update chấm công
+Route::patch(
+    '/cham-cong/update/{nhan_vien_id}/{ca}/{ngay}',
+    [ChamCongController::class, 'updateChamCong']
+);
 
+//Kiểm cho chấm công
+Route::get('/cham-cong/check/{nhan_vien_id}/{ca}/{ngay}', [ChamCongController::class, 'checkChamCong']);
 
 Route::get('/lich-su-cham-cong', [ChamCongController::class, 'getLichSuChamCong']);
-
-
-
-
+//thay đổi tuần
 Route::get('/chamcong/change-week', [ChamCongController::class, 'changeWeek'])->name('chamcong.changeWeek');
+//xóa mềm chấm cống
+Route::post('/cham-cong/restore', [ChamCongController::class, 'restore'])->name('cham-cong.restore');
+
+Route::delete('/cham-cong/delete', [ChamCongController::class, 'softDelete'])->name('cham-cong.softDelete');
+
+Route::get('/cham-cong/danhsach', [ChamCongController::class, 'danhsach'])->name('cham-cong.danhsach');
+
+
+
 
 Route::resource('cham-cong', ChamCongController::class);
 
@@ -275,20 +278,44 @@ Route::resource('cham-cong', ChamCongController::class);
 Route::get('export-cham-cong', [ChamCongController::class, 'export'])->name('cham-cong.export');
 Route::post('/import-cham-cong', [ChamCongController::class, 'importDichVu'])->name('cham-cong.import');
 
+//Tính lương
+
+
+Route::get('/luong', [BangTinhLuongController::class, 'index'])->name('luong.index');
+Route::get('/luong/create', [BangTinhLuongController::class, 'create'])->name('luong.create');
+Route::post('/luong/store', [BangTinhLuongController::class, 'store'])->name('luong.store');
+
 
 Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
 
-// Đăng nhập phân quyền
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::middleware(['auth'])->group(function () {
-    Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
-    Route::get('/thu-ngan', [ThuNganController::class, 'index'])->name('thungan.dashboard');
-    // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
-});
+Route::get('/luong/{id}', [BangTinhLuongController::class, 'show'])->name('luong.show');
 
+//lọc
+Route::get('/bang-luong/filter', [BangTinhLuongController::class, 'filter'])->name('bang-luong.filter');
+
+
+Route::get('luong/export', [BangTinhLuongController::class, 'export'])->name('luong.export');
+Route::post('luong/import', [BangTinhLuongController::class, 'import'])->name('luong.import');
+
+
+
+
+
+
+
+// // Đăng nhập phân quyền
+// Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+// Route::post('/login', [AuthController::class, 'login']);
+// Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// Route::middleware(['auth'])->group(function () {
+
+
+//     // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
+// });
+Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
 Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
+
+
 
 
 use Illuminate\Support\Facades\Log;
