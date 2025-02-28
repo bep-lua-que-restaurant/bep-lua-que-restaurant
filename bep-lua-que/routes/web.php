@@ -17,18 +17,14 @@ use App\Http\Controllers\LuongController;
 use Illuminate\Support\Facades\Route;
 
 use App\Models\PhongAn;
-// use Illuminate\Support\Facades\Route;  // Dòng này đã bị xóa
+
 
 use App\Http\Controllers\TableBookedController;
 use App\Http\Controllers\CaLamController;
 use App\Http\Controllers\ChiTietNhapKhoController;
 use App\Http\Controllers\MonAnController;
 use App\Http\Controllers\NguyenLieuController;
-// use App\Http\Controllers\PhieuNhapKhoController;
 
-
-// use App\Http\Controllers\PhieuNhapKhoController;
-// Giữ lại một lần duy nhất
 
 use App\Http\Controllers\BepController;
 use App\Http\Controllers\AuthController;
@@ -45,21 +41,13 @@ use App\Http\Controllers\LichLamViecController;
 
 
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+
 
 Route::get('/', function () {
     return view('admin.dashboard');
 });
 
+Route::get('/', [ThongKeController::class, 'index'])->name('dashboard');
 
 // Danh mục món ăn
 Route::resource('danh-muc-mon-an', DanhMucMonAnController::class);
@@ -216,12 +204,6 @@ Route::post('/thu-ngan/tao-hoa-don', [HoaDonController::class, 'createHoaDon'])-
 Route::get('/thu-ngan/hoa-don', [ThunganController::class, 'getHoaDon'])->name('thungan.getHoaDon');
 Route::get('/hoa-don/get-id', [ThuNganController::class, 'getHoaDonId'])->name('thungan.getHoaDonBan');
 Route::get('/hoa-don/get-details', [ThuNganController::class, 'getHoaDonDetails'])->name('thungan.getChiTietHoaDon');
-
-
-
-
-Route::get('/', [ThongKeController::class, 'index'])->name('dashboard');
-
 Route::delete('/thu-ngan/destroy/{id}', [ThuNganController::class, 'xoaHoaDon'])->name('thungan.destroy');
 Route::post('/hoa-don/update-status', [ThuNganController::class, 'updateStatus'])->name('thungan.thongBaoBep');
 Route::post('/update-ban-status', [ThuNganController::class, 'updateBanStatus'])->name('thungan.updateBanStatus');
@@ -239,7 +221,6 @@ Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.sh
 Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
 
 
-Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
 
 //Chấm công
 
@@ -286,7 +267,6 @@ Route::get('/luong/create', [BangTinhLuongController::class, 'create'])->name('l
 Route::post('/luong/store', [BangTinhLuongController::class, 'store'])->name('luong.store');
 
 
-Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
 
 Route::get('/luong/{id}', [BangTinhLuongController::class, 'show'])->name('luong.show');
 
@@ -296,6 +276,8 @@ Route::get('/bang-luong/filter', [BangTinhLuongController::class, 'filter'])->na
 
 Route::get('luong/export', [BangTinhLuongController::class, 'export'])->name('luong.export');
 Route::post('luong/import', [BangTinhLuongController::class, 'import'])->name('luong.import');
+
+
 
 
 
@@ -313,7 +295,9 @@ Route::post('luong/import', [BangTinhLuongController::class, 'import'])->name('l
 //     // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 // });
 Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
-Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
+
+
+
 
 
 
