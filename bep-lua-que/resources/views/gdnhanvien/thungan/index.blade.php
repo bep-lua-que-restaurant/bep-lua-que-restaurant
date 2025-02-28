@@ -49,6 +49,28 @@
         .add-btn:hover {
             background-color: #007bff;
         }
+
+        .filter-room-group label {
+            cursor: pointer;
+            padding: 8px 12px;
+            border: 2px solid transparent;
+            border-radius: 2px;
+            background: #f8f9fa;
+            transition: all 0.3s ease-in-out;
+            display: inline-block;
+        }
+
+        .filter-room-group input[type="radio"] {
+            display: none;
+        }
+
+        .filter-room-group input[type="radio"]:checked+label {
+            border-color: #e49b07;
+            background: #e49b07;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0px 0px 10px rgba(0, 123, 255, 0.5);
+        }
     </style>
 </head>
 
@@ -106,6 +128,19 @@
                     <div class="card shadow-sm border-0">
                         <div class="card-header">
                             <h4 class="card-title mb-0">Danh sách</h4>
+                            <div class="ms-auto filter-room-group">
+                                <label>
+                                    <input type="radio" name="filter-room" value="" checked>
+                                    Tất cả
+                                </label>
+                                @foreach ($phongBans as $phong)
+                                    <input type="radio" id="phong_{{ $phong->id }}" name="filter-room"
+                                        value="{{ $phong->id }}">
+                                    <label for="phong_{{ $phong->id }}">{{ $phong->ten_phong_an }}</label>
+                                @endforeach
+
+                            </div>
+
                         </div>
 
                         <div class="card-body" id="list-container">
@@ -124,7 +159,8 @@
                 <div class="col-lg-12">
                     <div class="card shadow-sm border-0">
                         <div class="card-header">
-                            <h4 class="card-title mb-0">Hóa đơn</h4>
+                            <h4 class="card-title mb-0">Hóa đơn <h5 class="text-success" id="ten-ban">Bàn </h5>
+                            </h4>
                         </div>
                         <div id="hoaDon-body" class="card-body">
                             @include('gdnhanvien.thungan.hoa-don-list')
@@ -145,16 +181,18 @@
 
     {{-- toast --}}
     <div class="position-fixed top-0 start-0 p-3" style="z-index: 1050">
-        <div id="toastMessage" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="toastMessage" class="toast align-items-center text-bg-success border-0" role="alert"
+            aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body">
                     <!-- Nội dung thông báo -->
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
             </div>
         </div>
     </div>
-    
+
 
     <!-- Script -->
 

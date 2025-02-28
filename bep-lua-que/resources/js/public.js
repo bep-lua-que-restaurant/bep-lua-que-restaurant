@@ -106,12 +106,12 @@ window.Echo.channel("hoa-don-channel")
         if (data.type === "hoa_don_added") {
             let hoaDonId = data.hoa_don.id;
             loadChiTietHoaDon(hoaDonId);
-            console.log("Hóa đơn mới được thêm:", data.hoa_don);
+            // console.log("Hóa đơn mới được thêm:", data.hoa_don);
         }
     })
     .listen("HoaDonUpdated", (data) => {
         if (data.type === "hoa_don_updated") {
-            console.log("Hóa đơn đã được cập nhật:", data.hoa_don);
+            // console.log("Hóa đơn đã được cập nhật:", data.hoa_don);
             let hoaDonId = $("#ten-ban").data("hoaDonId");
             if (hoaDonId && hoaDonId == data.hoa_don.id) {
                 loadChiTietHoaDon(hoaDonId);
@@ -151,7 +151,15 @@ function loadChiTietHoaDon(hoaDonId) {
                 <tr id="mon-${item.id}">
                      <td>${index}</td>
                     <td>${item.tenMon}</td>
-                    <td class="text-center">${item.so_luong}</td>
+                     <td class="text-center">
+                                <button class="btn btn-sm btn-outline-danger giam-soluong" data-id="${
+                                    item.id
+                                }">-</button>
+                                <span class="so-luong">${item.so_luong}</span>
+                                <button class="btn btn-sm btn-outline-success tang-soluong" data-id="${
+                                    item.id
+                                }">+</button>
+                            </td>
                     <td class="text-end">${item.don_gia.toLocaleString()} VNĐ</td>
                     <td class="text-end">${(
                         item.so_luong * item.don_gia
@@ -176,9 +184,39 @@ function loadChiTietHoaDon(hoaDonId) {
             if (response.ten_ban) {
                 $("#tableInfo").text(`Bàn ${response.ten_ban}`);
             }
+
+            // Thêm sự kiện cho nút tăng giảm số lượng
+            $(".tang-soluong").click(function () {
+                let monAnId = $(this).data("id");
+                updateSoLuong(monAnId, 1);
+            });
+
+            $(".giam-soluong").click(function () {
+                let monAnId = $(this).data("id");
+                updateSoLuong(monAnId, -1);
+            });
         },
         error: function (xhr) {
             console.error("🔥 Lỗi khi tải chi tiết hóa đơn:", xhr.responseText);
+        },
+    });
+}
+
+// Hàm cập nhật số lượng món ăn
+function updateSoLuong(monAnId, thayDoi) {
+    $.ajax({
+        url: "/hoa-don/update-quantity",
+        method: "POST",
+        data: {
+            mon_an_id: monAnId,
+            thay_doi: thayDoi,
+            _token: $('meta[name="csrf-token"]').attr("content"), // Nếu dùng Laravel
+        },
+        success: function (response) {
+            loadChiTietHoaDon(response.hoa_don_id); // Load lại chi tiết hóa đơn sau khi cập nhật
+        },
+        error: function (xhr) {
+            console.error("❌ Lỗi khi cập nhật số lượng:", xhr.responseText);
         },
     });
 }

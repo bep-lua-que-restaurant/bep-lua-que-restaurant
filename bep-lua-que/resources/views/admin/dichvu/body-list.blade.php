@@ -44,7 +44,7 @@
                         @method('DELETE')
                         <button type="submit" onclick="return confirm('Bạn muốn ngừng kinh doanh mục này chứ?')"
                             class="btn btn-danger btn-sm p-2 m-2" title="Xóa">
-                            <i class="fa fa-trash"></i> {{-- Icon xóa --}}
+                            <i class="fa fa-trash"></i>
                         </button>
                     </form>
                 @endif

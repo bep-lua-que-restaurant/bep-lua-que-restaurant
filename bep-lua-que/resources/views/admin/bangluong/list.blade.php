@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-    Chấm công
+    Bảng lương
 @endsection
 
 @section('content')
@@ -15,7 +15,7 @@
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Chấm công</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Bảng lương</a></li>
                 </ol>
             </div>
         </div>
@@ -28,21 +28,24 @@
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">Danh sách</h4>
+                        <h4 class="card-title">Bảng lương</h4>
 
                         <div class="btn-group">
-                            <!-- Nút Nhập file sẽ hiển thị Modal -->
-                            <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
-                                data-target=".bd-example-modal-lg">
-                                <i class="fa fa-upload"></i> Nhập file
+                            <a href="{{ route('luong.create') }}" class="btn btn-sm btn-primary">
+                                <i class="fa fa-plus"></i> Tính lương
                             </a>
+                            <!-- Nút Nhập file sẽ hiển thị Modal -->
 
-                            <a href="{{ route('cham-cong.export') }}" class="btn btn-sm btn-success">
+
+                            <a href="{{ route('dich-vu.export') }}" class="btn btn-sm btn-success">
                                 <i class="fa fa-download"></i> Xuất file
                             </a>
-                            <a href="#" class="btn btn-sm btn-info">
-                                <i class="fa fa-list"></i> Danh sách
-                            </a>
+                            {{-- <select class="btn btn-sm btn-info" id="filterPeriod">
+                                <option value="ngay">Theo ngày</option>
+                                <option value="tuan">Theo tuần</option>
+                                <option value="thang">Theo tháng</option>
+                                <option value="nam">Theo năm</option>
+                            </select> --}}
                         </div>
                     </div>
                     <div class="card-body">
@@ -57,15 +60,16 @@
                                                 <label class="custom-control-label" for="checkAll"></label>
                                             </div>
                                         </th>
-                                        <th><strong>ID.</strong></th>
-                                        <th><strong>Tên </strong></th>
-
-                                        <th><strong>Trạng thái</strong></th>
-                                        <th><strong>Hành động</strong></th>
+                                        <th>Mã</th>
+                                        <th>Tên</th>
+                                        <th>Kỳ hạn trả</th>
+                                        <th>Kỳ làm việc</th>
+                                        <th>Tổng lương</th>
+                                        <th>Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody id="{{ $tableId }}">
-                                    @include('admin.chamcong.chamcong')
+                                    @include('admin.bangluong.body-list')
                                 </tbody>
 
                             </table>
@@ -88,7 +92,8 @@
                 </div>
                 <div class="modal-body">
                     <!-- Form nhập file -->
-                    <form action="{{ route('c.import') }}" method="POST" enctype="multipart/form-data" id="importFileForm">
+                    <form action="{{ route('dich-vu.import') }}" method="POST" enctype="multipart/form-data"
+                        id="importFileForm">
                         @csrf
                         <div class="mb-3">
                             <label for="fileUpload" class="form-label">Chọn file</label>
@@ -108,3 +113,21 @@
     <!-- Hiển thị phân trang -->
     {{ $data->links('pagination::bootstrap-5') }}
 @endsection
+<script>
+    $(document).ready(function() {
+        $('#filterPeriod').on('change', function() {
+            let filterValue = $(this).val(); // Lấy giá trị đã chọn
+
+            $.ajax({
+                url: "{{ route('bang-luong.filter') }}", // Route xử lý request
+                type: "GET",
+                data: {
+                    filter: filterValue
+                },
+                success: function(data) {
+                    $('#dataTable').html(data); // Cập nhật bảng dữ liệu
+                }
+            });
+        });
+    });
+</script>
