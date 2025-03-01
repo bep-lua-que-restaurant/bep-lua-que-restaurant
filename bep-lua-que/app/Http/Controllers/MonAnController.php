@@ -8,6 +8,8 @@ use App\Imports\MonAnImport;
 use App\Models\DanhMucMonAn;
 use App\Models\HinhAnhMonAn;
 use App\Models\MonAn;
+use App\Models\NguyenLieu;
+use App\Models\NguyenLieuMonAn;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreMonAnRequest;
 use App\Http\Requests\UpdateMonAnRequest;
@@ -66,11 +68,17 @@ class MonAnController extends Controller
 
 
 
+   
     public function create()
     {
-        // Chỉ lấy danh mục chưa bị xóa mềm
+        // Lấy danh mục chưa bị xóa mềm
         $danhMucs = DanhMucMonAn::whereNull('deleted_at')->get();
-        return view('admin.monan.create', compact('danhMucs'));
+
+        // Lấy danh sách nguyên liệu để chọn
+        $nguyenLieus = NguyenLieu::all();
+        // dd($nguyenLieus); // Kiểm tra dữ liệu
+
+        return view('admin.monan.create', compact('danhMucs', 'nguyenLieus'));
     }
 
     public function store(StoreMonAnRequest $request)
@@ -86,40 +94,64 @@ class MonAnController extends Controller
         $validatedData['trang_thai'] = 'dang_ban'; // Mặc định là đang bán
 
         // Tạo món ăn
-        $monAn = MonAn::create($validatedData);
+        DB::beginTransaction(); // Bắt đầu transaction
+        try {
+            $monAn = MonAn::create($validatedData);
 
-        // Xử lý hình ảnh nếu có
-        if ($request->hasFile('hinh_anh')) {
-            foreach ($request->file('hinh_anh') as $image) {
-                $path = $image->store('mon_an_images', 'public');
-                HinhAnhMonAn::create([
-                    'mon_an_id' => $monAn->id,
-                    'hinh_anh' => $path
-                ]);
+            // Xử lý hình ảnh nếu có
+            if ($request->hasFile('hinh_anh')) {
+                foreach ($request->file('hinh_anh') as $image) {
+                    $path = $image->store('mon_an_images', 'public');
+                    HinhAnhMonAn::create([
+                        'mon_an_id' => $monAn->id,
+                        'hinh_anh' => $path
+                    ]);
+                }
             }
+
+            // Thêm nguyên liệu vào món ăn
+            if ($request->has('nguyen_lieu_id')) {
+                foreach ($request->nguyen_lieu_id as $key => $nguyenLieuId) {
+                    NguyenLieuMonAn::create([
+                        'mon_an_id' => $monAn->id,
+                        'nguyen_lieu_id' => $nguyenLieuId,
+                        'so_luong' => $request->so_luong[$key],
+                        'don_vi_tinh' => $request->don_vi_tinh[$key],
+                    ]);
+                }
+            }
+
+            DB::commit(); // Lưu thay đổi
+            broadcast(new ThucDonUpdated($monAn))->toOthers(); // Phát sự kiện khi cập nhật
+
+            return redirect()->route('mon-an.index')->with('success', 'Món ăn đã được thêm thành công!');
+        } catch (\Exception $e) {
+            DB::rollBack(); // Hoàn tác nếu có lỗi
+            return redirect()->back()->withErrors(['error' => 'Đã xảy ra lỗi khi thêm món ăn.']);
         }
-
-        broadcast(new ThucDonUpdated($monAn))->toOthers(); // Phát sự kiện khi cập nhật
-
-        return redirect()->route('mon-an.index')->with('success', 'Món ăn đã được thêm thành công!');
     }
+
 
 
     public function show(MonAn $monAn)
-    {
-        // Load danh mục món ăn + hình ảnh
-        $monAn->load('danhMuc', 'hinhAnhs');
+{
+    // Load danh mục món ăn, hình ảnh và nguyên liệu kèm thông tin trong bảng trung gian
+    $monAn->load('danhMuc', 'hinhAnhs', 'nguyenLieus');
 
-        return view('admin.monan.detail', compact('monAn'));
-    }
+    return view('admin.monan.detail', compact('monAn'));
+}
+
 
     public function edit(MonAn $monAn)
     {
         // Chỉ lấy danh mục chưa bị xóa mềm
         $danhMucs = DanhMucMonAn::whereNull('deleted_at')->get();
-        return view('admin.monan.edit', compact('monAn', 'danhMucs'));
-    }
+        // Lấy danh sách nguyên liệu liên quan đến món ăn
+        $nguyenLieus = NguyenLieu::all();
+        $monAnNguyenLieus = $monAn->nguyenLieus()->get();
 
+        return view('admin.monan.edit', compact('monAn', 'danhMucs', 'nguyenLieus', 'monAnNguyenLieus'));
+    }
 
 
     // Cập nhật món ăn
@@ -130,16 +162,28 @@ class MonAnController extends Controller
         // Cập nhật các trường thông tin cơ bản của món ăn
         $monAn->update($data);
 
+        // Cập nhật nguyên liệu món ăn
+        $monAn->nguyenLieus()->detach();
+        if ($request->has('nguyen_lieu_id')) {
+            foreach ($request->nguyen_lieu_id as $index => $nguyenLieuId) {
+                if ($nguyenLieuId) {
+                    $monAn->nguyenLieus()->attach($nguyenLieuId, [
+                        'so_luong' => $request->so_luong[$index] ?? 0,
+                        'don_vi_tinh' => $request->don_vi_tinh[$index] ?? '',
+                    ]);
+                }
+            }
+        }
+
         // Xử lý xóa hình ảnh nếu có hình ảnh cần xóa
-        if ($request->has('remove_images') && is_array($request->remove_images)) {
-            // Duyệt qua từng ID hình ảnh cần xóa
+        if ($request->has('remove_images') && is_array($request->remove_images)) 
+        {
             foreach ($request->remove_images as $imageId) {
                 $image = $monAn->hinhAnhs()->find($imageId);
-                if ($image) {
-                    // Xóa file vật lý nếu cần thiết
-                    Storage::delete('public/' . $image->hinh_anh);
-
-                    // Xóa bản ghi trong cơ sở dữ liệu
+                if ($image)
+                 {
+                    
+                     Storage::delete('public/' . $image->hinh_anh);
                     $image->delete();
                 }
             }
@@ -157,6 +201,7 @@ class MonAnController extends Controller
 
         return redirect()->route('mon-an.index')->with('success', 'Cập nhật món ăn thành công.');
     }
+
 
 
     // Xóa ảnh hiện tại
@@ -178,43 +223,42 @@ class MonAnController extends Controller
 
     public function destroy(MonAn $monAn)
     {
-        // Xóa tất cả ảnh món ăn trước khi xóa món ăn
-        // foreach ($monAn->hinhAnhs as $image) {
-        //     Storage::disk('public')->delete($image->hinh_anh);
-        //     $image->delete();
-        // }
-
+        // Cập nhật trạng thái thành 'ngung_ban' trước khi xóa
+        $monAn->update(['trang_thai' => 'ngung_ban']);
+    
+        // Xóa mềm món ăn
         $monAn->delete();
-
-        // Tạo một instance của model để phát sự kiện
+    
+        // Phát sự kiện cập nhật thực đơn
         $monAnDeleted = new MonAn();
         $monAnDeleted->id = $monAn->id;
         $monAnDeleted->deleted_at = now(); // Giả lập đã bị xóa
-
-        // Phát sự kiện với model hợp lệ
+    
         broadcast(new ThucDonUpdated($monAnDeleted))->toOthers();
-
-        return redirect()->route('mon-an.index')->with('success', 'Xóa món ăn thành công!');
+    
+        return redirect()->route('mon-an.index')->with('success', 'Xóa món ăn thành công .');
     }
+    
     public function restore($id)
-    {
-        // Tìm món ăn bao gồm cả những món đã bị xóa mềm
-        $monAn = MonAn::withTrashed()->findOrFail($id);
+{
+    // Tìm món ăn bao gồm cả những món đã bị xóa mềm
+    $monAn = MonAn::withTrashed()->findOrFail($id);
 
-        // Kiểm tra xem danh mục của món ăn có bị xóa mềm không
-        if ($monAn->danhMuc && $monAn->danhMuc->deleted_at !== null) {
-            return redirect()->back()->withErrors(['error' => 'Danh mục của món ăn đã bị xóa mềm. Vui lòng khôi phục danh mục trước.']);
-        }
-
-        // Khôi phục món ăn
-        $monAn->restore();
-
-
-        broadcast(new ThucDonUpdated($monAn))->toOthers();
-
-
-        return redirect()->route('mon-an.index')->with('success', 'Khôi phục món ăn thành công!');
+    // Kiểm tra xem danh mục của món ăn có bị xóa mềm không
+    if ($monAn->danhMuc && $monAn->danhMuc->deleted_at !== null) {
+        return redirect()->back()->withErrors(['error' => 'Danh mục của món ăn đã bị xóa mềm. Vui lòng khôi phục danh mục trước.']);
     }
+
+    // Khôi phục món ăn và cập nhật trạng thái thành 'dang_ban'
+    $monAn->restore();
+    $monAn->update(['trang_thai' => 'dang_ban']);
+
+    // Phát sự kiện cập nhật thực đơn
+    broadcast(new ThucDonUpdated($monAn))->toOthers();
+
+    return redirect()->route('mon-an.index')->with('success', 'Khôi phục món ăn thành công .');
+}
+
 
 
     /**

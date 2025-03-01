@@ -21,6 +21,12 @@ Broadcast::channel('banan-channel', function () {
     return true;
 });
 
+
+Broadcast::channel('datban-channel', function () {
+    return true;
+});
+
+
 Broadcast::channel('hoa-don-channel', function ($user) {
     return true; // Cho phép tất cả người dùng lắng nghe
 });

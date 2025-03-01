@@ -14,7 +14,6 @@ return [
     | Supported: "pusher", "ably", "redis", "log", "null"
     |
     */
-    // 'default' => env('BROADCAST_DRIVER', 'null'),
     'default' => env('BROADCAST_DRIVER', 'pusher'),
     /*
     |--------------------------------------------------------------------------
@@ -28,58 +27,15 @@ return [
     */
 
 
-
-    // 'connections' => [
-
-
-    //     'pusher' => [
-    //         'driver' => 'pusher',
-    //         'key' => env('PUSHER_APP_KEY'),
-    //         'secret' => env('PUSHER_APP_SECRET'),
-    //         'app_id' => env('PUSHER_APP_ID'),
-    //         'options' => [
-    //             'cluster' => env('PUSHER_APP_CLUSTER'),
-    //             'host' => env('PUSHER_APP_HOST'),
-    //             'port' => env('PUSHER_APP_PORT'),
-    //             'scheme' => env('PUSHER_SCHEME'),
-    //             'encrypted' => false,
-    //         ],
-    //     ],
-
-    //     'ably' => [
-    //         'driver' => 'ably',
-    //         'key' => env('ABLY_KEY'),
-    //     ],
-
-    //     'redis' => [
-    //         'driver' => 'redis',
-    //         'connection' => 'default',
-    //     ],
-
-    //     'log' => [
-    //         'driver' => 'log',
-    //     ],
-
-    //     'null' => [
-    //         'driver' => 'null',
-    //     ],
-
-    // ],
-
     'connections' => [
-
         'pusher' => [
             'driver' => 'pusher',
             'key' => env('PUSHER_APP_KEY'),
             'secret' => env('PUSHER_APP_SECRET'),
             'app_id' => env('PUSHER_APP_ID'),
-            'cluster' => env('PUSHER_APP_CLUSTER'),
-            'use_tls' => true,
-
             'options' => [
                 'cluster' => env('PUSHER_APP_CLUSTER'),
-                'encrypted' => true,
-                'useTLS' => true, // Nếu bạn sử dụng TLS
+                'useTLS' => true,
             ],
         ],
 

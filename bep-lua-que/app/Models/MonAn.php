@@ -38,4 +38,15 @@ class MonAn extends Model
     {
         return $this->hasMany(ChiTietHoaDon::class, 'mon_an_id');
     }
+    public function nguyenLieuMonAn()
+    {
+        return $this->hasMany(NguyenLieuMonAn::class, 'mon_an_id');
+    }
+
+    public function nguyenLieus()
+    {
+        return $this->belongsToMany(NguyenLieu::class, 'nguyen_lieu_mon_ans', 'mon_an_id', 'nguyen_lieu_id')
+            ->withPivot('so_luong', 'don_vi_tinh') // Nếu bảng trung gian có thêm cột
+            ->withTimestamps();
+    }
 }

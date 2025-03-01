@@ -43,7 +43,7 @@
                                 </tr>
                                 <tr>
                                     <th>Số Lượng Tồn</th>
-                                    <td>{{ $soLuongTon }} kg</td>
+                                    <td>{{ $soLuongTon }} {{ $chiTiet->nguyenLieu->don_vi_tinh }}</td>
                                 </tr>
                                 <tr>
                                     <th>Hình Ảnh Nguyên Liệu</th>

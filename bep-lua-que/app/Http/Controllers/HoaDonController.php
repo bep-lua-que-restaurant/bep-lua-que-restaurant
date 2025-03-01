@@ -91,8 +91,7 @@ class HoaDonController extends Controller
             ]);
         }
 
-
-
+        
         // Kiểm tra xem món ăn đã có trong hóa đơn chưa
         $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)
             ->where('mon_an_id', $monAnId)
@@ -125,15 +124,21 @@ class HoaDonController extends Controller
             BanAn::where('id', $banAnId)->update(['trang_thai' => 'co_khach']);
         }
 
-        DatBan::create([
-            'ban_an_id' => $banAnId,
-            'khach_hang_id' => 0, // Nếu không có khách hàng thì để null
-            'so_dien_thoai' =>  '0', // Nếu không có số điện thoại thì để null
-            'thoi_gian_den' => Carbon::now(), // Sử dụng Carbon để lấy thời gian hiện tại theo múi giờ Việt Nam
-            'so_nguoi' => 1, // Sử dụng số người từ request hoặc mặc định là 1
-            'trang_thai' => 'dang_xu_ly', // Trạng thái mặc định là 'dang_xu_ly'
-            'mo_ta' => null, // Nếu không có mô tả, để null
-        ]);
+        $datBan = DatBan::where('ban_an_id', $banAnId)->get();
+        // Kiểm tra xem có bản ghi nào đang xử lý không
+        $coDangXuLy = $datBan->contains('trang_thai', 'dang_xu_ly');
+
+        if (!$coDangXuLy) {
+            DatBan::create([
+                'ban_an_id' => $banAnId,
+                'khach_hang_id' => 0, // Nếu không có khách hàng thì để null
+                'so_dien_thoai' => '0', // Nếu không có số điện thoại thì để null
+                'thoi_gian_den' => Carbon::now(), // Sử dụng Carbon để lấy thời gian hiện tại theo múi giờ Việt Nam
+                'so_nguoi' => 1, // Sử dụng số người từ request hoặc mặc định là 1
+                'trang_thai' => 'dang_xu_ly', // Trạng thái mặc định là 'dang_xu_ly'
+                'mo_ta' => null, // Nếu không có mô tả, để null
+            ]);
+        }
 
 
         // Nạp luôn chi tiết hóa đơn để gửi đầy đủ dữ liệu
