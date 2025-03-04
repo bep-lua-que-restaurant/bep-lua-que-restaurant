@@ -9,7 +9,8 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-
+use App\Mail\DatBanMail;
+use Illuminate\Support\Facades\Mail;
 use App\Models\DatBan;
 
 class DatBanCreated implements ShouldBroadcast
@@ -23,6 +24,9 @@ class DatBanCreated implements ShouldBroadcast
     public function __construct(DatBan $datBan) // Đảm bảo $datBan là model hợp lệ
     {
         $this->datBan = $datBan;
+
+        // Gửi email sau khi đặt bàn thành công
+        Mail::to($datBan->khachHang->email)->send(new DatBanMail($datBan->khachHang, [$datBan]));
     }
     /**
      * Get the channels the event should broadcast on.

@@ -2,18 +2,19 @@
     use Carbon\Carbon;
 
     $today = Carbon::today(); // Ngày hôm nay
-    $endOfWeek = Carbon::parse('Sunday')->endOfDay(); // Lấy ngày Chủ Nhật, kết thúc vào cuối ngày
+    $endOfWeek = $today->copy()->addDays(7)->endOfDay(); // Lấy 7 ngày tiếp theo tính từ hôm nay
 
     $daysOfWeek = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
     $dates = [];
 
-    // Lấy tất cả các ngày từ hôm nay đến hết tuần
-    for ($i = 1; $i <= $endOfWeek->diffInDays($today); $i++) {
-        $date = Carbon::now()->addDays($i)->format('Y-m-d');
+    // Lấy tất cả các ngày từ hôm nay đến 7 ngày tiếp theo
+    for ($i = 0; $i <= 7; $i++) {
+        $date = $today->copy()->addDays($i)->format('Y-m-d');
         $dayOfWeek = $daysOfWeek[Carbon::parse($date)->dayOfWeek];
         $dates[] = ['date' => $date, 'day' => $dayOfWeek];
     }
 @endphp
+
 
 <div class="row">
     <!-- Cột bên trái (Cố định, giữ căn chỉnh với bên phải) -->

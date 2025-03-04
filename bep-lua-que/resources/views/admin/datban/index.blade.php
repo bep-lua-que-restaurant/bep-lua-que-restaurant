@@ -93,7 +93,13 @@
             </div>
         </div>
     </div>
-
+    <script>
+        setInterval(() => {
+            fetch('/api/update-datban')
+                .then(response => response.json())
+                .then(data => console.log(data.message));
+        }, 60000); // 60000ms = 1 phút
+    </script>
 
     <style>
         .tab-header {

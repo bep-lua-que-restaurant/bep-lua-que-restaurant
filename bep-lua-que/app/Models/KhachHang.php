@@ -11,4 +11,9 @@ class KhachHang extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = ['ho_ten', 'email', 'so_dien_thoai', 'dia_chi', 'can_cuoc'];
+
+    public function datBans()
+    {
+        return $this->hasMany(DatBan::class, 'khach_hang_id');
+    }
 }

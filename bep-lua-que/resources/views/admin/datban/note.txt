@@ -1,0 +1,12 @@
+php artisan datban:update-status
+
+
+Loại bàn cùng 1 dòng ( vi_tri)-> thời gian vào + số người + bàn  
+
+Chỉ nhận số người 
+
+thêm vào |hóa đơn  
+         |hóa đơn bàn
+
+
+         03/03/2025 21:00	đoàn văn quân	0388940846	8	bàn 1, bàn 2

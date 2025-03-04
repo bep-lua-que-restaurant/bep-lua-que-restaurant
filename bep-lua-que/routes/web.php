@@ -93,13 +93,14 @@ Route::get('/danh-sach-dat-ban', [DatBanController::class, 'DanhSach'])->name('d
 
 Route::resource('dat-ban', DatBanController::class);
 Route::get('/dat-ban/{dat_ban}/edit', [DatBanController::class, 'edit'])->name('dat-ban.edit');
-
+Route::get('/dat-ban/{id}', [DatBanController::class, 'show'])->name('dat-ban.show');
 // Route để tìm kiếm khách hàng
 Route::get('/dat-ban/search-customer', [DatBanController::class, 'searchCustomer'])->name('admin.datban.search');
 Route::get('admin/khachhang/search', [DatBanController::class, 'searchCustomer'])->name('admin.khachhang.search');
 
 
 Route::get('admin/dat-ban/create', [DatBanController::class, 'create'])->name('admin.datban.create');
+
 Route::get('admin/khachhang/search', [DatBanController::class, 'searchCustomer'])->name('admin.khachhang.search');
 Route::get('/admin/datban/filter', [DatBanController::class, 'filterBanAnByTime'])->name('admin.datban.filter');
 // Route::get('/admin/datban/get-ban-an-for-edit', [DatBanController::class, 'getBanAnForEdit'])->name('admin.datban.getBanAnForEdit');
