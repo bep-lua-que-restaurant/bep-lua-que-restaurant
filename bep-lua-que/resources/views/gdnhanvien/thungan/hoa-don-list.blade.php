@@ -56,7 +56,7 @@
             </select>
         </div>
         <!-- Bảng hiển thị các món hàng -->
-        <div class="table-responsive mb-3">
+        <div id="hoa-don-thanh-toan" class="table-responsive mb-3">
             <table class="table">
                 <thead>
                     <tr>
@@ -67,10 +67,8 @@
                         <th scope="col">Tổng cộng</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-
-                    </tr>
+                <tbody id="hoa-don-thanh-toan-body">
+                    <!-- Dữ liệu hóa đơn sẽ được hiển thị ở đây -->
                 </tbody>
             </table>
         </div>
@@ -81,9 +79,9 @@
         <div class="mb-3">
             <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
             <select class="form-select" id="paymentMethod">
-                <option value="cash">Tiền mặt</option>
-                <option value="card">Thẻ tín dụng</option>
-                <option value="transfer">Chuyển khoản</option>
+                <option value="tien_mat">Tiền mặt</option>
+                <option value="the">Thẻ tín dụng</option>
+                <option value="tai_khoan">Chuyển khoản</option>
             </select>
         </div>
         <div class="mb-3">
@@ -368,8 +366,9 @@
     $('#btnThanhToan').on('click', function() {
         // Lấy ID bàn hiện tại từ data (nếu có)
         var banId = $('#ten-ban').data('currentBan');
-        var soNguoi = $(".so-nguoi").data("soNguoi") || 1; // Lấy số người từ data
-        // console.log('ID bàn hiện tại: ', banId);
+        var soNguoi = $(".so-nguoi").data("soNguoi") || 1; 
+        var paymentDetails = $("#paymentDetails").val();
+        var phuongThucThanhToan = $('#paymentMethod').val(); 
         // Kiểm tra nếu có ID bàn
         if (banId) {
             $.ajax({
@@ -379,6 +378,8 @@
                     ban_an_id: banId,
                     khach_hang_id: $("#customerSelect").val() || null,
                     so_nguoi: soNguoi,
+                    chi_tiet_thanh_toan: paymentDetails,
+                    phuong_thuc_thanh_toan: phuongThucThanhToan,
                     _token: $('meta[name="csrf-token"]').attr("content") // Lấy CSRF token từ meta tag
                 },
                 success: function(response) {
@@ -427,8 +428,6 @@
         $('.so-nguoi').text("👥 0"); // Reset số người
         $("#totalAmount").val("0 VND"); // Reset tổng tiền trong offcanvas
         $("#tableInfo").text("Bàn chưa chọn"); // Reset tên bàn
-
-        // console.log("🔄 Giao diện hóa đơn đã được reset!");
     }
 
     // số người

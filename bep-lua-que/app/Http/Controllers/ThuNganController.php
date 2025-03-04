@@ -319,6 +319,8 @@ class ThuNganController extends Controller
         $banAnId = $request->input('ban_an_id');
         $khachHangId = $request->input('khach_hang_id');
         $soNguoi = $request->input('so_nguoi');
+        $chiTietThanhToan = $request->input('chi_tiet_thanh_toan');
+        $phuongThucThanhToan = $request->input('phuong_thuc_thanh_toan');
 
         if (!$banAnId) {
             return response()->json(['success' => false, 'message' => 'Bàn không hợp lệ.']);
@@ -334,7 +336,12 @@ class ThuNganController extends Controller
 
         if (!$hoaDonBan) {
             return response()->json(['success' => false, 'message' => 'Không tìm thấy hóa đơn.']);
-        }
+        }  
+
+        HoaDon::where('id', $hoaDonBan->hoa_don_id)->update([
+            'mo_ta' => $chiTietThanhToan,
+            'phuong_thuc_thanh_toan' => $phuongThucThanhToan
+        ]);
 
         $dsBanCungHoaDon = HoaDonBan::withTrashed() // Lấy cả bàn đã xóa mềm
             ->where('hoa_don_id', $hoaDonBan->hoa_don_id)
