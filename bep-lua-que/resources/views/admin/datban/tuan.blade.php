@@ -8,7 +8,7 @@
     $dates = [];
 
     // Lấy tất cả các ngày từ hôm nay đến hết tuần
-    for ($i = 1; $i <= $endOfWeek->diffInDays($today); $i++) {
+    for ($i = 0; $i <= $endOfWeek->diffInDays($today); $i++) {
         $date = Carbon::now()->addDays($i)->format('Y-m-d');
         $dayOfWeek = $daysOfWeek[Carbon::parse($date)->dayOfWeek];
         $dates[] = ['date' => $date, 'day' => $dayOfWeek];

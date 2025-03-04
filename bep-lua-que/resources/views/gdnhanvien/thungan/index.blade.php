@@ -17,7 +17,7 @@
         type="text/css" />
     <link href="{{ asset('admin') }}/css/style.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body {
             background-color: #004080;
@@ -122,9 +122,9 @@
 
     <main>
         <section class="container-fluid">
-            <!-- Card Bàn ăn / Thực đơn -->
             <div class="row">
-                <div class="col-lg-12">
+                <!-- Card Bàn ăn / Thực đơn -->
+                <div class="col-lg-7 col-12">
                     <div class="card shadow-sm border-0">
                         <div class="card-header">
                             <h4 class="card-title mb-0">Danh sách</h4>
@@ -138,42 +138,41 @@
                                         value="{{ $phong->id }}">
                                     <label for="phong_{{ $phong->id }}">{{ $phong->ten_phong_an }}</label>
                                 @endforeach
-
                             </div>
 
+                            @if (isset($danhMucs))
+                            <div class="ms-auto">
+                                <label>
+                                    <input type="radio" name="filter-category" value="" checked> Tất cả
+                                </label>
+                                @foreach ($danhMucs as $danhMuc)
+                                    <input type="radio" id="danhmuc_{{ $danhMuc->id }}" name="filter-category" value="{{ $danhMuc->id }}">
+                                    <label for="danhmuc_{{ $danhMuc->id }}">{{ $danhMuc->ten_danh_muc }}</label>
+                                @endforeach
+                            </div>
+                            @endif
                         </div>
-
                         <div class="card-body" id="list-container">
                             @include('gdnhanvien.thungan.body-list')
                         </div>
-
                     </div>
                 </div>
-
-
-            </div>
-
-
-            <!-- Card Hóa đơn -->
-            <div class="row">
-                <div class="col-lg-12">
+    
+                <!-- Card Hóa đơn -->
+                <div class="col-lg-5 col-12">
                     <div class="card shadow-sm border-0">
                         <div class="card-header">
-                            <h4 class="card-title mb-0">Hóa đơn <h5 class="text-success" id="ten-ban">Bàn </h5>
-                            </h4>
+                            <h4 class="card-title mb-0">Hóa đơn <h5 class="text-success" id="ten-ban">Bàn </h5></h4>
                         </div>
                         <div id="hoaDon-body" class="card-body">
                             @include('gdnhanvien.thungan.hoa-don-list')
                         </div>
-
                     </div>
                 </div>
-
             </div>
-
-
         </section>
     </main>
+    
 
     <footer>
         <!-- Footer content (nếu cần) -->
@@ -220,6 +219,8 @@
         var apiUrlGetThucDon = "{{ route('thungan.getThucDon') }}";
 
         var apiUrlThongBaoBep = "{{ route('thungan.thongBaoBep') }}";
+
+        var apiUrlXoaMon = "{{ route('thungan.deleteMonAn') }}";
 
         var dingSoundUrl = "{{ asset('sounds/ding.mp3') }}";
     </script>

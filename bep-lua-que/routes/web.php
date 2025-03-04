@@ -252,11 +252,9 @@ Route::get('thu-ngan-get-bill-ban/{id}', [ThuNganController::class, 'getBillBan'
 Route::post('thu-ngan-ghep-ban', [ThuNganController::class, 'ghepBan'])
     ->name('thungan.ghepBan');
 Route::post('/hoa-don/update-quantity', [ThuNganController::class, 'updateQuantity'])->name('thungan.updateQuantity');
-
+Route::post('/hoa-don/delete',[ThuNganController::class, 'deleteMonAn'])->name('thungan.deleteMonAn');
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
-
-
 Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
 
 

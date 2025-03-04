@@ -149,22 +149,60 @@ function loadChiTietHoaDon(hoaDonId) {
                 response.chi_tiet_hoa_don.forEach((item) => {
                     let row = `
                 <tr id="mon-${item.id}">
-                     <td>${index}</td>
-                    <td>${item.tenMon}</td>
-                     <td class="text-center">
-                                <button class="btn btn-sm btn-outline-danger giam-soluong" data-id="${
-                                    item.id
-                                }">-</button>
-                                <span class="so-luong">${item.so_luong}</span>
-                                <button class="btn btn-sm btn-outline-success tang-soluong" data-id="${
-                                    item.id
-                                }">+</button>
-                            </td>
-                    <td class="text-end">${item.don_gia.toLocaleString()} VNĐ</td>
-                    <td class="text-end">${(
-                        item.so_luong * item.don_gia
-                    ).toLocaleString()} VNĐ</td>
-                </tr>`;
+    <td class="small">${index}</td>
+    <td class="small">
+        <!-- Thêm điều kiện để thay đổi màu tên món tùy theo trạng thái -->
+        <span class="${
+            item.trang_thai === "cho_che_bien"
+                ? "text-danger"
+                : item.trang_thai === "dang_nau"
+                ? "text-warning"
+                : item.trang_thai === "hoan_thanh"
+                ? "text-success"
+                : ""
+        }">
+            ${item.tenMon}
+        </span>
+    </td>
+    <td class="text-center">
+        <!-- Nút giảm số lượng -->
+        <button class="btn btn-sm btn-outline-danger giam-soluong" data-id="${
+            item.id
+        }">
+            <i class="bi bi-dash"></i> <!-- Sử dụng biểu tượng cho nút giảm -->
+        </button>
+        <!-- Hiển thị số lượng với chữ nhỏ hơn -->
+        <span class="so-luong mx-2 small">${item.so_luong}</span>
+        <!-- Nút tăng số lượng -->
+        <button class="btn btn-sm btn-outline-success tang-soluong" data-id="${
+            item.id
+        }">
+            <i class="bi bi-plus"></i> <!-- Sử dụng biểu tượng cho nút tăng -->
+        </button>
+    </td>
+    <td class="text-end small">
+        ${parseFloat(item.don_gia).toLocaleString("vi-VN", {
+            style: "currency",
+            currency: "VND",
+        })}
+    </td>
+
+    <td class="text-end small">
+        ${(item.so_luong * item.don_gia).toLocaleString("vi-VN", {
+            style: "currency",
+            currency: "VND",
+        })}
+    </td>
+    <!-- Nút xóa với icon -->
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger xoa-mon" data-id="${
+            item.id
+        }">
+            <i class="bi bi-trash"></i> <!-- Biểu tượng xóa -->
+        </button>
+    </td>
+</tr>
+`;
                     hoaDonBody.append(row);
                     offcanvasBody.append(row);
                     tongTien += item.so_luong * item.don_gia;
@@ -217,6 +255,41 @@ function updateSoLuong(monAnId, thayDoi) {
         },
         error: function (xhr) {
             console.error("❌ Lỗi khi cập nhật số lượng:", xhr.responseText);
+        },
+    });
+}
+
+let isRequesting = false;
+
+// Gắn sự kiện xóa vào các nút xóa món ăn
+$(document).ready(function () {
+    $(document).on("click", ".xoa-mon", function () {
+        const monAnId = $(this).data("id"); // Lấy ID món ăn từ thuộc tính data-id
+        deleteMonAn(monAnId); // Gọi hàm xóa món ăn
+    });
+});
+
+function deleteMonAn(monAnId) {
+    if (isRequesting) return; // Nếu đang gửi yêu cầu, không gửi lại
+
+    isRequesting = true;
+    $.ajax({
+        url: apiUrlXoaMon, // Đường dẫn đến action xử lý xóa trong controller của bạn
+        method: "POST",
+        data: {
+            mon_an_id: monAnId,
+            _token: $('meta[name="csrf-token"]').attr("content"), // CSRF token nếu dùng Laravel
+        },
+        success: function (response) {
+            isRequesting = false;
+            // Xóa món ăn khỏi bảng
+            $(`#mon-${monAnId}`).remove(); // Loại bỏ dòng có ID tương ứng
+            $("#tong-tien").text(
+                response.tong_tien.toLocaleString("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                })
+            );
         },
     });
 }

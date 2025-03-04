@@ -1,8 +1,22 @@
-{{-- <div class="alert alert-warning d-flex align-items-center" role="alert">
-    <span class="me-2">🔔</span>
-    <span>Bạn vừa cập nhật đơn hàng. Click <a href="#" class="fw-bold text-decoration-none">Thông báo</a> để gửi
-        thông tin chế biến đến bar bếp.</span>
-</div> --}}
+<table class="table table-bordered table-sm">
+    <thead class="table-light">
+        <tr>
+            <th>#</th>
+            <th>Sản phẩm</th>
+            <th class="text-center">SL</th>
+            <th class="text-end">Giá</th>
+            <th class="text-end">Tổng</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="hoa-don-body">
+        <!-- Dữ liệu hóa đơn sẽ được hiển thị ở đây -->
+    </tbody>
+</table>
+<div class="d-flex justify-content-end align-items-center mt-3">
+    <span class="text-muted mx-4">Tổng tiền:</span>
+    <span class="fs-4 fw-bold text-success" id="tong-tien">0</span>
+</div>
 
 <div class="d-flex justify-content-between align-items-center mt-3">
     <div class="d-flex align-items-center">
@@ -16,37 +30,13 @@
     </div>
 </div>
 
-<div class="my-2 p-2 border rounded bg-white">
-    <h6 class="text-success fw-semibold">Mã hóa đơn:</h6>
-    <p class="fs-6 text-dark mb-0" id="ma_hoa_don">Chưa có</p>
-</div>
-
-<table class="table table-bordered">
-    <thead class="table-light">
-        <tr>
-            <th>#</th>
-            <th>Sản phẩm</th>
-            <th class="text-center">SL</th>
-            <th class="text-end">Giá</th>
-            <th class="text-end">Tổng</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody id="hoa-don-body">
-
-    </tbody>
-</table>
-<div class="d-flex justify-content-end align-items-center mt-3">
-    <span class="text-muted mx-4">Tổng tiền:</span>
-    <span class="fs-4 fw-bold text-success" id="tong-tien">0</span>
-</div>
-
-
 <div class="text-centerr mt-3">
     <button class="btn btn-success btn-sm px-4" type="button" data-bs-toggle="offcanvas"
         data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">Thanh toán </button>
     <button class="btn-thong-bao btn btn-primary btn-sm px-4"> Thông báo</button>
 </div>
+
+
 <!-- Offcanvas -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel"
     style="width: 70%;">
@@ -70,6 +60,7 @@
             <table class="table">
                 <thead>
                     <tr>
+                        <th scope="col">#</th>
                         <th scope="col">Sản phẩm</th>
                         <th scope="col">Số lượng</th>
                         <th scope="col">Đơn giá</th>
@@ -78,17 +69,14 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>GIN FIZZ</td>
-                        <td>1</td>
-                        <td>30,000</td>
-                        <td>30,000</td>
+
                     </tr>
                 </tbody>
             </table>
         </div>
         <div class="mb-3">
             <label for="totalAmount" class="form-label">Khách cần trả</label>
-            <input type="text" class="form-control" id="totalAmount" value="30,000 VND" readonly>
+            <input type="text" class="form-control" id="totalAmount" value="" readonly>
         </div>
         <div class="mb-3">
             <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
@@ -631,7 +619,7 @@
                         } else {
                             hoaDonTachBody.html(
                                 '<tr><td colspan="5" class="text-center">Chưa có món nào</td></tr>'
-                                );
+                            );
                         }
                     },
                     error: function(xhr) {

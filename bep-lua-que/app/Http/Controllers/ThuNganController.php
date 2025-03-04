@@ -6,6 +6,7 @@ use App\Events\BanAnUpdated;
 use App\Events\HoaDonUpdated;
 use App\Models\BanAn;
 use App\Models\ChiTietHoaDon;
+use App\Models\DanhMucMonAn;
 use App\Models\DatBan;
 use App\Models\MonAn;
 use App\Models\HoaDon;
@@ -16,12 +17,6 @@ use Illuminate\Http\Request;
 
 class ThuNganController extends Controller
 {
-
-    // public function __construct()
-    // {
-    //     $this->middleware('auth');
-    // }
-
 
     public function getBanAn(Request  $request)
     {
@@ -192,8 +187,9 @@ class ThuNganController extends Controller
 
         $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
             ->join('mon_ans', 'chi_tiet_hoa_dons.mon_an_id', '=', 'mon_ans.id')
-            ->select('chi_tiet_hoa_dons.*', 'mon_ans.ten as tenMon', 'mon_ans.gia as don_gia')
+            ->select('chi_tiet_hoa_dons.*', 'mon_ans.ten as tenMon', 'mon_ans.gia as don_gia', 'chi_tiet_hoa_dons.trang_thai') // Thêm trạng thái vào đây
             ->get();
+
 
 
         $hoaDonBan = HoaDonBan::where('hoa_don_id', $hoaDon->id)->first();
@@ -240,9 +236,12 @@ class ThuNganController extends Controller
             }
         }
 
+        if ($request->has('danhMuc') && $request->danhMuc != '') {
+            $query->where('danh_muc_id', $request->danhMuc);
+        }
 
         $data = $query->latest('id')->get();
-
+        $danhMucs = DanhMucMonAn::all();
         // Xử lý trả về khi yêu cầu là Ajax
         if ($request->ajax()) {
             return response()->json([
@@ -252,6 +251,7 @@ class ThuNganController extends Controller
 
         return view('gdnhanvien.thungan.index', [
             'data' => $data,
+            'danhMucs' => $danhMucs,
             'route' => route('thungan.getMonAn'), // URL route cho AJAX
             'tableId' => 'list-container', // ID của bảng
             'searchInputId' => 'search-name', // ID của ô tìm kiếm
@@ -313,11 +313,6 @@ class ThuNganController extends Controller
 
         // Tìm bàn theo ID
         $banAn = BanAn::find($banAnId);
-
-        
-
-
-
 
         // Tìm hóa đơn bàn liên quan đến bàn này có trạng thái 'đang xử lý'
         $hoaDonBan = HoaDonBan::where('ban_an_id', $banAnId)
@@ -503,8 +498,6 @@ class ThuNganController extends Controller
             ->map(fn($item) => $item->so_luong * $item->don_gia)
             ->sum();
 
-
-
         // Cập nhật tổng tiền hóa đơn
         HoaDon::where('id', $hoaDonId)->update(['tong_tien' => $tongTien]);
 
@@ -513,6 +506,40 @@ class ThuNganController extends Controller
             'hoa_don_id' => $hoaDonId,
             'tong_tien' => $tongTien,
             'so_luong' => $chiTietHoaDon->so_luong,
+        ]);
+    }
+
+    //xóa món ăn
+    public function deleteMonAn(Request $request)
+    {
+        $monAnId = $request->mon_an_id; // Lấy ID món ăn cần xóa
+
+        // Tìm món ăn trong chi tiết hóa đơn
+        $chiTietHoaDon = ChiTietHoaDon::where('id', $monAnId)->first();
+
+        if (!$chiTietHoaDon) {
+            return response()->json(['error' => 'Món ăn không tồn tại!'], 404);
+        }
+
+        // Lấy ID hóa đơn từ chi tiết món ăn
+        $hoaDonId = $chiTietHoaDon->hoa_don_id;
+
+        // Xóa món ăn khỏi chi tiết hóa đơn
+        $chiTietHoaDon->forceDelete();
+
+        // Lấy lại tổng tiền của hóa đơn sau khi xóa món ăn
+        $tongTien = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
+            ->get()
+            ->map(fn($item) => $item->so_luong * $item->don_gia)
+            ->sum();
+
+        // Cập nhật lại tổng tiền của hóa đơn
+        HoaDon::where('id', $hoaDonId)->update(['tong_tien' => $tongTien]);
+
+        return response()->json([
+            'success' => true,
+            'hoa_don_id' => $hoaDonId,
+            'tong_tien' => $tongTien,
         ]);
     }
 }

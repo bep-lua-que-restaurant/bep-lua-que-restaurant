@@ -16,9 +16,6 @@ use Carbon\Carbon;
 
 class HoaDonController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $query = HoaDon::query();
@@ -60,6 +57,7 @@ class HoaDonController extends Controller
         $banAnId = $request->input('ban_an_id'); // ID bàn ăn
         $monAnId = $request->input('mon_an_id'); // ID món ăn
         $giaMon = $request->input('gia'); // Giá món ăn
+
         if (!$banAnId || !$monAnId || !$giaMon) {
             return response()->json(['error' => 'Thiếu thông tin đầu vào!'], 400);
         }
@@ -91,7 +89,7 @@ class HoaDonController extends Controller
             ]);
         }
 
-        
+
         // Kiểm tra xem món ăn đã có trong hóa đơn chưa
         $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)
             ->where('mon_an_id', $monAnId)
@@ -140,7 +138,6 @@ class HoaDonController extends Controller
             ]);
         }
 
-
         // Nạp luôn chi tiết hóa đơn để gửi đầy đủ dữ liệu
         $hoaDon = HoaDon::with('chiTietHoaDons')->find($hoaDon->id);
 
@@ -153,45 +150,10 @@ class HoaDonController extends Controller
     }
 
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreHoaDonRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
         $hoaDon = HoaDon::with(['chiTietHoaDons.monAn', 'banAns'])->findOrFail($id);
 
         return view('admin.hoadon.show', compact('hoaDon'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(HoaDon $hoaDon)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateHoaDonRequest $request, HoaDon $hoaDon)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(HoaDon $hoaDon)
-    {
-        //
     }
 }
