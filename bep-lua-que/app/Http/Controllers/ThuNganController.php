@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\BanAnUpdated;
-use App\Events\HoaDonUpdated;
 use App\Models\BanAn;
 use App\Models\ChiTietHoaDon;
 use App\Models\DanhMucMonAn;
 use App\Models\DatBan;
 use App\Models\MonAn;
+use App\Models\DatBan;
 use App\Models\HoaDon;
 use App\Models\HoaDonBan;
 use App\Models\KhachHang;
+use App\Events\BanAnUpdated;
 use App\Models\PhongAn;
 use Illuminate\Http\Request;
+use App\Events\HoaDonUpdated;
+use App\Models\ChiTietHoaDon;
+use App\Events\MonMoiDuocThem;
 
 class ThuNganController extends Controller
 {
@@ -284,22 +287,34 @@ class ThuNganController extends Controller
     }
 
     public function updateStatus(Request $request)
-    {
-        $hoaDonId = $request->hoa_don_id;
+{
+    $hoaDonId = $request->hoa_don_id;
 
-        if (!$hoaDonId) {
-            return response()->json(['success' => false, 'message' => 'Hóa đơn không hợp lệ.']);
-        }
-
-        ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
-            ->where('trang_thai', 'cho_xac_nhan')
-            ->update([
-                'trang_thai' => 'cho_che_bien',
-                'updated_at' => now()
-            ]);
-
-        return response()->json(['success' => true]);
+    if (!$hoaDonId) {
+        return response()->json(['success' => false, 'message' => 'Hóa đơn không hợp lệ.']);
     }
+
+    // Cập nhật trạng thái món ăn
+    $monAn = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
+        ->where('trang_thai', 'cho_xac_nhan')
+        ->first(); // Lấy 1 món ăn đầu tiên thỏa mãn điều kiện
+
+    if (!$monAn) {
+        return response()->json(['success' => false, 'message' => 'Món ăn không hợp lệ hoặc đã thay đổi trạng thái.']);
+    }
+
+    // Cập nhật trạng thái món ăn
+    $monAn->update([
+        'trang_thai' => 'cho_che_bien', // Hoặc trạng thái bạn muốn chuyển
+        'updated_at' => now()
+    ]);
+
+    // Gửi sự kiện với thông tin món ăn đầy đủ
+    event(new MonMoiDuocThem($monAn));
+
+    return response()->json(['success' => true]);
+}
+
 
     public function updateBanStatus(Request $request)
     {
