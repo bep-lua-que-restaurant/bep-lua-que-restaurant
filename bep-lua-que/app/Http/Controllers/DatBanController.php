@@ -287,7 +287,7 @@ class DatBanController extends Controller
         event(new DatBanCreated(datBan: $datBan));
 
         // Sau khi đặt tất cả bàn, gửi một email duy nhất
-        // Mail::to($customer->email)->send(new DatBanMail($customer, $danhSachBanDat));
+        Mail::to($customer->email)->send(new DatBanMail($customer, $danhSachBanDat));
 
         return redirect()->route('dat-ban.index')->with('success', 'Đặt bàn thành công!');
     }

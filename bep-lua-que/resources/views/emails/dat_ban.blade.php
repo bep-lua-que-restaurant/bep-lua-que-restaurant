@@ -23,13 +23,14 @@
 
         <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
             <p><strong>Thời gian đến:</strong> {{ $danhSachBanDat[0]->thoi_gian_den }}</p>
+            <p><strong>Số điện thoại:</strong> {{ $danhSachBanDat[0]->so_dien_thoai }}</p>
             <p><strong>Số người:</strong> {{ $danhSachBanDat[0]->so_nguoi }}</p>
-            <h3 style="color: #333;">Bàn đã đặt:</h3>
-            <ul>
+            {{-- <h3 style="color: #333;">Bàn đã đặt:</h3> --}}
+            {{-- <ul>
                 @foreach ($danhSachBanDat as $datBan)
                     <li>Bàn số: {{ $datBan->ban_an_id }}</li>
                 @endforeach
-            </ul>
+            </ul> --}}
         </div>
 
         <p style="text-align: center;">

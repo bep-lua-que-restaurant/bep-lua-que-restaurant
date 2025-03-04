@@ -17,7 +17,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('datban:update-status')->everyFiveMinutes();
+        // $schedule->command('datban:update-status')->everyFiveMinutes();
+        $schedule->command('datban:update-status')->everyMinute(); // Cập nhật trạng thái bàn
+        $schedule->command('datban:send-reminder')->everyMinute(); // Gửi email nhắc nhở
     }
 
 
