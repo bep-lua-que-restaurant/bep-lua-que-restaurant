@@ -7,9 +7,11 @@
     $daysOfWeek = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
     $dates = [];
 
+
     // Lấy tất cả các ngày từ hôm nay đến 7 ngày tiếp theo
     for ($i = 0; $i <= 7; $i++) {
         $date = $today->copy()->addDays($i)->format('Y-m-d');
+
         $dayOfWeek = $daysOfWeek[Carbon::parse($date)->dayOfWeek];
         $dates[] = ['date' => $date, 'day' => $dayOfWeek];
     }

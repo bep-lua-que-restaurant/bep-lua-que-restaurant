@@ -75,13 +75,13 @@ $(document).ready(function () {
 
     $("#btn-ban-an").on("click", function () {
         currentType = "ban";
-        $("#statusFilter").parent().show();
+        $("#statusFilter").show(); // Hiện bộ lọc trạng thái bàn
         fetchFilteredData();
     });
 
     $("#btn-thuc-don").on("click", function () {
         currentType = "menu";
-        $("#statusFilter").parent().hide();
+        $("#statusFilter").hide(); // Ẩn bộ lọc trạng thái bàn
         fetchFilteredData();
     });
 
@@ -124,5 +124,3 @@ $(document).ready(function () {
     });
 });
 //
-
-
