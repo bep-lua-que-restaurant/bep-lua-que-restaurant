@@ -26,7 +26,7 @@ class DatBanCreated implements ShouldBroadcast
         $this->datBan = $datBan;
 
         // Gửi email sau khi đặt bàn thành công
-        Mail::to($datBan->khachHang->email)->send(new DatBanMail($datBan->khachHang, [$datBan]));
+        // Mail::to($datBan->khachHang->email)->send(new DatBanMail($datBan->khachHang, [$datBan]));
     }
     /**
      * Get the channels the event should broadcast on.

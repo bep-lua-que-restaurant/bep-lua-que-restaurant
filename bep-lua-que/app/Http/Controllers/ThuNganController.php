@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BanAn;
-use App\Models\ChiTietHoaDon;
 use App\Models\DanhMucMonAn;
-use App\Models\DatBan;
 use App\Models\MonAn;
 use App\Models\DatBan;
 use App\Models\HoaDon;

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\BanAnUpdated;
 use App\Events\DatBanCreated;
 use App\Models\DatBan;
 use App\Http\Requests\UpdateDatBanRequest;
@@ -286,7 +287,7 @@ class DatBanController extends Controller
         event(new DatBanCreated(datBan: $datBan));
 
         // Sau khi đặt tất cả bàn, gửi một email duy nhất
-        Mail::to($customer->email)->send(new DatBanMail($customer, $danhSachBanDat));
+        // Mail::to($customer->email)->send(new DatBanMail($customer, $danhSachBanDat));
 
         return redirect()->route('dat-ban.index')->with('success', 'Đặt bàn thành công!');
     }
@@ -382,6 +383,10 @@ class DatBanController extends Controller
             $hoaDon = HoaDon::create([
                 'ma_hoa_don' => $maHoaDon,
                 'khach_hang_id' => $datBan->khach_hang_id,
+                'tong_tien' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+
             ]);
 
             // Tạo danh sách hóa đơn bàn
@@ -397,6 +402,10 @@ class DatBanController extends Controller
                     'hoa_don_id' => $hoaDon->id,
                     'trang_thai' => 'dang_xu_ly',
                 ]);
+                $banAn = BanAn::find($banAnId);
+                $banAn->update(['trang_thai' => 'co_khach']);
+
+                event(new BanAnUpdated($banAn)); // Phát sự kiện real-time
             }
 
             // Phát sự kiện khi đơn đặt bàn được cập nhật
