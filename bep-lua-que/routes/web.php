@@ -1,7 +1,6 @@
 <?php
 use App\Http\Controllers\BangTinhLuongController;
 use App\Http\Controllers\CaLamNhanVienController;
-use App\Http\Controllers\ChamCongController;
 use App\Http\Controllers\DanhMucMonAnController;
 use App\Http\Controllers\ComBoController;
 use App\Http\Controllers\DichVuController;
