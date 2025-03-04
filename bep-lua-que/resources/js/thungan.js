@@ -35,6 +35,7 @@ $(document).ready(function () {
     function fetchFilteredData() {
         let searchQuery = $("#search-name").val();
         let statusFilter = $("#statusFilter").val();
+        let selectedRoom = $("input[name='filter-room']:checked").val(); // Lấy phòng được chọn
         $("#list-container").html(
             '<div class="text-center">Đang tải dữ liệu...</div>'
         );
@@ -45,6 +46,7 @@ $(document).ready(function () {
             data: {
                 ten: searchQuery,
                 statusFilter: currentType === "ban" ? statusFilter : null,
+                vi_tri: currentType === "ban" ? selectedRoom : null, // Gửi phòng lên server
             },
             success: function (response) {
                 $("#list-container").html(response.html);
@@ -65,15 +67,21 @@ $(document).ready(function () {
         }
     });
 
+    $("input[name='filter-room']").on("change", function () {
+        if (currentType === "ban") {
+            fetchFilteredData();
+        }
+    });
+
     $("#btn-ban-an").on("click", function () {
         currentType = "ban";
-        $("#statusFilter").parent().show();
+        $("#statusFilter").show(); // Hiện bộ lọc trạng thái bàn
         fetchFilteredData();
     });
 
     $("#btn-thuc-don").on("click", function () {
         currentType = "menu";
-        $("#statusFilter").parent().hide();
+        $("#statusFilter").hide(); // Ẩn bộ lọc trạng thái bàn
         fetchFilteredData();
     });
 
@@ -116,5 +124,3 @@ $(document).ready(function () {
     });
 });
 //
-
-

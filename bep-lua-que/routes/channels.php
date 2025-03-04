@@ -21,10 +21,18 @@ Broadcast::channel('banan-channel', function () {
     return true;
 });
 
+
+Broadcast::channel('datban-channel', function () {
+    return true;
+});
+
+
 Broadcast::channel('hoa-don-channel', function ($user) {
     return true; // Cho phép tất cả người dùng lắng nghe
 });
 
+
 Broadcast::channel('bep-channel', function () {
     return true; // Cho phép mọi người nghe kênh này, nếu cần bảo mật hơn thì kiểm tra quyền ở đây
 });
+

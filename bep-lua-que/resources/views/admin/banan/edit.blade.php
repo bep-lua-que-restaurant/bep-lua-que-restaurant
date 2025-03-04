@@ -42,8 +42,6 @@
                                 @endif
                             </div>
 
-
-
                             <!-- Vị trí -->
                             <div class="form-group">
                                 <label for="vi_tri">Vị trí</label>
@@ -67,14 +65,12 @@
                                 <label for="so_ghe">Loại bàn</label>
                                 <select name="so_ghe" id="so_ghe" class="form-control">
                                     <option value="">Chọn loại bàn</option>
+                                    <option value="4" id="ban4" <?php echo $banAn->so_ghe == 4 ? 'selected' : ''; ?>>Loại bàn 2-4 ghế</option>
+                                    <option value="8" id="ban8" <?php echo $banAn->so_ghe == 8 ? 'selected' : ''; ?>>Loại bàn 6-8 ghế</option>
+                                    <option value="10" id="ban10" <?php echo $banAn->so_ghe == 10 ? 'selected' : ''; ?>>Loại bàn 8-10 ghế</option>
                                 </select>
                                 <small id="so_ghe_error" class="text-danger"></small>
                             </div>
-
-                            <!-- Hiển thị số bàn hiện có -->
-                            {{-- <div id="soLuongBanHienCo" style="margin-top: 10px; font-weight: bold;"></div> --}}
-
-
 
 
                             <!-- Mô tả -->

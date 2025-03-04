@@ -1,26 +1,12 @@
-   <a href="{{ route('dat-ban.create', [
-                                            'ten_ban' => $item->ten_ban ?? 'Không xác định',
-                                            'id_ban' => $item->id ?? '',
-                                            'time' => $timeSlot,
-                                            'date' => $d['date'],
-                                        ]) }}"
-                                            class="grid-item time-item 
-                                @if ($datBanWeek) @switch($datBanWeek->trang_thai)
-                                        @case('dang_xu_ly')
-                                            bg-warning
-                                            @break
-                                        @case('xa_nhan')
-                                            bg-success
-                                            @break
-                                        @case('da_huy')
-                                            bg-danger
-                                            @break
-                                        @default
-                                            bg-secondary
-                                    @endswitch @endif">
+php artisan datban:update-status
 
-                                            <!-- Hiển thị giờ phút nếu có -->
-                                            @if ($datBanWeek)
-                                                <span>{{ Carbon::parse($datBanWeek->thoi_gian_den)->format('H:i') }}</span>
-                                            @endif
-                                        </a>
+
+Loại bàn cùng 1 dòng ( vi_tri)-> thời gian vào + số người + bàn  
+
+Chỉ nhận số người 
+
+thêm vào |hóa đơn  
+         |hóa đơn bàn
+
+
+         03/03/2025 21:00	đoàn văn quân	0388940846	8	bàn 1, bàn 2

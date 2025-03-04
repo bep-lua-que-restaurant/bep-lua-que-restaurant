@@ -2,18 +2,21 @@
     use Carbon\Carbon;
 
     $today = Carbon::today(); // Ngày hôm nay
-    $endOfWeek = Carbon::parse('Sunday')->endOfDay(); // Lấy ngày Chủ Nhật, kết thúc vào cuối ngày
+    $endOfWeek = $today->copy()->addDays(7)->endOfDay(); // Lấy 7 ngày tiếp theo tính từ hôm nay
 
     $daysOfWeek = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
     $dates = [];
 
-    // Lấy tất cả các ngày từ hôm nay đến hết tuần
-    for ($i = 1; $i <= $endOfWeek->diffInDays($today); $i++) {
-        $date = Carbon::now()->addDays($i)->format('Y-m-d');
+
+    // Lấy tất cả các ngày từ hôm nay đến 7 ngày tiếp theo
+    for ($i = 0; $i <= 7; $i++) {
+        $date = $today->copy()->addDays($i)->format('Y-m-d');
+
         $dayOfWeek = $daysOfWeek[Carbon::parse($date)->dayOfWeek];
         $dates[] = ['date' => $date, 'day' => $dayOfWeek];
     }
 @endphp
+
 
 <div class="row">
     <!-- Cột bên trái (Cố định, giữ căn chỉnh với bên phải) -->
@@ -132,14 +135,14 @@
                                                                 @csrf
                                                                 @method('DELETE')
                                                                 <div class="d-flex justify-content-center">
-                                                                    <label for="mo_ta" class="p-2">Ghi chú:
+                                                                    {{-- <label for="mo_ta" class="p-2">Ghi chú:
                                                                     </label>
                                                                     <input type="text" name="mo_ta" id="mo_ta"
-                                                                        placeholder="Ghi chú...">
+                                                                        placeholder="Ghi chú..."> --}}
                                                                 </div>
-                                                                <button type="submit" class="btn btn-danger mt-3"
+                                                                {{-- <button type="submit" class="btn btn-danger mt-3"
                                                                     onclick="return confirm('Bạn chắc chắn muốn hủy đặt bàn này?')">Hủy
-                                                                    đặt bàn</button>
+                                                                    đặt bàn</button> --}}
                                                             </form>
                                                         @endif
                                                     </div>

@@ -61,10 +61,6 @@
                                 <small id="so_ghe_error" class="text-danger"></small>
                             </div>
 
-
-
-
-
                             <!-- Mô tả -->
                             <div class="form-group">
                                 <label for="mo_ta">Mô tả</label>

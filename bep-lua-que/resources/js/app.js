@@ -1,5 +1,6 @@
 import './bootstrap';
-
+import "./thungan.js"; // Đảm bảo thungan.js thực sự có trong thư mục resources/js
+import "./datban.js";
 document.addEventListener("DOMContentLoaded", () => {
     console.log("🚀 Ứng dụng đã tải xong!");
     
@@ -14,3 +15,5 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("❌ Lỗi khi đăng ký kênh:", error);
     }
 });
+
+
