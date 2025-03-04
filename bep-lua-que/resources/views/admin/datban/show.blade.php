@@ -9,7 +9,7 @@
         <h3>Thông tin đặt bàn của khách hàng</h3>
         <p><strong>Tên khách hàng: </strong>{{ $datBan->khachHang->ho_ten }}</p>
         <p><strong>Số điện thoại: </strong>{{ $datBan->khachHang->so_dien_thoai }}</p>
-        <p><strong>Căn cước: </strong>{{ $datBan->khachHang->can_cuoc }}</p>
+        <p><strong>Email: </strong>{{ $datBan->khachHang->email }}</p>
         <p><strong>Thời gian đến: </strong>{{ $datBan->thoi_gian_den }}</p>
         <p><strong>Mô tả: </strong>{{ $datBan->mo_ta }}</p>
 
@@ -31,5 +31,5 @@
             </tbody>
         </table>
     </div>
-    <a class="btn btn-primary" href="/dat-ban/">quay lai</a>
+    <a class="btn btn-primary" href="/danh-sach-dat-ban/">quay lai</a>
 @endsection

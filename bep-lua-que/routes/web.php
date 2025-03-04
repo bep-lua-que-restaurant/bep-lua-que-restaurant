@@ -93,13 +93,14 @@ Route::get('/danh-sach-dat-ban', [DatBanController::class, 'DanhSach'])->name('d
 
 Route::resource('dat-ban', DatBanController::class);
 Route::get('/dat-ban/{dat_ban}/edit', [DatBanController::class, 'edit'])->name('dat-ban.edit');
-
+Route::get('/dat-ban/{id}', [DatBanController::class, 'show'])->name('dat-ban.show');
 // Route để tìm kiếm khách hàng
 Route::get('/dat-ban/search-customer', [DatBanController::class, 'searchCustomer'])->name('admin.datban.search');
 Route::get('admin/khachhang/search', [DatBanController::class, 'searchCustomer'])->name('admin.khachhang.search');
 
 
 Route::get('admin/dat-ban/create', [DatBanController::class, 'create'])->name('admin.datban.create');
+
 Route::get('admin/khachhang/search', [DatBanController::class, 'searchCustomer'])->name('admin.khachhang.search');
 Route::get('/admin/datban/filter', [DatBanController::class, 'filterBanAnByTime'])->name('admin.datban.filter');
 // Route::get('/admin/datban/get-ban-an-for-edit', [DatBanController::class, 'getBanAnForEdit'])->name('admin.datban.getBanAnForEdit');
@@ -255,8 +256,8 @@ Route::post('/hoa-don/update-quantity', [ThuNganController::class, 'updateQuanti
 Route::post('/hoa-don/delete',[ThuNganController::class, 'deleteMonAn'])->name('thungan.deleteMonAn');
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
-Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
 
+Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
 
 //Chấm công
 
@@ -302,6 +303,8 @@ Route::get('/luong', [BangTinhLuongController::class, 'index'])->name('luong.ind
 Route::get('/luong/create', [BangTinhLuongController::class, 'create'])->name('luong.create');
 Route::post('/luong/store', [BangTinhLuongController::class, 'store'])->name('luong.store');
 
+
+
 Route::get('/luong/{id}', [BangTinhLuongController::class, 'show'])->name('luong.show');
 
 //lọc
@@ -329,6 +332,10 @@ Route::post('luong/import', [BangTinhLuongController::class, 'import'])->name('l
 //     // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 // });
 Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
+
+
+
+
 
 
 
