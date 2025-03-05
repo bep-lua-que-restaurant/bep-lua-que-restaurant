@@ -1,5 +1,6 @@
 php artisan datban:update-status
 
+php artisan schedule:work
 
 Loại bàn cùng 1 dòng ( vi_tri)-> thời gian vào + số người + bàn  
 

@@ -91,7 +91,7 @@
                                                 @if ($datBanToday->trang_thai == 'xac_nhan')
                                                     Đã xác nhận
                                                 @elseif($datBanToday->trang_thai == 'dang_xu_ly')
-                                                    Được đặt trước
+                                                    Đang xử lý
                                                 @endif
 
 

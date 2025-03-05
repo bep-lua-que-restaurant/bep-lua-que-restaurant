@@ -185,6 +185,13 @@
                                                 $('#selectedTableSeats').text(soGhe);
                                                 $('#selectedTableInfo').show();
                                                 $('#selectedTableId').val(idBan);
+
+                                                // Nếu bàn hợp lệ, thêm vào danh sách selectedIds
+                                                if (!selectedIds.includes(idBan)) {
+                                                    selectedIds.push(idBan);
+                                                }
+
+                                                updateHiddenInputs(); // Cập nhật input ẩn ngay sau khi chọn bàn
                                             } else {
                                                 idBan = null; // Nếu bàn không còn khả dụng, bỏ chọn
                                                 $('#selectedTableInfo').hide();
