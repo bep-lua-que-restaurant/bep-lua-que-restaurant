@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\DanhMucMonAnExport;
 use App\Exports\NhaCungCapExport;
+use App\Imports\NhaCungCapImport;
 use App\Models\DanhMucMonAn;
 use App\Models\NhaCungCap;
 use App\Http\Requests\StoreNhaCungCapRequest;
@@ -129,4 +130,15 @@ class NhaCungCapController extends Controller
         // Xuất file Excel với tên "NhaCungCap.xlsx"
         return Excel::download(new NhaCungCapExport, 'NhaCungCap.xlsx');
     }
+    public function importNhaCungCap(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
+
+        Excel::import(new NhaCungCapImport, $request->file('file'));
+
+        return back()->with('success', 'Nhập dữ liệu thành công!');
+    }
 }
+

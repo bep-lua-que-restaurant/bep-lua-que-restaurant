@@ -2,14 +2,14 @@
 
 namespace App\Imports;
 
-use App\Models\BanAn;
+use App\Models\ComBo;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 
     
-    class BanAnImport implements ToModel, WithHeadingRow
+    class ComboImport implements ToModel, WithHeadingRow
     {
         public function headingRow(): int
         {
@@ -18,14 +18,11 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
     
         public function model(array $row)
         {
-            
        
-            return new BanAn([
-                'ten_ban' => $row['ten_ban'] ,
-                'so_ghe'=>$row['so_ghe'] ,
-                'vi_tri' => $row['vi_tri'] ?? null,
-                'mo_ta' => $row['mo_ta'] ?? null,
-                'created_at' => $row['created_at'] ?? null,      
+            return new ComBo([
+                'ten' => $row['ten'] ,
+                'mo_ta' => $row['mo_ta'] ?? '',
+                'hinh_anh' => $row['hinh_anh'] ?? '',
                 'deleted_at' => $row['deleted_at'] ?? null,
             ]);
         }

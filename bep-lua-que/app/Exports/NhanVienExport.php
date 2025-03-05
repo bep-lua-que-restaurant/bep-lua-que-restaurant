@@ -2,48 +2,66 @@
 
 namespace App\Exports;
 
-use App\Models\MonAn;
+use App\Models\NhanVien;
+use Illuminate\Support\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-
-use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Maatwebsite\Excel\Events\AfterSheet;
 
-class MonAnExport implements FromCollection, WithHeadings, WithMapping, WithEvents
+class NhanVienExport implements FromCollection, WithHeadings, WithEvents, WithMapping
 {
+    use Exportable;
+
+    /**
+    * @return \Illuminate\Support\Collection
+    */
     public function collection()
     {
-        return MonAn::withTrashed()
-            ->with('danhMuc') // Eager load danh mục
-            ->select('id', 'danh_muc_mon_an_id', 'ten', 'mo_ta', 'gia', 'trang_thai', 'created_at', 'deleted_at')
-            ->get();
+        return NhanVien::withTrashed()->select(
+            'id', 'chuc_vu_id', 'ma_nhan_vien', 'ho_ten', 'email', 
+            'so_dien_thoai', 'password', 'dia_chi', 'hinh_anh', 'gioi_tinh', 
+            'ngay_sinh', 'ngay_vao_lam', 'deleted_at', 'created_at', 'updated_at', 'trang_thai'
+        )->get();
     }
 
     public function headings(): array
     {
         return [
-            ['Món ăn'],
-            ['ID', 'Danh mục món', 'Tên món', 'Mô tả', 'Giá', 'Trạng thái', 'Ngày tạo', 'Tình trạng']
+            ['DANH SÁCH NHÂN VIÊN'], // Tiêu đề lớn
+            [
+                'ID', 'Chức vụ', 'Mã nhân viên', 'Họ tên', 'Email', 'Số điện thoại', 
+                'Mật khẩu', 'Địa chỉ', 'Hình ảnh', 'Giới tính', 'Ngày sinh', 
+                'Ngày vào làm', 'Trạng thái', 'Ngày tạo', 'Ngày cập nhật'
+            ], // Headers
         ];
     }
 
     public function map($row): array
-    {
-        return [
-            'ID' => $row->id,
-            'Danh Mục' => optional($row->danhMuc)->ten ?? 'Không có danh mục',
-            'Tên' => $row->ten,
-            'Mô Tả' => $row->mo_ta,
-            'Giá' => number_format($row->gia, 0, ',', '.') . ' đ',
-            'Trạng Thái' => ucfirst(str_replace('_', ' ', $row->trang_thai)),
-            'Ngày Tạo' => $row->created_at ? $row->created_at->format('d/m/Y') : 'N/A',
-            'Trạng Thái Kinh Doanh' => $row->deleted_at ? 'Ngừng kinh doanh' : 'Đang kinh doanh',
-        ];
-    }
-    
+{
+    return [
+        $row->id,
+        $row->chuc_vu_id,
+        $row->ma_nhan_vien,
+        $row->ho_ten,
+        $row->email,
+        $row->so_dien_thoai,
+        $row->password,
+        $row->dia_chi,
+        $row->hinh_anh,
+        $row->gioi_tinh ? 'Nam' : 'Nữ',
+        $row->ngay_sinh ? Carbon::parse($row->ngay_sinh)->format('d/m/Y') : '',
+        $row->ngay_vao_lam ? Carbon::parse($row->ngay_vao_lam)->format('d/m/Y') : '',
+        $row->deleted_at ? 'Ngừng làm việc' : 'Đang làm việc',
+        $row->created_at ? Carbon::parse($row->created_at)->format('d/m/Y H:i') : '',
+        $row->updated_at ? Carbon::parse($row->updated_at)->format('d/m/Y H:i') : '',
+    ];
+}
+
     public function registerEvents(): array
     {
         return [
@@ -51,8 +69,8 @@ class MonAnExport implements FromCollection, WithHeadings, WithMapping, WithEven
                 $sheet = $event->sheet->getDelegate();
 
                 // Gộp ô cho tiêu đề lớn
-                $sheet->mergeCells('A1:D1');
-                $sheet->setCellValue('A1', 'Dịch vụ');
+                $sheet->mergeCells('A1:O1');
+                $sheet->setCellValue('A1', 'DANH SÁCH NHÂN VIÊN');
 
                 // Định dạng tiêu đề lớn
                 $sheet->getStyle('A1')->applyFromArray([
@@ -71,8 +89,8 @@ class MonAnExport implements FromCollection, WithHeadings, WithMapping, WithEven
                     ],
                 ]);
 
-                // Định dạng heading
-                $sheet->getStyle('A2:D2')->applyFromArray([
+                // Định dạng tiêu đề cột
+                $sheet->getStyle('A2:O2')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'color' => ['rgb' => 'FFFFFF'],
@@ -88,7 +106,7 @@ class MonAnExport implements FromCollection, WithHeadings, WithMapping, WithEven
                 ]);
 
                 // Tự động căn chỉnh độ rộng cột
-                foreach (range('A', 'D') as $column) {
+                foreach (range('A', 'O') as $column) {
                     $sheet->getColumnDimension($column)->setAutoSize(true);
                 }
             },

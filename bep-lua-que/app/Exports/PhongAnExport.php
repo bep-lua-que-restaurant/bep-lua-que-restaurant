@@ -2,48 +2,46 @@
 
 namespace App\Exports;
 
-use App\Models\MonAn;
+use App\Models\PhongAn;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-
-use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Font;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Maatwebsite\Excel\Events\AfterSheet;
 
-class MonAnExport implements FromCollection, WithHeadings, WithMapping, WithEvents
+class PhongAnExport implements FromCollection, WithHeadings, WithEvents, WithMapping
+
 {
+    /**
+    * @return \Illuminate\Support\Collection
+    */
     public function collection()
     {
-        return MonAn::withTrashed()
-            ->with('danhMuc') // Eager load danh mục
-            ->select('id', 'danh_muc_mon_an_id', 'ten', 'mo_ta', 'gia', 'trang_thai', 'created_at', 'deleted_at')
-            ->get();
+        return PhongAn::withTrashed()->select('id', 'ten_phong_an', 'created_at', 'deleted_at')->get();
     }
 
     public function headings(): array
     {
         return [
-            ['Món ăn'],
-            ['ID', 'Danh mục món', 'Tên món', 'Mô tả', 'Giá', 'Trạng thái', 'Ngày tạo', 'Tình trạng']
+            ['Phòng Ăn'], // Tiêu đề lớn (dòng 1)
+            ['ID', 'Tên phòng ăn', 'Ngày tạo', 'Trạng thái kinh doanh'], // Headers (dòng 2)
         ];
     }
 
     public function map($row): array
     {
         return [
-            'ID' => $row->id,
-            'Danh Mục' => optional($row->danhMuc)->ten ?? 'Không có danh mục',
-            'Tên' => $row->ten,
-            'Mô Tả' => $row->mo_ta,
-            'Giá' => number_format($row->gia, 0, ',', '.') . ' đ',
-            'Trạng Thái' => ucfirst(str_replace('_', ' ', $row->trang_thai)),
-            'Ngày Tạo' => $row->created_at ? $row->created_at->format('d/m/Y') : 'N/A',
-            'Trạng Thái Kinh Doanh' => $row->deleted_at ? 'Ngừng kinh doanh' : 'Đang kinh doanh',
+            $row->id,
+            $row->ten_phong_an,
+            $row->created_at ? $row->created_at->format('d/m/Y') : '',
+            $row->deleted_at ? 'Ngừng kinh doanh' : 'Đang kinh doanh', // Trạng thái kinh doanh
         ];
     }
-    
+
     public function registerEvents(): array
     {
         return [
