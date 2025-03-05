@@ -225,7 +225,6 @@
     </script>
     @vite('resources/js/public.js')
     @vite('resources/js/thungan.js')
-
 </body>
 
 </html>
