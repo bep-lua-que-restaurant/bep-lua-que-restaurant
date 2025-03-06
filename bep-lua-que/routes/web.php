@@ -9,6 +9,7 @@ use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\BanAnController;
 use App\Http\Controllers\DatBanController;
 use App\Http\Controllers\LoaiNguyenLieuController;
+use App\Http\Controllers\NguyenLieuController;
 use App\Http\Controllers\PhongAnController;
 use App\Http\Controllers\LuongController;
 use Illuminate\Support\Facades\Route;
@@ -121,6 +122,10 @@ Route::resource('loai-nguyen-lieu', LoaiNguyenLieuController::class);
 Route::get('export-loai-nguyen-lieu', [LoaiNguyenLieuController::class, 'export'])->name('loai-nguyen-lieu.export');
 Route::post('loai-nguyen-lieu/{id}/restore', [LoaiNguyenLieuController::class, 'restore'])->name('loai-nguyen-lieu.restore');
 
+// Nguyên liệu kho
+Route::resource('nguyen-lieu', NguyenLieuController::class);
+Route::get('/nguyen-lieu-export', [NguyenLieuController::class, 'export'])->name('nguyen-lieu.export');
+Route::post('/nguyen-lieu/import', [NguyenLieuController::class, 'import'])->name('nguyen-lieu.import');
 // // phiếu nhập nguyên liệu
 Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
 Route::post('/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore'); // Khôi phục phiếu nhập
@@ -133,6 +138,12 @@ Route::get(
     [PhieuNhapKhoController::class, 'xemChiTietNguyenLieu']
 )
     ->name('phieu-nhap-kho.chitiet-nguyenlieu');
+Route::post(
+    '/phieu-nhap-kho/{phieuNhapId}/nguyen-lieu/{nguyenLieuId}/cap-nhat-trang-thai',
+    [PhieuNhapKhoController::class, 'capNhatTrangThai']
+)
+    ->name('phieu-nhap-kho.capnhaptrangthai');
+
 
 
 

@@ -40,7 +40,7 @@ class MonAn extends Model
     }
     public function nguyenLieuMonAn()
     {
-        return $this->hasMany(NguyenLieuMonAn::class, 'mon_an_id');
+        return $this->hasMany(CongThucMonAn::class, 'mon_an_id');
     }
 
     public function nguyenLieus()
