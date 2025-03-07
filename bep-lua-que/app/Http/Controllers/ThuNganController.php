@@ -7,7 +7,6 @@ use App\Models\ChiTietHoaDon;
 use App\Models\DanhMucMonAn;
 use App\Models\DatBan;
 use App\Models\MonAn;
-use App\Models\DatBan;
 use App\Models\HoaDon;
 use App\Models\HoaDonBan;
 use App\Models\KhachHang;
@@ -15,7 +14,6 @@ use App\Events\BanAnUpdated;
 use App\Models\PhongAn;
 use Illuminate\Http\Request;
 use App\Events\HoaDonUpdated;
-use App\Models\ChiTietHoaDon;
 use App\Events\MonMoiDuocThem;
 
 class ThuNganController extends Controller
@@ -286,7 +284,37 @@ class ThuNganController extends Controller
         return response()->json(['success' => false, 'message' => 'Hóa đơn không tồn tại']);
     }
 
-    public function updateStatus(Request $request)
+//     public function updateStatus(Request $request)
+// {
+//     $hoaDonId = $request->hoa_don_id;
+
+//     if (!$hoaDonId) {
+//         return response()->json(['success' => false, 'message' => 'Hóa đơn không hợp lệ.']);
+//     }
+
+//     // Cập nhật trạng thái món ăn
+//     $monAn = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
+//         ->where('trang_thai', 'cho_xac_nhan')
+//         ->first(); // Lấy 1 món ăn đầu tiên thỏa mãn điều kiện
+
+//     if (!$monAn) {
+//         return response()->json(['success' => false, 'message' => 'Món ăn không hợp lệ hoặc đã thay đổi trạng thái.']);
+//     }
+
+//     // Cập nhật trạng thái món ăn
+//     $monAn->update([
+//         'trang_thai' => 'cho_che_bien', // Hoặc trạng thái bạn muốn chuyển
+//         'updated_at' => now()
+//     ]);
+
+//     // Gửi sự kiện với thông tin món ăn đầy đủ
+//     event(new MonMoiDuocThem($monAn));
+
+//     return response()->json(['success' => true]);
+// }
+
+
+public function updateStatus(Request $request)
 {
     $hoaDonId = $request->hoa_don_id;
 
@@ -294,26 +322,31 @@ class ThuNganController extends Controller
         return response()->json(['success' => false, 'message' => 'Hóa đơn không hợp lệ.']);
     }
 
-    // Cập nhật trạng thái món ăn
-    $monAn = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
+    // Lấy danh sách món ăn và load quan hệ
+    $monAns = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
         ->where('trang_thai', 'cho_xac_nhan')
-        ->first(); // Lấy 1 món ăn đầu tiên thỏa mãn điều kiện
+        ->with('monAn', 'hoaDon.banAns') // 👈 Load quan hệ để tránh lỗi null
+        ->get();
 
-    if (!$monAn) {
-        return response()->json(['success' => false, 'message' => 'Món ăn không hợp lệ hoặc đã thay đổi trạng thái.']);
+    if ($monAns->isEmpty()) {
+        return response()->json(['success' => false, 'message' => 'Không có món ăn hợp lệ hoặc đã thay đổi trạng thái.']);
     }
 
-    // Cập nhật trạng thái món ăn
-    $monAn->update([
-        'trang_thai' => 'cho_che_bien', // Hoặc trạng thái bạn muốn chuyển
-        'updated_at' => now()
-    ]);
+    // Cập nhật trạng thái tất cả món ăn
+    foreach ($monAns as $monAn) {
+        $monAn->update([
+            'trang_thai' => 'cho_che_bien',
+            'updated_at' => now()
+        ]);
+    }
 
-    // Gửi sự kiện với thông tin món ăn đầy đủ
-    event(new MonMoiDuocThem($monAn));
+    // Phát sự kiện với danh sách món ăn đã có đầy đủ thông tin
+    event(new MonMoiDuocThem($monAns));
 
     return response()->json(['success' => true]);
 }
+
+
 
 
     public function updateBanStatus(Request $request)
