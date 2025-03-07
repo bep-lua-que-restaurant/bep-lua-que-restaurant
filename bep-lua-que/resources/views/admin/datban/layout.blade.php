@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -61,7 +61,7 @@
     </div>
 
     <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
-    @vite('resources/js/datban.js')
+
 
 
 </body>
