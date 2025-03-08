@@ -65,9 +65,10 @@
                                         <th><strong>Tên nguyên liệu</strong></th>
                                         <th><strong>Loại nguyên liệu</strong></th>
 
-                                        <th><strong>Đơn vị tính</strong></th>
+
                                         <th><strong>Giá nhập</strong></th>
                                         <th><strong>Số lượng tồn</strong></th>
+                                        <th><strong>Đơn vị tính</strong></th>
                                         {{-- <th><strong>Trạng thái kinh doanh</strong></th> --}}
                                         <th><strong>Hành động</strong></th>
                                     </tr>
