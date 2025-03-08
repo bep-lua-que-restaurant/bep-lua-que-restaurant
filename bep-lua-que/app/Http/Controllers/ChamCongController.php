@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ChamCongExport;
 use App\Models\CaLam;
 use App\Models\ChamCong;
 use App\Http\Requests\StoreChamCongRequest;
@@ -75,7 +76,13 @@ class ChamCongController extends Controller
             )
 
             ->get();
-
+// Nếu request là AJAX, chỉ trả về phần HTML bảng chấm công
+        if ($request->ajax()) {
+        return response()->json([
+        'weekLabel' => $weekLabel,
+        'html' => view('admin.chamcong.listchamcong', compact('dates', 'caLams', 'chamCongs'))->render()
+        ]);
+        }
 
 
         return view('admin.chamcong.chamcong', compact('dates', 'caLams', 'chamCongs', 'weekLabel', 'weekOffset'));
@@ -360,10 +367,10 @@ class ChamCongController extends Controller
         return view('admin.chamcong.danhsach', compact('danhSachChamCong'));
     }
 
-    // public function export()
-    // {
-    //     // Xuất file Excel với tên "DanhMucMonAn.xlsx"
-    //     return Excel::download(new DichVuExport, 'DichVu.xlsx');
-    // }
+    public function export()
+    {
+        // Xuất file Excel với tên "DanhMucMonAn.xlsx"
+        return Excel::download(new ChamCongExport, 'ChamCong.xlsx');
+    }
 
 }

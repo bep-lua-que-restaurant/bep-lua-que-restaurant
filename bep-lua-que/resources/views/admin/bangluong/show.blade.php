@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-    Chi tiết danh mục
+    Chi tiết bảng lương
 @endsection
 
 @section('content')
@@ -39,27 +39,30 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {{-- @if ($bangTinhLuong->isNotEmpty())
-                                        @foreach ($bangTinhLuong as $index => $chamCong)
+                                    @if ($bangTinhLuong->isNotEmpty())
+                                        @foreach ($bangTinhLuong->groupBy('ten_nhan_vien') as $tenNhanVien => $nhomLuong)
+                                            @php
+                                                $luong = $nhomLuong->first();
+                                                $soCaLam = $luong->so_ca_lam ?? 0;
+                                                $soNgayCong = intdiv($soCaLam, 3); // Số ngày công trọn vẹn
+                                                $caDu = $soCaLam % 3; // Số ca dư chưa đủ thành 1 ngày
+                                            @endphp
                                             <tr>
-                                                <td>{{ $loop->iteration }}</td> <!-- Laravel tự động đếm -->
-                                                <td>{{ $chamCong->ten_nhan_vien ?? 'Không có tên' }}</td>
-                                                <td>{{ $chamCong->ten_ca ?? 'Chưa có ca' }}</td>
-                                                <td>{{ $chamCong->ngay_cham_cong ?? 'Chưa cập nhật' }}</td>
-                                                <td>{{ number_format(optional($chamCong->luong)->muc_luong ?? 0, 0, ',', '.') }}
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $luong->ten_nhan_vien ?? 'Không có tên' }}</td>
+                                                <td>{{ $caDu > 0 ? $caDu . ' ca' : '-' }}</td> <!-- Hiển thị số ca dư -->
+                                                <td>{{ $soNgayCong > 0 ? sprintf('%02d', $soNgayCong) . ' ngày' : '-' }}
+                                                </td> <!-- Hiển thị số ngày công -->
+                                                <td>{{ isset($luong->muc_luong) ? number_format($luong->muc_luong) : '0' }}
                                                 </td>
-                                                <td>{{ number_format(optional($chamCong->tong_luong ?? 0), 0, ',', '.') }}
-                                                </td>
+                                                <td>{{ number_format($luong->tong_luong ?? 0, 0, ',', '.') }} VND</td>
                                             </tr>
                                         @endforeach
                                     @else
                                         <tr>
                                             <td colspan="6" class="text-center">Không có dữ liệu</td>
                                         </tr>
-                                    @endif --}}
-
-
-
+                                    @endif
                                 </tbody>
                             </table>
 

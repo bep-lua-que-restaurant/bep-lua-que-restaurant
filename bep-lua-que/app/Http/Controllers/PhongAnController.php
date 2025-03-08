@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PhongAnExport;
 use App\Http\Requests\StoreBanAnRequest;
 use App\Http\Requests\StorePhongAnRequest;
 use App\Http\Requests\UpdatePhongAnRequest;
+use App\Imports\PhongAnImport;
 use App\Models\PhongAn;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PhongAnController extends Controller
 {
@@ -127,4 +130,20 @@ class PhongAnController extends Controller
 
         return redirect()->route('phong-an.index')->with('error', 'Phòng ăn này chưa bị xóa!');
     }
+    public function exportPhongAn()
+    {
+        return Excel::download(new PhongAnExport, 'PhongAn.xlsx');
+    }
+
+    public function importPhongAn(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
+
+        Excel::import(new PhongAnImport, $request->file('file'));
+
+        return back()->with('success', 'Nhập dữ liệu thành công!');
+    }
 }
+

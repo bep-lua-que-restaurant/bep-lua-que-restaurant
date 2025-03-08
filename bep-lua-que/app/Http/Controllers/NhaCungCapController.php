@@ -97,4 +97,15 @@ class NhaCungCapController extends Controller
     {
         return Excel::download(new NhaCungCapExport, 'NhaCungCap.xlsx');
     }
+    public function importNhaCungCap(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
+
+        Excel::import(new NhaCungCapImport, $request->file('file'));
+
+        return back()->with('success', 'Nhập dữ liệu thành công!');
+    }
 }
+

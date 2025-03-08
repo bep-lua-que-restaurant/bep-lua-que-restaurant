@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\ComBoExport;
+use App\Imports\ComboImport;
 use App\Models\ComBo;
 use App\Http\Requests\StoreComBoRequest;
 use App\Http\Requests\UpdateComBoRequest;
@@ -126,4 +127,16 @@ class ComBoController extends Controller
         // Xuất file Excel với tên "Combo.xlsx"
         return Excel::download(new ComBoExport, 'ComBo.xlsx');
     }
+
+    public function importComBo(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
+
+        Excel::import(new ComboImport, $request->file('file'));
+
+        return back()->with('success', 'Nhập dữ liệu thành công!');
+    }
+
 }

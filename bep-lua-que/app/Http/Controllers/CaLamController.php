@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\CaLamExport;
+use App\Imports\CaLamImport;
 use App\Models\CaLam;
 use App\Http\Requests\StoreCaLamRequest;
 use App\Http\Requests\UpdateCaLamRequest;
@@ -124,5 +125,15 @@ class CaLamController extends Controller
     {
         // Xuất file Excel với tên "CaLam.xlsx"
         return Excel::download(new CaLamExport, 'CaLam.xlsx');
+    }
+    public function importCaLam(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
+
+        Excel::import(new CaLamImport, $request->file('file'));
+
+        return back()->with('success', 'Nhập dữ liệu thành công!');
     }
 }

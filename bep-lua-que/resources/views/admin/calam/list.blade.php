@@ -35,7 +35,7 @@
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
                             <!-- Nút Nhập file sẽ hiển thị Modal -->
-                            <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
+                            <a href="{{ route('ca-lam.import') }}" class="btn btn-sm btn-secondary" data-toggle="modal"
                                 data-target=".bd-example-modal-lg">
                                 <i class="fa fa-upload"></i> Nhập file
                             </a>
