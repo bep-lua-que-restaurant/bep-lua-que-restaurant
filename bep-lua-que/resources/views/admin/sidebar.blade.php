@@ -74,6 +74,7 @@
                 </a>
                 <ul aria-expanded="false">
                     <li><a href="{{ route('nhan-vien.index') }}">Nhân viên</a></li>
+
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="{{ route('ca-lam.index') }}">Ca làm</a></li>
@@ -82,9 +83,9 @@
                     <li><a href="{{ route('ca-lam-nhan-vien.index') }}">Quản lí ca </a></li>
                 </ul>
                 <ul aria-expanded="false">
+
                     <li><a href="{{ route('cham-cong.index') }}">Chấm công</a></li>
-                </ul>
-                <ul aria-expanded="false">
+        
 
                     <li><a href="{{ route('luong.index') }}">Bảng tính lương</a></li>
                     <li><a href="#">Thiết lập nhân viên</a></li>
