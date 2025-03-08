@@ -30,7 +30,22 @@
                             <!-- Tên danh mục -->
                             <div class="form-group">
                                 <label for="name">Tên nhà cung cấp</label>
-                                <input type="text" id="name" name="ten" class="form-control" value="{{ $nhaCungCap->ten }}" readonly>
+                                <input type="text" id="ten_nha_cung_cap" name="ten_nha_cung_cap" class="form-control" value="{{ $nhaCungCap->ten_nha_cung_cap }}" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="dia_chi">Địa chỉ</label>
+                                <input type="text" id="dia_chi" name="dia_chi" class="form-control" value="{{ $nhaCungCap->dia_chi }}" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="so_dien_thoai">Số điện thoại</label>
+                                <input type="tel" id="so_dien_thoai" name="so_dien_thoai" class="form-control" value="{{ $nhaCungCap->so_dien_thoai }}" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" class="form-control" value="{{ $nhaCungCap->email }}" readonly>
                             </div>
 
                             <!-- Mô tả -->
