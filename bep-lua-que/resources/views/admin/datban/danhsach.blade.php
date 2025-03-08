@@ -123,5 +123,6 @@
                 .then(data => console.log(data.message));
         }, 60000); // 60000ms = 1 phút
     </script>
+    @vite('resources/js/datban.js')
     {{ $banhSachDatban->links('pagination::bootstrap-5') }}
 @endsection
