@@ -30,8 +30,8 @@
                                     <td>{{ $chiTiet->so_luong }}</td>
                                 </tr>
                                 <tr>
-                                    <th>Đơn vị tính</th>
-                                    <td>{{ $chiTiet->nguyenLieu->don_vi_tinh }}</td>
+                                    <th>Đơn vị nhập</th>
+                                    <td>{{ $chiTiet->don_vi_nhap }}</td>
                                 </tr>
                                 <tr>
                                     <th>Giá Nhập</th>
@@ -50,6 +50,51 @@
                                     <td>
                                         <img src="{{ asset('storage/' . $chiTiet->nguyenLieu->hinh_anh) }}" 
                                             alt="Hình Ảnh Nguyên Liệu" width="150">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Trạng Thái</th>
+                                    <td>
+                                        <span class="badge 
+                                            @if($chiTiet->trang_thai == 'Đạt') bg-success 
+                                            @elseif($chiTiet->trang_thai == 'Không đạt') bg-danger 
+                                            @else bg-warning 
+                                            @endif">
+                                            {{ $chiTiet->trang_thai }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Cập nhật trạng thái</th>
+                                    <td>
+                                        <form action="{{ route('phieu-nhap-kho.capnhaptrangthai', ['phieuNhapId' => $phieuNhapId, 'nguyenLieuId' => $chiTiet->nguyen_lieu_id]) }}" method="POST">
+                                            @csrf
+                                            <table class="table table-bordered">
+                                                <tbody>
+                                                    <!-- Các trường thông tin nguyên liệu -->
+                                                    <tr>
+                                                        <th>Trạng Thái</th>
+                                                        <td>
+                                                            <select name="trang_thai" class="form-control">
+                                                                @if($chiTiet->trang_thai == 'Cần kiểm tra')
+                                                                    <option value="Cần kiểm tra" selected>Cần kiểm tra</option>
+                                                                    <option value="Đạt">Đạt</option>
+                                                                    <option value="Không đạt">Không đạt</option>
+                                                                @else
+                                                                    <option value="Đạt" @if($chiTiet->trang_thai == 'Đạt') selected @endif>Đạt</option>
+                                                                    <option value="Không đạt" @if($chiTiet->trang_thai == 'Không đạt') selected @endif>Không đạt</option>
+                                                                @endif
+                                                            </select>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save"></i> Cập nhật trạng thái
+                                            </button>
+                                        </form>
+                                        
                                     </td>
                                 </tr>
                             </tbody>
