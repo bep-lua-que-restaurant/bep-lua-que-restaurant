@@ -230,6 +230,7 @@ Route::post('/hoa-don/delete',[ThuNganController::class, 'deleteMonAn'])->name('
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
 Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
+Route::post('/thu-ngan/in-hoa-don', [ThuNganController::class, 'inHoaDon'])->name('thungan.inHoaDon');
 
 //Chấm công
 Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
@@ -273,3 +274,5 @@ Route::get('/test-log', function () {
     Log::info('Test ghi log Laravel');
     return 'Đã ghi log!';
 });
+
+

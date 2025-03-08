@@ -30,11 +30,32 @@
     </div>
 </div>
 
-<div class="text-centerr mt-3">
-    <button class="btn btn-success btn-sm px-4" type="button" data-bs-toggle="offcanvas"
-        data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">Thanh toán </button>
-    <button class="btn-thong-bao btn btn-primary btn-sm px-4"> Thông báo</button>
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <!-- Nút bấm -->
+    <div>
+        <button class="btn btn-success btn-sm px-4" type="button" data-bs-toggle="offcanvas"
+            data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">Thanh toán</button>
+        <button class="btn-thong-bao btn btn-primary btn-sm px-4">Thông báo</button>
+    </div>
+
+    <!-- Chú thích trạng thái -->
+    <div class="text-end small">
+        <h6 class="mb-2 fw-bold">Trạng thái món</h6>
+        <div class="d-flex align-items-center mb-1">
+            <span class="rounded-circle bg-danger d-inline-block" style="width: 10px; height: 10px; margin-right: 6px;"></span>
+            <span class="text-muted">Chờ chế biến</span>
+        </div>
+        <div class="d-flex align-items-center mb-1">
+            <span class="rounded-circle bg-warning d-inline-block" style="width: 10px; height: 10px; margin-right: 6px;"></span>
+            <span class="text-muted">Đang nấu</span>
+        </div>
+        <div class="d-flex align-items-center">
+            <span class="rounded-circle bg-success d-inline-block" style="width: 10px; height: 10px; margin-right: 6px;"></span>
+            <span class="text-muted">Hoàn thành</span>
+        </div>
+    </div>
 </div>
+
 
 
 <!-- Offcanvas -->
@@ -364,33 +385,104 @@
     });
 
     $('#btnThanhToan').on('click', function() {
-        // Lấy ID bàn hiện tại từ data (nếu có)
         var banId = $('#ten-ban').data('currentBan');
-        var soNguoi = $(".so-nguoi").data("soNguoi") || 1; 
+        var soNguoi = $(".so-nguoi").data("soNguoi") || 1;
+        var khachHangId = $("#customerSelect").val();
+        var phuongThucThanhToan = $('#paymentMethod').val();
         var paymentDetails = $("#paymentDetails").val();
-        var phuongThucThanhToan = $('#paymentMethod').val(); 
-        // Kiểm tra nếu có ID bàn
+        var totalAmount = parseFloat($('#totalAmount').val().replace(/\./g, '').trim()) || 0;
+        var amountGiven = parseFloat($('#amountGiven').val().replace(/\./g, '').trim()) || 0;
+        var changeToReturn = parseFloat($('#changeToReturn').val().replace(/\./g, '').trim()) || 0;
+
+
+        // Lấy dữ liệu từ bảng hóa đơn
+        var danhSachSanPham = [];
+        $("#hoa-don-thanh-toan-body tr").each(function() {
+            var sanPham = {
+                ten_san_pham: $(this).find("td:nth-child(2)").text().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim(),
+                so_luong: parseInt($(this).find("td:nth-child(3)").text().trim()) || 0,
+                don_gia: parseFloat($(this).find("td:nth-child(4)").text().replace(/\./g, '')
+                    .trim()) || 0,
+                tong_cong: parseFloat($(this).find("td:nth-child(5)").text().replace(/\./g, '')
+                    .trim()) || 0
+            };
+            danhSachSanPham.push(sanPham);
+        });
+
+
         if (banId) {
             $.ajax({
-                url: "/update-ban-status", // Đường dẫn đến API cập nhật trạng thái bàn
+                url: "/update-ban-status",
                 method: "POST",
                 data: {
                     ban_an_id: banId,
-                    khach_hang_id: $("#customerSelect").val() || null,
+                    khach_hang_id: khachHangId,
                     so_nguoi: soNguoi,
-                    chi_tiet_thanh_toan: paymentDetails,
                     phuong_thuc_thanh_toan: phuongThucThanhToan,
-                    _token: $('meta[name="csrf-token"]').attr("content") // Lấy CSRF token từ meta tag
+                    chi_tiet_thanh_toan: paymentDetails,
+                    tong_tien: totalAmount,
+                    tien_khach_dua: amountGiven,
+                    tien_thua: changeToReturn,
+                    san_pham: danhSachSanPham, // Gửi danh sách sản phẩm lên server
+                    _token: $('meta[name="csrf-token"]').attr("content")
                 },
                 success: function(response) {
                     if (response.success) {
-                        showToast("Đã thanh toán đơn hàng", "success"); // Thông báo thành công
+                        showToast("Đã thanh toán đơn hàng", "success");
+
                         var offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById(
                             "offcanvasRight"));
                         offcanvas.hide();
-                        resetGiaoDienHoaDon()
+                        resetGiaoDienHoaDon();
+
+                        // Gọi AJAX tạo file PDF
+                        $.ajax({
+                            url: "/thu-ngan/in-hoa-don",
+                            method: "POST",
+                            contentType: "application/json",
+                            headers: {
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr(
+                                    "content") // Lấy CSRF token từ meta tag
+                            },
+                            data: JSON.stringify({
+                                ban_an_id: banId,
+                                khach_hang_id: khachHangId,
+                                so_nguoi: soNguoi,
+                                phuong_thuc_thanh_toan: phuongThucThanhToan,
+                                chi_tiet_thanh_toan: paymentDetails,
+                                tong_tien: totalAmount,
+                                tien_khach_dua: amountGiven,
+                                tien_thua: changeToReturn,
+                                san_pham: danhSachSanPham
+                            }),
+                            success: function(pdfResponse) {
+                                if (pdfResponse.success) {
+                                    // Mở file PDF trong tab mới
+                                    var printWindow = window.open(pdfResponse.pdf_url,
+                                        '_blank');
+                                    if (printWindow) {
+                                        printWindow.focus();
+                                    } else {
+                                        showToast(
+                                            "Trình duyệt đã chặn popup, vui lòng mở thủ công.",
+                                            "warning");
+                                    }
+                                } else {
+                                    showToast("Lỗi khi tạo hóa đơn PDF: " + (pdfResponse
+                                        .error || ""), "danger");
+                                }
+                            },
+                            error: function(xhr) {
+                                console.error("Lỗi AJAX:", xhr.responseText);
+                                showToast(
+                                    "Không thể tạo hóa đơn PDF. Vui lòng thử lại.",
+                                    "danger");
+                            }
+
+                        });
+
                     } else {
-                        showToast("Thanh toán không thành công.", "danger"); // Thông báo lỗi
+                        showToast("Thanh toán không thành công.", "danger");
                     }
                 },
                 error: function(xhr, status, error) {
@@ -402,6 +494,7 @@
             showToast("Không tìm thấy ID bàn!", "warning");
         }
     });
+
 
     // thông báo toast
     function showToast(message, type) {

@@ -17,6 +17,9 @@ use App\Models\ChiTietHoaDon;
 use App\Events\MonMoiDuocThem;
 use App\Models\NguyenLieu;
 use App\Models\NguyenLieuMonAn;
+use PhpParser\Node\Expr\FuncCall;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class ThuNganController extends Controller
 {
@@ -591,5 +594,39 @@ class ThuNganController extends Controller
             'hoa_don_id' => $hoaDonId,
             'tong_tien' => $tongTien,
         ]);
+    }
+
+    public function inHoaDon(Request $request)
+    {
+        try {
+            $data = array_map(function ($value) {
+                return is_string($value) ? mb_convert_encoding($value, 'UTF-8', 'auto') : $value;
+            }, $request->all());
+
+            // Render nội dung HTML từ view
+            $html = view('invoice', ['data' => $data])->render();
+            $html = mb_convert_encoding($html, 'UTF-8', 'auto');
+
+            // Khởi tạo PDF từ HTML
+            $pdf = Pdf::loadHTML($html);
+
+            // Đường dẫn lưu file
+            $filename = 'hoadon_' . time() . '.pdf';
+            $pdfPath = 'public/hoadonpdf/' . $filename;
+
+            // Lưu file vào storage
+            Storage::put($pdfPath, $pdf->output());
+
+            return response()->json([
+                'success' => true,
+                'datas' => $request->all(),
+                'pdf_url' => asset('storage/hoadonpdf/' . $filename),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Lỗi khi tạo PDF: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
