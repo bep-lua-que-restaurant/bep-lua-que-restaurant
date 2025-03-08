@@ -12,15 +12,7 @@
                         <h4 class="card-title">Thêm Phiếu Nhập Kho</h4>
                     </div>
                     <div class="card-body">
-                        {{-- @if ($errors->any())
-                            <div class="alert alert-danger">
-                                <ul>
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif --}}
+                    
 
                         <form action="{{ route('phieu-nhap-kho.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
@@ -94,7 +86,7 @@
                                     <div class="mb-3">
                                         <label for="ten_nguyen_lieu" class="form-label">Tên Nguyên Liệu</label>
                                         <input type="text" name="nguyen_lieu[${nguyenLieuIndex}][ten_nguyen_lieu]"
-                                            class="form-control">
+                                            class="form-control" value="{{ old('nguyen_lieu.${nguyenLieuIndex}.ten_nguyen_lieu') }}">
                                         @error('nguyen_lieu.*.ten_nguyen_lieu')
                                             <div class="text-danger">*{{ $message }}</div>
                                         @enderror
@@ -107,7 +99,7 @@
                                             class="form-control">
                                             <option value="">Chọn loại nguyên liệu</option>
                                             @foreach ($loaiNguyenLieus as $loai)
-                                                <option value="{{ $loai->id }}">{{ $loai->ten_loai }}</option>
+                                                <option value="{{ $loai->id }}"{{ old('loai_nguyen_lieu_id') == $loai->id ? 'selected' : '' }}>{{ $loai->ten_loai }}</option>
                                             @endforeach
                                         </select>
                                         @error('nguyen_lieu.*.loai_nguyen_lieu_id')
@@ -119,7 +111,7 @@
                                     <div class="mb-3">
                                         <label for="don_vi_tinh" class="form-label">Đơn Vị Tính</label>
                                         <input type="text" name="nguyen_lieu[${nguyenLieuIndex}][don_vi_tinh]"
-                                            class="form-control">
+                                            class="form-control"value="{{ old('nguyen_lieu.${nguyenLieuIndex}.don_vi_tinh') }}">
                                         @error('nguyen_lieu.*.don_vi_tinh')
                                             <div class="text-danger">*{{ $message }}</div>
                                         @enderror
@@ -128,21 +120,29 @@
                                     <div class="mb-3">
                                         <label for="don_vi_nhap_${uniqueID}" class="form-label">Đơn Vị Nhập</label>
                                         <input type="text" name="nguyen_lieu[${nguyenLieuIndex}][don_vi_nhap]"
-                                            class="form-control">
+                                            class="form-control"value="{{ old('nguyen_lieu.${nguyenLieuIndex}.don_vi_nhap') }}">
+                                            @error('nguyen_lieu.*.don_vi_nhap')
+                                            <div class="text-danger">*{{ $message }}</div>
+                                        @enderror
                                     </div>
 
                                     <!-- Hệ số quy đổi -->
                                     <div class="mb-3">
                                         <label for="he_so_quy_doi_${uniqueID}" class="form-label">Hệ Số Quy Đổi</label>
                                         <input type="number" step="0.01"
-                                            name="nguyen_lieu[${nguyenLieuIndex}][he_so_quy_doi]" class="form-control">
+                                            name="nguyen_lieu[${nguyenLieuIndex}][he_so_quy_doi]" class="form-control"
+                                            value="{{ old('nguyen_lieu.${nguyenLieuIndex}.he_so_quy_doi') }}">
+                                            @error('nguyen_lieu.*.he_so_quy_doi')
+                                            <div class="text-danger">*{{ $message }}</div>
+                                        @enderror
                                     </div>
 
                                     <!-- Số lượng -->
                                     <div class="mb-3">
                                         <label for="so_luong" class="form-label">Số Lượng</label>
                                         <input type="number" name="nguyen_lieu[${nguyenLieuIndex}][so_luong]"
-                                            class="form-control" min="1">
+                                            class="form-control" min="1"
+                                            value="{{ old('nguyen_lieu.${nguyenLieuIndex}.so_luong') }}">
                                         @error('nguyen_lieu.*.so_luong')
                                             <div class="text-danger">*{{ $message }}</div>
                                         @enderror
@@ -152,7 +152,8 @@
                                     <div class="mb-3">
                                         <label for="don_gia" class="form-label">Giá Nhập</label>
                                         <input type="number" step="0.01"
-                                            name="nguyen_lieu[${nguyenLieuIndex}][don_gia]" class="form-control">
+                                            name="nguyen_lieu[${nguyenLieuIndex}][don_gia]" class="form-control"
+                                            value="{{ old('nguyen_lieu.${nguyenLieuIndex}.don_gia') }}">
                                         @error('nguyen_lieu.*.don_gia')
                                             <div class="text-danger">*{{ $message }}</div>
                                         @enderror
@@ -161,8 +162,21 @@
                                     <div class="mb-3">
                                         <label for="han_su_dung" class="form-label">Hạn Sử Dụng</label>
                                         <input type="date" name="nguyen_lieu[${nguyenLieuIndex}][han_su_dung]"
-                                            class="form-control">
+                                            class="form-control"value="{{ old('nguyen_lieu.${nguyenLieuIndex}.han_su_dung') }}">
                                         @error('nguyen_lieu.*.han_su_dung')
+                                            <div class="text-danger">*{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <!-- Trạng thái nguyên liệu -->
+                                    <div class="mb-3">
+                                        <label for="trang_thai" class="form-label">Trạng Thái</label>
+                                        <select name="nguyen_lieu[${nguyenLieuIndex}][trang_thai]" class="form-control">
+                                            <option value="">Chọn trạng thái nguyên liệu</option>
+                                            <option value="Đạt">Đạt</option>
+                                            <option value="Không đạt">Không đạt</option>
+                                            <option value="Cần kiểm tra">Cần kiểm tra</option>
+                                        </select>
+                                        @error('nguyen_lieu.*.trang_thai')
                                             <div class="text-danger">*{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -170,13 +184,14 @@
                                     <div class="mb-3">
                                         <label for="mo_ta" class="form-label">Mô tả Nguyên Liệu</label>
                                         <input type="text" name="nguyen_lieu[${nguyenLieuIndex}][mo_ta]"
-                                            class="form-control">
+                                            class="form-control"value="{{ old('nguyen_lieu.${nguyenLieuIndex}.mo_ta') }}">
                                     </div>
                                     <!-- Hình ảnh -->
                                     <div class="mb-3">
                                         <label for="hinh_anh_${uniqueID}" class="form-label">Hình Ảnh Nguyên Liệu</label>
                                         <input type="file" name="nguyen_lieu[${nguyenLieuIndex}][hinh_anh]"
-                                            class="form-control" accept="image/*">
+                                            class="form-control" accept="image/*"
+                                            value="{{ old('nguyen_lieu.${nguyenLieuIndex}.hinh_anh') }}">
                                     </div>
                                     <!-- Nút xóa nguyên liệu -->
                                     <button type="button" class="btn btn-danger remove-nguyen-lieu">
@@ -292,6 +307,16 @@
                 <div class="mb-3">
                     <label for="han_su_dung_${uniqueID}" class="form-label">Hạn Sử Dụng</label>
                     <input type="date" name="nguyen_lieu[${nguyenLieuIndex}][han_su_dung]" class="form-control" >
+                </div>
+                <!-- Trạng thái nguyên liệu -->
+                <div class="mb-3">
+                    <label for="trang_thai_${uniqueID}" class="form-label">Trạng Thái</label>
+                    <select name="nguyen_lieu[${nguyenLieuIndex}][trang_thai]" class="form-control">
+                        <option value="">Chọn trạng thái nguyên liệu</option>
+                        <option value="Đạt">Đạt</option>
+                        <option value="Không đạt">Không đạt</option>
+                        <option value="Cần kiểm tra">Cần kiểm tra</option>
+                    </select>
                 </div>
                 <!-- Mô tả -->
                 <div class="mb-3">

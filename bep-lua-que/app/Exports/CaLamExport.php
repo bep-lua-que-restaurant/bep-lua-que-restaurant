@@ -20,7 +20,7 @@ class CaLamExport implements FromCollection, WithHeadings, WithEvents, WithMappi
 
     public function collection()
     {
-        return CaLam::withTrashed()->select('id', 'ten_ca', 'created_at', 'deleted_at')->get();
+        return CaLam::withTrashed()->select('id', 'ten_ca', 'gio_bat_dau','gio_ket_thuc','deleted_at','mo_ta' ,)->get();
     }
 
 
@@ -28,7 +28,7 @@ class CaLamExport implements FromCollection, WithHeadings, WithEvents, WithMappi
     {
         return [
             ['Ca làm'], // Tiêu đề lớn (dòng 1)
-            ['ID', 'Tên', 'Ngày tạo', 'Trạng thái hoạt động'], // Headers (dòng 2)
+            ['ID', 'Tên ca', 'Giờ bắt đầu','Giờ kết thúc','Trạng thái hoạt động','Mô tả',], // Headers (dòng 2)
         ];
     }
 
@@ -37,8 +37,11 @@ class CaLamExport implements FromCollection, WithHeadings, WithEvents, WithMappi
         return [
             $row->id,
             $row->ten_ca,
-            $row->created_at ? $row->created_at->format('d/m/Y') : '',
+            $row->gio_bat_dau,
+            $row->gio_ket_thuc,
             $row->deleted_at ? 'Ngừng hoạt động' : 'Đang hoạt động', // Trạng thái kinh doanh
+            $row->mo_ta,
+           
         ];
     }
 

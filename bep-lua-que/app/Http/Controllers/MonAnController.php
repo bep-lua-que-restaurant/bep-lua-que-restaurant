@@ -9,10 +9,10 @@ use App\Models\DanhMucMonAn;
 use App\Models\HinhAnhMonAn;
 use App\Models\MonAn;
 use App\Models\NguyenLieu;
-use App\Models\NguyenLieuMonAn;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreMonAnRequest;
 use App\Http\Requests\UpdateMonAnRequest;
+use App\Models\CongThucMonAn;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -22,48 +22,48 @@ use Maatwebsite\Excel\Validators\ValidationException;
 class MonAnController extends Controller
 {
     public function index(Request $request)
-    {
-        // Tạo query lấy tất cả món ăn (bao gồm cả bị xóa mềm) và danh mục chưa bị xóa mềm
-        $query = MonAn::with(['danhMuc', 'hinhAnhs'])->withTrashed();
+{
+    // Tạo query lấy tất cả nguyên liệu (bao gồm cả bị xóa mềm) và danh mục chưa bị xóa mềm
+    $query = NguyenLieu::with(['danhMuc', 'hinhAnhs'])->withTrashed();
 
+    // Chỉ lấy nguyên liệu có danh mục chưa bị xóa mềm
+    $query->whereHas('danhMuc', function ($q) {
+        $q->whereNull('deleted_at'); // Chỉ lấy danh mục chưa bị xóa mềm
+    });
 
-        // Loại bỏ món ăn có danh mục đã bị xóa mềm (deleted_at != NULL)
+    // Lọc theo tên nguyên liệu
+    if ($request->has('ten') && $request->ten != '') {
+        $query->where('ten', 'like', '%' . $request->ten . '%');
+    }
 
-        $query->whereHas('danhMuc', function ($q) {
-            $q->whereNull('deleted_at'); // Chỉ lấy danh mục chưa bị xóa mềm
-        });
-
-        // Lọc theo tên món ăn
-        if ($request->has('ten') && $request->ten != '') {
-            $query->where('ten', 'like', '%' . $request->ten . '%');
+    // Lọc theo trạng thái nguyên liệu (Đang kinh doanh / Ngừng kinh doanh)
+    if ($request->has('statusFilter') && $request->statusFilter != '') {
+        if ($request->statusFilter == 'Đang kinh doanh') {
+            $query->whereNull('deleted_at');
+        } elseif ($request->statusFilter == 'Ngừng kinh doanh') {
+            $query->whereNotNull('deleted_at');
         }
+    }
 
-        if ($request->has('statusFilter') && $request->statusFilter != '') {
-            if ($request->statusFilter == 'Đang kinh doanh') {
-                $query->whereNull('deleted_at');
-            } elseif ($request->statusFilter == 'Ngừng kinh doanh') {
-                $query->whereNotNull('deleted_at');
-            }
-        }
-        // Phân trang và lấy danh sách món ăn
-        $data = $query->withTrashed()->latest('id')->paginate(15);
+    // Phân trang và lấy danh sách nguyên liệu
+    $data = $query->withTrashed()->latest('id')->paginate(15);
 
-        // Nếu là request AJAX, trả về HTML của danh sách món ăn
-
-        if ($request->ajax()) {
-            return response()->json([
-                'html' => view('admin.monan.body-list', compact('data'))->render(),
-            ]);
-        }
-
-        // Trả về view danh sách món ăn
-        return view('admin.monan.list', [
-            'data' => $data,
-            'route' => route('mon-an.index'), // URL route cho AJAX
-            'tableId' => 'list-container', // ID của bảng
-            'searchInputId' => 'search-name', // ID của ô tìm kiếm
+    // Nếu là request AJAX, trả về HTML của danh sách nguyên liệu
+    if ($request->ajax()) {
+        return response()->json([
+            'html' => view('admin.nguyenlieu.body-list', compact('data'))->render(),
         ]);
     }
+
+    // Trả về view danh sách nguyên liệu
+    return view('admin.nguyenlieu.list', [
+        'data' => $data,
+        'route' => route('nguyen-lieu.index'), // URL route cho AJAX
+        'tableId' => 'list-container', // ID của bảng
+        'searchInputId' => 'search-name', // ID của ô tìm kiếm
+    ]);
+}
+
 
 
 
@@ -112,7 +112,7 @@ class MonAnController extends Controller
             // Thêm nguyên liệu vào món ăn
             if ($request->has('nguyen_lieu_id')) {
                 foreach ($request->nguyen_lieu_id as $key => $nguyenLieuId) {
-                    NguyenLieuMonAn::create([
+                    CongThucMonAn::create([
                         'mon_an_id' => $monAn->id,
                         'nguyen_lieu_id' => $nguyenLieuId,
                         'so_luong' => $request->so_luong[$key],
@@ -274,23 +274,11 @@ class MonAnController extends Controller
     public function importMonAn(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls|max:2048'
+            'file' => 'required|mimes:xlsx,xls'
         ]);
 
-        try {
-            Excel::import(new MonAnImport, $request->file('file'));
+        Excel::import(new MonAnImport, $request->file('file'));
 
-            Log::info("Import file thành công!");
-
-            return back()->with('success', 'Nhập dữ liệu món ăn thành công!');
-        } catch (ValidationException $e) {
-            Log::error("Lỗi nhập file: " . json_encode($e->failures()));
-
-            return back()->withErrors(['file' => 'Lỗi khi nhập dữ liệu. Hãy kiểm tra lại file.']);
-        } catch (\Exception $e) {
-            Log::error("Lỗi hệ thống: " . $e->getMessage());
-
-            return back()->withErrors(['file' => 'Lỗi hệ thống: ' . $e->getMessage()]);
-        }
+        return back()->with('success', 'Nhập dữ liệu thành công!');
     }
 }

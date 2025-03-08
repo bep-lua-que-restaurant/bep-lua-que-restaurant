@@ -7,15 +7,14 @@ use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\BanAnController;
 use App\Http\Controllers\DatBanController;
 use App\Http\Controllers\LoaiNguyenLieuController;
+use App\Http\Controllers\NguyenLieuController;
 use App\Http\Controllers\PhongAnController;
 use App\Http\Controllers\LuongController;
 use Illuminate\Support\Facades\Route;
 use App\Models\PhongAn;
 use App\Http\Controllers\TableBookedController;
 use App\Http\Controllers\CaLamController;
-use App\Http\Controllers\ChiTietNhapKhoController;
 use App\Http\Controllers\MonAnController;
-use App\Http\Controllers\NguyenLieuController;
 use App\Http\Controllers\BepController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HoaDonController;
@@ -27,6 +26,7 @@ use App\Http\Controllers\ThongKeController;
 use App\Http\Controllers\PhieuNhapKhoController;
 use App\Http\Controllers\MaGiamGiaController;
 use App\Http\Controllers\XinNghiController;
+use App\Models\CaLam;
 use Illuminate\Support\Facades\Log;
 
 Route::get('/', function () {
@@ -56,25 +56,26 @@ Route::post('/import-dich-vu', [DichVuController::class, 'importDichVu'])->name(
 Route::resource('ca-lam', CaLamController::class);
 Route::post('ca-lam/restore/{id}', [CaLamController::class, 'restore'])->name('ca-lam.restore');
 Route::get('export-ca-lam', [CaLamController::class, 'export'])->name('ca-lam.export');
-Route::post('/import-ca-lam', [CaLamController::class, 'importDanhMucMonAn'])->name('ca-lam.import');
+Route::post('/import-ca-lam', [CaLamController::class, 'importCaLam'])->name('ca-lam.import');
+
 
 Route::resource('nha-cung-cap', \App\Http\Controllers\NhaCungCapController::class);
 Route::post('nha-cung-cap/restore/{id}', [\App\Http\Controllers\NhaCungCapController::class, 'restore'])->name('nha-cung-cap.restore');
-Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'export'])->name('nha-cung-cap.export');
-//Route::post('/import-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha-cung-cap.import');
 
+Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'export'])->name('nha-cung-cap.export');
+
+Route::post('/nha_cung_cap/import', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha_cung_cap.import');
 
 // Phong an
 Route::resource('phong-an', PhongAnController::class);
 Route::post('/phong-an/{banAn}/restore', [PhongAnController::class, 'restore'])->name('phong-an.restore');
 
-
 Route::resource('ban-an', BanAnController::class);
 Route::get('/ban-an/{id}', [BanAnController::class, 'show'])->name('ban-an.show');
 Route::post('/ban-an/{banAn}/restore', [BanAnController::class, 'restore'])->name('ban-an.restore');
 Route::get('/ban-an-export', [BanAnController::class, 'export'])->name('ban-an.export');
-Route::post('/ban-an/import', [BanAnController::class, 'import'])->name('ban-an.import');
-// Bàn ăn
+
+Route::post('/ban-an/import', [BanAnController::class, 'importBanAn'])->name('ban-an.import');
 
 // Đặt bàn
 // Route::post('/dat-ban', [DatBanController::class, 'datBan']);
@@ -103,7 +104,9 @@ Route::put('/dat-ban/{id}', [DatBanController::class, 'update'])->name('datban.u
 Route::resource('mon-an', MonAnController::class);
 Route::post('mon-an/restore/{id}', [MonAnController::class, 'restore'])->name('mon-an.restore');
 Route::get('export-mon-an', [MonAnController::class, 'exportMonAn'])->name('mon-an.export');
+
 Route::post('/import-mon-an', [MonAnController::class, 'importMonAn'])->name('mon-an.import');
+
 Route::delete('/mon-an/xoa-hinh-anh/{hinhAnhId}', [MonAnController::class, 'xoaHinhAnh'])->name('mon-an.xoa-hinh-anh');
 
 // loại nguyên liêu
@@ -111,6 +114,10 @@ Route::resource('loai-nguyen-lieu', LoaiNguyenLieuController::class);
 Route::get('export-loai-nguyen-lieu', [LoaiNguyenLieuController::class, 'export'])->name('loai-nguyen-lieu.export');
 Route::post('loai-nguyen-lieu/{id}/restore', [LoaiNguyenLieuController::class, 'restore'])->name('loai-nguyen-lieu.restore');
 
+// Nguyên liệu kho
+Route::resource('nguyen-lieu', NguyenLieuController::class);
+Route::get('/nguyen-lieu-export', [NguyenLieuController::class, 'export'])->name('nguyen-lieu.export');
+Route::post('/nguyen-lieu/import', [NguyenLieuController::class, 'import'])->name('nguyen-lieu.import');
 // // phiếu nhập nguyên liệu
 Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
 Route::post('/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore'); // Khôi phục phiếu nhập
@@ -123,7 +130,16 @@ Route::get(
     [PhieuNhapKhoController::class, 'xemChiTietNguyenLieu']
 )
     ->name('phieu-nhap-kho.chitiet-nguyenlieu');
+Route::post(
+    '/phieu-nhap-kho/{phieuNhapId}/nguyen-lieu/{nguyenLieuId}/cap-nhat-trang-thai',
+    [PhieuNhapKhoController::class, 'capNhatTrangThai']
+)
+    ->name('phieu-nhap-kho.capnhaptrangthai');
 
+
+
+ Route::get('/phieu-nhap-export', [PhieuNhapKhoController::class, 'export'])->name('phieu-nhap.export');
+  
 // Quản lí nhân viên
 Route::get('/nhan-vien', [NhanVienController::class, 'index'])->name('nhan-vien.index');
 Route::get('/nhan-vien/create', [NhanVienController::class, 'create'])->name('nhan-vien.create');
@@ -134,6 +150,10 @@ Route::put('/nhan-vien/update/{id}', [NhanVienController::class, 'update'])->nam
 Route::delete('/nhan-vien/destroy/{id}', [NhanVienController::class, 'destroy'])->name('nhan-vien.destroy');
 Route::post('nhan-vien/{id}/nghi-viec', [NhanVienController::class, 'nghiViec'])->name('nhan-vien.nghi-viec');
 Route::post('nhan-vien/{id}/khoi-phuc', [NhanVienController::class, 'khoiPhuc'])->name('nhan-vien.khoi-phuc');
+
+
+Route::get('/nhan-vien-export', [NhanVienController::class, 'exportNhanVien'])->name('nhan-vien.export');
+Route::post('/nhan-vien/import', [NhanVienController::class, 'importNhanVien'])->name('nhan-vien.import');
 
 Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
 Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
@@ -164,6 +184,7 @@ Route::prefix('ca-lam-nhan-vien')->group(function () {
     .delete'); // Xóa ca làm
     Route::get('/ca-lam-nhan-vien/export', [CaLamNhanVienController::class, 'export'])->name('ca-lam-nhan-vien.export');
     // Xuất file Excel
+
     ///////
     Route::get('/ca-lam-nhan-vien
     /xin-nghi', [CaLamNhanVienController::class, 'showXinNghiForm'])->name('xinnghi.form');
@@ -263,10 +284,11 @@ Route::post('/luong/store', [BangTinhLuongController::class, 'store'])->name('lu
 Route::get('/luong/{id}', [BangTinhLuongController::class, 'show'])->name('luong.show');
 
 //lọc
-Route::get('/bang-luong/filter', [BangTinhLuongController::class, 'filter'])->name('bang-luong.filter');
 
-Route::get('luong/export', [BangTinhLuongController::class, 'export'])->name('luong.export');
+Route::get('/bangluong/filter', [BangTinhLuongController::class, 'filter'])->name('bangluong.filter');
+Route::get('/bang-luong-export', [BangTinhLuongController::class, 'exportBangLuong'])->name('bang-luong.export');
 Route::post('luong/import', [BangTinhLuongController::class, 'import'])->name('luong.import');
+
 
 Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
 

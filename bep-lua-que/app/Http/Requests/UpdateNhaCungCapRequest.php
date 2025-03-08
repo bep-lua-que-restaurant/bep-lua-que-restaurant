@@ -24,7 +24,7 @@ class UpdateNhaCungCapRequest extends FormRequest
     {
         $id = $this->route('nha_cung_cap');
         return [
-            'ten' => [
+            'ten_nha_cung_cap' => [
                 'required',
                 'string',
                 'max:255',
@@ -38,10 +38,10 @@ class UpdateNhaCungCapRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'ten.required' => 'Tên nhà cung cấp không được để trống',
-            'ten.string' => 'Tên nhà cung cấp phải là chuỗi',
-            'ten.max' => 'Tên nhà cung cấp không được quá 255 ký tự',
-            'ten.unique' => 'Tên nhà cung cấp đã tồn tại',
+            'ten_nha_cung_cap.required' => 'Tên nhà cung cấp không được để trống',
+            'ten_nha_cung_cap.string' => 'Tên nhà cung cấp phải là chuỗi',
+            'ten_nha_cung_cap.max' => 'Tên nhà cung cấp không được quá 255 ký tự',
+            'ten_nha_cung_cap.unique' => 'Tên nhà cung cấp đã tồn tại',
             'moTa.string' => 'Mô tả phải là chuỗi',
             'hinhAnh.image' => 'Hình ảnh phải là ảnh',
             'hinhAnh.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg, gif, svg',

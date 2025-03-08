@@ -33,11 +33,11 @@
             </ul> --}}
         </div>
 
-        <p style="text-align: center;">
+        {{-- <p style="text-align: center;">
             <a href="https://yourrestaurant.com"
                 style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Xem
                 chi tiết</a>
-        </p>
+        </p> --}}
 
         <p style="text-align: center; font-size: 14px; color: #999;">Nhà hàng Bếp Lửa Quê - Chúng tôi mong được phục vụ
             bạn!</p>

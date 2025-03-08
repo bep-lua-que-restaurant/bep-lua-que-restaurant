@@ -27,4 +27,16 @@ class NhapKho extends Model
     {
         return $this->belongsTo(NhaCungCap::class);
     }
+    public function nhanVien()
+    {
+        return $this->belongsTo(NhanVien::class, 'nhan_vien_id', 'id');
+    }
+    public function nguyenLieu()
+    {
+        return $this->belongsTo(NguyenLieu::class, 'nguyen_lieu_id', 'id');
+    }
+    public function kho()
+    {
+        return $this->belongsTo(Kho::class, 'kho_id', 'id');
+    }
 }

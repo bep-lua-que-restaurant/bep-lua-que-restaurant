@@ -45,7 +45,7 @@ class NguyenLieu extends Model
 
     public function monAnNguyenLieu()
     {
-        return $this->hasMany(NguyenLieuMonAn::class, 'nguyen_lieu_id');
+        return $this->hasMany(CongThucMonAn::class, 'nguyen_lieu_id');
     }
 
     public function monAn()

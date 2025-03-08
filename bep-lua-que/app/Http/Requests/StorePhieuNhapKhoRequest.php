@@ -21,10 +21,13 @@ class StorePhieuNhapKhoRequest extends FormRequest
 
             // Bắt buộc có ít nhất một nguyên liệu
             'nguyen_lieu' => 'required|array|min:1',
-
+            'nguyen_lieu.*.trang_thai' => 'required|in:Đạt,Không đạt,Cần kiểm tra',
             'nguyen_lieu.*.loai_nguyen_lieu_id' => 'required|exists:loai_nguyen_lieus,id',
             'nguyen_lieu.*.ten_nguyen_lieu' => 'required|string|max:255',
             'nguyen_lieu.*.don_vi_tinh' => 'required|string|max:255',
+            'nguyen_lieu.*.don_vi_nhap' => 'required|string|max:255',
+            'nguyen_lieu.*.he_so_quy_doi' => 'required|numeric|min:1',
+
             'nguyen_lieu.*.so_luong' => 'required|integer|min:1',
             'nguyen_lieu.*.don_gia' => 'required|numeric|min:0',
             'nguyen_lieu.*.han_su_dung' => 'required|date|after_or_equal:today',
@@ -41,12 +44,15 @@ class StorePhieuNhapKhoRequest extends FormRequest
             'nguyen_lieu.required' => 'Bạn phải nhập ít nhất một nguyên liệu.',
             'nguyen_lieu.array' => 'Chi tiết nguyên liệu phải là một mảng.',
             'nguyen_lieu.min' => 'Bạn phải nhập ít nhất một nguyên liệu.',
+            'nguyen_lieu.*.trang_thai.required' => 'Không được để trống trạng thái nguyên liệu',
 
             'nguyen_lieu.*.ten_nguyen_lieu.required' => 'Tên nguyên liệu không được để trống.',
             'nguyen_lieu.*.loai_nguyen_lieu_id.required' => 'Loại nguyên liệu không được để trống.',
             'nguyen_lieu.*.so_luong.min' => 'Số lượng nguyên liệu phải lớn hơn 0.',
             'nguyen_lieu.*.so_luong.required' => 'Số lượng nguyên liệu không được để trống.',
             'nguyen_lieu.*.don_vi_tinh.required' => 'Đơn vị tính không được để trống.',
+            'nguyen_lieu.*.don_vi_nhap.required' => 'Đơn vị nhập không được để trống.',
+            'nguyen_lieu.*.he_so_quy_doi.required' => 'Hệ số quy đổi không được để trống',
             'nguyen_lieu.*.don_gia.min' => 'Giá nhập phải lớn hơn hoặc bằng 0.',
             'nguyen_lieu.*.don_gia.required' => 'Giá nhập không được để trống.',
             'nguyen_lieu.*.han_su_dung.required' => 'Hạn sử dụng không được để trống.',

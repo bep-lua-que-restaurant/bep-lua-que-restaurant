@@ -20,9 +20,9 @@
             </div>
         </div>
         <!-- row -->
-        <div class="row">
+        {{-- <div class="row">
             @include('admin.filter')
-        </div>
+        </div> --}}
 
         <div class="row">
             <div class="col-lg-12">
@@ -34,18 +34,23 @@
                             <a href="{{ route('luong.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Tính lương
                             </a>
-                            <!-- Nút Nhập file sẽ hiển thị Modal -->
 
-
-                            <a href="{{ route('dich-vu.export') }}" class="btn btn-sm btn-success">
+                            <a href="{{ route('bang-luong.export') }}" class="btn btn-sm btn-success">
                                 <i class="fa fa-download"></i> Xuất file
                             </a>
-                            {{-- <select class="btn btn-sm btn-info" id="filterPeriod">
-                                <option value="ngay">Theo ngày</option>
-                                <option value="tuan">Theo tuần</option>
-                                <option value="thang">Theo tháng</option>
-                                <option value="nam">Theo năm</option>
-                            </select> --}}
+
+
+                            <select id="monthSelect" class="btn btn-sm btn-primary">
+                                @for ($m = 1; $m <= 12; $m++)
+                                    @php
+                                        $year = now()->year;
+                                    @endphp
+                                    <option value="{{ $m }}" {{ now()->month == $m ? 'selected' : '' }}>
+                                        Tháng {{ $m }} - {{ $year }}
+                                    </option>
+                                @endfor
+                            </select>
+
                         </div>
                     </div>
                     <div class="card-body">
@@ -68,7 +73,7 @@
                                         <th>Hành động</th>
                                     </tr>
                                 </thead>
-                                <tbody id="{{ $tableId }}">
+                                <tbody id="bangluong">
                                     @include('admin.bangluong.body-list')
                                 </tbody>
 
@@ -112,22 +117,27 @@
     @include('admin.search-srcip')
     <!-- Hiển thị phân trang -->
     {{ $data->links('pagination::bootstrap-5') }}
-@endsection
-<script>
-    $(document).ready(function() {
-        $('#filterPeriod').on('change', function() {
-            let filterValue = $(this).val(); // Lấy giá trị đã chọn
 
-            $.ajax({
-                url: "{{ route('bang-luong.filter') }}", // Route xử lý request
-                type: "GET",
-                data: {
-                    filter: filterValue
-                },
-                success: function(data) {
-                    $('#dataTable').html(data); // Cập nhật bảng dữ liệu
-                }
+
+    <script>
+        $(document).ready(function() {
+            $('#monthSelect').change(function() {
+                var selectedMonth = $(this).val();
+
+                $.ajax({
+                    url: "{{ route('luong.index') }}",
+                    type: "GET",
+                    data: {
+                        month: selectedMonth
+                    },
+                    success: function(response) {
+                        $('#bangluong').html(response);
+                    },
+                    error: function(xhr) {
+                        console.log(xhr.responseText);
+                    }
+                });
             });
         });
-    });
-</script>
+    </script>
+@endsection

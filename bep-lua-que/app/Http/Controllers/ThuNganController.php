@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\BanAn;
 use App\Models\DanhMucMonAn;
 use App\Models\MonAn;
-use App\Models\DatBan;
 use App\Models\HoaDon;
 use App\Models\HoaDonBan;
 use App\Models\KhachHang;
@@ -13,7 +12,6 @@ use App\Events\BanAnUpdated;
 use App\Models\PhongAn;
 use Illuminate\Http\Request;
 use App\Events\HoaDonUpdated;
-use App\Models\ChiTietHoaDon;
 use App\Events\MonMoiDuocThem;
 use App\Models\NguyenLieu;
 use App\Models\NguyenLieuMonAn;
@@ -293,6 +291,7 @@ class ThuNganController extends Controller
     {
         $hoaDonId = $request->hoa_don_id;
 
+
         if (!$hoaDonId) {
             return response()->json(['success' => false, 'message' => 'Hóa đơn không hợp lệ.']);
         }
@@ -346,6 +345,8 @@ class ThuNganController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+
 
     public function updateBanStatus(Request $request)
     {

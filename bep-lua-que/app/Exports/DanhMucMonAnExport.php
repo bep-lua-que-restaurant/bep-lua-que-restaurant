@@ -19,7 +19,7 @@ class DanhMucMonAnExport implements FromCollection, WithHeadings, WithEvents, Wi
 
     public function collection()
     {
-        return DanhMucMonAn::withTrashed()->select('id', 'ten', 'created_at', 'deleted_at')->get();
+        return DanhMucMonAn::withTrashed()->select('id', 'ten', 'mo_ta','created_at', 'deleted_at')->get();
     }
 
 
@@ -27,19 +27,21 @@ class DanhMucMonAnExport implements FromCollection, WithHeadings, WithEvents, Wi
     {
         return [
             ['Danh Mục Món Ăn'], // Tiêu đề lớn (dòng 1)
-            ['ID', 'Tên', 'Ngày tạo', 'Trạng thái kinh doanh'], // Headers (dòng 2)
+            ['ID', 'Tên', 'Mô tả','Ngày tạo', 'Trạng thái kinh doanh'], // Headers (dòng 2)
         ];
     }
 
     public function map($row): array
-    {
-        return [
-            $row->id,
-            $row->ten,
-            $row->created_at ? $row->created_at->format('d/m/Y') : '',
-            $row->deleted_at ? 'Ngừng kinh doanh' : 'Đang kinh doanh', // Trạng thái kinh doanh
-        ];
-    }
+{
+    return [
+        'ID' => $row->id,
+        'Tên' => $row->ten,
+        'Mô Tả' => $row->mo_ta,
+        'Ngày Tạo' => $row->created_at ? $row->created_at->format('d/m/Y') : '',
+        'Trạng Thái' => $row->deleted_at ? 'Ngừng kinh doanh' : 'Đang kinh doanh',
+    ];
+}
+
 
     public function registerEvents(): array
     {

@@ -14,7 +14,6 @@
                     <li><a href="{{ route('com-bo.index') }}">Combo - đóng gói</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="{{ route('loai-nguyen-lieu.index') }}">Loại nguyên liệu</a></li>
                     <li><a href="{{ route('ma-giam-gia.index') }}">Mã giảm giá</a></li>
                 </ul>
             </li>
@@ -30,7 +29,18 @@
                     <li><a href="{{ route('ban-an.index') }}">Bàn Ăn</a></li>
                 </ul>
             </li>
+            {{-- kho --}}
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                    <i class="fa fa-list"></i>
+                    <span class="nav-text">Kho</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="{{ route('loai-nguyen-lieu.index') }}">Loại nguyên liệu</a></li>
 
+                    <li><a href="{{ route('nguyen-lieu.index') }}">Nguyên liệu</a></li>
+                </ul>
+            </li>
             {{-- Giao dịch --}}
             <li>
                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
@@ -74,17 +84,18 @@
                 </a>
                 <ul aria-expanded="false">
                     <li><a href="{{ route('nhan-vien.index') }}">Nhân viên</a></li>
+
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="{{ route('ca-lam.index') }}">ca làm</a></li>
+                    <li><a href="{{ route('ca-lam.index') }}">Ca làm</a></li>
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="{{ route('ca-lam-nhan-vien.index') }}">Quản lí ca </a></li>
                 </ul>
                 <ul aria-expanded="false">
+
                     <li><a href="{{ route('cham-cong.index') }}">Chấm công</a></li>
-                </ul>
-                <ul aria-expanded="false">
+        
 
                     <li><a href="{{ route('luong.index') }}">Bảng tính lương</a></li>
                     <li><a href="#">Thiết lập nhân viên</a></li>
