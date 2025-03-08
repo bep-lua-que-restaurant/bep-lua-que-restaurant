@@ -38,7 +38,7 @@ use Illuminate\Queue\SerializesModels;
 // {
 //     // Tải quan hệ monAn, hoaDon (bao gồm banAns và chiTietHoaDon)
 //     // $this->monAn->load('hoaDon.banAns', 'hoaDon.chiTietHoaDon'); 
-    
+
 //     return [
 //         'monAn' => $this->monAn, // Trả về món ăn đầy đủ thông tin
 //     ];
@@ -82,18 +82,16 @@ class MonMoiDuocThem implements ShouldBroadcast
 
 
     public function broadcastWith()
-{
-    return [
-        'monAns' => $this->monAns->map(function ($monAn) {
-            return [
-                'id' => $monAn['id'],
-                'ten' => $monAn['ten'],
-                'ban' => $monAn['ban'],
-                'so_luong' => $monAn['so_luong']
-            ];
-        })
-    ];
+    {
+        return [
+            'monAns' => $this->monAns->map(function ($monAn) {
+                return [
+                    'id' => $monAn['id'],
+                    'ten' => $monAn['ten'],
+                    'ban' => $monAn['ban'],
+                    'so_luong' => $monAn['so_luong']
+                ];
+            })
+        ];
+    }
 }
-
-}
-

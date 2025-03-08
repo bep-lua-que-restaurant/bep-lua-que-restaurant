@@ -13,6 +13,8 @@ use App\Models\PhongAn;
 use Illuminate\Http\Request;
 use App\Events\HoaDonUpdated;
 use App\Events\MonMoiDuocThem;
+use App\Models\ChiTietHoaDon;
+use App\Models\DatBan;
 use App\Models\NguyenLieu;
 use App\Models\NguyenLieuMonAn;
 use PhpParser\Node\Expr\FuncCall;
@@ -291,7 +293,6 @@ class ThuNganController extends Controller
     {
         $hoaDonId = $request->hoa_don_id;
 
-
         if (!$hoaDonId) {
             return response()->json(['success' => false, 'message' => 'Hóa đơn không hợp lệ.']);
         }
@@ -311,42 +312,11 @@ class ThuNganController extends Controller
                 'trang_thai' => 'cho_che_bien',
                 'updated_at' => now()
             ]);
-
-            // Lấy danh sách nguyên liệu cần cho món ăn này
-            $nguyenLieuList = NguyenLieuMonAn::where('mon_an_id', $monAn->mon_an_id)->get();
-
-            foreach ($nguyenLieuList as $nguyenLieu) {
-                // Lấy hệ số quy đổi của nguyên liệu
-                $nguyenLieuTonKho = NguyenLieu::where('id', $nguyenLieu->nguyen_lieu_id)->first();
-
-                if (!$nguyenLieuTonKho) {
-                    continue; // Bỏ qua nếu nguyên liệu không tồn tại
-                }
-
-                // Tính số lượng cần trừ theo hệ số quy đổi
-                $soLuongTru = ($nguyenLieu->so_luong * $monAn->so_luong) / $nguyenLieuTonKho->he_so_quy_doi;
-
-                // Kiểm tra số lượng tồn kho trước khi trừ
-                if ($nguyenLieuTonKho->so_luong_ton < $soLuongTru) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Nguyên liệu {$nguyenLieuTonKho->ten_nguyen_lieu} không đủ tồn kho."
-                    ]);
-                }
-
-                // Trừ nguyên liệu trong bảng nguyên liệu
-                NguyenLieu::where('id', $nguyenLieu->nguyen_lieu_id)
-                    ->decrement('so_luong_ton', $soLuongTru);
-            }
-
             // Gửi sự kiện thông báo món ăn đã cập nhật
-            event(new MonMoiDuocThem($monAn));
+            event(new MonMoiDuocThem($monAnList));
         }
-
         return response()->json(['success' => true]);
     }
-
-
 
     public function updateBanStatus(Request $request)
     {
