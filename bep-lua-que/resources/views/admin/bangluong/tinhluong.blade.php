@@ -20,7 +20,7 @@
                         <th>STT</th>
                         <th>Tên nhân viên</th>
                         <th>Số ca làm</th>
-                        <th>Số ngày làm</th>
+                        {{-- <th>Số ngày làm</th> --}}
                         <th>Hình thức tính lương</th>
                         <th>Lương chính (VND)</th>
                         <th>Tổng lương (VND)</th>
@@ -32,15 +32,15 @@
                         @php
                             $so_ca_lam = $nv->chamCongs->count();
                             $so_ngay_lam_thuc_te = $nv->chamCongs->groupBy('ngay_cham_cong')->count();
-                            $so_ngay_lam = floor($so_ca_lam / 3); // Mỗi 3 ca tính 1 ngày công
-                            $so_ca_hien_thi = $so_ca_lam % 3 ?: ($so_ca_lam > 0 ? 3 : 0); // Nếu chia hết cho 3, hiển thị 3 ca
+                            // $so_ngay_lam = floor($so_ca_lam / 3); // Mỗi 3 ca tính 1 ngày công
+                            // $so_ca_hien_thi = $so_ca_lam % 3 ?: ($so_ca_lam > 0 ? 3 : 0); // Nếu chia hết cho 3, hiển thị 3 ca
 
-                            // Nếu có đúng 4 ca thì sẽ hiển thị 1 ca + 1 ngày
-                            if ($so_ca_lam == 4) {
-                                $so_ca_hien_thi = 1; // Chỉ hiển thị 1 ca
-                                // $so_ngay_lam += 1; // Cộng thêm 1 ngày công
-                            }
-
+                            // // Nếu có đúng 4 ca thì sẽ hiển thị 1 ca + 1 ngày
+                            // if ($so_ca_lam == 4) {
+                            //     $so_ca_hien_thi = 1; // Chỉ hiển thị 1 ca
+                            //     // $so_ngay_lam += 1; // Cộng thêm 1 ngày công
+                            // }
+                            // $so_ca_lam;
                             $luongChinh = optional($nv->luong)->muc_luong ?? 0;
                             $hinhThuc = optional($nv->luong)->hinh_thuc == 'thang' ? 'Theo tháng' : 'Theo ca';
                             $tongLuong = $hinhThuc === 'Theo tháng' ? $luongChinh : $luongChinh * $so_ca_lam;
@@ -53,21 +53,23 @@
                                 <input type="hidden" name="nhan_vien_id[]" value="{{ $nv->id }}">
                             </td>
                             <td class="so-ca-lam">
-                                {{ $so_ca_hien_thi }}
-                                <input type="hidden" name="so_ca_lam[]" value="{{ $so_ca_hien_thi }}">
+                                {{ $so_ca_lam }}
+                                <input type="hidden" name="so_ca_lam[]" value="{{ $so_ca_lam }}">
                             </td>
-                            <td class="so-ngay-lam">
+                            {{-- <td class="so-ngay-lam">
                                 {{ $so_ngay_lam }}
                                 <input type="hidden" name="so_ngay_cong[]" value="{{ $so_ngay_lam }}">
-                            </td>
+                            </td> --}}
 
                             <td class="hinh-thuc">
                                 {{ $hinhThuc }}
                             </td>
                             <td>
-                                <input type="number" class="form-control luong-chinh" value="{{ $luongChinh }}"
-                                    min="0" readonly>
+                                <input type="number" class="form-control luong-chinh" value="{{ intval($luongChinh) }}"
+                                    min="0" readonly style="text-align: center;">
                             </td>
+
+
                             <td class="tong-luong">
                                 <input type="hidden" name="tong_luong[]" value="{{ $tongLuong }}">
                                 <span>{{ number_format($tongLuong, 0, ',', '.') }}</span>
@@ -80,11 +82,11 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th colspan="6" class="text-right">Tổng cộng:</th>
+                        <th colspan="5" class="text-right">Tổng cộng:</th>
                         <th id="tongCong">
                             {{ number_format($nhanViens->sum(fn($nv) => optional($nv->luong)->hinh_thuc == 'thang' ? optional($nv->luong)->muc_luong : optional($nv->luong)->muc_luong * $nv->chamCongs->count()), 0, ',', '.') }}
                         </th>
-                        <th></th>
+
                     </tr>
                 </tfoot>
             </table>
@@ -120,11 +122,11 @@
                 let total = 0;
 
                 // Tính lương theo hình thức
-                if (hinhThuc === 'Theo tháng' && soNgayLam > 0) {
-                    total = (luongChinh / 26) * soNgayLam; // Chia trung bình cho 26 ngày công chuẩn
-                } else if (hinhThuc === 'Theo ca' && soCaLam > 0) {
-                    total = luongChinh * soCaLam;
-                }
+                // if (hinhThuc === 'Theo tháng' && soNgayLam > 0) {
+                //     total = (luongChinh / 26) * soNgayLam; // Chia trung bình cho 26 ngày công chuẩn
+                // } else if (hinhThuc === 'Theo ca' && soCaLam > 0) {
+                //     total = luongChinh * soCaLam;
+                // }
 
                 // Cập nhật giá trị vào input và hiển thị
                 row.querySelector('input[name="tong_luong[]"]').value = total;

@@ -7,9 +7,9 @@
             {{-- <input type="text" class="form-control w-25" placeholder="Tìm kiếm nhân viên"> --}}
 
             <div>
-                <button class="btn btn-light" onclick="changeWeek(-1)">&#60;</button>
-                <span id="week-label" data-offset="{{ $weekOffset }}">{{ $weekLabel }}</span>
-                <button class="btn btn-light" onclick="changeWeek(1)">&#62;</button>
+                <button class="btn btn-light" onclick="changeDate(-1)">&#60;</button>
+                <span id="date-label" data-date="{{ $selectedDate }}">{{ $dayLabel }}</span>
+                <button class="btn btn-light" onclick="changeDate(1)">&#62;</button>
                 <a href="{{ route('cham-cong.export') }}" class="btn btn-sm btn-success">
                     <i class="fa fa-download"></i> Xuất file
                 </a>
@@ -23,8 +23,10 @@
         </div>
     </div>
 
+
     <!-- Modal chấm công -->
     @include('admin.chamcong.bangchamcong')
+
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -105,22 +107,22 @@
             });
 
             // Hàm tạo mới chấm công
-            function storeChamCong(data) {
-                $.ajax({
-                    url: "{{ route('chamcong.store') }}",
-                    type: "POST",
-                    data: data,
-                    success: function() {
-                        alert("Chấm công thành công!");
-                        $("#myModal").modal("hide"); // Ẩn modal sau khi lưu
-                        location.reload();
-                    },
-                    error: function(xhr) {
-                        console.error("Lỗi khi tạo mới chấm công:", xhr.responseText);
-                        alert("Lỗi khi tạo mới: " + xhr.responseText);
-                    }
-                });
-            }
+            // function storeChamCong(data) {
+            //     $.ajax({
+            //         url: "{{ route('chamcong.store') }}",
+            //         type: "POST",
+            //         data: data,
+            //         success: function() {
+            //             alert("Chấm công thành công!");
+            //             $("#myModal").modal("hide"); // Ẩn modal sau khi lưu
+            //             location.reload();
+            //         },
+            //         error: function(xhr) {
+            //             console.error("Lỗi khi tạo mới chấm công:", xhr.responseText);
+            //             alert("Lỗi khi tạo mới: " + xhr.responseText);
+            //         }
+            //     });
+            // }
 
             // Hàm cập nhật chấm công
             function updateChamCong(data, nhan_vien_id, ca, ngay) {
@@ -148,20 +150,23 @@
 
         });
 
-        function changeWeek(offset) {
-            let currentOffset = parseInt($("#week-label").data("offset"));
-            let newOffset = currentOffset + offset;
+        function changeDate(offset) {
+            let currentDate = $("#date-label").data("date"); // Lấy ngày hiện tại
+            let newDate = new Date(currentDate);
+            newDate.setDate(newDate.getDate() + offset); // Cộng/trừ số ngày
+
+            let formattedDate = newDate.toISOString().split('T')[0]; // Định dạng YYYY-MM-DD
 
             $.ajax({
-                url: "{{ route('cham-cong.index') }}",
+                url: @json(route('cham-cong.index')), // Đảm bảo URL chính xác
                 type: "GET",
                 data: {
-                    week_offset: newOffset
+                    selected_date: formattedDate // Đúng với tên biến trong controller
                 },
                 success: function(response) {
-                    $("#week-label").text(response.weekLabel); // Cập nhật nhãn tuần
-                    $("#week-label").data("offset", newOffset); // Cập nhật offset
-                    $("#cham-cong-table").html(response.html); // Cập nhật bảng chấm công nếu cần
+                    $("#date-label").text(response.dayLabel); // Cập nhật nhãn ngày
+                    $("#date-label").data("date", formattedDate); // Cập nhật ngày mới
+                    $("#cham-cong-table").html(response.html); // Cập nhật bảng chấm công
                 },
                 error: function() {
                     alert("Có lỗi xảy ra, vui lòng thử lại!");

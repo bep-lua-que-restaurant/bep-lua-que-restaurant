@@ -30,12 +30,12 @@
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>STT</th>
-                                        <th>Tên nhân viên</th>
-                                        <th>Số ca làm</th>
-                                        <th>Số ngày công</th>
-                                        <th>Lương chính (VND)</th>
-                                        <th>Tổng lương (VND)</th>
+                                        <th class="text-center">STT</th>
+                                        <th class="text-center">Tên nhân viên</th>
+                                        <th class="text-center">Số ca làm</th>
+                                        {{-- <th>Số ngày công</th> --}}
+                                        <th class="text-center">Lương chính (VND)</th>
+                                        <th class="text-center">Tổng lương (VND)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -48,14 +48,17 @@
                                                 $caDu = $soCaLam % 3; // Số ca dư chưa đủ thành 1 ngày
                                             @endphp
                                             <tr>
-                                                <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $luong->ten_nhan_vien ?? 'Không có tên' }}</td>
-                                                <td>{{ $caDu > 0 ? $caDu . ' ca' : '-' }}</td> <!-- Hiển thị số ca dư -->
-                                                <td>{{ $soNgayCong > 0 ? sprintf('%02d', $soNgayCong) . ' ngày' : '-' }}
+                                                <td class="text-center">{{ $loop->iteration }}</td>
+                                                <td class="text-center">{{ $luong->ten_nhan_vien ?? 'Không có tên' }}</td>
+                                                <td class="text-center">{{ $caDu > 0 ? $caDu . ' ca' : '-' }}</td>
+                                                <!-- Hiển thị số ca dư -->
+                                                {{-- <td>{{ $soNgayCong > 0 ? sprintf('%02d', $soNgayCong) . ' ngày' : '-' }} --}}
                                                 </td> <!-- Hiển thị số ngày công -->
-                                                <td>{{ isset($luong->muc_luong) ? number_format($luong->muc_luong) : '0' }}
+                                                <td class="text-center">
+                                                    {{ isset($luong->muc_luong) ? number_format($luong->muc_luong) : '0' }}
                                                 </td>
-                                                <td>{{ number_format($luong->tong_luong ?? 0, 0, ',', '.') }} VND</td>
+                                                <td class="text-center">
+                                                    {{ number_format($luong->tong_luong ?? 0, 0, ',', '.') }} VND</td>
                                             </tr>
                                         @endforeach
                                     @else
