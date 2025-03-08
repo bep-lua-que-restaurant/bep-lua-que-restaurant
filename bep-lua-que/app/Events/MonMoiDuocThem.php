@@ -2,15 +2,10 @@
 
 namespace App\Events;
 
-use App\Models\ChiTietHoaDon;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Queue\SerializesModels;
 
 class MonMoiDuocThem implements ShouldBroadcast
 {
@@ -18,28 +13,35 @@ class MonMoiDuocThem implements ShouldBroadcast
 
     public $monAn;
 
-    public function __construct(ChiTietHoaDon $monAn)
+    public function __construct($monAn)
     {
-        $this->monAn = $monAn->load('monAn', 'hoaDon.banAns'); // Load quan hệ để client có đầy đủ thông tin
+        $this->monAn = $monAn;
+        $this->monAn = [
+            'id' => $this->monAn->id,  // Thêm id vào sự kiện
+            'ten' => $this->monAn->monAn->ten,
+            'ban' => $this->monAn->hoaDon->banAns->pluck('ten_ban')->join(', '),
+            'so_luong' => $this->monAn->so_luong,
+        ];
     }
 
     public function broadcastOn()
     {
-
-        return ['bep-channel']; // Kênh giao diện bếp lắng nghe
+        return new Channel("bep-channel");  // 👈 Nếu dùng private channel thì sửa thành PrivateChannel
     }
 
     public function broadcastAs()
     {
-        return 'mon-moi-duoc-them'; // Tên sự kiện cho frontend
+        return "mon-moi-duoc-them";  // 👈 Đảm bảo frontend lắng nghe đúng sự kiện này
     }
 
     public function broadcastWith()
-    {
-        Log::info('Đã broadcast sự kiện MonMoiDuocThem', ['monAn' => $this->monAn]);
+{
+    // Tải quan hệ monAn, hoaDon (bao gồm banAns và chiTietHoaDon)
+    // $this->monAn->load('hoaDon.banAns', 'hoaDon.chiTietHoaDon'); 
+    
+    return [
+        'monAn' => $this->monAn, // Trả về món ăn đầy đủ thông tin
+    ];
+}
 
-        return [
-            'monAn' => $this->monAn
-        ];
-    }
 }

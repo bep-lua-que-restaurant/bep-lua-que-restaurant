@@ -12,11 +12,11 @@
             <!-- Bộ lọc tìm kiếm -->
             <div class="row d-flex p-3">
                 <div class="col-9">
-                    <input type="text" name="searchBanDat" id="searchBanDat" class="form-control"
+                    <input type="text" id="searchBanDat" class="form-control"
                         placeholder="Tìm theo họ tên hoặc số điện thoại">
                 </div>
                 <div class="col-3">
-                    <select name="trang_thai" id="trang_thai" class="form-control">
+                    <select id="trang_thai" class="form-control">
                         <option value="">Tất cả trạng thái</option>
                         <option value="dang_xu_ly">Đang xử lý</option>
                         <option value="xac_nhan">Xác nhận</option>
@@ -26,114 +26,103 @@
             </div>
 
             <!-- Bảng dữ liệu -->
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Thời Gian Đến</th>
-                        <th>Họ Tên</th>
-                        <th>Số Điện Thoại</th>
-                        <th>Số Người</th>
-                        <th>Danh Sách Bàn</th>
-                        <th>Trạng Thái</th>
-                        <th>Mô Tả</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- Dữ liệu sẽ được load ở đây bằng AJAX -->
-                </tbody>
-            </table>
+            <div class="container">
+                <h2 class="text-center">Danh Sách Đặt Bàn</h2>
+                <table class="table table-bordered" id="tableBanDat">
+                    <thead>
+                        <tr>
+                            <th>Thời Gian Đến</th>
+                            <th>Họ Tên</th>
+                            <th>Số Điện Thoại</th>
+                            <th>Số Người</th>
+                            <th>Danh Sách Bàn</th>
+                            <th>Trạng Thái</th>
+                            <th>Hoat dong</th>
+                        </tr>
+                    </thead>
 
+                    <tbody>
+                        @foreach ($banhSachDatban as $datban)
+                            <tr>
+                                <td>{{ \Carbon\Carbon::parse($datban->thoi_gian_den)->format('d/m/Y H:i') }}</td>
+                                <td>{{ $datban->ho_ten }}</td>
+                                <td>{{ $datban->so_dien_thoai }}</td>
+                                <td>{{ $datban->so_nguoi }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ $datban->danh_sach_ban }}</span>
+                                </td>
+                                <td>
+                                    @if ($datban->trang_thai == 'xac_nhan')
+                                        <span class="badge bg-success trang_thai" data-value="{{ $datban->trang_thai }}">
+                                            Đã nhận bàn</span>
+                                    @elseif ($datban->trang_thai == 'dang_xu_ly')
+                                        <span class="badge bg-warning trang_thai"
+                                            data-value="{{ $datban->trang_thai }}">Đang xử lý</span>
+                                    @else
+                                        <span class="badge bg-danger trang_thai" data-value="{{ $datban->trang_thai }}">Đã
+                                            hủy</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <a href="{{ route('dat-ban.show', $datban->datban_id) }}"
+                                        class="btn btn-primary btn-sm">Xem</a>
+                                    @if ($datban->trang_thai === 'dang_xu_ly')
+                                        <form action="{{ route('dat-ban.destroy', $datban->datban_id) }}" method="post">
+                                            @csrf
+                                            @method('DELETE')
+                                            <input type="submit" class="btn btn-danger btn-sm mt-2" value="Hủy đặt">
+                                        </form>
+
+                                        <form action="{{ route('dat-ban.update', $datban->datban_id) }}" method="post">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="submit" class="btn btn-warning btn-sm  mt-2" value="Xác nhận">
+                                        </form>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+
+                </table>
+            </div>
         </div>
     </div>
-    {{-- {{ $banhSachDatban->links('pagination::bootstrap-5') }} --}}
-
-
+    </div>
     <script>
-        $(document).ready(function() {
-            function loadData() {
-                let search = $('#searchBanDat').val();
-                let trang_thai = $('#trang_thai').val();
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInput = document.getElementById("searchBanDat");
+            const selectStatus = document.getElementById("trang_thai");
+            const tableRows = document.querySelectorAll("#tableBanDat tbody tr");
 
-                $.ajax({
-                    url: "{{ route('datban.filter') }}",
-                    method: "GET",
-                    data: {
-                        search: search,
-                        trang_thai: trang_thai
-                    },
-                    success: function(response) {
-                        let rows = '';
-                        if (response.length > 0) {
-                            $.each(response, function(index, datban) {
-                                let trangThaiText = '';
-                                if (datban.trang_thai === 'dang_xu_ly') {
-                                    trangThaiText = 'Đang xử lý';
-                                } else if (datban.trang_thai === 'xa_nhan') {
-                                    trangThaiText = 'Đã xác nhận';
-                                } else if (datban.trang_thai === 'da_huy') {
-                                    trangThaiText = 'Đã hủy';
-                                } else {
-                                    trangThaiText = 'Đã xác nhận';
-                                }
+            function filterTable() {
+                const searchValue = searchInput.value.toLowerCase();
+                const selectedStatus = selectStatus.value.toLowerCase();
 
-                                rows += `
-                            <tr>
-                                <td>${datban.thoi_gian_den}</td>
-                                <td>${datban.ho_ten}</td>
-                                <td>${datban.so_dien_thoai}</td>
-                                <td>${datban.so_nguoi}</td>
-                                <td>${datban.danh_sach_ban}</td>
-                                <td>${trangThaiText}</td>
-                                <td>
-                                    <a href="/dat-ban/${datban.id}" class="btn btn-info btn-sm" title="Xem chi tiết">Xem</a>
-                        `;
+                tableRows.forEach(row => {
+                    const name = row.children[1].textContent.toLowerCase();
+                    const phone = row.children[2].textContent.toLowerCase();
+                    const statusElement = row.querySelector(".trang_thai");
+                    const status = statusElement ? statusElement.dataset.value.toLowerCase() : "";
 
-                                if (datban.trang_thai === 'dang_xu_ly') {
-                                    rows += `
-                                <form action="/dat-ban/${datban.id}" method="post">
-                                    @csrf
-                                    @method('PUT')
-                                    <input type="submit" class="btn btn-warning btn-sm" value="Xác nhận">
-                                </form>
-                                <form action="/dat-ban/${datban.id}" method="post">
-                                    @csrf
-                                    @method('DELETE')
-                                    <input type="submit" class="btn btn-danger btn-sm mt-22" value="Hủy đặt">
-                                </form>
-                            `;
-                                }
+                    const matchesSearch = [name, phone].some(text => text.includes(searchValue));
+                    const matchesStatus = !selectedStatus || status === selectedStatus;
 
-                                rows += `</td></tr>`;
-                            });
-                        } else {
-                            rows =
-                                `<tr><td colspan="8" class="text-center">Không tìm thấy dữ liệu</td></tr>`;
-                        }
-                        $('#tableBody').html(rows);
-                    }
+                    row.style.display = matchesSearch && matchesStatus ? "" : "none";
                 });
             }
 
-            // Load dữ liệu ban đầu
-            loadData();
-
-            // Tìm kiếm khi nhập vào ô input
-            $('#searchBanDat').on('keyup', function() {
-                loadData();
-            });
-
-            // Lọc theo trạng thái khi thay đổi select
-            $('#trang_thai').on('change', function() {
-                loadData();
-            });
-
-            // Tự động tải lại dữ liệu mỗi 5 giây
-            setInterval(loadData, 5000);
+            searchInput.addEventListener("input", filterTable);
+            selectStatus.addEventListener("change", filterTable);
         });
     </script>
-
-    </div>
-
-    <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
+    <script>
+        setInterval(() => {
+            fetch('/api/update-datban')
+                .then(response => response.json())
+                .then(data => console.log(data.message));
+        }, 60000); // 60000ms = 1 phút
+    </script>
     @vite('resources/js/datban.js')
+    {{ $banhSachDatban->links('pagination::bootstrap-5') }}
 @endsection

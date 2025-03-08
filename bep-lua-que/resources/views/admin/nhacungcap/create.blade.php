@@ -26,14 +26,40 @@
                     <div class="card-body">
                         <form action="{{ route('nha-cung-cap.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
-
                             <!-- Tên danh mục -->
                             <div class="form-group">
                                 <label for="name">Tên nhà cung cấp</label>
-                                <input type="text" id="name" name="ten" class="form-control"
+                                <input type="text" id="ten_nha_cung_cap" name="ten_nha_cung_cap" class="form-control"
                                     placeholder="Nhập tên nhà cung cấp">
-                                @if ($errors->has('ten'))
-                                    <small class="text-danger">*{{ $errors->first('ten') }}</small>
+                                @if ($errors->has('ten_nha_cung_cap'))
+                                    <small class="text-danger">*{{ $errors->first('ten_nha_cung_cap') }}</small>
+                                @endif
+                            </div>
+
+                            <div class="form-group">
+                                <label for="name">Địa chỉ</label>
+                                <input type="text" id="dia_chi" name="dia_chi" class="form-control"
+                                       placeholder="Nhập địa chỉ">
+                                @if ($errors->has('dia_chi'))
+                                    <small class="text-danger">*{{ $errors->first('dia_chi') }}</small>
+                                @endif
+                            </div>
+
+                            <div class="form-group">
+                                <label for="name">Số điện thoại</label>
+                                <input type="tel" id="so_dien_thoai" name="so_dien_thoai" class="form-control"
+                                       placeholder="Nhập số điện thoại">
+                                @if ($errors->has('so_dien_thoai'))
+                                    <small class="text-danger">*{{ $errors->first('so_dien_thoai') }}</small>
+                                @endif
+                            </div>
+
+                            <div class="form-group">
+                                <label for="name">Email</label>
+                                <input type="email" id="email" name="email" class="form-control"
+                                       placeholder="Nhập email">
+                                @if ($errors->has('email'))
+                                    <small class="text-danger">*{{ $errors->first('email') }}</small>
                                 @endif
                             </div>
 
