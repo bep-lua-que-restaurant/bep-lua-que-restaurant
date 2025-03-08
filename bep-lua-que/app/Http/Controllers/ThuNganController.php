@@ -13,6 +13,11 @@ use App\Models\PhongAn;
 use Illuminate\Http\Request;
 use App\Events\HoaDonUpdated;
 use App\Events\MonMoiDuocThem;
+use App\Models\NguyenLieu;
+use App\Models\NguyenLieuMonAn;
+use PhpParser\Node\Expr\FuncCall;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class ThuNganController extends Controller
 {
@@ -282,68 +287,64 @@ class ThuNganController extends Controller
         return response()->json(['success' => false, 'message' => 'Hóa đơn không tồn tại']);
     }
 
-//     public function updateStatus(Request $request)
-// {
-//     $hoaDonId = $request->hoa_don_id;
-
-//     if (!$hoaDonId) {
-//         return response()->json(['success' => false, 'message' => 'Hóa đơn không hợp lệ.']);
-//     }
-
-//     // Cập nhật trạng thái món ăn
-//     $monAn = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
-//         ->where('trang_thai', 'cho_xac_nhan')
-//         ->first(); // Lấy 1 món ăn đầu tiên thỏa mãn điều kiện
-
-//     if (!$monAn) {
-//         return response()->json(['success' => false, 'message' => 'Món ăn không hợp lệ hoặc đã thay đổi trạng thái.']);
-//     }
-
-//     // Cập nhật trạng thái món ăn
-//     $monAn->update([
-//         'trang_thai' => 'cho_che_bien', // Hoặc trạng thái bạn muốn chuyển
-//         'updated_at' => now()
-//     ]);
-
-//     // Gửi sự kiện với thông tin món ăn đầy đủ
-//     event(new MonMoiDuocThem($monAn));
-
-//     return response()->json(['success' => true]);
-// }
+    public function updateStatus(Request $request)
+    {
+        $hoaDonId = $request->hoa_don_id;
 
 
-public function updateStatus(Request $request)
-{
-    $hoaDonId = $request->hoa_don_id;
+        if (!$hoaDonId) {
+            return response()->json(['success' => false, 'message' => 'Hóa đơn không hợp lệ.']);
+        }
 
-    if (!$hoaDonId) {
-        return response()->json(['success' => false, 'message' => 'Hóa đơn không hợp lệ.']);
+        // Lấy danh sách món ăn theo hóa đơn và trạng thái "cho_xac_nhan"
+        $monAnList = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
+            ->where('trang_thai', 'cho_xac_nhan')
+            ->get();
+
+        if ($monAnList->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'Không có món ăn nào hợp lệ hoặc đã thay đổi trạng thái.']);
+        }
+
+        foreach ($monAnList as $monAn) {
+            // Cập nhật trạng thái món ăn thành "cho_che_bien"
+            $monAn->update([
+                'trang_thai' => 'cho_che_bien',
+                'updated_at' => now()
+            ]);
+
+            // Lấy danh sách nguyên liệu cần cho món ăn này
+            $nguyenLieuList = NguyenLieuMonAn::where('mon_an_id', $monAn->mon_an_id)->get();
+
+            foreach ($nguyenLieuList as $nguyenLieu) {
+                // Lấy hệ số quy đổi của nguyên liệu
+                $nguyenLieuTonKho = NguyenLieu::where('id', $nguyenLieu->nguyen_lieu_id)->first();
+
+                if (!$nguyenLieuTonKho) {
+                    continue; // Bỏ qua nếu nguyên liệu không tồn tại
+                }
+
+                // Tính số lượng cần trừ theo hệ số quy đổi
+                $soLuongTru = ($nguyenLieu->so_luong * $monAn->so_luong) / $nguyenLieuTonKho->he_so_quy_doi;
+
+                // Kiểm tra số lượng tồn kho trước khi trừ
+                if ($nguyenLieuTonKho->so_luong_ton < $soLuongTru) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Nguyên liệu {$nguyenLieuTonKho->ten_nguyen_lieu} không đủ tồn kho."
+                    ]);
+                }
+
+                // Trừ nguyên liệu trong bảng nguyên liệu
+                NguyenLieu::where('id', $nguyenLieu->nguyen_lieu_id)
+                    ->decrement('so_luong_ton', $soLuongTru);
+            }
+
+            // Gửi sự kiện thông báo món ăn đã cập nhật
+            event(new MonMoiDuocThem($monAn));
+        }
+
+        return response()->json(['success' => true]);
     }
-
-    // Lấy danh sách món ăn và load quan hệ
-    $monAns = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
-        ->where('trang_thai', 'cho_xac_nhan')
-        ->with('monAn', 'hoaDon.banAns') // 👈 Load quan hệ để tránh lỗi null
-        ->get();
-
-    if ($monAns->isEmpty()) {
-        return response()->json(['success' => false, 'message' => 'Không có món ăn hợp lệ hoặc đã thay đổi trạng thái.']);
-    }
-
-    // Cập nhật trạng thái tất cả món ăn
-    foreach ($monAns as $monAn) {
-        $monAn->update([
-            'trang_thai' => 'cho_che_bien',
-            'updated_at' => now()
-        ]);
-    }
-
-    // Phát sự kiện với danh sách món ăn đã có đầy đủ thông tin
-    event(new MonMoiDuocThem($monAns));
-
-    return response()->json(['success' => true]);
-}
-
 
 
 
@@ -369,7 +370,7 @@ public function updateStatus(Request $request)
 
         if (!$hoaDonBan) {
             return response()->json(['success' => false, 'message' => 'Không tìm thấy hóa đơn.']);
-        }  
+        }
 
         HoaDon::where('id', $hoaDonBan->hoa_don_id)->update([
             'mo_ta' => $chiTietThanhToan,
@@ -594,5 +595,39 @@ public function updateStatus(Request $request)
             'hoa_don_id' => $hoaDonId,
             'tong_tien' => $tongTien,
         ]);
+    }
+
+    public function inHoaDon(Request $request)
+    {
+        try {
+            $data = array_map(function ($value) {
+                return is_string($value) ? mb_convert_encoding($value, 'UTF-8', 'auto') : $value;
+            }, $request->all());
+
+            // Render nội dung HTML từ view
+            $html = view('invoice', ['data' => $data])->render();
+            $html = mb_convert_encoding($html, 'UTF-8', 'auto');
+
+            // Khởi tạo PDF từ HTML
+            $pdf = Pdf::loadHTML($html);
+
+            // Đường dẫn lưu file
+            $filename = 'hoadon_' . time() . '.pdf';
+            $pdfPath = 'public/hoadonpdf/' . $filename;
+
+            // Lưu file vào storage
+            Storage::put($pdfPath, $pdf->output());
+
+            return response()->json([
+                'success' => true,
+                'datas' => $request->all(),
+                'pdf_url' => asset('storage/hoadonpdf/' . $filename),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Lỗi khi tạo PDF: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

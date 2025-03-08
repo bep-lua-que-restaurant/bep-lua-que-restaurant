@@ -68,7 +68,8 @@
 
             // Kiểm tra nếu chưa chọn bàn
             if (!banId) {
-                alert("Vui lòng chọn bàn trước khi thêm món!");
+                showToast("🚨 Vui lòng chọn bàn trước khi thêm món", "warning");
+
                 return;
             }
 
@@ -83,7 +84,6 @@
                     gia: giaMon
                 },
                 success: function(response) {
-                    console.log("Món đã thêm vào hóa đơn!");
                     showToast("Đã thêm một món vào hóa đơn",
                         "success"); // Thông báo thành công
                 },
