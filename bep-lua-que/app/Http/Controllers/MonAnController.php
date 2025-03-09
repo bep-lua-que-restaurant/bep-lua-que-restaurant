@@ -24,7 +24,7 @@ class MonAnController extends Controller
     public function index(Request $request)
 {
     // Tạo query lấy tất cả nguyên liệu (bao gồm cả bị xóa mềm) và danh mục chưa bị xóa mềm
-    $query = NguyenLieu::with(['danhMuc', 'hinhAnhs'])->withTrashed();
+    $query = MonAn::with(['danhMuc', 'hinhAnhs'])->withTrashed();
 
     // Chỉ lấy nguyên liệu có danh mục chưa bị xóa mềm
     $query->whereHas('danhMuc', function ($q) {
@@ -51,14 +51,14 @@ class MonAnController extends Controller
     // Nếu là request AJAX, trả về HTML của danh sách nguyên liệu
     if ($request->ajax()) {
         return response()->json([
-            'html' => view('admin.nguyenlieu.body-list', compact('data'))->render(),
+            'html' => view('admin.monan.body-list', compact('data'))->render(),
         ]);
     }
 
     // Trả về view danh sách nguyên liệu
-    return view('admin.nguyenlieu.list', [
+    return view('admin.monan.list', [
         'data' => $data,
-        'route' => route('nguyen-lieu.index'), // URL route cho AJAX
+        'route' => route('mon-an.index'), // URL route cho AJAX
         'tableId' => 'list-container', // ID của bảng
         'searchInputId' => 'search-name', // ID của ô tìm kiếm
     ]);
