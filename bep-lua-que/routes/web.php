@@ -11,6 +11,7 @@ use App\Http\Controllers\DatBanController;
 use App\Http\Controllers\LoaiNguyenLieuController;
 use App\Http\Controllers\PhongAnController;
 use App\Http\Controllers\LuongController;
+use App\Http\Controllers\ThongKeMonAnController;
 use Illuminate\Support\Facades\Route;
 use App\Models\PhongAn;
 use App\Http\Controllers\TableBookedController;
@@ -322,7 +323,8 @@ Route::get('/bangluong/filter', [BangTinhLuongController::class, 'filter'])->nam
 
 Route::get('/bang-luong-export', [BangTinhLuongController::class, 'exportBangLuong'])->name('bang-luong.export');
 
-
+//Thống kê
+Route::get('/thong-ke-mon-an', [ThongKeMonAnController::class, 'thongKeMonAn'])->name('thongke.thongkemonan');
 
 
 

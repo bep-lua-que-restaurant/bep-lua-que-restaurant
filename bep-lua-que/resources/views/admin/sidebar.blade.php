@@ -114,6 +114,20 @@
                     <span class="nav-text">Thu ngân</span>
                 </a>
             </li>
+            {{-- Thống kê --}}
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                    <i class="fas fa-chart-bar"></i>
+                    <span class="nav-text">Thống kê</span>
+                </a>
+                <ul aria-expanded="false">
+
+                    <li><a href="#">Thống kê</a></li>
+                    <li><a href="">Thống kê</a></li>
+                    <li><a href="{{ route('thongke.thongkemonan') }}">Thống kê món ăn</a></li>
+                    <li><a href="#">Thống kê</a></li>
+                </ul>
+            </li>
         </ul>
     </div>
 </div>
