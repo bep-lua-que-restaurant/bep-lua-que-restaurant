@@ -23,8 +23,7 @@
                             <div class="pulse-css"></div>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
-                            <div id="DZ_W_Notification1" class="widget-media dz-scroll p-3"
-                                style="height:380px;">
+                            <div id="DZ_W_Notification1" class="widget-media dz-scroll p-3" style="height:380px;">
                                 <ul class="timeline">
                                     <li>
                                         <div class="timeline-panel">
@@ -130,7 +129,8 @@
                                         <a class="timeline-panel text-muted" href="#">
                                             <span>10 minutes ago</span>
                                             <h6 class="mb-0">Youtube, a video-sharing website, goes live
-                                                <strong class="text-primary">$500</strong>.</h6>
+                                                <strong class="text-primary">$500</strong>.
+                                            </h6>
                                         </a>
                                     </li>
                                     <li>
@@ -185,8 +185,7 @@
                     </li>
                     <li class="nav-item dropdown header-profile">
                         <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                            <img src="{{ asset('admin') }}/images/profile/pic1.jpg" width="20"
-                                alt="" />
+                            <img src="{{ asset('admin') }}/images/profile/pic1.jpg" width="20" alt="" />
                             <div class="header-info">
                                 <span class="fs-20 font-w500">Robertos Jr.</span>
                                 <small>Super Admin</small>
@@ -215,7 +214,7 @@
                                 </svg>
                                 <span class="ml-2">Inbox </span>
                             </a>
-                            <a href="page-login.html" class="dropdown-item ai-icon">
+                            <a href="{{ route('login') }}" class="dropdown-item ai-icon">
                                 <svg id="icon-logout" xmlns="http://www.w3.org/2000/svg" class="text-danger"
                                     width="18" height="18" viewBox="0 0 24 24" fill="none"
                                     stroke="currentColor" stroke-width="2" stroke-linecap="round"

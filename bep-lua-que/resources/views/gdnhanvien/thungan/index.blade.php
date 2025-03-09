@@ -17,7 +17,7 @@
         type="text/css" />
     <link href="{{ asset('admin') }}/css/style.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body {
             background-color: #004080;
@@ -71,6 +71,19 @@
             font-weight: bold;
             box-shadow: 0px 0px 10px rgba(0, 123, 255, 0.5);
         }
+
+        .empty-invoice {
+            padding: 50px 0;
+            text-align: center;
+            font-style: italic;
+            border: 2px dashed #ccc;
+            /* Viền nét đứt */
+            border-radius: 10px;
+            /* Bo góc nhẹ nhàng */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            width: 100%;
+        }
     </style>
 </head>
 
@@ -79,26 +92,42 @@
         <audio id="ding-sound" src="{{ asset('sounds/ding.mp3') }}" preload="auto"></audio>
 
         <div class="container-fluid">
-            <!-- Tìm kiếm + Lọc trạng thái -->
             <section class="row my-4">
-                <div class="col-lg-6">
-                    <div class="input-group">
-                        <input type="text" id="search-name" class="form-control border-0 "
-                            placeholder="Tìm kiếm ...">
-                    </div>
-                </div>
-                <div class="col-lg-6 d-flex justify-content-end">
-                    <select id="statusFilter" class="btn btn-primary btn-sm ">
-
-                        <option value="Tất cả">Tất cả</option>
-                        <option value="trong">Bàn trống</option>
-                        <option value="co_khach">Bàn có khách</option>
-                        <option value="da_dat_truoc">Đã đặt trước</option>
-
-                    </select>
+                <div class="col-12 text-center mb-3">
+                    <h2 class="fw-bold text-uppercase text-light ">Thu Ngân</h2>
                 </div>
             </section>
 
+
+            <!-- Tìm kiếm + Lọc trạng thái + Dropdown -->
+            <section class="row">
+                <div class="col-lg-6 d-flex align-items-center">
+                    <input type="text" id="search-name" class="form-control form-control-sm me-2 border-primary"
+                        style="width: 200px; height: 40px;">
+                    <select id="statusFilter" class="btn btn-primary btn-sm " style="width: 100px;">
+                        <option value="Tất cả">Tất cả</option>
+                        <option value="trong">Bàn trống</option>
+                        <option value="co_khach">Bàn có khách</option>
+                    </select>
+                </div>
+                <div class="col-lg-6 d-flex justify-content-end">
+                    <div class="dropdown">
+                        <button class="btn btn-primary btn-sm  d-flex align-items-center justify-content-center"
+                            type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item text-primary" href="/"><i
+                                        class="fas fa-tachometer-alt me-2"></i> Dashboard</a></li>
+                            <li><a class="dropdown-item text-primary" href="bep"><i
+                                        class="fas fa-utensils me-2"></i> Bếp</a></li>
+                            <li><a class="dropdown-item text-danger" href="dat-ban"><i
+                                        class="fas fa-concierge-bell me-2"></i> Lễ tân</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+            </section>
             <!-- Danh sách Bàn ăn / Thực đơn -->
             <section class="row">
                 <div class="col-lg-12 my-4">
@@ -122,9 +151,9 @@
 
     <main>
         <section class="container-fluid">
-            <!-- Card Bàn ăn / Thực đơn -->
             <div class="row">
-                <div class="col-lg-12">
+                <!-- Card Bàn ăn / Thực đơn -->
+                <div class="col-lg-7 col-12">
                     <div class="card shadow-sm border-0">
                         <div class="card-header">
                             <h4 class="card-title mb-0">Danh sách</h4>
@@ -138,25 +167,29 @@
                                         value="{{ $phong->id }}">
                                     <label for="phong_{{ $phong->id }}">{{ $phong->ten_phong_an }}</label>
                                 @endforeach
-
                             </div>
 
+                            @if (isset($danhMucs))
+                                <div class="ms-auto">
+                                    <label>
+                                        <input type="radio" name="filter-category" value="" checked> Tất cả
+                                    </label>
+                                    @foreach ($danhMucs as $danhMuc)
+                                        <input type="radio" id="danhmuc_{{ $danhMuc->id }}" name="filter-category"
+                                            value="{{ $danhMuc->id }}">
+                                        <label for="danhmuc_{{ $danhMuc->id }}">{{ $danhMuc->ten_danh_muc }}</label>
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
-
                         <div class="card-body" id="list-container">
                             @include('gdnhanvien.thungan.body-list')
                         </div>
-
                     </div>
                 </div>
 
-
-            </div>
-
-
-            <!-- Card Hóa đơn -->
-            <div class="row">
-                <div class="col-lg-12">
+                <!-- Card Hóa đơn -->
+                <div class="col-lg-5 col-12">
                     <div class="card shadow-sm border-0">
                         <div class="card-header">
                             <h4 class="card-title mb-0">Hóa đơn <h5 class="text-success" id="ten-ban">Bàn </h5>
@@ -165,15 +198,12 @@
                         <div id="hoaDon-body" class="card-body">
                             @include('gdnhanvien.thungan.hoa-don-list')
                         </div>
-
                     </div>
                 </div>
-
             </div>
-
-
         </section>
     </main>
+
 
     <footer>
         <!-- Footer content (nếu cần) -->
@@ -221,11 +251,12 @@
 
         var apiUrlThongBaoBep = "{{ route('thungan.thongBaoBep') }}";
 
+        var apiUrlXoaMon = "{{ route('thungan.deleteMonAn') }}";
+
         var dingSoundUrl = "{{ asset('sounds/ding.mp3') }}";
     </script>
     @vite('resources/js/public.js')
     @vite('resources/js/thungan.js')
-
 </body>
 
 </html>
