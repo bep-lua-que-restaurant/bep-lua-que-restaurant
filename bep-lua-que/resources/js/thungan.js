@@ -124,3 +124,12 @@ $(document).ready(function () {
     });
 });
 //
+
+window.Echo.channel("datban-channel").listen("DatBanCreated", (e) => {
+    let banId = e.ban_an_id; // Nhận ID bàn ăn từ Laravel
+    let icon = document.getElementById(`icon-${banId}`);
+
+    if (icon) {
+        icon.classList.remove("d-none"); // Hiển thị icon 🔔
+    }
+});

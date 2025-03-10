@@ -468,7 +468,7 @@ class ThuNganController extends Controller
             HoaDonBan::where('ban_an_id', $idBanMoi)
                 ->update(['hoa_don_id' => $hoaDonHienTaiID]);
 
-            HoaDonBan::where('ban_an_id', $idBanMoi)->delete();
+            // HoaDonBan::where('ban_an_id', $idBanMoi)->delete();
 
             // Kiểm tra xem còn bàn nào dùng hóa đơn cũ không
             $banConSuDungHoaDonCu = HoaDonBan::where('hoa_don_id', $hoaDonMoiID)->exists();
@@ -483,7 +483,7 @@ class ThuNganController extends Controller
                 'trang_thai' => 'dang_xu_ly'
             ]);
 
-            HoaDonBan::where('ban_an_id', $idBanMoi)->delete();
+            // HoaDonBan::where('ban_an_id', $idBanMoi)->delete();
         }
 
         // Cập nhật trạng thái bàn mới thành "có khách"
@@ -600,4 +600,19 @@ class ThuNganController extends Controller
             ], 500);
         }
     }
+
+    public function getOrders(Request $request)
+    {
+        $banAnId = $request->ban_an_id;
+    
+        $orders = DatBan::join('ban_ans', 'dat_bans.ban_an_id', '=', 'ban_ans.id')
+        ->join('khach_hangs', 'dat_bans.khach_hang_id', '=', 'khach_hangs.id')
+        ->where('dat_bans.ban_an_id', $banAnId)
+        ->where('dat_bans.trang_thai', 'dang_xu_ly')
+        ->select('dat_bans.*', 'khach_hangs.ho_ten', 'ban_ans.ten_ban') // Lấy cả tên bàn
+        ->get();
+    
+        return response()->json($orders);
+    }
+    
 }

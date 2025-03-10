@@ -79,7 +79,6 @@ class HoaDonController extends Controller
                 'phuong_thuc_thanh_toan' => 'tien_mat',
                 'mo_ta' => null
             ]);
-            // Nạp luôn chi tiết hóa đơn để gửi đầy đủ dữ liệu
 
             // Liên kết hóa đơn với bàn ăn (trạng thái `dang_xu_ly`)
             $hoaDonBan = HoaDonBan::create([

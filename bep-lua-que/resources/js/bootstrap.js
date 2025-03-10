@@ -15,7 +15,7 @@ window.Echo = new Echo({
     enabledTransports: ['ws', 'wss'],
 });
 
-console.log("✅ Laravel Echo đã kết nối!", window.Echo);
+// console.log("✅ Laravel Echo đã kết nối!", window.Echo);
 
 import axios from "axios";
 window.axios = axios;

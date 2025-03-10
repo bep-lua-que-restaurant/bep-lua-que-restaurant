@@ -84,7 +84,7 @@ class BepController extends Controller
         $mon->trang_thai = $request->trang_thai;
         $mon->save();
 
-        broadcast(new TrangThaiCapNhat($mon))->toOthers();
+        event(new TrangThaiCapNhat($mon));
 
         return response()->json([
             'success' => true,
