@@ -10,6 +10,7 @@ use App\Http\Controllers\LoaiNguyenLieuController;
 use App\Http\Controllers\NguyenLieuController;
 use App\Http\Controllers\PhongAnController;
 use App\Http\Controllers\LuongController;
+use App\Http\Controllers\ThongKeMonAnController;
 use Illuminate\Support\Facades\Route;
 use App\Models\PhongAn;
 use App\Http\Controllers\TableBookedController;
@@ -288,6 +289,27 @@ Route::get('/luong/{id}', [BangTinhLuongController::class, 'show'])->name('luong
 Route::get('/bangluong/filter', [BangTinhLuongController::class, 'filter'])->name('bangluong.filter');
 Route::get('/bang-luong-export', [BangTinhLuongController::class, 'exportBangLuong'])->name('bang-luong.export');
 Route::post('luong/import', [BangTinhLuongController::class, 'import'])->name('luong.import');
+
+
+//Thống kê
+Route::get('/thong-ke-mon-an', [ThongKeMonAnController::class, 'thongKeMonAn'])->name('thongke.thongkemonan');
+
+
+
+
+
+
+
+// // Đăng nhập phân quyền
+// Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+// Route::post('/login', [AuthController::class, 'login']);
+// Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// Route::middleware(['auth'])->group(function () {
+
+
+//     // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
+// });
+
 
 
 Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
