@@ -15,17 +15,17 @@ class ThongKeMonAnController extends Controller
         $filterType = $request->input('filterType', 'day');
         $fromDate = $request->input('fromDate');
         $toDate = $request->input('toDate');
-    
+
         // Nếu không có fromDate hoặc toDate, gán giá trị mặc định
         if (!$fromDate || !$toDate) {
             $fromDate = Carbon::now()->subDays(7)->format('Y-m-d');
             $toDate = Carbon::now()->format('Y-m-d');
         }
-    
+
         // Chuyển đổi ngày sang định dạng chuẩn
         $fromDate = Carbon::parse($fromDate);
         $toDate = Carbon::parse($toDate);
-    
+
         // Điều chỉnh khoảng thời gian dựa vào filterType
         if ($filterType == 'month') {
             $fromDate = $fromDate->startOfMonth();
@@ -37,14 +37,14 @@ class ThongKeMonAnController extends Controller
             $fromDate = $fromDate->startOfDay();
             $toDate = $toDate->endOfDay();
         }
-    
+
         // Truy vấn thống kê
         $query = DB::table('chi_tiet_hoa_dons')
             ->join('mon_ans', 'chi_tiet_hoa_dons.mon_an_id', '=', 'mon_ans.id')
             ->where('chi_tiet_hoa_dons.trang_thai', 'hoan_thanh')
             ->whereBetween('chi_tiet_hoa_dons.created_at', [$fromDate->startOfDay(), $toDate->endOfDay()])
             ;
-    
+
         // Xử lý nhóm dữ liệu theo filterType
         if ($filterType == 'month') {
             $query->select(
@@ -62,7 +62,7 @@ class ThongKeMonAnController extends Controller
             )
             ->groupBy(DB::raw('DATE(chi_tiet_hoa_dons.created_at)'), 'mon_ans.ten')
             ->orderByDesc('tong_so_luong');
-            
+
         } else {
             $query->select(
                 DB::raw('DATE(chi_tiet_hoa_dons.created_at) as time_label'),
@@ -71,24 +71,24 @@ class ThongKeMonAnController extends Controller
             )
             ->groupBy(DB::raw('DATE(chi_tiet_hoa_dons.created_at)'), 'mon_ans.ten')
             ->orderByDesc('tong_so_luong');
-            
+
         }
-    
+
         $query->limit(10); // Giới hạn 10 món ăn bán chạy nhất
-    
+
         $queryResult = $query->get();
-    
-        // Nếu không có kết quả, trả về JSON báo không có dữ liệu
-        if ($queryResult->isEmpty()) {
-            return response()->json([
-                'message' => 'Không có dữ liệu thống kê'
-            ]);
-        }
-    
+
+//        // Nếu không có kết quả, trả về JSON báo không có dữ liệu
+//        if ($queryResult->isEmpty()) {
+//            return response()->json([
+//                'message' => 'Không có dữ liệu thống kê'
+//            ]);
+//        }
+
         // Trích xuất dữ liệu
         $labels = $queryResult->pluck('ten');
         $datasets = $queryResult->pluck('tong_so_luong');
-    
+
         // Kiểm tra nếu request là AJAX thì trả về JSON
         if ($request->ajax()) {
             return response()->json([
@@ -96,9 +96,9 @@ class ThongKeMonAnController extends Controller
                 'datasets' => $datasets->toArray()
             ]);
         }
-    
+
         // Trả về view với dữ liệu đã lọc
         return view('admin.thongke.thongkemonan', compact('labels', 'datasets', 'filterType', 'fromDate', 'toDate'));
     }
-        
+
 }

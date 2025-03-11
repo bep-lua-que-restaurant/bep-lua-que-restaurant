@@ -10,7 +10,9 @@ use App\Http\Controllers\LoaiNguyenLieuController;
 use App\Http\Controllers\NguyenLieuController;
 use App\Http\Controllers\PhongAnController;
 use App\Http\Controllers\LuongController;
+use App\Http\Controllers\ThongKeDoanhSoController;
 use App\Http\Controllers\ThongKeMonAnController;
+use App\Http\Controllers\ThongKeSoLuongKhachController;
 use Illuminate\Support\Facades\Route;
 use App\Models\PhongAn;
 use App\Http\Controllers\TableBookedController;
@@ -35,6 +37,9 @@ Route::get('/', function () {
 });
 
 Route::get('/', [ThongKeController::class, 'index'])->name('dashboard');
+Route::get('/thong-ke-doanh-so', [ThongKeDoanhSoController::class, 'index'])->name('thongke.thongkedoanhso');
+Route::get('/thong-ke-so-luong-khach', [ThongKeSoLuongKhachController::class, 'index'])->name('thongke.thongkesoluongkhach');
+
 
 // Danh mục món ăn
 Route::resource('danh-muc-mon-an', DanhMucMonAnController::class);
@@ -140,7 +145,7 @@ Route::post(
 
 
  Route::get('/phieu-nhap-export', [PhieuNhapKhoController::class, 'export'])->name('phieu-nhap.export');
-  
+
 // Quản lí nhân viên
 Route::get('/nhan-vien', [NhanVienController::class, 'index'])->name('nhan-vien.index');
 Route::get('/nhan-vien/create', [NhanVienController::class, 'create'])->name('nhan-vien.create');
@@ -165,14 +170,14 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
-   
+
     Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 });
 Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
 Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
 
-///Ca làm việc 
+///Ca làm việc
 
 Route::prefix('ca-lam-nhan-vien')->group(function () {
     Route::get('/', [CaLamNhanVienController::class, 'index'])->name('ca-lam-nhan-vien.index'); // Hiển thị lịch làm việc
@@ -213,7 +218,7 @@ Route::prefix('ca-lam-nhan-vien')->group(function () {
     //xóa ca làm cho nhân viên
     Route::delete('/ca-lam-nhan-vien/{id}', [CaLamNhanVienController::class, 'destroy'])
         ->name('ca-lam-nhan-vien.destroy');
-    //xin nghỉ cho nhân viên 
+    //xin nghỉ cho nhân viên
     Route::get('/ca-lam-nhan-vien/xin-nghi', [CaLamNhanVienController::class, 'xinNghi'])
         ->name('ca-lam-nhan-vien.xin-nghi');
     // Route::post('/ca-lam-nhan-vien/xin-nghi', [CaLamNhanVienController::class, 'xinNghi'])
