@@ -93,7 +93,7 @@ class BangTinhLuongController extends Controller
             'nhan_vien_id' => 'required|array', // Danh sách nhân viên
             'nhan_vien_id.*' => 'exists:nhan_viens,id',
             'so_ca_lam' => 'required|array',
-            'so_ngay_cong' => 'required|array',
+            'so_ngay_cong' => 'nullable|array',
             'tong_luong' => 'required|array',
             'thang_nam' => 'required|date_format:Y-m',
         ]);
@@ -107,15 +107,14 @@ class BangTinhLuongController extends Controller
         }
     
         foreach ($request->nhan_vien_id as $index => $nhan_vien_id) {
-            $nhanVien = NhanVien::findOrFail($nhan_vien_id);
-    
+            $nhanVien = NhanVien::findOrFail($nhan_vien_id);    
             // Kiểm tra hình thức tính lương
             $hinhThuc = optional($nhanVien->luong)->hinh_thuc ?? 'ca';
             $mucLuong = optional($nhanVien->luong)->muc_luong ?? 0;
     
             // Lấy số ca và số ngày làm từ form
             $soCaLam = $request->so_ca_lam[$index] ?? 0;
-            $soNgayLam = $request->so_ngay_cong[$index] ?? 0;
+            // $soNgayLam = $request->so_ngay_cong[$index] ?? 0;
             $tongLuong = $request->tong_luong[$index] ?? 0; // Nhận từ form
     
             // Lưu vào bảng lương
@@ -123,7 +122,7 @@ class BangTinhLuongController extends Controller
                 'nhan_vien_id' => $nhan_vien_id,
                 'thang_nam' => $thangNam,
                 'so_ca_lam' => $soCaLam,
-                'so_ngay_cong' => $soNgayLam,
+                'so_ngay_cong' => $soNgayLam ?? 0,
                 'tong_luong' => $tongLuong,
             ]);
         }
@@ -131,8 +130,7 @@ class BangTinhLuongController extends Controller
         return redirect()->route('luong.index', ['thang' => $request->thang_nam])
                          ->with('success', "Lương tháng $request->thang_nam đã được chốt!");
     }
-            public function show( $id
-    )
+        public function show($id)
     {
         $bangTinhLuong = DB::table('bang_tinh_luongs')
         ->join('nhan_viens', 'bang_tinh_luongs.nhan_vien_id', '=', 'nhan_viens.id') // Lấy tên nhân viên

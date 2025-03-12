@@ -50,7 +50,6 @@
                                     </option>
                                 @endfor
                             </select>
-
                         </div>
                     </div>
                     <div class="card-body">

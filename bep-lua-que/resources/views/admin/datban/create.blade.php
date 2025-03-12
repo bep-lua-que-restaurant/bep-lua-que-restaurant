@@ -25,58 +25,98 @@
                                     <ul id="customerList" class="list-group mt-2" style="display: none;"></ul>
                                 </div>
 
-                                <!-- Thông tin khách hàng -->
-                                <div class="mb-3">
-                                    <label class="form-label">Họ và Tên:</label>
-                                    <input type="text" class="form-control" id="customerName" name="customer_name">
-                                    @error('customer_name')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
+                                <div class="row">
+                                    <!-- Họ và Tên -->
+                                    <div class="col-md-6 mb-2">
+                                        <label class="form-label">Họ và Tên:</label>
+                                        <input type="text" class="form-control" id="customerName" name="customer_name">
+                                        @error('customer_name')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Số điện thoại -->
+                                    <div class="col-md-6 mb-2">
+                                        <label class="form-label">Số điện thoại:</label>
+                                        <input type="text" class="form-control" id="customerPhone" name="customer_phone">
+                                        @error('customer_phone')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div class="col-md-6 mb-2">
+                                        <label class="form-label">Email:</label>
+                                        <input type="email" class="form-control" id="customerEmail" name="customer_email">
+                                        @error('customer_email')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Số người -->
+                                    <div class="col-md-6 mb-2">
+                                        <label class="form-label">Số người:</label>
+                                        <input type="number" class="form-control" name="num_people" id="numPeople" required
+                                            min="1">
+                                        @error('num_people')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Thời gian đến -->
+                                    <div class="col-md-6 mb-2">
+                                        <label class="form-label">Thời gian đến:</label>
+                                        <input type="datetime-local" class="form-control" name="thoi_gian_den"
+                                            id="thoi_gian_den"
+                                            value="{{ old('thoi_gian_den', \Carbon\Carbon::parse($thoiGianDen)->format('Y-m-d\TH:i')) }}">
+                                        @error('thoi_gian_den')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+
+                                    <div class="col-md-6 mb-2">
+                                        <label for="gio_du_kien">Giờ dự kiến:</label>
+                                        <div class="d-flex">
+                                            <select id="gio_du_kien_gio" name="gio_du_kien_gio" class="form-control me-2">
+                                                @for ($i = 0; $i < 14; $i++)
+                                                    <option value="{{ sprintf('%02d', $i) }}">{{ sprintf('%02d', $i) }}
+                                                    </option>
+                                                @endfor
+                                            </select>
+
+                                            <select id="gio_du_kien_phut" name="gio_du_kien_phut" class="form-control">
+                                                @foreach (['00', '15', '30', '45'] as $phut)
+                                                    <option value="{{ $phut }}">{{ $phut }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        @error('gio_du_kien')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+
+                                    <script>
+                                        document.addEventListener("DOMContentLoaded", function() {
+                                            let inputTime = document.getElementById("gio_du_kien");
+
+                                            inputTime.addEventListener("input", function() {
+                                                // Giữ nguyên định dạng HH:MM, tránh bị trình duyệt tự động thêm ký tự lạ
+                                                let timeValue = inputTime.value;
+                                                let formattedTime = timeValue.substring(0, 5); // Lấy đúng 5 ký tự đầu (HH:MM)
+                                                inputTime.value = formattedTime;
+                                            });
+                                        });
+                                    </script>
+                                    <!-- Mô tả -->
+                                    <div class="col-md-6 mb-2">
+                                        <label class="form-label">Mô tả:</label>
+                                        <textarea class="form-control" id="mo_ta" name="mo_ta" rows="2"></textarea>
+                                    </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label">Số điện thoại:</label>
-                                    <input type="text" class="form-control" id="customerPhone" name="customer_phone">
-                                    @error('customer_phone')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">Email:</label>
-                                    <input type="email" class="form-control" id="customerEmail" name="customer_email">
-                                    @error('customer_email')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
-
-
-                                <div class="mb-3">
-                                    <label class="form-label">Mô tả:</label>
-                                    <input type="textare" class="form-control" id="mo_ta" name="mo_ta">
-
-                                </div>
-
-                                <!-- Thông tin đặt bàn -->
-                                <div class="mb-3">
-                                    <label class="form-label">Thời gian đến:</label>
-                                    <input type="datetime-local" class="form-control" name="thoi_gian_den"
-                                        id="thoi_gian_den"
-                                        value="{{ old('thoi_gian_den', \Carbon\Carbon::parse($thoiGianDen)->format('Y-m-d\TH:i')) }}">
-                                    @error('thoi_gian_den')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
-
-                                {{-- 02/14/2025 11:50 AM --}}
-                                <div class="mb-3">
-                                    <label class="form-label">Số người:</label>
-                                    <input type="number" class="form-control" name="num_people" id="numPeople" required
-                                        min="1">
-                                    @error('num_people')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
 
                                 <!-- Select Bàn ăn -->
                                 <div class="mb-3">
@@ -99,36 +139,37 @@
 
                         <script>
                             $(document).ready(async function() {
-                                var thoiGianDen = "{{ $thoiGianDen ?? '' }}"; // Lấy thời gian từ server
-                                var idBan = "{{ $idBan ?? '' }}"; // Lấy ID bàn từ server
+                                var thoiGianDen = "{{ $thoiGianDen ?? '' }}";
+                                var idBan = "{{ $idBan ?? '' }}";
 
-                                // Hàm tải danh sách bàn theo thời gian
-                                async function loadBanAn(thoiGian) {
+                                // Mặc định chọn 1 giờ
+                                $('#gio_du_kien_gio').val('01');
+                                $('#gio_du_kien_phut').val('00');
+
+                                // Load bàn khi thay đổi thời gian hoặc giờ dự kiến
+                                async function loadBanAn(thoiGian, gioDuKienGio, gioDuKienPhut) {
                                     var selectedTime = moment(thoiGian, "YYYY-MM-DDTHH:mm");
                                     var currentTime = moment();
 
                                     if (selectedTime.isBefore(currentTime)) {
                                         $('#banAnButtons').html('');
                                         alert(
-                                            "⚠️ Thời gian được chọn không hợp lệ! Vui lòng chọn thời gian sau thời gian hiện tại."
-                                        );
+                                            "⚠️ Thời gian được chọn không hợp lệ! Vui lòng chọn thời gian sau thời gian hiện tại.");
                                         return;
                                     }
-
-                                    $('#selectedTime').text(thoiGian);
-                                    $('#thoi_gian_den').val(thoiGian);
-                                    $('#selectedTimeInput').val(thoiGian);
 
                                     try {
                                         const response = await $.ajax({
                                             url: '{{ route('admin.datban.filter') }}',
                                             method: 'GET',
                                             data: {
-                                                thoi_gian_den: selectedTime.format("YYYY-MM-DD HH:mm:ss")
+                                                thoi_gian_den: selectedTime.format("YYYY-MM-DD HH:mm:ss"),
+                                                gio_du_kien_gio: gioDuKienGio,
+                                                gio_du_kien_phut: gioDuKienPhut
                                             }
                                         });
 
-                                        $('#banAnButtons').html(''); // Xóa bàn cũ để cập nhật bàn mới
+                                        $('#banAnButtons').html('');
 
                                         var groupedBanAns = {};
                                         $.each(response, function(index, banAn) {
@@ -144,59 +185,20 @@
                                             roomContainer.append(roomTitle);
                                             var rowContainer = $('<div class="row g-2"></div>');
 
-                                            banAns.sort(function(a, b) {
-                                                return a.so_ghe - b.so_ghe;
-                                            });
-
                                             $.each(banAns, function(index, banAn) {
-                                                var colClass = "col-2";
-                                                if (banAn.so_ghe == 8) colClass = "col-3";
-                                                else if (banAn.so_ghe == 10) colClass = "col-6";
-
                                                 var button = $(
-                                                    '<button type="button" class="btn btn-primary w-100 p-2" data-id="' +
-                                                    banAn.id + '" data-so-ghe="' + banAn.so_ghe + '">' +
-                                                    banAn.ten_ban + ' (' + banAn.so_ghe + ')' + '</button>'
+                                                    `<button type="button" class="btn ${banAn.da_duoc_dat == 1 ? 'btn-danger' : 'btn-primary'} w-100 p-2" 
+                         data-id="${banAn.id}" data-so-ghe="${banAn.so_ghe}" ${banAn.da_duoc_dat == 1 ? 'disabled' : ''}>
+                         ${banAn.ten_ban} (${banAn.so_ghe})
+                         </button>`
                                                 );
-
-                                                if (banAn.da_duoc_dat == 1) {
-                                                    button.removeClass('btn-primary').addClass('btn-danger')
-                                                        .prop('disabled', true);
-                                                }
-
-                                                var gridItem = $('<div class="' + colClass + '"></div>');
-                                                gridItem.append(button);
-                                                rowContainer.append(gridItem);
+                                                rowContainer.append($('<div class="col-3"></div>').append(
+                                                    button));
                                             });
 
                                             roomContainer.append(rowContainer);
                                             $('#banAnButtons').append(roomContainer);
                                         });
-
-                                        // Nếu có bàn đã chọn trước đó, đánh dấu lại (nếu còn trống)
-                                        if (idBan) {
-                                            var selectedButton = $('#banAnButtons button[data-id="' + idBan + '"]');
-                                            if (selectedButton.length > 0) {
-                                                var tenBan = selectedButton.text();
-                                                var soGhe = selectedButton.data('so-ghe');
-                                                selectedButton.addClass('selected'); // Thêm class để làm nổi bật bàn đã chọn
-
-                                                $('#selectedTableName').text(tenBan);
-                                                $('#selectedTableSeats').text(soGhe);
-                                                $('#selectedTableInfo').show();
-                                                $('#selectedTableId').val(idBan);
-
-                                                // Nếu bàn hợp lệ, thêm vào danh sách selectedIds
-                                                if (!selectedIds.includes(idBan)) {
-                                                    selectedIds.push(idBan);
-                                                }
-
-                                                updateHiddenInputs(); // Cập nhật input ẩn ngay sau khi chọn bàn
-                                            } else {
-                                                idBan = null; // Nếu bàn không còn khả dụng, bỏ chọn
-                                                $('#selectedTableInfo').hide();
-                                            }
-                                        }
 
                                     } catch (error) {
                                         console.error('Lỗi khi xử lý AJAX: ', error);
@@ -204,51 +206,43 @@
                                     }
                                 }
 
-                                // Khi trang tải lần đầu, load dữ liệu từ server
-                                if (thoiGianDen && idBan) {
-                                    loadBanAn(thoiGianDen);
+                                // Khi trang load lần đầu
+                                if (thoiGianDen) {
+                                    loadBanAn(thoiGianDen, $('#gio_du_kien_gio').val(), $('#gio_du_kien_phut').val());
                                 }
 
+                                // Khi chọn thời gian hoặc giờ dự kiến
+                                $('#thoi_gian_den, #gio_du_kien_gio, #gio_du_kien_phut').on('change', function() {
+                                    loadBanAn(
+                                        $('#thoi_gian_den').val(),
+                                        $('#gio_du_kien_gio').val(),
+                                        $('#gio_du_kien_phut').val()
+                                    );
+                                });
+
                                 // Khi chọn thời gian mới, load lại danh sách bàn
-                                $('#thoi_gian_den').on('change', function() {
-                                    var newTime = $(this).val();
-                                    loadBanAn(newTime);
+                                $('#thoi_gian_den, #gio_du_kien').on('change', function() {
+                                    var newTime = $('#thoi_gian_den').val();
+                                    var newGioDuKien = $('#gio_du_kien').val();
+                                    loadBanAn(newTime, newGioDuKien);
                                 });
 
                                 // Khi click vào bàn, chọn bàn mới và bỏ chọn bàn cũ
                                 $(document).on('click', '#banAnButtons button', function() {
-                                    if ($(this).hasClass('btn-danger')) return; // Không cho chọn bàn đã đặt
+                                    if ($(this).hasClass('btn-danger')) return;
 
                                     var idBan = $(this).data('id');
 
                                     if ($(this).hasClass('selected')) {
-                                        // Nếu đã chọn, thì hủy chọn
                                         $(this).removeClass('selected');
-
-                                        // Cập nhật lại danh sách bàn đã chọn
                                         updateSelectedTables();
                                     } else {
-                                        // Nếu chưa chọn, thì thêm vào danh sách chọn
                                         $(this).addClass('selected');
                                         updateSelectedTables();
                                     }
                                 });
 
                                 let selectedIds = [];
-
-                                function toggleBanAn(id) {
-                                    let index = selectedIds.indexOf(id);
-                                    if (index === -1) {
-                                        selectedIds.push(id); // Thêm nếu chưa có
-                                    } else {
-                                        selectedIds.splice(index, 1); // Xóa nếu đã chọn
-                                    }
-
-                                    updateSelectedTables();
-                                    updateHiddenInputs(); // Cập nhật input ẩn sau khi chọn bàn
-                                }
-
-
 
                                 function updateHiddenInputs() {
                                     let selectedBanInputs = document.getElementById("selectedBanInputs");
@@ -258,45 +252,40 @@
                                         return;
                                     }
 
-                                    selectedBanInputs.innerHTML = ""; // Xóa input cũ
+                                    selectedBanInputs.innerHTML = "";
 
                                     selectedIds.forEach(id => {
                                         let input = document.createElement("input");
                                         input.type = "hidden";
-                                        input.name = "selectedIds[]"; // Laravel sẽ nhận dạng mảng
+                                        input.name = "selectedIds[]";
                                         input.value = id;
                                         selectedBanInputs.appendChild(input);
                                     });
-
-                                    //console.log("Danh sách bàn đã chọn:", selectedIds);
-                                    //console.log("Hidden inputs cập nhật:", selectedBanInputs.innerHTML);
                                 }
 
-
-                                // Hàm cập nhật danh sách bàn đã chọn
                                 function updateSelectedTables() {
                                     var selectedTables = $('#banAnButtons button.selected');
-                                    selectedIds = []; // Sử dụng biến global
+                                    selectedIds = [];
                                     var selectedInfo = [];
 
                                     selectedTables.each(function() {
                                         selectedIds.push($(this).data('id'));
                                         selectedInfo.push({
                                             tenBan: $(this).text(),
-                                            soGhe: $(this).data('so-ghe')
+                                            soGhe: $(this).data('so-ghe'),
+                                            gioDuKien: $(this).attr('title') // Lấy từ tooltip
                                         });
                                     });
-
-                                    console.log("Danh sách bàn đã chọn:", selectedIds);
-                                    //console.log("Phần tử chứa input ẩn:", document.getElementById("selectedBanInputs"));
 
                                     updateHiddenInputs(); // Cập nhật input ẩn
 
                                     if (selectedTables.length > 0) {
                                         $('#selectedTableInfo').show();
-                                        $('#selectedTableId').val(selectedIds.join(',')); // Lưu nhiều ID cách nhau dấu phẩy
-                                        var html = selectedInfo.map(table => `<p>${table.tenBan} (${table.soGhe} ghế)</p>`).join(
-                                            '');
+                                        $('#selectedTableId').val(selectedIds.join(','));
+
+                                        var html = selectedInfo.map(table =>
+                                            `<p>${table.tenBan} (${table.soGhe} ghế) - Giờ dự kiến: ${table.gioDuKien}</p>`
+                                        ).join('');
                                         $('#selectedTableName').html(html);
                                     } else {
                                         $('#selectedTableInfo').hide();
@@ -304,7 +293,6 @@
                                         $('#selectedTableName').html('');
                                     }
                                 }
-
 
                             });
                         </script>

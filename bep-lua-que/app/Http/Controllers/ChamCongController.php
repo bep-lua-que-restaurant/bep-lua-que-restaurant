@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use App\Exports\ChamCongExport;
 use App\Models\CaLam;
+use App\Models\CaLamNhanVien;
 use App\Models\ChamCong;
 use App\Http\Requests\StoreChamCongRequest;
 use App\Http\Requests\UpdateChamCongRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\NhanVien; // Đảm bảo import model NhanVien
-
-use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -21,72 +21,69 @@ class ChamCongController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request)
-
     {
+        
         Carbon::setLocale('vi'); // Đặt ngôn ngữ tiếng Việt
-        // Lấy giá trị week_offset từ query, mặc định là 0 nếu không có
-        $weekOffset = $request->query('week_offset', 0);
+        
+        // Lấy ngày được chọn từ request, nếu không có thì mặc định là hôm nay
+        $selectedDate = $request->query('selected_date', Carbon::now()->format('Y-m-d'));
+        $selectedDate = Carbon::parse($selectedDate); // Chuyển thành đối tượng Carbon
+        
+        // Lấy danh sách ngày (chỉ một ngày)
+        $dates = collect([$selectedDate]);
+        
+        $dayLabel = ucfirst($selectedDate->translatedFormat('l, d/m/Y'));
 
-        // Lấy ngày đầu tuần (Thứ Hai)
-        $startOfWeek = Carbon::now()->startOfWeek(Carbon::MONDAY)->addWeeks($weekOffset);
-
-        // Lấy danh sách ngày trong tuần
-        $dates = collect();
-        for ($i = 0; $i < 7; $i++) {
-            $dates->push($startOfWeek->copy()->addDays($i));
-        }
-
-        $weekLabel = "Tuần " . $startOfWeek->weekOfYear . " - Th." . $startOfWeek->format('m Y');
-
+        
         // Lấy danh sách ca làm
         $caLams = CaLam::all();
-
+        $caLamNhanViens = CaLamNhanVien::whereDate('ngay_lam', $selectedDate->format('Y-m-d'))->get();
+        
         // Lấy danh sách chấm công với thông tin nhân viên
         $chamCongs = DB::table('ca_lam_nhan_viens')
             ->join('nhan_viens', 'ca_lam_nhan_viens.nhan_vien_id', '=', 'nhan_viens.id')
             ->join('ca_lams', 'ca_lam_nhan_viens.ca_lam_id', '=', 'ca_lams.id')
             ->leftJoin('cham_congs', function ($join) {
                 $join->on('ca_lam_nhan_viens.nhan_vien_id', '=', 'cham_congs.nhan_vien_id')
-                    ->on('ca_lam_nhan_viens.ca_lam_id', '=', 'cham_congs.ca_lam_id') // ⚠️ THÊM điều kiện này
-                    ->on('ca_lam_nhan_viens.ngay_lam', '=', 'cham_congs.ngay_cham_cong'); // Đảm bảo nối đúng ngày
+                    ->on('ca_lam_nhan_viens.ca_lam_id', '=', 'cham_congs.ca_lam_id')
+                    ->on('ca_lam_nhan_viens.ngay_lam', '=', 'cham_congs.ngay_cham_cong');
             })
-            ->whereBetween('ca_lam_nhan_viens.ngay_lam', [
-                $dates->first()->format('Y-m-d'),
-                $dates->last()->format('Y-m-d')
-            ])
+            ->whereDate('ca_lam_nhan_viens.ngay_lam', $selectedDate->format('Y-m-d'))
             ->select(
-                'ca_lam_nhan_viens.id AS ca_lam_nhan_vien_id', // ID của bảng trung gian
+                'ca_lam_nhan_viens.id AS ca_lam_nhan_vien_id',
                 'ca_lam_nhan_viens.ngay_lam',
                 'ca_lam_nhan_viens.ca_lam_id',
-
-                'nhan_viens.id AS nhan_vien_id', // ID của nhân viên
-                'nhan_viens.ho_ten AS ten_nhan_vien', // Tên nhân viên
-
-                'ca_lams.id AS ca_lam_id', // ID ca làm (để chắc chắn)
-                'ca_lams.ten_ca AS ten_ca', // Tên ca làm
+    
+                'nhan_viens.id AS nhan_vien_id',
+                'nhan_viens.ho_ten AS ten_nhan_vien',
+    
+                'ca_lams.id AS ca_lam_id',
+                'ca_lams.ten_ca AS ten_ca',
                 'ca_lams.gio_bat_dau',
                 'ca_lams.gio_ket_thuc',
-
-                'cham_congs.id AS cham_cong_id', // ID chấm công (nếu có)
-                'cham_congs.ngay_cham_cong', // Ngày chấm công
+    
+                'cham_congs.id AS cham_cong_id',
+                'cham_congs.ngay_cham_cong',
                 'cham_congs.gio_vao_lam',
                 'cham_congs.gio_ket_thuc',
                 'cham_congs.mo_ta',
-                'cham_congs.deleted_at'
+                'cham_congs.deleted_at',
+                DB::raw('CASE WHEN cham_congs.id IS NOT NULL THEN 1 ELSE 0 END AS da_cham_cong')
             )
-
             ->get();
-// Nếu request là AJAX, chỉ trả về phần HTML bảng chấm công
+            
+        
+        // Nếu request là AJAX, chỉ trả về phần HTML bảng chấm công
         if ($request->ajax()) {
-        return response()->json([
-        'weekLabel' => $weekLabel,
-        'html' => view('admin.chamcong.listchamcong', compact('dates', 'caLams', 'chamCongs'))->render()
-        ]);
+            return response()->json([
+                'dayLabel' => $dayLabel,
+                'html' => view('admin.chamcong.listchamcong', compact('dates', 'caLams', 'chamCongs', 'caLamNhanViens'))->render()
+            ]);
         }
-
-
-        return view('admin.chamcong.chamcong', compact('dates', 'caLams', 'chamCongs', 'weekLabel', 'weekOffset'));
+        
+        return view('admin.chamcong.chamcong', compact('dates', 'caLams', 'chamCongs', 'dayLabel', 'selectedDate', 'caLamNhanViens'));
     }
+    
 
 
 
@@ -105,45 +102,46 @@ class ChamCongController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'nhan_vien_id' => 'required|exists:nhan_viens,id',
+{
+    $validated = $request->validate([
+        'ca_lam_nhan_vien_id' => 'required|exists:ca_lam_nhan_viens,id',
+        'gio_vao_lam' => 'nullable|date_format:H:i',
+        'gio_ket_thuc' => 'nullable|date_format:H:i|after:gio_vao_lam',
+        'mo_ta' => 'nullable|string'
+    ]);
 
-            'ca_lam_id' => 'required|exists:ca_lams,id', // Bắt buộc phải có ca làm
-            // 'ngay_cham_cong' => 'required|date',
-            'gio_vao_lam' => 'nullable|date_format:H:i',
-            'gio_ket_thuc' => 'nullable|date_format:H:i|after:gio_vao_lam',
-            'mo_ta' => 'nullable|string'
-        ]);
+    // Lấy thông tin từ bảng ca_lam_nhan_viens
+    $caLamNhanVien = DB::table('ca_lam_nhan_viens')
+        ->where('id', $validated['ca_lam_nhan_vien_id'])
+        ->first();
 
-
-
-        // Kiểm tra nhân viên có thuộc ca làm đã chọn không
-        $caLamHienTai = DB::table('ca_lam_nhan_viens')
-            ->where('nhan_vien_id', $request->nhan_vien_id)
-            ->where('ca_lam_id', $request->ca_lam_id)
-            ->where('ngay_lam', $request->ngay_cham_cong)
-            ->exists();
-
-        if (!$caLamHienTai) {
-            return back()->with('error', 'Không tìm thấy ca làm phù hợp cho nhân viên này!');
-        }
-
-
-
-        // Tạo bản ghi chấm công chỉ cho ca làm được chọn
-        ChamCong::create([
-            'nhan_vien_id' => $request->nhan_vien_id,
-            'ca_lam_id' => $request->ca_lam_id, // Đảm bảo lưu đúng ca làm
-            'ngay_cham_cong' => $request->ngay_cham_cong,
-            'gio_vao_lam' => $request->gio_vao_lam ?? null,
-            'gio_ket_thuc' => $request->gio_ket_thuc ?? null,
-            'mo_ta' => $request->mo_ta,
-        ]);
-
-        return redirect()->route('cham-cong.index')->with('success', 'Chấm công thành công!');
+    if (!$caLamNhanVien) {
+        return back()->with('error', 'Không tìm thấy ca làm của nhân viên này!');
     }
 
+    // Kiểm tra xem nhân viên đã được chấm công trong ngày chưa
+    $daChamCong = DB::table('cham_congs')
+        ->where('nhan_vien_id', $caLamNhanVien->nhan_vien_id)
+        ->where('ca_lam_id', $caLamNhanVien->ca_lam_id)
+        ->where('ngay_cham_cong', $caLamNhanVien->ngay_lam)
+        ->exists();
+
+    if ($daChamCong) {
+        return back()->with('error', 'Nhân viên này đã được chấm công trong ca làm này!');
+    }
+
+    // Lưu vào bảng cham_congs
+    ChamCong::create([
+        'nhan_vien_id' => $caLamNhanVien->nhan_vien_id,
+        'ca_lam_id' => $caLamNhanVien->ca_lam_id,
+        'ngay_cham_cong' => $caLamNhanVien->ngay_lam,
+        'gio_vao_lam' => $validated['gio_vao_lam'] ?? null,
+        'gio_ket_thuc' => $validated['gio_ket_thuc'] ?? null,
+        'mo_ta' => $validated['mo_ta']??null,
+    ]);
+
+    return redirect()->route('cham-cong.index')->with('success', 'Chấm công thành công!');
+}
 
 
 

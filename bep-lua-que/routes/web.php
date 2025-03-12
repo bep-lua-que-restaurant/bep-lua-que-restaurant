@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\BangTinhLuongController;
 use App\Http\Controllers\CaLamNhanVienController;
 use App\Http\Controllers\DanhMucMonAnController;
@@ -10,8 +11,10 @@ use App\Http\Controllers\LoaiNguyenLieuController;
 use App\Http\Controllers\NguyenLieuController;
 use App\Http\Controllers\PhongAnController;
 use App\Http\Controllers\LuongController;
+use App\Http\Controllers\ThongKeDoanhSoController;
+use App\Http\Controllers\ThongKeMonAnController;
+use App\Http\Controllers\ThongKeSoLuongKhachController;
 use Illuminate\Support\Facades\Route;
-use App\Models\PhongAn;
 use App\Http\Controllers\TableBookedController;
 use App\Http\Controllers\CaLamController;
 use App\Http\Controllers\MonAnController;
@@ -26,14 +29,17 @@ use App\Http\Controllers\ThongKeController;
 use App\Http\Controllers\PhieuNhapKhoController;
 use App\Http\Controllers\MaGiamGiaController;
 use App\Http\Controllers\XinNghiController;
-use App\Models\CaLam;
 use Illuminate\Support\Facades\Log;
+
 
 Route::get('/', function () {
     return view('admin.dashboard');
 });
 
 Route::get('/', [ThongKeController::class, 'index'])->name('dashboard');
+Route::get('/thong-ke-doanh-so', [ThongKeDoanhSoController::class, 'index'])->name('thongke.thongkedoanhso');
+Route::get('/thong-ke-so-luong-khach', [ThongKeSoLuongKhachController::class, 'index'])->name('thongke.thongkesoluongkhach');
+
 
 // Danh mục món ăn
 Route::resource('danh-muc-mon-an', DanhMucMonAnController::class);
@@ -78,13 +84,29 @@ Route::get('/ban-an-export', [BanAnController::class, 'export'])->name('ban-an.e
 Route::post('/ban-an/import', [BanAnController::class, 'importBanAn'])->name('ban-an.import');
 
 // Đặt bàn
+Route::get('/datban/ngay', [DatBanController::class, 'indexNgay']);
+Route::get('/api/datban', [DatBanController::class, 'getDatBanByDate']);
+
+
 // Route::post('/dat-ban', [DatBanController::class, 'datBan']);
 Route::get('/danh-sach-dat-ban', [DatBanController::class, 'DanhSach'])->name('datban.danhsach');
 
 
 Route::resource('dat-ban', DatBanController::class);
-Route::get('/dat-ban/{dat_ban}/edit', [DatBanController::class, 'edit'])->name('dat-ban.edit');
-Route::get('/dat-ban/{id}', [DatBanController::class, 'show'])->name('dat-ban.show');
+// Route::get('/dat-ban/{dat_ban}/edit', [DatBanController::class, 'edit'])->name('dat-ban.edit');
+Route::get('/dat-ban/edit/{maDatBan}', [DatBanController::class, 'edit'])->name('dat-ban.edit');
+
+// Route::get('/dat-ban/{id}', [DatBanController::class, 'show'])->name('dat-ban.show');
+Route::delete('/dat-ban/{ma_dat_ban}', [DatBanController::class, 'destroy'])->name('dat-ban.destroy');
+Route::post('/dat-ban/store', [DatBanController::class, 'store'])->name('dat-ban.store');
+Route::put('/dat-ban/{maDatBan}', [DatBanController::class, 'update'])->where('maDatBan', '[A-Za-z0-9]+')->name('dat-ban.update');
+
+
+
+
+
+
+
 // Route để tìm kiếm khách hàng
 Route::get('/dat-ban/search-customer', [DatBanController::class, 'searchCustomer'])->name('admin.datban.search');
 Route::get('admin/khachhang/search', [DatBanController::class, 'searchCustomer'])->name('admin.khachhang.search');
@@ -139,7 +161,7 @@ Route::post(
 
 
  Route::get('/phieu-nhap-export', [PhieuNhapKhoController::class, 'export'])->name('phieu-nhap.export');
-  
+
 // Quản lí nhân viên
 Route::get('/nhan-vien', [NhanVienController::class, 'index'])->name('nhan-vien.index');
 Route::get('/nhan-vien/create', [NhanVienController::class, 'create'])->name('nhan-vien.create');
@@ -164,28 +186,27 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
-   
+
     Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 });
 Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
 Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
 
-///Ca làm việc 
+///Ca làm việc
 
 Route::prefix('ca-lam-nhan-vien')->group(function () {
     Route::get('/', [CaLamNhanVienController::class, 'index'])->name('ca-lam-nhan-vien.index'); // Hiển thị lịch làm việc
     Route::post('/store', [CaLamNhanVienController::class, 'store'])->name('ca-lam-nhan-vien.store'); // Thêm lịch làm việc
-    Route::post('/confirm/{id}', [CaLamNhanVienController::class, 'confirmShift'])->name('ca-lam-nhan-vien
-    .confirm'); // Xác nhận lịch làm việc
-    Route::post('/change-shift/{id}', [CaLamNhanVienController::class, 'changeShift'])->name('ca-lam-nhan-vien
-    .change'); // Đổi ca làm
+    // Xác nhận lịch làm việc
+
     Route::delete('/delete/{id}', [CaLamNhanVienController::class, 'delete'])->name('ca-lam-nhan-vien
     .delete'); // Xóa ca làm
     Route::get('/ca-lam-nhan-vien/export', [CaLamNhanVienController::class, 'export'])->name('ca-lam-nhan-vien.export');
     // Xuất file Excel
 
-    ///////
+    Route::post('/dang-ky', [CaLamNhanVienController::class, 'dangKyCaLam'])->name('ca-lam-nhan-vien.dang-ky'); // Xử lý đăng ký ca làm
+
     Route::get('/ca-lam-nhan-vien
     /xin-nghi', [CaLamNhanVienController::class, 'showXinNghiForm'])->name('xinnghi.form');
     Route::post('/ca-lam-nhan-vien
@@ -205,23 +226,23 @@ Route::prefix('ca-lam-nhan-vien')->group(function () {
     Route::resource('ca-lam-nhan-vien', CaLamNhanVienController::class);
     Route::put('ca-lam-nhan-vien/{id}', [CaLamNhanVienController::class, 'update'])
         ->name('ca-lam-nhan-vien.update');
-
-    // Route::patch('ca-lam-nhan-vien/doi-ca/{id}', [CaLamNhanVienController::class, 'doiCaLam'])
-    // ->name('ca-lam-nhan-vien.doi-ca');
-    Route::post('/ca-lam-nhan-vien/doi-ca/{id}', [CaLamNhanVienController::class, 'doiCa'])->name('ca-lam-nhan-vien.doi-ca');
     //xóa ca làm cho nhân viên
     Route::delete('/ca-lam-nhan-vien/{id}', [CaLamNhanVienController::class, 'destroy'])
         ->name('ca-lam-nhan-vien.destroy');
-    //xin nghỉ cho nhân viên 
+    //xin nghỉ cho nhân viên
     Route::get('/ca-lam-nhan-vien/xin-nghi', [CaLamNhanVienController::class, 'xinNghi'])
         ->name('ca-lam-nhan-vien.xin-nghi');
     // Route::post('/ca-lam-nhan-vien/xin-nghi', [CaLamNhanVienController::class, 'xinNghi'])
     // ->name('ca-lam-nhan-vien.xin-nghi');
 
     Route::delete('/ca-lam-nhan-vien/{id}', [CaLamNhanVienController::class, 'destroy'])
-        ->name('ca-lam-nhan-vien.destroy');
+    ->name('ca-lam-nhan-vien.destroy');
 
     Route::get('/ca-lam-nhan-vien', [CaLamNhanVienController::class, 'index'])->name('ca-lam-nhan-vien.index');
+
+
+
+
 });
 
 ///Mã giảm giảm
@@ -247,7 +268,7 @@ Route::get('thu-ngan-get-bill-ban/{id}', [ThuNganController::class, 'getBillBan'
 Route::post('thu-ngan-ghep-ban', [ThuNganController::class, 'ghepBan'])
     ->name('thungan.ghepBan');
 Route::post('/hoa-don/update-quantity', [ThuNganController::class, 'updateQuantity'])->name('thungan.updateQuantity');
-Route::post('/hoa-don/delete',[ThuNganController::class, 'deleteMonAn'])->name('thungan.deleteMonAn');
+Route::post('/hoa-don/delete', [ThuNganController::class, 'deleteMonAn'])->name('thungan.deleteMonAn');
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
 Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
@@ -265,7 +286,7 @@ Route::patch(
 );
 //Kiểm cho chấm công
 Route::get('/cham-cong/check/{nhan_vien_id}/{ca}/{ngay}', [ChamCongController::class, 'checkChamCong']);
-Route::get('/lich-su-cham-cong', [ChamCongController::class, 'getLichSuChamCong']);//thay đổi tuần
+Route::get('/lich-su-cham-cong', [ChamCongController::class, 'getLichSuChamCong']); //thay đổi tuần
 Route::get('/chamcong/change-week', [ChamCongController::class, 'changeWeek'])->name('chamcong.changeWeek');
 //xóa mềm chấm cống
 Route::post('/cham-cong/restore', [ChamCongController::class, 'restore'])->name('cham-cong.restore');
@@ -290,11 +311,30 @@ Route::get('/bang-luong-export', [BangTinhLuongController::class, 'exportBangLuo
 Route::post('luong/import', [BangTinhLuongController::class, 'import'])->name('luong.import');
 
 
+//Thống kê
+Route::get('/thong-ke-mon-an', [ThongKeMonAnController::class, 'thongKeMonAn'])->name('thongke.thongkemonan');
+
+
+
+
+
+
+
+// // Đăng nhập phân quyền
+// Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+// Route::post('/login', [AuthController::class, 'login']);
+// Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// Route::middleware(['auth'])->group(function () {
+
+
+//     // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
+// });
+
+
+
 Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
 
 Route::get('/test-log', function () {
     Log::info('Test ghi log Laravel');
     return 'Đã ghi log!';
 });
-
-

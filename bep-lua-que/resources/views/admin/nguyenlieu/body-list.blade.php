@@ -11,10 +11,10 @@
             <div class="d-flex align-items-center"><span class="w-space-no">{{ $item->ten_nguyen_lieu }}</span></div>
         </td>
         <td>
-            <div class="d-flex align-items-center"><span class="w-space-no">{{ $item->loaiNguyenLieu->ten_loai }}</span></div>
+            <div class="d-flex align-items-center"><span class="w-space-no">{{ $item->loaiNguyenLieu->ten_loai }}</span>
+            </div>
         </td>
-        <!-- Đơn vị tính -->
-        <td>{{ $item->don_vi_tinh }}</td>
+
 
         <!-- Giá nhập -->
         <td>{{ number_format($item->gia_nhap, 0, ',', '.') }} VNĐ</td>
@@ -29,7 +29,8 @@
                 <span class="badge badge-danger">Hết hàng</span>
             @endif
         </td>
-        
+        <!-- Đơn vị tính -->
+        <td>{{ $item->don_vi_tinh }}</td>
 
         {{-- <!-- Trạng thái kinh doanh -->
         <td>
