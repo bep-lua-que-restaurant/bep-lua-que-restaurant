@@ -146,7 +146,7 @@ class CaLamNhanVienController extends Controller
 
     public function export()
     {
-        return Excel::download(new CaLamNhanVienExport, 'ca-lam-nhan-vien.xlsx');
+        return Excel::download(new CaLamNhanVienExport, 'CaLamNhanVien.xlsx');
     }
 
 

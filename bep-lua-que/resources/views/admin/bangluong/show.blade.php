@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-    Chi tiết danh mục
+    Chi tiết bảng lương
 @endsection
 
 @section('content')
@@ -30,36 +30,42 @@
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>STT</th>
-                                        <th>Tên nhân viên</th>
-                                        <th>Số ca làm</th>
-                                        <th>Số ngày công</th>
-                                        <th>Lương chính (VND)</th>
-                                        <th>Tổng lương (VND)</th>
+                                        <th class="text-center">STT</th>
+                                        <th class="text-center">Tên nhân viên</th>
+                                        <th class="text-center">Số ca làm</th>
+                                        {{-- <th>Số ngày công</th> --}}
+                                        <th class="text-center">Lương chính (VND)</th>
+                                        <th class="text-center">Tổng lương (VND)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {{-- @if ($bangTinhLuong->isNotEmpty())
-                                        @foreach ($bangTinhLuong as $index => $chamCong)
+                                    @if ($bangTinhLuong->isNotEmpty())
+                                        @foreach ($bangTinhLuong->groupBy('ten_nhan_vien') as $tenNhanVien => $nhomLuong)
+                                            @php
+                                                $luong = $nhomLuong->first();
+                                                $soCaLam = $luong->so_ca_lam ?? 0;
+                                                $soNgayCong = intdiv($soCaLam, 3); // Số ngày công trọn vẹn
+                                                $caDu = $soCaLam % 3; // Số ca dư chưa đủ thành 1 ngày
+                                            @endphp
                                             <tr>
-                                                <td>{{ $loop->iteration }}</td> <!-- Laravel tự động đếm -->
-                                                <td>{{ $chamCong->ten_nhan_vien ?? 'Không có tên' }}</td>
-                                                <td>{{ $chamCong->ten_ca ?? 'Chưa có ca' }}</td>
-                                                <td>{{ $chamCong->ngay_cham_cong ?? 'Chưa cập nhật' }}</td>
-                                                <td>{{ number_format(optional($chamCong->luong)->muc_luong ?? 0, 0, ',', '.') }}
+                                                <td class="text-center">{{ $loop->iteration }}</td>
+                                                <td class="text-center">{{ $luong->ten_nhan_vien ?? 'Không có tên' }}</td>
+                                                <td class="text-center">{{ $caDu > 0 ? $caDu . ' ca' : '-' }}</td>
+                                                <!-- Hiển thị số ca dư -->
+                                                {{-- <td>{{ $soNgayCong > 0 ? sprintf('%02d', $soNgayCong) . ' ngày' : '-' }} --}}
+                                                </td> <!-- Hiển thị số ngày công -->
+                                                <td class="text-center">
+                                                    {{ isset($luong->muc_luong) ? number_format($luong->muc_luong) : '0' }}
                                                 </td>
-                                                <td>{{ number_format(optional($chamCong->tong_luong ?? 0), 0, ',', '.') }}
-                                                </td>
+                                                <td class="text-center">
+                                                    {{ number_format($luong->tong_luong ?? 0, 0, ',', '.') }} VND</td>
                                             </tr>
                                         @endforeach
                                     @else
                                         <tr>
                                             <td colspan="6" class="text-center">Không có dữ liệu</td>
                                         </tr>
-                                    @endif --}}
-
-
-
+                                    @endif
                                 </tbody>
                             </table>
 

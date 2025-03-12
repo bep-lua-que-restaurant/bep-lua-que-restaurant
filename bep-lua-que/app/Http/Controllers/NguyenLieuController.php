@@ -15,16 +15,47 @@ class NguyenLieuController extends Controller
      */
     public function index(Request $request)
     {
-        // $query = NguyenLieu::query();
+        // Tạo query lấy tất cả nguyên liệu (bao gồm cả bị xóa mềm) và danh mục chưa bị xóa mềm
+        $query = NguyenLieu::with(['loaiNguyenLieu'])->withTrashed();
 
-        // if ($request->has('ten') && $request->ten != '') {
-        //     $query->where('ten_nguyen_lieu', 'like', '%' . $request->ten . '%');
-        // }
+        // Chỉ lấy nguyên liệu có loại nguyên liệu chưa bị xóa mềm
+        $query->whereHas('loaiNguyenLieu', function ($q) {
+            $q->whereNull('deleted_at'); // Chỉ lấy danh mục chưa bị xóa mềm
+        });
 
-        // $data = $query->withTrashed()->latest('id')->paginate(15);
+        // Lọc theo tên nguyên liệu
+        if ($request->has('ten') && $request->ten != '') {
+            $query->where('ten_nguyen_lieu', 'like', '%' . $request->ten . '%');
+        }
 
-        // return view('admin.nguyenlieu.list', compact('data'));
+        // Lọc theo trạng thái nguyên liệu (Đang kinh doanh / Ngừng kinh doanh)
+        if ($request->has('statusFilter') && $request->statusFilter != '') {
+            if ($request->statusFilter == 'Đang kinh doanh') {
+                $query->whereNull('deleted_at');
+            } elseif ($request->statusFilter == 'Ngừng kinh doanh') {
+                $query->whereNotNull('deleted_at');
+            }
+        }
+
+        // Phân trang và lấy danh sách nguyên liệu
+        $data = $query->withTrashed()->latest('id')->paginate(15);
+
+        // Nếu là request AJAX, trả về HTML của danh sách nguyên liệu
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('admin.nguyenlieu.body-list', compact('data'))->render(),
+            ]);
+        }
+
+        // Trả về view danh sách nguyên liệu
+        return view('admin.nguyenlieu.list', [
+            'data' => $data,
+            'route' => route('nguyen-lieu.index'), // URL route cho AJAX
+            'tableId' => 'list-container', // ID của bảng
+            'searchInputId' => 'search-name', // ID của ô tìm kiếm
+        ]);
     }
+
     public function getNguyenLieuByLoai($loai_id)
     {
         // $nguyenLieus = NguyenLieu::where('loai_nguyen_lieu_id', $loai_id)->get();
@@ -62,15 +93,16 @@ class NguyenLieuController extends Controller
 
     public function show($id)
     {
-        // Tìm nguyên liệu dựa vào ID
-        $nguyenLieu = NguyenLieu::with('loaiNguyenLieu')->find($id);
+        try {
+            // Tìm nguyên liệu bao gồm cả loại nguyên liệu, kể cả khi bị xóa mềm
+            $nguyenLieu = NguyenLieu::with(['loaiNguyenLieu'])->withTrashed()->findOrFail($id);
 
-        if (!$nguyenLieu) {
-            return redirect()->back()->with('error', 'Nguyên liệu không tồn tại.');
+            return view('admin.nguyenlieu.detail', compact('nguyenLieu'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Nguyên liệu không tồn tại hoặc đã bị xóa.');
         }
-
-        return view('nguyen-lieu.detail', compact('nguyenLieu'));
     }
+
 
 
     /**

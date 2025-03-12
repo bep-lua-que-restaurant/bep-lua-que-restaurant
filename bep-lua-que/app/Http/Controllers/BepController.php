@@ -3,86 +3,87 @@
 namespace App\Http\Controllers;
 
 use App\Models\MonAn;
-use App\Models\HoaDonBan;
 use Illuminate\Http\Request;
 use App\Models\ChiTietHoaDon;
 use App\Events\MonMoiDuocThem;
 use App\Events\TrangThaiCapNhat;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class BepController extends Controller
 {
-    // public function __construct()
-    // {
-    //     $this->middleware('auth');
-    // }
-
-
     public function index()
     {
+        // Lấy tất cả các món Chờ chế biến
         $monAnChoCheBien = ChiTietHoaDon::with(['monAn', 'hoaDon.banAns'])
+    ->where('trang_thai', 'cho_che_bien')
+    ->get();
+    
+        // Lấy các món theo kiểu tổng hợp (tính tổng số lượng của mỗi món từ tất cả hóa đơn)
+        $monAnTheoMon = ChiTietHoaDon::with(['monAn'])
             ->where('trang_thai', 'cho_che_bien')
+            ->select('mon_an_id', DB::raw('SUM(so_luong) as total_so_luong'))
+            ->groupBy('mon_an_id')
             ->get();
-
-
+    
+        // Lấy danh sách món đang nấu (vẫn hiển thị theo món và bàn)
         $monAnDangNau = ChiTietHoaDon::with(['monAn', 'hoaDon.banAns'])
             ->where('trang_thai', 'dang_nau')
             ->get();
+    
+        // Dữ liệu cho view
+        return view('gdnhanvien.bep.index', compact('monAnChoCheBien', 'monAnTheoMon', 'monAnDangNau'));
+    }
+    
 
-        return view('gdnhanvien.bep.index', compact('monAnChoCheBien', 'monAnDangNau'));
+
+    // public function themMonAnVaoBep(Request $request)
+    // {
+    //     $monAn = MonAn::create([
+    //         'ten' => $request->ten,
+    //         'so_luong' => $request->so_luong,
+    //         'hoa_don_id' => $request->hoa_don_id
+    //     ]);
+    
+    //     broadcast(new MonMoiDuocThem($monAn));
+    
+    //     return response()->json(['success' => true, 'monAn' => $monAn]);
+    // }
+
+    public function themMonAnVaoBep(Request $request)
+{
+    $monAns = [];
+
+    foreach ($request->mon_an as $mon) {
+        $monAns[] = MonAn::create([
+            'ten' => $mon['ten'],
+            'so_luong' => $mon['so_luong'],
+            'hoa_don_id' => $request->hoa_don_id
+        ]);
     }
 
-    public function themMon(Request $request)
-    {
-        Log::info('Thêm món từ Postman:', $request->all());
-        $data = $request->validate([
-            'hoa_don_id' => 'required|exists:hoa_dons,id',
-            'mon_an_id' => 'required|exists:mon_ans,id',
-            'so_luong' => 'required|integer|min:1'
-        ]);
+    // Gửi tất cả món một lần
+    broadcast(new MonMoiDuocThem($monAns));
 
-        $monAn = MonAn::findOrFail($data['mon_an_id']);
-        $donGia = $monAn->gia;
-        $thanhTien = $donGia * $data['so_luong'];
-
-        // Tạo món ăn trong hóa đơn
-        $mon = ChiTietHoaDon::create([
-            'hoa_don_id' => $data['hoa_don_id'],
-            'mon_an_id' => $data['mon_an_id'],
-            'so_luong' => $data['so_luong'],
-            'don_gia' => $donGia,
-            'thanh_tien' => $thanhTien,
-            'trang_thai' => 'cho_che_bien',
-        ]);
-
-        // Phát sự kiện để giao diện cập nhật real-time
-        broadcast(new MonMoiDuocThem($mon))->toOthers();
-
-        return response()->json(['message' => 'Thêm món thành công!', 'monAn' => $mon], 201);
-    }
-
+    return response()->json(['success' => true, 'monAns' => $monAns]);
+}
 
 
     public function updateTrangThai(Request $request, $id)
     {
-        // Kiểm tra dữ liệu đầu vào
         $request->validate([
             'trang_thai' => 'required|in:cho_che_bien,dang_nau,hoan_thanh'
         ]);
 
-        // Tìm món ăn theo ID
         $mon = ChiTietHoaDon::find($id);
 
-        // Nếu không tìm thấy món ăn
         if (!$mon) {
             return response()->json(['success' => false, 'message' => 'Không tìm thấy món ăn.'], 404);
         }
 
-        // Cập nhật trạng thái món ăn
         $mon->trang_thai = $request->trang_thai;
         $mon->save();
 
-        // Gửi sự kiện cập nhật giao diện bếp
         broadcast(new TrangThaiCapNhat($mon))->toOthers();
 
         return response()->json([

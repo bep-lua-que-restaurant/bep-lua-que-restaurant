@@ -37,7 +37,14 @@
                             <a href="{{ route('phieu-nhap-kho.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm phiếu nhập
                             </a>
+                            {{-- <a href="{{ route('phieu-nhap.import') }}" class="btn btn-sm btn-secondary" data-toggle="modal"
+                                data-target=".bd-example-modal-lg">
+                                <i class="fa fa-upload"></i> Nhập file
+                            </a> --}}
 
+                            <a href="{{ route('phieu-nhap.export') }}" class="btn btn-sm btn-success">
+                                <i class="fa fa-download"></i> Xuất file
+                            </a>
 
                         </div>
                     </div>
@@ -66,12 +73,39 @@
                 </div>
             </div>
         </div>
+        <!-- Modal Nhập file -->
+        {{-- <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true" id="importFileModal">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="importFileModalLabel">Nhập file</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal"
+                            aria-label="Close"><span>&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Form nhập file -->
+                        <form action="{{ route('phieu-nhap.import') }}" method="POST" enctype="multipart/form-data"
+                            id="importFileForm">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="fileUpload" class="form-label">Chọn file</label>
+                                <input type="file" name="file" id="fileUpload" class="form-control" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" form="importFileForm" class="btn btn-primary">Xác nhận</button>
+                    </div>
+                </div>
+            </div>
+        </div> --}}
+
+
 
         <!-- Hiển thị phân trang -->
         <div class="mt-3">
             {{ $data->links('pagination::bootstrap-5') }}
         </div>
     </div>
-
-
 @endsection

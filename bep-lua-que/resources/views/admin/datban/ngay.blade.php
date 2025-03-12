@@ -87,23 +87,17 @@
                                         <p><strong>Giờ:</strong>
                                             {{ Carbon::parse($datBanToday->thoi_gian_den)->format('H:i') }}</p>
                                         <p><strong>Số người:</strong> {{ $datBanToday->so_nguoi }}</p>
-                                        <p><strong>Trạng thái:</strong>
-                                            @switch($datBanToday->trang_thai)
-                                                @case('dang_xu_ly')
-                                                    Đang xử lý
-                                                @break
-
-                                                @case('xa_nhan')
+                                        <p><strong>Trạng thái:
+                                                @if ($datBanToday->trang_thai == 'xac_nhan')
                                                     Đã xác nhận
-                                                @break
+                                                @elseif($datBanToday->trang_thai == 'dang_xu_ly')
+                                                    Đang xử lý
+                                                @endif
 
-                                                @case('da_huy')
-                                                    Đã hủy
-                                                @break
 
-                                                @default
-                                                    Chưa xác định
-                                            @endswitch
+                                            </strong>
+
+
                                         </p>
                                     </div>
                                 </div>
@@ -114,7 +108,6 @@
                 </div>
             @endforeach
 
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
             <script>
                 $(document).ready(function() {

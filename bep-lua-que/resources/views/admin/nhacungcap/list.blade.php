@@ -35,8 +35,8 @@
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
                             <!-- Nút Nhập file sẽ hiển thị Modal -->
-                            <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
-                                data-target=".bd-example-modal-lg">
+                            <a href="{{ route('nha_cung_cap.import') }}" class="btn btn-sm btn-secondary"
+                                data-toggle="modal" data-target=".bd-example-modal-lg">
                                 <i class="fa fa-upload"></i> Nhập file
                             </a>
 
@@ -91,7 +91,7 @@
                 </div>
                 <div class="modal-body">
                     <!-- Form nhập file -->
-                    <form action="#" method="POST" enctype="multipart/form-data"
+                    <form action="{{ route('nha_cung_cap.import') }}" method="POST" enctype="multipart/form-data"
                         id="importFileForm">
                         @csrf
                         <div class="mb-3">

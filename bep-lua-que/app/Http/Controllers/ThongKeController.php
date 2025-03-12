@@ -2,107 +2,78 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DatBan;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\HoaDon;
+use App\Models\HoaDonBan;
+
 
 class ThongKeController extends Controller
 {
     public function index(Request $request)
     {
-        $filterType = $request->input('filterType', 'day');
-        $data = [];
-        $labels = [];
+        $today = Carbon::today();
+        $yesterday = Carbon::yesterday();
 
-        // Thống kê theo năm, tháng, ngày
-        if ($filterType == 'year') {
-            $year = Carbon::now()->year;
-            $labels = array_map(fn($m) => "Tháng $m", range(1, 12));
-            $rawData = HoaDon::selectRaw('MONTH(created_at) as month, SUM(tong_tien) as revenue')
-                ->whereYear('created_at', $year)
-                ->groupBy('month')
-                ->orderBy('month')
-                ->pluck('revenue', 'month')
-                ->toArray();
+        // Truy vấn tất cả dữ liệu trong một lần
+        $revenueData = HoaDon::whereDate('created_at', '>=', $yesterday)
+            ->selectRaw('DATE(created_at) as date, SUM(tong_tien) as revenue')
+            ->groupBy('date')
+            ->pluck('revenue', 'date');
 
-            foreach (range(1, 12) as $month) {
-                $data[] = $rawData[$month] ?? 0;
-            }
-        } elseif ($filterType == 'month') {
-            $year = Carbon::now()->year;
-            $month = Carbon::now()->month;
-            $daysInMonth = Carbon::now()->daysInMonth;
-            $labels = array_map(fn($d) => "Ngày $d", range(1, $daysInMonth));
-            $rawData = HoaDon::selectRaw('DAY(created_at) as day, SUM(tong_tien) as revenue')
-                ->whereYear('created_at', $year)
-                ->whereMonth('created_at', $month)
-                ->groupBy('day')
-                ->orderBy('day')
-                ->pluck('revenue', 'day')
-                ->toArray();
+        $totalRevenueToday = $revenueData[$today->toDateString()] ?? 0;
+        $totalRevenueYesterday = $revenueData[$yesterday->toDateString()] ?? 0;
 
-            foreach (range(1, $daysInMonth) as $day) {
-                $data[] = $rawData[$day] ?? 0;
-            }
-        } elseif ($filterType == 'day') {
-            $date = Carbon::now()->toDateString();
-            $labels = array_map(fn($h) => "$h:00", range(0, 23));
-            $rawData = HoaDon::selectRaw('HOUR(created_at) as hour, SUM(tong_tien) as revenue')
-                ->whereDate('created_at', $date)
-                ->groupBy('hour')
-                ->orderBy('hour')
-                ->pluck('revenue', 'hour')
-                ->toArray();
+        // Số đơn đang phục vụ hôm nay (trạng thái 'dang_xu_ly')
+        $ordersServingToday = HoaDonBan::whereDate('created_at', $today)
+            ->where('trang_thai', 'dang_xu_ly')
+            ->count();
 
-            foreach (range(0, 23) as $hour) {
-                $data[] = $rawData[$hour] ?? 0;
-            }
-        }
+        // Số đơn đã phục vụ hôm qua (trạng thái 'da_thanh_toan')
+        $ordersCompletedYesterday = HoaDonBan::whereDate('created_at', $yesterday)
+            ->where('trang_thai', 'da_thanh_toan')
+            ->count();
 
-        // **Thống kê doanh số tháng này vs tháng trước**
-        $currentMonthRevenue = HoaDon::whereYear('created_at', Carbon::now()->year)
-            ->whereMonth('created_at', Carbon::now()->month)
-            ->sum('tong_tien');
+        // Truy vấn số khách hôm nay & hôm qua
+        $customerData = DatBan::whereDate('created_at', '>=', $yesterday)
+            ->where('trang_thai', 'xac_nhan')
+            ->selectRaw('DATE(created_at) as date, SUM(so_nguoi) as total_customers')
+            ->groupBy('date')
+            ->pluck('total_customers', 'date');
 
-        $lastMonthRevenue = HoaDon::whereYear('created_at', Carbon::now()->year)
-            ->whereMonth('created_at', Carbon::now()->subMonth()->month)
-            ->sum('tong_tien');
+        $customersToday = $customerData[$today->toDateString()] ?? 0;
+        $customersYesterday = $customerData[$yesterday->toDateString()] ?? 0;
 
-        // **Thống kê doanh số tuần này vs tuần trước**
-        $currentWeekRevenue = HoaDon::whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
-            ->sum('tong_tien');
+        // Truy vấn doanh số theo giờ trong ngày hôm nay
+        $salesData = HoaDon::whereDate('created_at', $today)
+            ->selectRaw('HOUR(created_at) as hour, SUM(tong_tien) as revenue')
+            ->groupBy('hour')
+            ->pluck('revenue', 'hour');
 
-        $lastWeekRevenue = HoaDon::whereBetween('created_at', [Carbon::now()->subWeek()->startOfWeek(), Carbon::now()->subWeek()->endOfWeek()])
-            ->sum('tong_tien');
-
-        // Tính phần trăm chênh lệch
-        $monthPercentage = $lastMonthRevenue > 0
-            ? (($currentMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100
-            : 0;
-
-        $weekPercentage = $lastWeekRevenue > 0
-            ? (($currentWeekRevenue - $lastWeekRevenue) / $lastWeekRevenue) * 100
-            : 0;
+        $labels = array_map(fn($h) => "$h:00", range(0, 23));
+        $data = array_map(fn($h) => $salesData[$h] ?? 0, range(0, 23));
 
         if ($request->ajax()) {
             return response()->json([
                 'labels' => $labels,
                 'data' => $data,
-                'totalSales' => number_format(array_sum($data), 0, ',', '.') . ' VND',
-                'monthComparison' => [
-                    'currentMonth' => $currentMonthRevenue,
-                    'lastMonth' => $lastMonthRevenue,
-                    'percentage' => round($monthPercentage, 2)
-                ],
-                'weekComparison' => [
-                    'currentWeek' => $currentWeekRevenue,
-                    'lastWeek' => $lastWeekRevenue,
-                    'percentage' => round($weekPercentage, 2)
-                ]
+                'totalSales' => number_format($totalRevenueToday, 0, ',', '.') . ' VND',
+                'totalRevenueToday' => number_format($totalRevenueToday, 0, ',', '.') . ' VND',
+                'totalRevenueYesterday' => number_format($totalRevenueYesterday, 0, ',', '.') . ' VND',
+                'customersToday' => $customersToday,
+                'customersYesterday' => $customersYesterday,
+                'ordersServingToday' => $ordersServingToday,
+                'ordersCompletedYesterday' => $ordersCompletedYesterday
             ]);
         }
 
-        return view('admin.dashboard', compact('labels', 'data', 'filterType', 'currentMonthRevenue', 'lastMonthRevenue', 'currentWeekRevenue', 'lastWeekRevenue', 'monthPercentage', 'weekPercentage'));
+        return view('admin.dashboard', compact(
+            'labels', 'data', 'totalRevenueToday', 'totalRevenueYesterday',
+            'ordersServingToday', 'ordersCompletedYesterday',
+            'customersToday', 'customersYesterday'
+        ));
     }
+
 
 }

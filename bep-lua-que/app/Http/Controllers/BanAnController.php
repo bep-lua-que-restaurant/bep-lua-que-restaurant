@@ -187,7 +187,14 @@ class BanAnController extends Controller
         return Excel::download(new BanAnExport, 'DanhSachBanAn.xlsx');
     }
 
-    /**
-     * Nhập danh sách bàn ăn từ file Excel
-     */
+    public function importBanAn(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
+
+        Excel::import(new BanAnImport, $request->file('file'));
+
+        return back()->with('success', 'Nhập dữ liệu thành công!');
+    }
 }
