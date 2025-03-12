@@ -67,31 +67,25 @@
                                     // Tìm đặt bàn trong khoảng thời gian này
                                     const datBan = response.datBans.find(d => {
                                         if (d.ban_an_id !== ban.id)
-                                    return false;
+                                            return false;
 
                                         const thoiGianDen = new Date(d
                                             .thoi_gian_den);
-
-                                        // Lấy giờ và phút từ gio_du_kien
                                         const [hours, minutes] = d.gio_du_kien
                                             .split(':').map(Number);
-
-                                        // Gán thoiGianKetThuc trực tiếp từ gio_du_kien
                                         const thoiGianKetThuc = new Date(
-                                            thoiGianDen);
-                                        thoiGianKetThuc.setHours(hours);
-                                        thoiGianKetThuc.setMinutes(minutes);
+                                            thoiGianDen.getTime() + (hours *
+                                                60 + minutes) * 60 * 1000);
 
                                         return thoiGianHienTai >= thoiGianDen &&
                                             thoiGianHienTai < thoiGianKetThuc;
                                     });
 
-
                                     const statusClass = datBan ? (datBan.trang_thai ===
                                         'xac_nhan' ? 'table-success' :
                                         'table-warning') : '';
                                     const content = datBan ?
-                                        `<a href="/dat-ban/${datBan.ma_dat_ban}" class="btn btn-sm btn-info text-white btn-view-details" 
+                                        `<a class="btn btn-sm btn-info text-white btn-view-details" 
                                             data-datban-id="${datBan.id}" 
                                             data-bs-toggle="tooltip" 
                                             title="Xem chi tiết">
@@ -163,14 +157,14 @@
                 });
 
                 // Xử lý sự kiện click phân trang
-                $(document).on("click", ".pagination-link", function(e) {
-                    e.preventDefault(); // Ngăn hành vi mặc định
-                    e.stopPropagation(); // Ngăn lan truyền lên các thành phần cha
+                // $(document).on("click", ".pagination-link", function(e) {
+                //     e.preventDefault(); // Ngăn hành vi mặc định
+                //     e.stopPropagation(); // Ngăn lan truyền lên các thành phần cha
 
-                    let page = $(this).data("page");
-                    let date = $(this).data("date");
-                    loadDatBan(date, page);
-                });
+                //     let page = $(this).data("page");
+                //     let date = $(this).data("date");
+                //     loadDatBan(date, page);
+                // });
 
             });
 
@@ -185,7 +179,6 @@
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl"> <!-- Đổi modal-lg thành modal-xl -->
             <div class="modal-content">
-
                 <form id="bookingForm" method="POST" action="{{ route('dat-ban.store') }}">
                     @csrf
                     <div class="modal-header">
@@ -244,10 +237,11 @@
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                        <button id="clearButton" class="btn btn-danger">clearButton</button>
+                        <button id="clearButton">clearButton</button>
                         <button type="submit" id="confirmButton" class="btn btn-primary">Xác nhận đặt bàn</button>
 
                     </div>
+
                 </form>
 
             </div>
@@ -312,6 +306,9 @@
                 updateModalButton(); // ✅ Cập nhật nút mở modal
             });
 
+
+
+
             // Hiển thị hoặc ẩn nút mở modal
             function updateModalButton() {
                 if (Object.keys(selectedSlots).length > 0) {
@@ -354,7 +351,7 @@
 
                         // Trừ phút nhưng đảm bảo không bị âm
                         startTime.setMinutes(startTime.getMinutes() - 1);
-                        endTime.setMinutes(endTime.getMinutes() - 5);
+                        endTime.setMinutes(endTime.getMinutes() - 2);
 
                         let formattedGioBatDau =
                             `${pad(startTime.getHours())}:${pad(startTime.getMinutes())}`;
@@ -369,24 +366,23 @@
 
                         let diffMinutes = Math.floor((endTime - startTime) / 60000);
                         let gioDuKien =
-                            // `${pad(Math.floor(diffMinutes / 60))}:${pad(diffMinutes % 60)}:00`;
-                            `${formattedGioKetThuc}:00`;
+                            `${pad(Math.floor(diffMinutes / 60))}:${pad(diffMinutes % 60)}:00`;
 
                         let thoiGianDen = `${formattedDate} ${formattedGioBatDau}:00`;
 
                         modalContent += `
-                            <li class="d-flex justify-content-around">
-                                <p><strong>Tên bàn: </strong> ${tenBan}</p>
-                                <p><strong>Ngày: </strong>${formattedDate.split('-').reverse().join('/')} </p>
-                                <p><strong>Thời gian: </strong> ${formattedGioBatDau} → ${formattedGioKetThuc}</p>
-                            
-                                <input type="hidden" name="selectedIds[]" value="${banId}">
-                                <input type="hidden" name="ten_ban" value="${tenBan}">
-                                <input type="hidden" name="thoi_gian_den" value="${thoiGianDen}">
-                                <input type="hidden" name="gio_du_kien" value="${gioDuKien}">
-                                <input type="hidden" name="ngay" value="${formattedDate}">
-                            </li>
-                        `;
+        <li class="d-flex justify-content-around">
+            <p><strong>Tên bàn: </strong> ${tenBan}</p>
+            <p><strong>Ngày: </strong>${formattedDate.split('-').reverse().join('/')} </p>
+            <p><strong>Thời gian: </strong> ${formattedGioBatDau} → ${formattedGioKetThuc}</p>
+        
+            <input type="hidden" name="selectedIds[]" value="${banId}">
+            <input type="hidden" name="ten_ban" value="${tenBan}">
+            <input type="hidden" name="thoi_gian_den" value="${thoiGianDen}">
+            <input type="hidden" name="gio_du_kien" value="${gioDuKien}">
+            <input type="hidden" name="ngay" value="${formattedDate}">
+        </li>
+    `;
                     }
 
 
@@ -404,10 +400,10 @@
                 $("#exampleModal").modal("hide");
             });
 
-            // $('#confirmButton').on('click', function() {
-            //     console.log('Button clicked!');
-            //     $('#bookingForm').submit();
-            // });
+            $('#confirmButton').on('click', function() {
+                console.log('Button clicked!');
+                $('#bookingForm').submit();
+            });
 
         });
     </script>
@@ -416,65 +412,20 @@
         $('#confirmButton').on('click', function(event) {
             event.preventDefault();
 
-            // Ngăn chặn click liên tục bằng cách vô hiệu hóa nút
-            let $button = $(this);
-            if ($button.prop('disabled')) return; // Nếu đã disabled thì bỏ qua
-
-            $button.prop('disabled', true); // Vô hiệu hóa nút khi bắt đầu xử lý
-
-            // Lấy dữ liệu từ form
-            let customerName = $('input[name="customer_name"]').val().trim();
-            let customerPhone = $('input[name="customer_phone"]').val().trim();
-            let customerEmail = $('input[name="customer_email"]').val().trim();
-            let numPeople = $('input[name="num_people"]').val().trim();
-            let thoiGianDen = $('input[name="thoi_gian_den"]').val().trim();
-            let gioDuKien = $('input[name="gio_du_kien"]').val().trim();
-            let selectedIds = $('input[name="selectedIds[]"]').map(function() {
-                return $(this).val();
-            }).get();
-
-            // Kiểm tra hợp lệ
-            let errors = [];
-            if (customerName === '') {
-                errors.push("Họ tên không được để trống.");
-            }
-            if (customerPhone === '' || !/^\d{10}$/.test(customerPhone)) {
-                errors.push("Số điện thoại không hợp lệ. (10 chữ số)");
-            }
-            if (customerEmail === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
-                errors.push("Email không hợp lệ.");
-            }
-            if (numPeople === '' || isNaN(numPeople) || numPeople <= 0) {
-                errors.push("Số người phải lớn hơn 0.");
-            }
-            if (thoiGianDen === '') {
-                errors.push("Vui lòng chọn thời gian đến.");
-            }
-            if (gioDuKien === '') {
-                errors.push("Vui lòng chọn giờ dự kiến.");
-            }
-            if (selectedIds.length === 0) {
-                errors.push("Vui lòng chọn ít nhất một bàn.");
-            }
-
-            // Nếu có lỗi, hiển thị thông báo và kích hoạt lại nút
-            if (errors.length > 0) {
-                alert("Lỗi:\n" + errors.join("\n"));
-                $button.prop('disabled', false); // Kích hoạt lại nút nếu có lỗi
-                return;
-            }
-
-            // Dữ liệu hợp lệ, tiếp tục gửi AJAX
             let formData = {
-                customer_name: customerName,
-                customer_phone: customerPhone,
-                customer_email: customerEmail,
-                num_people: numPeople,
-                thoi_gian_den: thoiGianDen,
-                gio_du_kien: gioDuKien,
-                selectedIds: selectedIds,
+                customer_name: $('input[name="customer_name"]').val(),
+                customer_phone: $('input[name="customer_phone"]').val(),
+                customer_email: $('input[name="customer_email"]').val(),
+                selectedIds: $('input[name="selectedIds[]"]').map(function() {
+                    return $(this).val();
+                }).get(),
+                thoi_gian_den: $('input[name="thoi_gian_den"]').val(),
+                gio_du_kien: $('input[name="gio_du_kien"]').val(),
+                num_people: $('input[name="num_people"]').val(),
                 _token: '{{ csrf_token() }}'
             };
+
+            console.log('FormData:', formData); // Kiểm tra lại dữ liệu trước khi gửi
 
             $.ajax({
                 url: '{{ route('dat-ban.store') }}',
@@ -492,9 +443,6 @@
                     let errors = xhr.responseJSON.errors;
                     let errorMsg = Object.values(errors).flat().join("\n");
                     alert('Lỗi:\n' + errorMsg);
-                },
-                complete: function() {
-                    $button.prop('disabled', false); // Hoàn thành -> Kích hoạt lại nút
                 }
             });
         });
@@ -502,7 +450,9 @@
 
 
 
+    <style>
 
+    </style>
     <script>
         $(document).ready(function() {
             $(document).ready(function() {
