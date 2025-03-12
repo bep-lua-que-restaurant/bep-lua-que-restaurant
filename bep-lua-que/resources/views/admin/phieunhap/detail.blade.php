@@ -54,7 +54,7 @@
                                             </form>
                                         @elseif ($phieuNhapKho->trang_thai == 'da_duyet')
                                             <span class="badge bg-success">Đã duyệt</span>
-                                        @elseif ($phieuNhapKho->trang_thai == 'da_huy')
+                                        @elseif ($phieuNhapKho->trang_thai == 'huy')
                                             <span class="badge bg-danger">Đã hủy</span>
                                         @else
                                             <span class="badge bg-secondary">Không xác định</span>

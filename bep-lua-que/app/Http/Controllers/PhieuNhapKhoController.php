@@ -208,6 +208,9 @@ class PhieuNhapKhoController extends Controller
     if ($phieuNhap->trang_thai === 'da_duyet') {
         return redirect()->back()->with(['error' => 'Không thể thay đổi trạng thái vì phiếu đã duyệt.']);
     }
+    if ($phieuNhap->trang_thai === 'huy') {
+        return redirect()->back()->with(['error' => 'Không thể thay đổi trạng thái vì phiếu đã hủy.']);
+    }
 
     // Lấy chi tiết nguyên liệu trong phiếu nhập kho
     $chiTiet = ChiTietPhieuNhapKho::where('phieu_nhap_kho_id', $phieuNhapId)
