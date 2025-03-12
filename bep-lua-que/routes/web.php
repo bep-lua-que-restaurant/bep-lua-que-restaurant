@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\BangTinhLuongController;
 use App\Http\Controllers\CaLamNhanVienController;
 use App\Http\Controllers\DanhMucMonAnController;
@@ -83,13 +84,29 @@ Route::get('/ban-an-export', [BanAnController::class, 'export'])->name('ban-an.e
 Route::post('/ban-an/import', [BanAnController::class, 'importBanAn'])->name('ban-an.import');
 
 // Đặt bàn
+Route::get('/datban/ngay', [DatBanController::class, 'indexNgay']);
+Route::get('/api/datban', [DatBanController::class, 'getDatBanByDate']);
+
+
 // Route::post('/dat-ban', [DatBanController::class, 'datBan']);
 Route::get('/danh-sach-dat-ban', [DatBanController::class, 'DanhSach'])->name('datban.danhsach');
 
 
 Route::resource('dat-ban', DatBanController::class);
-Route::get('/dat-ban/{dat_ban}/edit', [DatBanController::class, 'edit'])->name('dat-ban.edit');
-Route::get('/dat-ban/{id}', [DatBanController::class, 'show'])->name('dat-ban.show');
+// Route::get('/dat-ban/{dat_ban}/edit', [DatBanController::class, 'edit'])->name('dat-ban.edit');
+Route::get('/dat-ban/edit/{maDatBan}', [DatBanController::class, 'edit'])->name('dat-ban.edit');
+
+// Route::get('/dat-ban/{id}', [DatBanController::class, 'show'])->name('dat-ban.show');
+Route::delete('/dat-ban/{ma_dat_ban}', [DatBanController::class, 'destroy'])->name('dat-ban.destroy');
+Route::post('/dat-ban/store', [DatBanController::class, 'store'])->name('dat-ban.store');
+Route::put('/dat-ban/{maDatBan}', [DatBanController::class, 'update'])->where('maDatBan', '[A-Za-z0-9]+')->name('dat-ban.update');
+
+
+
+
+
+
+
 // Route để tìm kiếm khách hàng
 Route::get('/dat-ban/search-customer', [DatBanController::class, 'searchCustomer'])->name('admin.datban.search');
 Route::get('admin/khachhang/search', [DatBanController::class, 'searchCustomer'])->name('admin.khachhang.search');
@@ -251,7 +268,7 @@ Route::get('thu-ngan-get-bill-ban/{id}', [ThuNganController::class, 'getBillBan'
 Route::post('thu-ngan-ghep-ban', [ThuNganController::class, 'ghepBan'])
     ->name('thungan.ghepBan');
 Route::post('/hoa-don/update-quantity', [ThuNganController::class, 'updateQuantity'])->name('thungan.updateQuantity');
-Route::post('/hoa-don/delete',[ThuNganController::class, 'deleteMonAn'])->name('thungan.deleteMonAn');
+Route::post('/hoa-don/delete', [ThuNganController::class, 'deleteMonAn'])->name('thungan.deleteMonAn');
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
 Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
@@ -269,7 +286,7 @@ Route::patch(
 );
 //Kiểm cho chấm công
 Route::get('/cham-cong/check/{nhan_vien_id}/{ca}/{ngay}', [ChamCongController::class, 'checkChamCong']);
-Route::get('/lich-su-cham-cong', [ChamCongController::class, 'getLichSuChamCong']);//thay đổi tuần
+Route::get('/lich-su-cham-cong', [ChamCongController::class, 'getLichSuChamCong']); //thay đổi tuần
 Route::get('/chamcong/change-week', [ChamCongController::class, 'changeWeek'])->name('chamcong.changeWeek');
 //xóa mềm chấm cống
 Route::post('/cham-cong/restore', [ChamCongController::class, 'restore'])->name('cham-cong.restore');
@@ -321,5 +338,3 @@ Route::get('/test-log', function () {
     Log::info('Test ghi log Laravel');
     return 'Đã ghi log!';
 });
-
-
