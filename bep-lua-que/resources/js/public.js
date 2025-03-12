@@ -9,20 +9,34 @@ window.Echo.channel("banan-channel").listen("BanAnUpdated", (data) => {
         // Xử lý class trạng thái bàn
         let badge = updatedBan.find(".badge");
         badge.removeClass(
-            "badge-success badge-danger badge-warning badge-primary"
+            "badge-success badge-danger badge-warning badge-primary badge-secondary"
         );
 
         if (data.trang_thai === "trong") {
             badge.addClass("badge-success").text("Có sẵn");
+            updatedBan.find(".new-order-icon").remove(); // Xóa icon chuông nếu có
         } else if (data.trang_thai === "co_khach") {
             badge.addClass("badge-warning").text("Có khách");
+            updatedBan.find(".new-order-icon").remove(); // Xóa icon chuông nếu có
         } else if (data.trang_thai === "da_dat_truoc") {
-            badge.addClass("badge-primary").text("Đã đặt trước");
+            badge.addClass("badge-success").text("Có sẵn");
+
+            // Kiểm tra xem đã có icon chuông chưa, nếu chưa thì thêm vào
+            if (updatedBan.find(".new-order-icon").length === 0) {
+                updatedBan.append(
+                    `<span class="new-order-icon position-absolute top-0 end-0 p-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                    title="Có đơn đặt trước cho bàn này"
+                     data-id="{{ $banAn->id }}" onclick="showOrders(this)">
+                        <i class="fas fa-bell text-danger"></i>
+                    </span>`
+                );
+            }
         } else {
-            badge.addClass("badge-secondary").text("Không xác định"); // Trường hợp lỗi
+            badge.addClass("badge-secondary").text("Không xác định");
+            updatedBan.find(".new-order-icon").remove(); // Xóa icon chuông nếu có
         }
     } else {
-        // Nếu bàn ăn chưa có trên UI, gọi AJAX để tải lại danh sách
+        // Nếu bàn ăn chưa có trên UI, chỉ gọi fetchUpdatedList() một lần
         fetchUpdatedList();
     }
 
@@ -31,9 +45,6 @@ window.Echo.channel("banan-channel").listen("BanAnUpdated", (data) => {
         updatedBan.fadeOut(100, function () {
             $(this).remove();
         });
-    } else {
-        // Nếu bàn ăn chưa có trên UI, gọi AJAX để tải lại danh sách
-        fetchUpdatedList();
     }
 });
 
@@ -106,7 +117,7 @@ window.Echo.channel("hoa-don-channel")
         if (data.type === "hoa_don_added") {
             let hoaDonId = data.hoa_don.id;
             loadChiTietHoaDon(hoaDonId);
-            loadHoaDonThanhToan(hoaDonId)
+            loadHoaDonThanhToan(hoaDonId);
             // console.log("Hóa đơn mới được thêm:", data.hoa_don);
         }
     })
@@ -116,7 +127,7 @@ window.Echo.channel("hoa-don-channel")
             let hoaDonId = $("#ten-ban").data("hoaDonId");
             if (hoaDonId && hoaDonId == data.hoa_don.id) {
                 loadChiTietHoaDon(hoaDonId);
-                loadHoaDonThanhToan(hoaDonId)
+                loadHoaDonThanhToan(hoaDonId);
             }
         }
     });
@@ -218,8 +229,8 @@ function loadChiTietHoaDon(hoaDonId) {
             $(".so-nguoi").text(`👥 ${soNguoi}`);
             $("#totalAmount").val(tongTien.toLocaleString() + " VND"); // Cập nhật tổng tiền trong offcanvas
 
-            if (response.ten_ban) {
-                $("#tableInfo").text(`Bàn ${response.ten_ban}`);
+            if (response.da_ghep == true) {
+                $("#ten-ban").text(response.ten_ban_an.join(" + "));
             }
 
             // Thêm sự kiện cho nút tăng giảm số lượng
@@ -308,10 +319,6 @@ function loadHoaDonThanhToan(hoaDonId) {
                 offcanvasBody.html(emptyRow);
             }
 
-            if (response.da_ghep) {
-                $("#ten-ban").text(response.ten_ban_an + " (Đã ghép)");
-            }
-
             if (response.ma_hoa_don) {
                 $("#ma_hoa_don").text(response.ma_hoa_don);
             }
@@ -342,7 +349,7 @@ function updateSoLuong(monAnId, thayDoi) {
         },
         success: function (response) {
             loadChiTietHoaDon(response.hoa_don_id); // Load lại chi tiết hóa đơn sau khi cập nhật
-            loadHoaDonThanhToan(response.hoa_don_id)
+            loadHoaDonThanhToan(response.hoa_don_id);
         },
         error: function (xhr) {
             console.error("❌ Lỗi khi cập nhật số lượng:", xhr.responseText);
@@ -384,3 +391,26 @@ function deleteMonAn(monAnId) {
         },
     });
 }
+
+window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (e) => {
+    // Tìm phần tử <span> trong hàng <tr> chứa món ăn
+    let monElement = document.querySelector(`#mon-${e.monAn.id} span`);
+
+    if (monElement) {
+        // Xóa màu cũ
+        monElement.classList.remove(
+            "text-danger",
+            "text-warning",
+            "text-success"
+        );
+
+        // Thêm màu mới theo trạng thái
+        if (e.monAn.trang_thai === "cho_che_bien") {
+            monElement.classList.add("text-danger");
+        } else if (e.monAn.trang_thai === "dang_nau") {
+            monElement.classList.add("text-warning");
+        } else if (e.monAn.trang_thai === "hoan_thanh") {
+            monElement.classList.add("text-success");
+        }
+    }
+});

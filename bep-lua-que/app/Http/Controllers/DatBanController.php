@@ -267,7 +267,16 @@ class DatBanController extends Controller
             ]);
 
             $danhSachBanDat[] = $datBan;
+
+            $banAn = BanAn::where('id', $banAnId)->first();
+            $banAn->update(['trang_thai' => 'da_dat_truoc']);
+
+            // Phát sự kiện sau khi cập nhật
+            event(new BanAnUpdated($banAn));
         }
+      
+        // Phát sự kiện ngay sau khi tạo bản ghi
+        event(new DatBanCreated(datBan: $datBan));
 
         // Phát sự kiện sau khi đặt bàn (nếu cần xử lý tiếp)
         event(new DatBanCreated($datBan));

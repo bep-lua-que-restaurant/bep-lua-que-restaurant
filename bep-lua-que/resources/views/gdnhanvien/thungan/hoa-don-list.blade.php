@@ -1,3 +1,15 @@
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<style>
+    .select2-results__option {
+        background-color: #f0f0f0 !important;
+        color: black !important;
+    }
+
+    .select2-results__option--highlighted {
+        background-color: #d1e7fd !important;
+        color: black !important;
+    }
+</style>
 <table class="table table-bordered table-sm">
     <thead class="table-light">
         <tr>
@@ -42,15 +54,18 @@
     <div class="text-end small">
         <h6 class="mb-2 fw-bold">Trạng thái món</h6>
         <div class="d-flex align-items-center mb-1">
-            <span class="rounded-circle bg-danger d-inline-block" style="width: 10px; height: 10px; margin-right: 6px;"></span>
+            <span class="rounded-circle bg-danger d-inline-block"
+                style="width: 10px; height: 10px; margin-right: 6px;"></span>
             <span class="text-muted">Chờ chế biến</span>
         </div>
         <div class="d-flex align-items-center mb-1">
-            <span class="rounded-circle bg-warning d-inline-block" style="width: 10px; height: 10px; margin-right: 6px;"></span>
+            <span class="rounded-circle bg-warning d-inline-block"
+                style="width: 10px; height: 10px; margin-right: 6px;"></span>
             <span class="text-muted">Đang nấu</span>
         </div>
         <div class="d-flex align-items-center">
-            <span class="rounded-circle bg-success d-inline-block" style="width: 10px; height: 10px; margin-right: 6px;"></span>
+            <span class="rounded-circle bg-success d-inline-block"
+                style="width: 10px; height: 10px; margin-right: 6px;"></span>
             <span class="text-muted">Hoàn thành</span>
         </div>
     </div>
@@ -207,9 +222,8 @@
             </div>
             <div class="modal-body">
                 <label class="form-label">Ghép tới:</label>
-                <select class="form-select" id="chonBanGhep">
+                <select id="chonBanGhep" class="form-control select2" multiple="multiple">
                     <option value="">-- Chọn bàn --</option>
-                    <!-- Danh sách bàn sẽ được thêm vào đây bằng JS -->
                 </select>
             </div>
 
@@ -315,7 +329,8 @@
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+<!-- Select2 JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script>
     function calculateChange() {
         let totalAmount = parseInt(document.getElementById("totalAmount").value.replace(/\D/g, "")) || 0;
@@ -399,7 +414,8 @@
         var danhSachSanPham = [];
         $("#hoa-don-thanh-toan-body tr").each(function() {
             var sanPham = {
-                ten_san_pham: $(this).find("td:nth-child(2)").text().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim(),
+                ten_san_pham: $(this).find("td:nth-child(2)").text().normalize("NFD").replace(
+                    /[\u0300-\u036f]/g, "").trim(),
                 so_luong: parseInt($(this).find("td:nth-child(3)").text().trim()) || 0,
                 don_gia: parseFloat($(this).find("td:nth-child(4)").text().replace(/\./g, '')
                     .trim()) || 0,
@@ -547,30 +563,51 @@
         });
     });
 
-    // Tách/Ghép bàn
     $(document).ready(function() {
+        // Khởi tạo Select2 với multiple
+        $('#chonBanGhep').select2({
+            width: '100%',
+            placeholder: "Chọn bàn cần ghép",
+            allowClear: true,
+            templateResult: formatOption, // Màu trong danh sách sổ xuống
+            templateSelection: formatOption // Màu khi chọn bàn
+        });
+
+        function formatOption(option) {
+            if (!option.id) return option.text; // Nếu là option trống thì giữ nguyên
+
+            let color = $(option.element).data('color'); // Lấy màu từ data
+            return $('<span style="color:' + color + '; font-weight: bold;">' + option.text + '</span>');
+        }
+
         // Khi modal mở, load danh sách bàn
+        let luuIdBan = null;
+
         $('#modalGhepBan').on('shown.bs.modal', function() {
             var idBanHienTai = $('#ten-ban').data('currentBan');
-            $('#ten-ban').attr('data-currentBan', idBanHienTai);
-            var apiUrlShowBanGhep = "{{ route('thungan.getBanDeGhep') }}";
+            luuIdBan = idBanHienTai;
             $.ajax({
-                url: apiUrlShowBanGhep, // File PHP lấy danh sách bàn từ database
+                url: "{{ route('thungan.getBanDeGhep') }}",
                 type: 'GET',
                 dataType: 'json',
                 success: function(data) {
                     let select = $('#chonBanGhep');
-                    select.empty(); // Xóa danh sách cũ
+                    select.empty();
                     select.append('<option value="">-- Chọn bàn --</option>');
 
-                    // Lọc danh sách bàn, bỏ bàn hiện tại
                     data.forEach(function(ban) {
-                        if (ban.id != idBanHienTai) { // Bỏ bàn đang chọn
+                        if (ban.id != idBanHienTai) {
+                            let trangThai = ban.trang_thai === "co_khach" ?
+                                " (Đang sử dụng)" : " (Trống)";
+                            let statusClass = ban.trang_thai === "co_khach" ?
+                                "co-khach" :
+                                "trong"; // Sử dụng trạng thái đúng trong database
                             select.append(
-                                `<option value="${ban.id}">${ban.ten_ban} - ${ban.trang_thai}</option>`
+                                `<option value="${ban.id}" class="${statusClass}">${ban.ten_ban} ${trangThai}</option>`
                             );
                         }
                     });
+                    select.trigger('change');
                 },
                 error: function() {
                     alert('Lỗi khi tải danh sách bàn!');
@@ -578,69 +615,77 @@
             });
         });
 
-        // Khi chọn bàn, gọi API để lấy thông tin bill
+        // Khi chọn bàn, lấy thông tin từng bàn
         $('#chonBanGhep').on('change', function() {
-            let idBan = $(this).val();
-            $('#chonBanGhep').data('selectedBan', idBan);
-            // console.log("Bàn muốn ghép:", $('#chonBanGhep').data('selectedBan'));
-            if (idBan) {
-                let apiUrlGetBill = "{{ route('thungan.getBillBan', ':id') }}".replace(':id', idBan);
-                $.ajax({
-                    url: apiUrlGetBill,
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.bill) {
-                            $('#tenBan').text(response.bill.ten_ban);
-                            $('#maHoaDon').text(response.bill.ma_hoa_don);
-                            $('#soLuongMon').text(response.bill.tong_so_luong_mon_an ||
-                                '0'); // Hiển thị tổng số lượng món ăn
-                            $('#tongTien').text(response.bill.tong_tien.toLocaleString() +
-                                ' VNĐ');
+            let idBanList = $(this).val() || []; // Lấy danh sách ID bàn được chọn
+            let $tbody = $('#thongTinBan tbody');
 
-                            $('#thongTinBan').show(); // Hiển thị thông tin bàn
-                        } else {
+            $tbody.html(''); // Xóa dữ liệu cũ trước khi thêm mới
+            $('#thongTinBan').hide(); // Ẩn trước khi load dữ liệu mới
+
+            if (idBanList.length > 0) {
+                idBanList.forEach(function(idBan) {
+                    let apiUrlGetBill = "{{ route('thungan.getBillBan', ':id') }}".replace(
+                        ':id', idBan);
+
+                    $.ajax({
+                        url: apiUrlGetBill,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.bill) {
+                                let tongTien = parseFloat(response.bill
+                                    .tong_tien) || 0; // Chuyển về số
+
+                                // Tạo hàng mới
+                                let newRow = `
+                            <tr>
+                                <td>Khách lẻ</td>
+                                <td>${response.bill.ten_ban}</td>
+                                <td>${response.bill.ma_hoa_don}</td>
+                                <td>${response.bill.tong_so_luong_mon_an || '0'}</td>
+                                <td>${tongTien.toLocaleString()} VNĐ</td>
+                            </tr>
+                        `;
+                                // Thêm hàng mới vào tbody
+                                $tbody.append(newRow);
+
+                                // Hiển thị bảng nếu có dữ liệu
+                                $('#thongTinBan').show();
+                            }
+                        },
+                        error: function() {
                             $('#thongTinBan').hide();
                         }
-                    },
-                    error: function() {
-                        alert('Lỗi khi tải thông tin bill!');
-                    }
+                    });
                 });
-            } else {
-                $('#thongTinBan').hide();
             }
         });
-    });
 
-    // xác nhận ghép bàn
-    $(document).ready(function() {
+        // Xác nhận ghép bàn
         $('#btnXacNhanGhepBan').click(function() {
-            let urlGhep = "{{ route('thungan.ghepBan') }}"
-            let idBanHienTai = $('#ten-ban').attr('data-currentBan');
-            let idBanMoi = $('#chonBanGhep').val(); // ID bàn mới được chọn
-            if (!idBanMoi) {
-                alert('Vui lòng chọn bàn cần ghép!');
+            let idBanHienTai = luuIdBan;
+            let idBanList = $('#chonBanGhep').val();
+            if (idBanList.length === 0) {
+                alert('Vui lòng chọn ít nhất một bàn để ghép!');
                 return;
             }
 
             $.ajax({
-                url: urlGhep, // API xử lý ghép bàn trong Laravel
+                url: "{{ route('thungan.ghepBan') }}",
                 type: 'POST',
                 data: {
                     id_ban_hien_tai: idBanHienTai,
-                    id_ban_moi: idBanMoi,
-                    _token: $('meta[name="csrf-token"]').attr('content') // CSRF Token
+                    danh_sach_ban: JSON.stringify(idBanList),
+                    _token: $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function(response) {
-                    $('#modalGhepBan').modal('hide'); // Đóng modal
-                    showToast("Ghép bàn thành công", "success"); // Thông báo thành công
-
-
+                    $('#modalGhepBan').modal('hide');
+                    showToast(response.message, "success");
                 },
                 error: function(xhr) {
-                    console.log("Lỗi chi tiết:", xhr.responseText);
-                    alert(xhr.responseJSON.error);
+                    console.log(xhr.responseText);
+
                 }
             });
         });
