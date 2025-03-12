@@ -70,6 +70,4 @@ class ThongKeMonAnController extends Controller
     // Trả về view với dữ liệu đã lọc
     return view('admin.thongke.thongkemonan', compact('labels', 'datasets', 'filterType', 'fromDate', 'toDate'));
 }
-
-        
 }

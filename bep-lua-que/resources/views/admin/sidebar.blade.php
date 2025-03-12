@@ -1,6 +1,19 @@
 <div class="deznav">
     <div class="deznav-scroll">
         <ul class="metismenu" id="menu">
+            {{-- Thống kê --}}
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                    <i class="fas fa-chart-bar"></i>
+                    <span class="nav-text">Thống kê</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="{{ route('thongke.thongkedoanhso') }}">Thống kê doanh số</a></li>
+                    <li><a href="{{ route('thongke.thongkesoluongkhach') }}">Thống kê số lượng khách hàng</a></li>
+                    <li><a href="{{ route('thongke.thongkemonan') }}">Thống kê món ăn</a></li>
+                    <li><a href="#">Thống kê chưa nghĩ ra</a></li>
+                </ul>
+            </li>
             {{-- Hàng hóa --}}
             <li>
                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
@@ -95,7 +108,7 @@
                 <ul aria-expanded="false">
 
                     <li><a href="{{ route('cham-cong.index') }}">Chấm công</a></li>
-        
+
 
                     <li><a href="{{ route('luong.index') }}">Bảng tính lương</a></li>
                     <li><a href="#">Thiết lập nhân viên</a></li>
@@ -124,20 +137,6 @@
                     <i class="fa fa-cash-register"></i>
                     <span class="nav-text">Thu ngân</span>
                 </a>
-            </li>
-            {{-- Thống kê --}}
-            <li>
-                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                    <i class="fas fa-chart-bar"></i>
-                    <span class="nav-text">Thống kê</span>
-                </a>
-                <ul aria-expanded="false">
-
-                    <li><a href="#">Thống kê</a></li>
-                    <li><a href="">Thống kê</a></li>
-                    <li><a href="{{ route('thongke.thongkemonan') }}">Thống kê món ăn</a></li>
-                    <li><a href="#">Thống kê</a></li>
-                </ul>
             </li>
         </ul>
     </div>
