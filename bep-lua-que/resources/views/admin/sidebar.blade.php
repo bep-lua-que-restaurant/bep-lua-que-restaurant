@@ -103,7 +103,7 @@
                     <li><a href="{{ route('ca-lam.index') }}">Ca làm</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="{{ route('ca-lam-nhan-vien.index') }}">Quản lí ca </a></li>
+                    <li><a href="{{ route('ca-lam-nhan-vien.index') }}">Quản lí ca làm nhân viên </a></li>
                 </ul>
                 <ul aria-expanded="false">
 

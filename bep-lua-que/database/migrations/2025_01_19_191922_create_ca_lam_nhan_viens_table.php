@@ -16,10 +16,11 @@ return new class extends Migration
             $table->unsignedBigInteger('ca_lam_id');
             $table->unsignedBigInteger('nhan_vien_id');
             $table->date('ngay_lam');
-            $table->time('gio_bat_dau');
+            // $table->time('gio_bat_dau');
+            $table->time('gio_bat_dau')->nullable();
             $table->time('gio_ket_thuc');
             $table->string('mo_ta')->nullable();
-            $table->enum('trang_thai',['hoat_dong','ngung_lam'])->default('hoat_dong');
+            $table->enum('trang_thai', ['hoat_dong', 'ngung_lam'])->default('hoat_dong');
             $table->softDeletes();
             $table->timestamps();
         });
