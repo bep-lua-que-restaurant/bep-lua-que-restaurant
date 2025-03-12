@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\NhanVienExport;
+use App\Imports\NhanVienImport;
 use App\Models\ChucVu;
 use App\Models\NhanVien;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\StoreNhanVienRequest;
 use App\Http\Requests\UpdateNhanVienRequest;
+use Maatwebsite\Excel\Facades\Excel;
 
 class NhanVienController extends Controller
 {
@@ -158,5 +161,20 @@ class NhanVienController extends Controller
         $nhanVien->save();
 
         return redirect()->route('nhan-vien.index')->with('success', 'Nhân viên đã được khôi phục.');
+    }
+    public function exportNhanVien()
+    {
+        return Excel::download(new NhanVienExport, 'NhanVien.xlsx');
+    }
+
+    public function importNhanVien(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
+
+        Excel::import(new NhanVienImport, $request->file('file'));
+
+        return back()->with('success', 'Nhập dữ liệu thành công!');
     }
 }

@@ -76,19 +76,13 @@
                                     data-bs-target="#updateShiftModal"
                                     onclick="setUpdateShift({{ $caLamNhanVien->id }}, '{{ $caLamNhanVien->nhan_vien_id }}', '{{ $caLamNhanVien->ca_lam_id }}', '{{ $caLamNhanVien->ngay_lam }}')">✏️
                                     Cập nhật</button>
-                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalDoiCa"
-                                    onclick="setDoiCa({{ $caLamNhanVien->id }})">🔄
-                                    Đổi Ca</button>
+                               
                                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalXoaCa"
                                     onclick="setXoaCa({{ $caLamNhanVien->id }})">🗑️ Xóa
                                 </button>
-                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalXinNghi"
-                                    onclick="setXinNghi({{ $caLamNhanVien->id }})">🚫
-                                    Xin Nghỉ</button>
+                              
                                 @if (strcasecmp(trim($caLamNhanVien->trang_thai), 'Chờ duyệt') == 0)
-                                    {{-- <button class="btn btn-danger btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#modalXinNghi"
-                                            onclick="setXinNghi({{ $caLamNhanVien->id }})">🚫 Xin Nghỉ</button> --}}
+                                    
                                 @endif
                             </td>
                         </tr>
@@ -192,33 +186,7 @@
         </div>
     </div>
 
-    <!-- Modal Đổi Ca Làm -->
-    <div class="modal fade" id="modalDoiCa" tabindex="-1" aria-labelledby="modalDoiCaLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalDoiCaLabel">Đổi Ca Làm</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form method="POST" action="{{ route('ca-lam-nhan-vien.doi-ca', ':id') }}" id="doiCaForm">
-                        @csrf
-                        <input type="hidden" id="doiCaId" name="id">
-                        <div class="mb-3">
-                            <label for="newShift" class="form-label">Ca làm mới</label>
-                            <select class="form-select" id="newShift" name="ca_lam_moi_id" required>
-                                @foreach ($caLams as $caLam)
-                                    <option value="{{ $caLam->id }}">{{ $caLam->ten_ca }} ({{ $caLam->gio_bat_dau }}
-                                        - {{ $caLam->gio_ket_thuc }})</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">🔄 Xác nhận đổi ca</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <script>
         function setUpdateShift(id, nhanVienId, caLamId, ngayLam) {
@@ -281,37 +249,35 @@
             form.action = form.action.replace(':id', id);
         }
     </script>
-    <!-- Modal Xin Nghỉ Ca Làm -->
-    <div class="modal fade" id="modalXinNghi" tabindex="-1" aria-labelledby="modalXinNghiLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalXinNghiLabel">Xin Nghỉ Ca Làm</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form method="POST" action="{{ route('ca-lam-nhan-vien.xin-nghi', ':id') }}" id="xinNghiForm">
-                        @csrf
-                        <input type="hidden" id="xinNghiId" name="id">
-                        <div class="mb-3">
-                            <label for="reason" class="form-label">Lý do nghỉ</label>
-                            <textarea class="form-control" id="reason" name="ly_do" required></textarea>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">❌ Hủy</button>
-                            <button type="submit" class="btn btn-danger">🚫 Xác nhận nghỉ</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <script>
-        function setXinNghi(id) {
-            document.getElementById('xinNghiId').value = id;
-            let form = document.getElementById('xinNghiForm');
-            form.action = form.action.replace(':id', id);
-        }
-    </script>
+{{-- Kiểm tra trùng ca làm bằng AJAX --}}
+<script>
+    document.getElementById("registerShiftForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // Ngăn chặn submit mặc định
+
+        let nhanVienId = document.getElementById("employee").value;
+        let caLamId = document.getElementById("shift").value;
+        let ngayLam = document.getElementById("workDate").value;
+
+        fetch("{{ route('ca-lam-nhan-vien.index') }}?nhan_vien_id=" + nhanVienId + "&ca_lam_id=" + caLamId + "&ngay_lam=" + ngayLam)
+            .then(response => response.json())
+            .then(data => {
+                if (data.trung) {
+                    alert("❌ Nhân viên đã đăng ký ca làm này rồi! Không thể đăng ký lại.");
+                } else {
+                    document.getElementById("registerShiftForm").submit(); // Submit form nếu không trùng
+                }
+            });
+    });
+
+    function setXoaCa(id) {
+        document.getElementById('xoaCaId').value = id;
+        let form = document.getElementById('xoaCaForm');
+        form.action = form.action.replace(':id', id);
+    }
+</script>
+
+
+
+
 @endsection

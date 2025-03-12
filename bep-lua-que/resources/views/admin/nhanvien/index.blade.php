@@ -53,11 +53,11 @@
                             <a href="{{ route('nhan-vien.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm nhân viên
                             </a>
-                            <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
+                            <a href="{{ route('nhan-vien.import') }}" class="btn btn-sm btn-secondary" data-toggle="modal"
                                 data-target=".bd-example-modal-lg">
                                 <i class="fa fa-upload"></i> Nhập file
                             </a>
-                            <a href="" class="btn btn-sm btn-success">
+                            <a href="{{ route('nhan-vien.export') }}" class="btn btn-sm btn-success">
                                 <i class="fa fa-download"></i> Xuất file
                             </a>
                         </div>
@@ -137,7 +137,8 @@
                 </div>
                 <div class="modal-body">
                     <!-- Form nhập file -->
-                    <form action="" method="POST" enctype="multipart/form-data" id="importFileForm">
+                    <form action="{{ route('nhan-vien.import') }}" method="POST" enctype="multipart/form-data"
+                        id="importFileForm">
                         @csrf
                         <div class="mb-3">
                             <label for="fileUpload" class="form-label">Chọn file</label>

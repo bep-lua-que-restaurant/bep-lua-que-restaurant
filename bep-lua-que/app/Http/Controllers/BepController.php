@@ -37,18 +37,37 @@ class BepController extends Controller
     
 
 
+    // public function themMonAnVaoBep(Request $request)
+    // {
+    //     $monAn = MonAn::create([
+    //         'ten' => $request->ten,
+    //         'so_luong' => $request->so_luong,
+    //         'hoa_don_id' => $request->hoa_don_id
+    //     ]);
+    
+    //     broadcast(new MonMoiDuocThem($monAn));
+    
+    //     return response()->json(['success' => true, 'monAn' => $monAn]);
+    // }
+
     public function themMonAnVaoBep(Request $request)
-    {
-        $monAn = MonAn::create([
-            'ten' => $request->ten,
-            'so_luong' => $request->so_luong,
+{
+    $monAns = [];
+
+    foreach ($request->mon_an as $mon) {
+        $monAns[] = MonAn::create([
+            'ten' => $mon['ten'],
+            'so_luong' => $mon['so_luong'],
             'hoa_don_id' => $request->hoa_don_id
         ]);
-    
-        broadcast(new MonMoiDuocThem($monAn));
-    
-        return response()->json(['success' => true, 'monAn' => $monAn]);
     }
+
+    // Gửi tất cả món một lần
+    broadcast(new MonMoiDuocThem($monAns));
+
+    return response()->json(['success' => true, 'monAns' => $monAns]);
+}
+
 
     public function updateTrangThai(Request $request, $id)
     {

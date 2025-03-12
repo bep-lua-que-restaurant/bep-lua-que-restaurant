@@ -48,24 +48,13 @@
                 </div>
             </div>
         @endforeach
-
-
-
     </div>
 </div>
-
-
 <!-- Nút điều hướng TÙY CHỈNH -->
 <div class="text-centerr mt-3">
     <button id="prevBtn" class="btn btn-primary btn-sm px-4">⬅ </button>
     <button id="nextBtn" class="btn btn-primary btn-sm px-4"> ➡</button>
 </div>
-
-
-
-<!-- Thêm jQuery -->
-
-
 <script>
     function setActive(element) {
         // Xóa class 'active' khỏi tất cả các bàn
@@ -74,14 +63,11 @@
         // Thêm class 'active' vào bàn được chọn
         element.classList.add('active');
     }
-
-
     var swiper = new Swiper(".mySwiper", {
         slidesPerView: 1, // Mỗi lần hiển thị 1 nhóm 12 sản phẩm
         spaceBetween: 20, // Khoảng cách giữa các nhóm
         allowTouchMove: false, // Không cho trượt bằng tay, chỉ dùng nút
     });
-
     // Xử lý sự kiện nút bấm
     document.getElementById("nextBtn").addEventListener("click", function() {
         swiper.slideNext();
@@ -96,8 +82,6 @@
         $('.ban').on('click', function() {
             var banId = $(this).data('id'); // Lấy ID bàn
             var tenBan = $(this).find('.card-title').text(); // Lấy tên bàn
-
-            // console.log("🔥 Bàn được chọn:", banId);
             // Lưu ID bàn vào dataset để sử dụng khi thêm món
             $('#ten-ban').data('currentBan', banId);
             $('#ten-ban').text(tenBan);
@@ -112,17 +96,25 @@
                 success: function(response) {
                     if (response.hoa_don_id) {
                         // console.log("🔥 Hóa đơn ID:", response.hoa_don_id);
-
                         $('#ten-ban').data('hoaDonId', response.hoa_don_id);
-
                         // Gọi API để lấy chi tiết hóa đơn
                         loadChiTietHoaDon(response.hoa_don_id);
+                        loadHoaDonThanhToan(response.hoa_don_id)
                     } else {
                         // console.log("🔥 Bàn này chưa có hóa đơn.");
                         $('#ten-ban').data('hoaDonId', null);
-                        $('#hoa-don-body').html(
-                            '<tr><td colspan="5" class="text-center">Chưa có món nào trong đơn</td></tr>'
-                        );
+                        $('#hoa-don-body').html(`
+                            <tr>
+        <td colspan="5" class="text-center">
+            <div class="empty-invoice w-100 p-5 border border-2 rounded bg-light">
+                <i class="bi bi-receipt text-muted" style="font-size: 50px;"></i>
+                <div class="mt-2">Chưa có món nào trong đơn</div>
+                <div>🍔 Mời bạn chọn món!</div>
+            </div>
+        </td>
+    </tr>
+`);
+
                         $('#tong-tien').text("0 VNĐ");
                         $('.so-nguoi').text("👥 0");
                     }
@@ -153,6 +145,8 @@
             });
         }
 
+
+
         function loadChiTietHoaDon(hoaDonId) {
             $.ajax({
                 url: "/hoa-don/get-details",
@@ -182,18 +176,15 @@
             ${item.tenMon}
         </span>
     </td>
-    <td class="text-center">
-        <!-- Nút giảm số lượng -->
-        <button class="btn btn-sm btn-outline-danger giam-soluong" data-id="${item.id}">
-            <i class="bi bi-dash"></i> <!-- Sử dụng biểu tượng cho nút giảm -->
-        </button>
-        <!-- Hiển thị số lượng với chữ nhỏ hơn -->
-        <span class="so-luong mx-2 small">${item.so_luong}</span>
-        <!-- Nút tăng số lượng -->
-        <button class="btn btn-sm btn-outline-success tang-soluong" data-id="${item.id}">
-            <i class="bi bi-plus"></i> <!-- Sử dụng biểu tượng cho nút tăng -->
-        </button>
-    </td>
+<td class="text-center">
+    <!-- Nút giảm số lượng -->
+    <i class="bi bi-dash-circle text-danger giam-soluong" style="cursor: pointer; font-size: 20px;" data-id="${item.id}"></i>
+    <!-- Hiển thị số lượng -->
+    <span class="so-luong mx-2 small">${item.so_luong}</span>
+    <!-- Nút tăng số lượng -->
+    <i class="bi bi-plus-circle text-success tang-soluong" style="cursor: pointer; font-size: 20px;" data-id="${item.id}"></i>
+</td>
+
     <td class="text-end small">
         ${parseFloat(item.don_gia).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
     </td>
@@ -255,6 +246,82 @@
                 }
             });
         }
+
+        function loadHoaDonThanhToan(hoaDonId) {
+    $.ajax({
+        url: "/hoa-don/get-details",
+        method: "GET",
+        data: { hoa_don_id: hoaDonId },
+        success: function(response) {
+            let hoaDonThanhToan = $("#hoa-don-thanh-toan-body");
+            let offcanvasBody = $(".offcanvas-body tbody"); // Lấy phần bảng trong offcanvas
+
+            hoaDonThanhToan.empty();
+            offcanvasBody.empty();
+
+            var soNguoi = response.so_nguoi;
+            let tongTien = 0;
+            let rows = [];
+
+            if (response.chi_tiet_hoa_don.length > 0) {
+                let index = 1;
+                response.chi_tiet_hoa_don.forEach((item) => {
+                    let row = `
+                        <tr id="mon-${item.id}">
+                            <td class="small">${index}</td>
+                            <td class="small">
+                                <span class="${item.trang_thai === 'cho_che_bien' ? 'text-danger' : 
+                                             item.trang_thai === 'dang_nau' ? 'text-warning' : 
+                                             item.trang_thai === 'hoan_thanh' ? 'text-success' : ''}">
+                                    ${item.tenMon}
+                                </span>
+                            </td>
+                            <td class="text-start">
+                                <span class="so-luong mx-2 small">${item.so_luong}</span>
+                            </td>
+                            <td class="text-start small">
+                                ${parseFloat(item.don_gia).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                            </td>
+                            <td class="text-start small">
+                                ${(item.so_luong * item.don_gia).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                            </td>
+                        </tr>
+                    `;
+                    rows.push(row);
+                    tongTien += item.so_luong * item.don_gia;
+                    index++;
+                });
+
+                // Cập nhật bảng bằng cách dùng .html() thay vì .append()
+                hoaDonThanhToan.html(rows.join(''));
+                offcanvasBody.html(rows.join(''));
+            } else {
+                let emptyRow = '<tr><td colspan="5" class="text-center">Chưa có món nào</td></tr>';
+                hoaDonThanhToan.html(emptyRow);
+                offcanvasBody.html(emptyRow);
+            }
+
+            if (response.da_ghep) {
+                $("#ten-ban").text(response.ten_ban_an + " (Đã ghép)");
+            }
+
+            if (response.ma_hoa_don) {
+                $("#ma_hoa_don").text(response.ma_hoa_don);
+            }
+
+            $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
+            $('.so-nguoi').text(`👥 ${soNguoi}`);
+            $("#totalAmount").val(tongTien.toLocaleString() + " VND");
+
+            if (response.ten_ban) {
+                $("#tableInfo").text(`Bàn ${response.ten_ban}`);
+            }
+        },
+        error: function(xhr) {
+            console.error("🔥 Lỗi khi tải chi tiết hóa đơn:", xhr.responseText);
+        }
+    });
+}
 
     });
 </script>

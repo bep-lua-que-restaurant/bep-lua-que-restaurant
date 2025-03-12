@@ -10,13 +10,13 @@ class NhaCungCap extends Model
 {
     use HasFactory, SoftDeletes;
     protected $fillable = [
-
-        'ma_nha_cung_cap',
         'ten_nha_cung_cap',
         'dia_chi',
         'so_dien_thoai',
         'email',
         'ghi_chu',
+        'hinhAnh',
+        'moTa'
     ];
 
     public function phieuNhapKhos()
