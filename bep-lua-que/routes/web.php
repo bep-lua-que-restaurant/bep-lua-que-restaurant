@@ -7,7 +7,7 @@ use App\Http\Controllers\DichVuController;
 use App\Http\Controllers\BanAnController;
 use App\Http\Controllers\DatBanController;
 use App\Http\Controllers\LoaiNguyenLieuController;
-use App\Http\Controllers\PhongAnController;
+// use App\Http\Controllers\PhongAnController;
 use App\Http\Controllers\LuongController;
 use App\Http\Controllers\ThongKeMonAnController;
 use Illuminate\Support\Facades\Route;
@@ -67,8 +67,8 @@ Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::c
 Route::post('/nha_cung_cap/import', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha_cung_cap.import');
 
 // Phong an
-Route::resource('phong-an', PhongAnController::class);
-Route::post('/phong-an/{banAn}/restore', [PhongAnController::class, 'restore'])->name('phong-an.restore');
+// Route::resource('phong-an', PhongAnController::class);
+// Route::post('/phong-an/{banAn}/restore', [PhongAnController::class, 'restore'])->name('phong-an.restore');
 
 Route::resource('ban-an', BanAnController::class);
 Route::get('/ban-an/{id}', [BanAnController::class, 'show'])->name('ban-an.show');

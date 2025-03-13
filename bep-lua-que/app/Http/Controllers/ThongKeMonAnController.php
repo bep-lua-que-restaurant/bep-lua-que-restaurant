@@ -14,7 +14,7 @@ class ThongKeMonAnController extends Controller
     $filterType = $request->input('filterType', 'day');
     $fromDate = $request->input('fromDate');
     $toDate = $request->input('toDate');
-
+    $chartType = $request->input('chartType','banchay'); // 'banchay' hoặc 'banit'
     // Gán giá trị mặc định nếu không có fromDate hoặc toDate
     if (!$fromDate || !$toDate) {
         $fromDate = Carbon::now()->subDays(7)->format('Y-m-d');
@@ -50,10 +50,16 @@ class ThongKeMonAnController extends Controller
             DB::raw('SUM(chi_tiet_hoa_dons.so_luong) as tong_so_luong')
         )
         ->groupBy('mon_ans.id', 'mon_ans.ten')
-        ->orderByDesc('tong_so_luong')
+        // ->orderByDesc('tong_so_luong')
         ->limit(10);
+    // Sắp xếp dữ liệu theo loại thống kê
+    if ($chartType === 'banchay') {
+    $query->orderByDesc('tong_so_luong');
+    } elseif ($chartType === 'banit') {
+    $query->orderBy('tong_so_luong');
+    }
 
-    $queryResult = $query->get();
+    $queryResult = $query->limit(10)->get();
 
     // Trích xuất dữ liệu
     $labels = $queryResult->pluck('ten');
