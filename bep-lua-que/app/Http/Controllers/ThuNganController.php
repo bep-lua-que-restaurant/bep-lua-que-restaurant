@@ -382,7 +382,7 @@ class ThuNganController extends Controller
 
         foreach ($datBanList as $datBan) {
             $datBan->update([
-                'trang_thai' => 'xac_nhan',
+                'trang_thai' => 'da_thanh_toan',
                 'so_nguoi' => $soNguoi,
                 'khach_hang_id' => $khachHangId ?: null,
             ]);

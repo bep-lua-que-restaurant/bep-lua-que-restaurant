@@ -1,4 +1,4 @@
-@extends('admin.datban.layout')
+@extends('gdnhanvien.datban.layout')
 
 @section('content')
     <div class="container">
@@ -67,7 +67,7 @@
                                     // Tìm đặt bàn trong khoảng thời gian này
                                     const datBan = response.datBans.find(d => {
                                         if (d.ban_an_id !== ban.id)
-                                    return false;
+                                            return false;
 
                                         const thoiGianDen = new Date(d
                                             .thoi_gian_den);
@@ -86,31 +86,36 @@
                                             thoiGianHienTai < thoiGianKetThuc;
                                     });
 
+                                    // Xử lý trạng thái button và các thuộc tính dữ liệu
+                                    const statusClass = datBan ?
+                                        (datBan.trang_thai === 'xac_nhan' ?
+                                            'btn-success' :
+                                            datBan.trang_thai === 'dang_xu_ly' ?
+                                            'btn-danger' : '') : 'bg-light';
 
-                                    const statusClass = datBan ? (datBan.trang_thai ===
-                                        'xac_nhan' ? 'table-success' :
-                                        'table-warning') : '';
-                                    const content = datBan ?
-                                        `<a href="/dat-ban/${datBan.ma_dat_ban}" class="btn btn-sm btn-info text-white btn-view-details" 
-                                            data-datban-id="${datBan.id}" 
-                                            data-bs-toggle="tooltip" 
-                                            title="Xem chi tiết">
-                                            Chi tiết
-                                        </a>` :
-                                        `<div class="selectable-slot" 
-                                            data-ban-id="${ban.id}" 
-                                            data-ten-ban="${ban.ten_ban}" 
-                                            data-time-slot="${timeSlot}"
-                                            data-date="${date}">
-                                            +
-                                        </div>
-                                        `;
+                                    // Default if no reservation
 
+                                    const maDatBan = datBan ? datBan.ma_dat_ban :
+                                        ''; // Lấy mã đặt bàn nếu có
+                                    const gioDuKien = datBan ? datBan.gio_du_kien :
+                                        timeSlot; // Nếu có đặt bàn thì dùng giờ dự kiến, nếu không thì dùng giờ hiện tại
+
+                                    // Button chứa các thuộc tính dữ liệu bổ sung
+                                    const content = `<button class="btn btn-sm ${statusClass} text-dark btn-view-details selectable-slot" 
+                                    data-ma-dat-ban="${maDatBan}" 
+                                    data-ban-id="${ban.id}" 
+                                    data-ten-ban="${ban.ten_ban}" 
+                                    data-time-slot="${timeSlot}" 
+                                    data-date="${date}"
+                                    data-bs-toggle="tooltip">
+                                        +
+                                    </button>`;
 
                                     html +=
-                                        `<td class="text-center ${statusClass}">${content}</td>`;
+                                        `<td class="text-center"  data-ban-id="${ban.id}" >${content}</td>`;
                                 });
                             }
+
 
 
                             html += `</tr>`;
@@ -177,7 +182,6 @@
 
         });
     </script>
-
     <!-- Nút mở modal -->
     <button id="openModalButton" class="btn btn-primary d-none">Xem chi tiết</button>
 
@@ -244,7 +248,7 @@
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                        <button id="clearButton" class="btn btn-danger">clearButton</button>
+                        {{-- <button id="clearButton" class="btn btn-danger">clearButton</button> --}}
                         <button type="submit" id="confirmButton" class="btn btn-primary">Xác nhận đặt bàn</button>
 
                     </div>
@@ -307,7 +311,7 @@
                     });
                 }
 
-                console.log('Selected Slots:', selectedSlots);
+                // console.log('Selected Slots:', selectedSlots);
 
                 updateModalButton(); // ✅ Cập nhật nút mở modal
             });
@@ -404,10 +408,6 @@
                 $("#exampleModal").modal("hide");
             });
 
-            // $('#confirmButton').on('click', function() {
-            //     console.log('Button clicked!');
-            //     $('#bookingForm').submit();
-            // });
 
         });
     </script>
@@ -489,18 +489,25 @@
                     console.error('Error:', xhr);
                     console.error('Response:', xhr.responseText);
 
-                    let errors = xhr.responseJSON.errors;
-                    let errorMsg = Object.values(errors).flat().join("\n");
+                    let errorMsg = "Có lỗi xảy ra!"; // Thông báo mặc định
+
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        let errors = xhr.responseJSON.errors;
+                        errorMsg = Object.values(errors).flat().join("\n");
+                    } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message; // Lấy message nếu có
+                    } else {
+                        errorMsg = xhr.responseText || "Lỗi không xác định.";
+                    }
+
                     alert('Lỗi:\n' + errorMsg);
                 },
-                complete: function() {
-                    $button.prop('disabled', false); // Hoàn thành -> Kích hoạt lại nút
-                }
+
             });
         });
     </script>
 
-
+    @vite('resources/js/datban.js')
 
 
     <script>
@@ -585,6 +592,14 @@
 
         .table-hover tbody tr:hover {
             background-color: #f8f9fa;
+        }
+
+        .btn-danger {
+            pointer-events: none;
+        }
+
+        .btn-success {
+            pointer-events: none;
         }
 
         .border-left-rounded {

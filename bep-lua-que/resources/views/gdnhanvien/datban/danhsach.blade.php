@@ -1,4 +1,4 @@
-@extends('admin.datban.layout')
+@extends('gdnhanvien.datban.layout')
 
 @section('title')
     Danh mục Bàn Ăn
