@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\BangTinhLuongController;
 use App\Http\Controllers\CaLamNhanVienController;
+
+use App\Http\Controllers\ChatController;
+
 use App\Http\Controllers\DanhMucMonAnController;
 use App\Http\Controllers\ComBoController;
 use App\Http\Controllers\DichVuController;
@@ -75,6 +78,18 @@ Route::resource('nha-cung-cap', \App\Http\Controllers\NhaCungCapController::clas
 Route::post('nha-cung-cap/restore/{id}', [\App\Http\Controllers\NhaCungCapController::class, 'restore'])->name('nha-cung-cap.restore');
 
 Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'export'])->name('nha-cung-cap.export');
+
+//Route::post('/import-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha-cung-cap.import');
+
+
+// Route::get('/', function () {
+//     return view('client.home');
+// });
+// chatbot
+Route::get('/chat', [ChatController::class, 'index'])->name('chat.index'); 
+Route::post('/chat/gui', [ChatController::class, 'guiTinNhan'])->name('chat.gui');
+Route::get('/chat/tin-nhan', [ChatController::class, 'layTinNhan'])->name('chat.layTinNhan');
+
 
 Route::post('/nha_cung_cap/import', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha_cung_cap.import');
 
