@@ -637,4 +637,40 @@ class ThuNganController extends Controller
 
         return response()->json($orders);
     }
+
+    public function thongTinHoaDon(Request $request)
+    {
+        if (!$request->maHoaDon) {
+            return response()->json(['error' => 'Không tìm thấy mã hóa đơn'], 404);
+        }
+
+        $maHoaDon = $request->maHoaDon;
+
+        $hoaDon = HoaDon::where('ma_hoa_don', $maHoaDon)->first();
+        if (!$hoaDon) {
+            // Nếu không tìm thấy hóa đơn, trả về lỗi
+            return response()->json(['error' => 'Không tìm thấy hóa đơn với mã này'], 404);
+        }
+
+        $banAn = HoaDonBan::where('hoa_don_id', $hoaDon->id)->get();
+        // Kiểm tra xem có bàn ăn nào không
+        if ($banAn->isEmpty()) {
+            return response()->json(['error' => 'Không tìm thấy bàn ăn cho hóa đơn này'], 404);
+        }
+
+        $datBan = DatBan::where('ban_an_id', $banAn->first()->ban_an_id)->first();
+
+        $khachHang = KhachHang::where('id', $datBan->khach_hang_id)->first();
+        if (!$khachHang) {
+            return response()->json([
+                'banAn' => $banAn,
+                'khachHang' => null
+            ]);
+        }
+        
+        return response()->json([
+            'banAn' => $banAn,
+            'khachHang' => $khachHang
+        ]);
+    }
 }

@@ -54,7 +54,7 @@
     <!-- Nút bấm -->
     <div>
         <button class="btn btn-success btn-sm px-4" type="button" data-bs-toggle="offcanvas"
-            data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">Thanh toán</button>
+            data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" id="thanhToan-btn">Thanh toán</button>
         <button class="btn-thong-bao btn btn-primary btn-sm px-4">Thông báo</button>
     </div>
 
@@ -86,7 +86,7 @@
     style="width: 70%;">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="offcanvasRightLabel">
-            Phiếu thanh toán - <span id="tableInfo"> </span>
+            Phiếu thanh toán - <span id="tableInfo"> </span> - <span id="maHoaDonInFo">Chưa có hóa đơn</span>
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
@@ -345,6 +345,49 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/print-js/1.6.0/print.min.js"></script>
 
 <script>
+    // Hàm lấy dữ liệu thanh toán
+    $(document).ready(function() {
+        $('#thanhToan-btn').click(function() {
+            let maHoaDonElm = document.getElementById("maHoaDon");
+            let maHoaDon = maHoaDonElm.innerText;
+            let maHoaDonInFo = document.getElementById("maHoaDonInFo");
+            maHoaDonInFo.innerText = maHoaDon
+
+            if (maHoaDon === 'Chưa có hóa đơn') {
+                return;
+            }
+
+            $.ajax({
+                url: '/thu-ngan/hoa-don-info',
+                type: 'GET',
+                data: {
+                    maHoaDon: maHoaDon
+                },
+                success: function(response) {
+                    if (response.khachHang) {
+                        // Nếu có khách hàng, cập nhật thông tin khách hàng vào dropdown
+                        $('#customerSelect').html(`
+                        <option value="${response.khachHang.id}" selected>
+                            ${response.khachHang.ho_ten} - ${response.khachHang.so_dien_thoai}
+                        </option>
+                        <option value="new">Thêm mới khách</option>
+                    `);
+                    } else {
+                        // Nếu không có khách hàng, hiển thị mặc định là "Khách lẻ"
+                        $('#customerSelect').html(`
+                        <option value="0" selected>Khách lẻ</option>
+                        <option value="new">Thêm mới khách</option>
+                    `);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Lỗi khi lấy thông tin hóa đơn:", xhr.responseText);
+                }
+            })
+        });
+    });
+
+
     function calculateChange() {
         let totalAmount = parseInt(document.getElementById("totalAmount").value.replace(/\D/g, "")) || 0;
         let amountGiven = parseInt(document.getElementById("amountGiven").value) || 0;

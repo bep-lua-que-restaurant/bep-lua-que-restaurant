@@ -137,7 +137,7 @@ class HoaDonController extends Controller
                 'gio_du_kien' => Carbon::now(),
                 'thoi_gian_den' => Carbon::now(),
                 'so_nguoi' => 1, // Mặc định là 1 người
-                'trang_thai' => 'dang_xu_ly',
+                'trang_thai' => 'xac_nhan',
                 'ma_dat_ban' => $maDatBan,
                 'mo_ta' => null,
             ]);
