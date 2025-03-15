@@ -1,4 +1,5 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
 <style>
     .select2-results__option {
         background-color: #f0f0f0 !important;
@@ -24,6 +25,13 @@
     <tbody id="hoa-don-body">
         <!-- Dữ liệu hóa đơn sẽ được hiển thị ở đây -->
     </tbody>
+    <tfoot id="tfoot-hoaDon">
+        <tr>
+            <td colspan="6" class="text-start text-muted" style="font-size: 14px; font-weight: 400;">
+                Mã hóa đơn: <span id="maHoaDon"></span>
+            </td>
+        </tr>
+    </tfoot>
 </table>
 <div class="d-flex justify-content-end align-items-center mt-3">
     <span class="text-muted mx-4">Tổng tiền:</span>
@@ -328,9 +336,14 @@
         </div>
     </div>
 </div>
+
+{{-- giao diện lưu hóa đơn In --}}
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- Select2 JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/print-js/1.6.0/print.min.js"></script>
+
 <script>
     function calculateChange() {
         let totalAmount = parseInt(document.getElementById("totalAmount").value.replace(/\D/g, "")) || 0;
@@ -408,14 +421,12 @@
         var totalAmount = parseFloat($('#totalAmount').val().replace(/\./g, '').trim()) || 0;
         var amountGiven = parseFloat($('#amountGiven').val().replace(/\./g, '').trim()) || 0;
         var changeToReturn = parseFloat($('#changeToReturn').val().replace(/\./g, '').trim()) || 0;
-
-
         // Lấy dữ liệu từ bảng hóa đơn
         var danhSachSanPham = [];
         $("#hoa-don-thanh-toan-body tr").each(function() {
             var sanPham = {
-                ten_san_pham: $(this).find("td:nth-child(2)").text().normalize("NFD").replace(
-                    /[\u0300-\u036f]/g, "").trim(),
+                ten_san_pham: $(this).find("td:nth-child(2)").text()
+                    .trim(), // Không loại bỏ dấu nữa
                 so_luong: parseInt($(this).find("td:nth-child(3)").text().trim()) || 0,
                 don_gia: parseFloat($(this).find("td:nth-child(4)").text().replace(/\./g, '')
                     .trim()) || 0,
@@ -424,7 +435,6 @@
             };
             danhSachSanPham.push(sanPham);
         });
-
 
         if (banId) {
             $.ajax({
@@ -437,66 +447,101 @@
                     phuong_thuc_thanh_toan: phuongThucThanhToan,
                     chi_tiet_thanh_toan: paymentDetails,
                     tong_tien: totalAmount,
-                    tien_khach_dua: amountGiven,
-                    tien_thua: changeToReturn,
-                    san_pham: danhSachSanPham, // Gửi danh sách sản phẩm lên server
+                    // tien_khach_dua: amountGiven,
+                    // tien_thua: changeToReturn,
+                    // san_pham: danhSachSanPham, // Gửi danh sách sản phẩm lên server
                     _token: $('meta[name="csrf-token"]').attr("content")
                 },
                 success: function(response) {
                     if (response.success) {
-                        showToast("Đã thanh toán đơn hàng", "success");
+                        hoaDonId = response.hoaDon.id;
+                        // Tạo nội dung in
+                        var maHoaDon = response.hoaDon.ma_hoa_don;
+                        tenKhachHang = response.khachHang.ho_ten
+                        // Tạo nội dung cần in (chỉ in mã hóa đơn)
+                        var printContent = `
+        <!-- Thông tin cửa hàng -->
+            <div>
+                <h2><strong>Hóa đơn bán hàng</h2>
+                <h5><strong>Ngày bán:</strong> 14-03-2025</h5>
+            </div>
 
+            <hr>
+
+            <!-- Thông tin khách hàng -->
+            <div>
+                <p><strong>Khách hàng: ${tenKhachHang}</strong></p>
+                <p><strong>Số điện thoại:</strong>0332491395</p>
+            </div>
+
+ <table class="table table-bordered text-start">
+            <thead>
+                <tr>
+                    <th>Tên món</th>  
+                    <th>SL</th>      
+                    <th>Thành tiền</th> 
+                </tr>
+            </thead>
+            <tbody>
+                ${danhSachSanPham.map(item => `
+                    <tr>
+                        <td>${item.ten_san_pham}</td>
+                        <td>${item.so_luong}</td>
+                        <td>${item.tong_cong}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+
+
+            <hr>
+
+            <!-- Tổng tiền -->
+            <div>
+                <p><strong>Tổng tiền hàng:</strong> ${totalAmount}</p>
+                <p><strong>Tiền khách đưa:</strong>${amountGiven} </p>
+                <p><strong>Tiền thừa trả khách:</strong> ${changeToReturn}</p>
+            </div>
+        </div>
+    `;
+
+                        // Tạo phần tử tạm trong DOM để chứa nội dung in
+                        var tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = printContent;
+
+                        // Thêm phần tử vào body hoặc một phần tử nào đó trong DOM
+                        document.body.appendChild(tempDiv);
+
+                        // In nội dung của phần tử tạm
+                        printJS({
+                            printable: tempDiv, // Truyền phần tử DOM vào Print.js
+                            type: 'html', // Kiểu nội dung (html)
+                            showModal: true,
+                            modalTitle: 'Cài Đặt In',
+                            options: {
+                                orientation: 'portrait', // Chế độ chân dung
+                                color: true, // In màu
+                                duplex: false, // Không in 2 mặt
+                                margins: {
+                                    top: 10,
+                                    left: 10,
+                                    right: 10,
+                                    bottom: 10
+                                } // Cài đặt lề
+                            }
+                        });
+
+                        // Sau khi in xong, có thể xóa phần tử tạm đi
+                        document.body.removeChild(tempDiv);
+
+                        showToast("Đã thanh toán đơn hàng", "success");
                         var offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById(
                             "offcanvasRight"));
                         offcanvas.hide();
                         resetGiaoDienHoaDon();
-
-                        // Gọi AJAX tạo file PDF
-                        $.ajax({
-                            url: "/thu-ngan/in-hoa-don",
-                            method: "POST",
-                            contentType: "application/json",
-                            headers: {
-                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr(
-                                    "content") // Lấy CSRF token từ meta tag
-                            },
-                            data: JSON.stringify({
-                                ban_an_id: banId,
-                                khach_hang_id: khachHangId,
-                                so_nguoi: soNguoi,
-                                phuong_thuc_thanh_toan: phuongThucThanhToan,
-                                chi_tiet_thanh_toan: paymentDetails,
-                                tong_tien: totalAmount,
-                                tien_khach_dua: amountGiven,
-                                tien_thua: changeToReturn,
-                                san_pham: danhSachSanPham
-                            }),
-                            success: function(pdfResponse) {
-                                if (pdfResponse.success) {
-                                    // Mở file PDF trong tab mới
-                                    var printWindow = window.open(pdfResponse.pdf_url,
-                                        '_blank');
-                                    if (printWindow) {
-                                        printWindow.focus();
-                                    } else {
-                                        showToast(
-                                            "Trình duyệt đã chặn popup, vui lòng mở thủ công.",
-                                            "warning");
-                                    }
-                                } else {
-                                    showToast("Lỗi khi tạo hóa đơn PDF: " + (pdfResponse
-                                        .error || ""), "danger");
-                                }
-                            },
-                            error: function(xhr) {
-                                console.error("Lỗi AJAX:", xhr.responseText);
-                                showToast(
-                                    "Không thể tạo hóa đơn PDF. Vui lòng thử lại.",
-                                    "danger");
-                            }
-
-                        });
-
+                        var maHoaDonElement = document.getElementById("maHoaDon");
+                        maHoaDonElement.innerText = "Chưa có hóa đơn";
+                        maHoaDonElement.style.color = "red";
                     } else {
                         showToast("Thanh toán không thành công.", "danger");
                     }

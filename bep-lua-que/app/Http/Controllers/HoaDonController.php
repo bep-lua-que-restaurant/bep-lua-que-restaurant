@@ -124,15 +124,18 @@ class HoaDonController extends Controller
         $datBan = DatBan::where('ban_an_id', $banAnId)->get();
         // Kiểm tra xem có bản ghi nào đang xử lý không
         $coDangXuLy = $datBan->contains('trang_thai', 'dang_xu_ly');
-
+        // Tạo mã đặt bàn duy nhất
+        $maDatBan = DatBan::generateMaDatBan(); // Hoặc gọi hàm generateMaDatBan()
         if (!$coDangXuLy) {
             DatBan::create([
                 'ban_an_id' => $banAnId,
                 'khach_hang_id' => 0, // Nếu không có khách hàng thì để null
                 'so_dien_thoai' => '0', // Nếu không có số điện thoại thì để null
+                'gio_du_kien' => Carbon::now(), // Sử dụng Carbon để lấy thời gian hiện tại theo múi giờ Việt Nam
                 'thoi_gian_den' => Carbon::now(), // Sử dụng Carbon để lấy thời gian hiện tại theo múi giờ Việt Nam
                 'so_nguoi' => 1, // Sử dụng số người từ request hoặc mặc định là 1
                 'trang_thai' => 'dang_xu_ly', // Trạng thái mặc định là 'dang_xu_ly'
+                'ma_dat_ban' => $maDatBan, // Mã đặt bàn duy nhất
                 'mo_ta' => null, // Nếu không có mô tả, để null
             ]);
         }
@@ -143,7 +146,6 @@ class HoaDonController extends Controller
         event(new HoaDonUpdated($hoaDon));
 
         return response()->json([
-            'message' => 'Hóa đơn đã được cập nhật',
             'data' => $hoaDon
         ], 200);
     }
