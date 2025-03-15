@@ -11,3 +11,12 @@ thêm vào |hóa đơn
 
 
          03/03/2025 21:00	đoàn văn quân	0388940846	8	bàn 1, bàn 2
+
+ALTER TABLE dat_bans ALTER COLUMN trang_thai SET DEFAULT 'dang_xu_ly';
+
+         http://127.0.0.1:8000/datban/ngay
+
+         Thay đổi cách chọn bàn làm việc khi đến thời điểm
+
+         notepad storage/logs/laravel.log
+echo "" > storage/logs/laravel.log

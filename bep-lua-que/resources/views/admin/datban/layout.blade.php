@@ -42,7 +42,7 @@
         </div>
         <div class="row">
             <!-- Sidebar -->
-            <nav class="col-2 bg-light p-3">
+            <nav class="col-2 bg-light pt-3">
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a href="{{ route('dat-ban.index') }}" class="btn btn-primary">Danh sách bàn đặt</a>
@@ -54,7 +54,7 @@
                 </ul>
             </nav>
             <!-- Main Content -->
-            <main class="col-10 p-3">
+            <main class="col-10">
                 @yield('content')
             </main>
         </div>

@@ -1,4 +1,5 @@
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+{{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" /> --}}
+<link href="{{ asset('admin/css/swiper-bundle.min.css') }}" rel="stylesheet" />
 <div class="swiper mySwiper">
     <div class="swiper-wrapper">
         @foreach ($data->chunk(12) as $chunk)
@@ -45,7 +46,7 @@
     var swiper = new Swiper(".mySwiper", {
         slidesPerView: 1, // Hiển thị 1 nhóm 12 món/lượt
         spaceBetween: 20, // Khoảng cách giữa các nhóm
-        allowTouchMove: false, // Không cho vuốt tay, chỉ dùng nút
+        allowTouchMove: true, // Không cho vuốt tay, chỉ dùng nút
     });
 
     // Xử lý sự kiện nút bấm
@@ -68,7 +69,8 @@
 
             // Kiểm tra nếu chưa chọn bàn
             if (!banId) {
-                alert("Vui lòng chọn bàn trước khi thêm món!");
+                showToast("🚨 Vui lòng chọn bàn trước khi thêm món", "warning");
+
                 return;
             }
 
@@ -83,7 +85,6 @@
                     gia: giaMon
                 },
                 success: function(response) {
-                    console.log("Món đã thêm vào hóa đơn!");
                     showToast("Đã thêm một món vào hóa đơn",
                         "success"); // Thông báo thành công
                 },

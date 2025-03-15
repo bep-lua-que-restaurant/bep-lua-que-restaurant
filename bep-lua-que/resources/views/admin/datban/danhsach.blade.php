@@ -37,7 +37,7 @@
                             <th>Số Người</th>
                             <th>Danh Sách Bàn</th>
                             <th>Trạng Thái</th>
-                            <th>Hoat dong</th>
+                            <th>Hoạt Động</th>
                         </tr>
                     </thead>
 
@@ -49,42 +49,50 @@
                                 <td>{{ $datban->so_dien_thoai }}</td>
                                 <td>{{ $datban->so_nguoi }}</td>
                                 <td>
-                                    <span class="badge bg-primary">{{ $datban->danh_sach_ban }}</span>
+                                    {{-- Hiển thị danh sách bàn gọn hơn --}}
+                                    <ul class="list-unstyled mb-0">
+                                        @foreach (explode(',', $datban->danh_sach_ban) as $ban)
+                                            <li><span class="badge bg-primary">{{ trim($ban) }}</span></li>
+                                        @endforeach
+                                    </ul>
                                 </td>
                                 <td>
                                     @if ($datban->trang_thai == 'xac_nhan')
                                         <span class="badge bg-success trang_thai" data-value="{{ $datban->trang_thai }}">
                                             Đã nhận bàn</span>
                                     @elseif ($datban->trang_thai == 'dang_xu_ly')
-                                        <span class="badge bg-warning trang_thai"
-                                            data-value="{{ $datban->trang_thai }}">Đang xử lý</span>
+                                        <span class="badge bg-warning trang_thai" data-value="{{ $datban->trang_thai }}">
+                                            Đang xử lý</span>
                                     @else
-                                        <span class="badge bg-danger trang_thai" data-value="{{ $datban->trang_thai }}">Đã
-                                            hủy</span>
+                                        <span class="badge bg-danger trang_thai" data-value="{{ $datban->trang_thai }}">
+                                            Đã hủy</span>
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{ route('dat-ban.show', $datban->datban_id) }}"
+                                    <a href="{{ route('dat-ban.show', $datban->ma_dat_ban) }}"
                                         class="btn btn-primary btn-sm">Xem</a>
                                     @if ($datban->trang_thai === 'dang_xu_ly')
-                                        <form action="{{ route('dat-ban.destroy', $datban->datban_id) }}" method="post">
+                                        <form action="{{ route('dat-ban.destroy', $datban->ma_dat_ban) }}" method="post">
                                             @csrf
                                             @method('DELETE')
                                             <input type="submit" class="btn btn-danger btn-sm mt-2" value="Hủy đặt">
                                         </form>
 
-                                        <form action="{{ route('dat-ban.update', $datban->datban_id) }}" method="post">
+
+                                        {{-- <form action="{{ route('dat-ban.update', $datban->ma_dat_ban) }}" method="post">
                                             @csrf
                                             @method('PUT')
-                                            <input type="submit" class="btn btn-warning btn-sm  mt-2" value="Xác nhận">
-                                        </form>
+                                            <input type="submit" class="btn btn-warning btn-sm mt-2" value="Xác nhận">
+                                        </form> --}}
+                                        <a href="{{ route('dat-ban.edit', $datban->ma_dat_ban) }}"
+                                            class="btn btn-warning btn-sm mt-2">Xác nhận</a>
                                     @endif
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
-
                 </table>
+
             </div>
         </div>
     </div>

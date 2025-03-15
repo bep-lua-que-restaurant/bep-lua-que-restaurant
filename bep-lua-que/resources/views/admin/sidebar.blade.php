@@ -1,6 +1,19 @@
 <div class="deznav">
     <div class="deznav-scroll">
         <ul class="metismenu" id="menu">
+            {{-- Thống kê --}}
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                    <i class="fas fa-chart-bar"></i>
+                    <span class="nav-text">Thống kê</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="{{ route('thongke.thongkedoanhso') }}">Thống kê doanh số</a></li>
+                    <li><a href="{{ route('thongke.thongkesoluongkhach') }}">Thống kê số lượng khách hàng</a></li>
+                    <li><a href="{{ route('thongke.thongkemonan') }}">Thống kê món ăn</a></li>
+                    <li><a href="#">Thống kê chưa nghĩ ra</a></li>
+                </ul>
+            </li>
             {{-- Hàng hóa --}}
             <li>
                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
@@ -12,6 +25,7 @@
                     <li><a href="{{ route('mon-an.index') }}">Món ăn</a></li>
                     <li><a href="{{ route('dich-vu.index') }}">Dịch vụ</a></li>
                     <li><a href="{{ route('com-bo.index') }}">Combo - đóng gói</a></li>
+
                     <li><a href="{{ route('ma-giam-gia.index') }}">Mã giảm giá</a></li>
                 </ul>
                 {{-- <ul aria-expanded="false">
@@ -31,7 +45,18 @@
                     <li><a href="{{ route('ban-an.index') }}">Bàn Ăn</a></li>
                 </ul>
             </li>
+            {{-- kho --}}
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                    <i class="fa fa-list"></i>
+                    <span class="nav-text">Kho</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="{{ route('loai-nguyen-lieu.index') }}">Loại nguyên liệu</a></li>
 
+                    <li><a href="{{ route('nguyen-lieu.index') }}">Nguyên liệu</a></li>
+                </ul>
+            </li>
             {{-- Giao dịch --}}
             <li>
                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
@@ -76,17 +101,18 @@
 
                 <ul aria-expanded="false">
                     <li><a href="{{ route('nhan-vien.index') }}">Nhân viên</a></li>
+
                 </ul>
                 <ul aria-expanded="false">
                     <li><a href="{{ route('ca-lam.index') }}">Ca làm</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="{{ route('ca-lam-nhan-vien.index') }}">Quản lí ca </a></li>
+                    <li><a href="{{ route('ca-lam-nhan-vien.index') }}">Quản lí ca làm nhân viên </a></li>
                 </ul>
                 <ul aria-expanded="false">
+
                     <li><a href="{{ route('cham-cong.index') }}">Chấm công</a></li>
-                </ul>
-                <ul aria-expanded="false">
+
 
                     <li><a href="{{ route('luong.index') }}">Bảng tính lương</a></li>
                     {{-- <li><a href="#">Thiết lập nhân viên</a></li> --}}
@@ -115,20 +141,6 @@
                     <i class="fa fa-cash-register"></i>
                     <span class="nav-text">Thu ngân</span>
                 </a>
-            </li>
-            {{-- Thống kê --}}
-            <li>
-                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                    <i class="fas fa-chart-bar"></i>
-                    <span class="nav-text">Thống kê</span>
-                </a>
-                <ul aria-expanded="false">
-
-                    <li><a href="#">Thống kê</a></li>
-                    <li><a href="">Thống kê</a></li>
-                    <li><a href="{{ route('thongke.thongkemonan') }}">Thống kê món ăn</a></li>
-                    <li><a href="#">Thống kê</a></li>
-                </ul>
             </li>
         </ul>
     </div>

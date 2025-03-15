@@ -1,7 +1,7 @@
 @extends('admin.datban.layout')
 
 @section('title')
-    Danh mục Bàn Ăn
+    Chi tiết Đặt Bàn
 @endsection
 
 @section('content')
@@ -10,8 +10,8 @@
         <p><strong>Tên khách hàng: </strong>{{ $datBan->khachHang->ho_ten }}</p>
         <p><strong>Số điện thoại: </strong>{{ $datBan->khachHang->so_dien_thoai }}</p>
         <p><strong>Email: </strong>{{ $datBan->khachHang->email }}</p>
-        <p><strong>Thời gian đến: </strong>{{ $datBan->thoi_gian_den }}</p>
-        <p><strong>Mô tả: </strong>{{ $datBan->mo_ta }}</p>
+        <p><strong>Thời gian đến: </strong>{{ \Carbon\Carbon::parse($datBan->thoi_gian_den)->format('d/m/Y H:i') }}</p>
+        <p><strong>Mô tả: </strong>{{ $datBan->mo_ta ?? 'Không có mô tả' }}</p>
 
         <h4>Bàn đã đặt:</h4>
         <table class="table table-bordered">
@@ -24,12 +24,12 @@
             <tbody>
                 @foreach ($datBans as $datBanItem)
                     <tr>
-                        <td>{{ $datBanItem->banAn->phongAn->ten_phong_an }}</td>
-                        <td>{{ $datBanItem->banAn->ten_ban }}</td>
+                        <td>{{ optional($datBanItem->banAn->phongAn)->ten_phong_an ?? 'Không xác định' }}</td>
+                        <td>{{ optional($datBanItem->banAn)->ten_ban ?? 'Không xác định' }}</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
-    <a class="btn btn-primary" href="/danh-sach-dat-ban/">quay lai</a>
+    <a class="btn btn-primary" href="{{ route('dat-ban.index') }}">Quay lại</a>
 @endsection

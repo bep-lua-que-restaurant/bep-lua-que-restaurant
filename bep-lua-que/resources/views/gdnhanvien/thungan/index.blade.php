@@ -18,73 +18,7 @@
     <link href="{{ asset('admin') }}/css/style.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #004080;
-            color: #fff;
-        }
-
-        .cardd:hover {
-            border-color: #FF6347 !important;
-            box-shadow: 0 4px 10px rgba(255, 99, 71, 0.3);
-            cursor: pointer;
-        }
-
-        .add-mon-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            padding: 0;
-            font-size: 14px;
-            border: none;
-            transition: 0.3s;
-        }
-
-        .add-btn:hover {
-            background-color: #007bff;
-        }
-
-        .filter-room-group label {
-            cursor: pointer;
-            padding: 8px 12px;
-            border: 2px solid transparent;
-            border-radius: 2px;
-            background: #f8f9fa;
-            transition: all 0.3s ease-in-out;
-            display: inline-block;
-        }
-
-        .filter-room-group input[type="radio"] {
-            display: none;
-        }
-
-        .filter-room-group input[type="radio"]:checked+label {
-            border-color: #e49b07;
-            background: #e49b07;
-            color: white;
-            font-weight: bold;
-            box-shadow: 0px 0px 10px rgba(0, 123, 255, 0.5);
-        }
-
-        .empty-invoice {
-            padding: 50px 0;
-            text-align: center;
-            font-style: italic;
-            border: 2px dashed #ccc;
-            /* Viền nét đứt */
-            border-radius: 10px;
-            /* Bo góc nhẹ nhàng */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            font-size: 16px;
-            width: 100%;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('admin') }}/css/thungan.css">
 </head>
 
 <body>
@@ -157,30 +91,6 @@
                     <div class="card shadow-sm border-0">
                         <div class="card-header">
                             <h4 class="card-title mb-0">Danh sách</h4>
-                            <div class="ms-auto filter-room-group">
-                                <label>
-                                    <input type="radio" name="filter-room" value="" checked>
-                                    Tất cả
-                                </label>
-                                @foreach ($phongBans as $phong)
-                                    <input type="radio" id="phong_{{ $phong->id }}" name="filter-room"
-                                        value="{{ $phong->id }}">
-                                    <label for="phong_{{ $phong->id }}">{{ $phong->ten_phong_an }}</label>
-                                @endforeach
-                            </div>
-
-                            @if (isset($danhMucs))
-                                <div class="ms-auto">
-                                    <label>
-                                        <input type="radio" name="filter-category" value="" checked> Tất cả
-                                    </label>
-                                    @foreach ($danhMucs as $danhMuc)
-                                        <input type="radio" id="danhmuc_{{ $danhMuc->id }}" name="filter-category"
-                                            value="{{ $danhMuc->id }}">
-                                        <label for="danhmuc_{{ $danhMuc->id }}">{{ $danhMuc->ten_danh_muc }}</label>
-                                    @endforeach
-                                </div>
-                            @endif
                         </div>
                         <div class="card-body" id="list-container">
                             @include('gdnhanvien.thungan.body-list')
@@ -233,9 +143,8 @@
     <script src="{{ asset('admin') }}/vendor/apexchart/apexchart.js" type="text/javascript"></script>
     <script src="{{ asset('admin') }}/js/dashboard/dashboard-1.js" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-
+    <script src="{{ asset('admin/js/swiper-bundle.min.js') }}"></script>
+    <script src="{{ asset('js/jquery-3.6.4.min.js') }}"></script>
     <script>
         var apiUrl = "{{ route('thungan.getBanAn') }}";
 
@@ -255,8 +164,10 @@
 
         var dingSoundUrl = "{{ asset('sounds/ding.mp3') }}";
     </script>
+    
     @vite('resources/js/public.js')
     @vite('resources/js/thungan.js')
+
 </body>
 
 </html>

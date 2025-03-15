@@ -94,7 +94,7 @@ class PhieuNhapKhoController extends Controller
         return view('admin.phieunhap.create', compact('maPhieuNhap', 'nhanViens', 'nhaCungCaps', 'loaiNguyenLieus', 'nguyenLieus'));
     }
 
-    
+
 
 
     public function store(StorePhieuNhapKhoRequest $request)
@@ -131,6 +131,7 @@ class PhieuNhapKhoController extends Controller
                         'ten_nguyen_lieu' => $chiTiet['ten_nguyen_lieu'],
                         'loai_nguyen_lieu_id' => $chiTiet['loai_nguyen_lieu_id'],
                         'don_vi_tinh' => $chiTiet['don_vi_tinh'],
+                        'he_so_quy_doi' => $heSoQuyDoi,
                         'gia_nhap' => $chiTiet['don_gia'],
                         'mo_ta' => $chiTiet['mo_ta'],
                         'hinh_anh' => $hinhAnhPath,
@@ -143,12 +144,12 @@ class PhieuNhapKhoController extends Controller
                     'nguyen_lieu_id' => $nguyenLieu->id,
                     'so_luong' => $chiTiet['so_luong'],
                     'don_vi_nhap' => $chiTiet['don_vi_nhap'],
-                    'he_so_quy_doi' => $heSoQuyDoi,
+                    
                     'so_luong_quy_doi' => $soLuongQuyDoi,
                     'don_gia' => $chiTiet['don_gia'],
                     'tong_tien' => $chiTiet['so_luong'] * $chiTiet['don_gia'],
                     'han_su_dung' => $chiTiet['han_su_dung'] ?? null,
-                    'trang_thai' => 'Đạt',
+                    'trang_thai' => $chiTiet['trang_thai'] ?? 'Cần kiểm tra', // Lấy trạng thái từ form hoặc mặc định
                 ]);
             }
 
@@ -198,7 +199,33 @@ class PhieuNhapKhoController extends Controller
 
         return view('admin.phieunhap.detail-nguyenlieu', compact('chiTiet', 'phieuNhapId', 'soLuongTon'));
     }
+    public function capNhatTrangThai(Request $request, $phieuNhapId, $nguyenLieuId)
+{
+    // Lấy phiếu nhập kho
+    $phieuNhap = PhieuNhapKho::findOrFail($phieuNhapId);
 
+    // Kiểm tra nếu phiếu đã duyệt thì không được cập nhật trạng thái
+    if ($phieuNhap->trang_thai === 'da_duyet') {
+        return redirect()->back()->with(['error' => 'Không thể thay đổi trạng thái vì phiếu đã duyệt.']);
+    }
+    if ($phieuNhap->trang_thai === 'huy') {
+        return redirect()->back()->with(['error' => 'Không thể thay đổi trạng thái vì phiếu đã hủy.']);
+    }
+
+    // Lấy chi tiết nguyên liệu trong phiếu nhập kho
+    $chiTiet = ChiTietPhieuNhapKho::where('phieu_nhap_kho_id', $phieuNhapId)
+        ->where('nguyen_lieu_id', $nguyenLieuId)
+        ->firstOrFail();
+
+    // Cập nhật trạng thái
+    $chiTiet->trang_thai = $request->input('trang_thai');
+    $chiTiet->save();
+
+    // Lấy số lượng tồn để truyền lại view
+    $soLuongTon = $chiTiet->nguyenLieu->so_luong_ton ?? 0;
+
+    return redirect()->back()->with(['success' => 'Trạng thái đã cập nhật thành công.']);
+}
     public function duyet($id)
     {
         DB::beginTransaction();
@@ -227,7 +254,7 @@ class PhieuNhapKhoController extends Controller
                 if ($nguyenLieu) {
                     // Cộng số lượng quy đổi vào số lượng tồn
                     $nguyenLieu->so_luong_ton += $chiTiet->so_luong_quy_doi;
-                    $nguyenLieu->gia_nhap=$chiTiet->don_gia;
+                    $nguyenLieu->gia_nhap = $chiTiet->don_gia;
                     $nguyenLieu->save();
                 } else {
                     return redirect()->back()->withErrors('Nguyên liệu không tồn tại.');
@@ -251,9 +278,9 @@ class PhieuNhapKhoController extends Controller
         return back()->with('error', 'Phiếu nhập đã bị hủy!');
     }
 
-    
 
-    
+
+
 
     /**
      * Xóa phiếu nhập kho.
