@@ -547,9 +547,10 @@
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error("Có lỗi xảy ra: ", error);
-                    showToast("Lỗi khi cập nhật trạng thái bàn.", "danger");
+                    console.error("Lỗi chi tiết:", xhr.responseText); // In lỗi chi tiết ra console
+                    showToast("Lỗi khi cập nhật trạng thái bàn: " + xhr.responseText, "danger");
                 }
+
             });
         } else {
             showToast("Không tìm thấy ID bàn!", "warning");

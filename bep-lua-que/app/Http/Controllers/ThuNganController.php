@@ -341,6 +341,12 @@ class ThuNganController extends Controller
         // Tìm bàn theo ID
         $banAn = BanAn::find($banAnId);
 
+        // lấy ra mã đặt bàn của bàn này
+        $maDatBan = DatBan::where('ban_an_id', $banAnId)->value('ma_dat_ban');
+        if (!$maDatBan) {
+            return response()->json(['success' => false, 'message' => 'Không tìm thấy mã đặt bàn.']);
+        }
+
         // Tìm hóa đơn bàn liên quan đến bàn này có trạng thái 'đang xử lý'
         $hoaDonBan = HoaDonBan::where('ban_an_id', $banAnId)
             ->where('trang_thai', 'dang_xu_ly')
@@ -387,9 +393,14 @@ class ThuNganController extends Controller
         }
 
         $khachHang = KhachHang::find($khachHangId);
+
+        // 🔹 Lấy tất cả `ban_an_id` có cùng `ma_dat_ban`
+        $dsBanCungMaDatBan = DatBan::where('ma_dat_ban', $maDatBan)
+            ->where('trang_thai', 'xac_nhan') // Chỉ lấy những cái đã xác nhận
+            ->pluck('ban_an_id');
         // Cập nhật trạng thái đặt bàn
-        $datBanList = DatBan::whereIn('ban_an_id', $dsBanCungHoaDon)
-            ->where('trang_thai', 'dang_xu_ly')
+        $datBanList = DatBan::whereIn('ban_an_id', $dsBanCungMaDatBan)
+            ->where('trang_thai', 'xac_nhan')
             ->get();
 
         foreach ($datBanList as $datBan) {
@@ -626,6 +637,4 @@ class ThuNganController extends Controller
 
         return response()->json($orders);
     }
-
-
 }
