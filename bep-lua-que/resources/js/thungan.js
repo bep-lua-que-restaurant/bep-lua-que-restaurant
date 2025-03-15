@@ -75,13 +75,13 @@ $(document).ready(function () {
 
     $("#btn-ban-an").on("click", function () {
         currentType = "ban";
-        $("#statusFilter").parent().show();
+        $("#statusFilter").show(); // Hiện bộ lọc trạng thái bàn
         fetchFilteredData();
     });
 
     $("#btn-thuc-don").on("click", function () {
         currentType = "menu";
-        $("#statusFilter").parent().hide();
+        $("#statusFilter").hide(); // Ẩn bộ lọc trạng thái bàn
         fetchFilteredData();
     });
 
@@ -92,7 +92,10 @@ $(document).ready(function () {
 
 $(document).ready(function () {
     $(".btn-thong-bao").on("click", function () {
-        let hoaDonId = $("#ten-ban").data("hoaDonId");
+        let hoaDonId =
+            window.luuIdHoaDon !== null && window.luuIdHoaDon !== undefined
+                ? window.luuIdHoaDon
+                : $("#ten-ban").data("hoaDonId");
 
         if (!hoaDonId) {
             alert("Không tìm thấy hóa đơn cho bàn này!");
@@ -125,4 +128,11 @@ $(document).ready(function () {
 });
 //
 
+window.Echo.channel("datban-channel").listen("DatBanCreated", (e) => {
+    let banId = e.ban_an_id; // Nhận ID bàn ăn từ Laravel
+    let icon = document.getElementById(`icon-${banId}`);
 
+    if (icon) {
+        icon.classList.remove("d-none"); // Hiển thị icon 🔔
+    }
+});

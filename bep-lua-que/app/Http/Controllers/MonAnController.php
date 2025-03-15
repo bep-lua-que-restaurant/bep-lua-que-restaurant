@@ -274,23 +274,11 @@ class MonAnController extends Controller
     public function importMonAn(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls|max:2048'
+            'file' => 'required|mimes:xlsx,xls'
         ]);
 
-        try {
-            Excel::import(new MonAnImport, $request->file('file'));
+        Excel::import(new MonAnImport, $request->file('file'));
 
-            Log::info("Import file thành công!");
-
-            return back()->with('success', 'Nhập dữ liệu món ăn thành công!');
-        } catch (ValidationException $e) {
-            Log::error("Lỗi nhập file: " . json_encode($e->failures()));
-
-            return back()->withErrors(['file' => 'Lỗi khi nhập dữ liệu. Hãy kiểm tra lại file.']);
-        } catch (\Exception $e) {
-            Log::error("Lỗi hệ thống: " . $e->getMessage());
-
-            return back()->withErrors(['file' => 'Lỗi hệ thống: ' . $e->getMessage()]);
-        }
+        return back()->with('success', 'Nhập dữ liệu thành công!');
     }
 }

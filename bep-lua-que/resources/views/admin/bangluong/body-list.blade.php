@@ -49,13 +49,13 @@
                 {{-- <a href="{{ route('dich-vu.edit', $item->id) }}" class="btn btn-warning btn-sm p-2 m-2"> --}}
                 {{-- <i class="fa fa-edit "></i> --}}
                 {{-- </a> --}}
-                @if ($item->deleted_at)
+                {{-- @if ($item->deleted_at)
                     <form action="{{ route('dich-vu.restore', $item->id) }}" method="POST" style="display:inline;">
                         @csrf
                         <button type="submit" onclick="return confirm('Bạn có chắc muốn khôi phục mục này không?')"
                             class="btn btn-success btn-sm p-2 m-2" title="Khôi phục">
                             <i class="fa fa-recycle"></i> {{-- Icon khôi phục --}}
-                        </button>
+                {{-- </button>
                     </form>
                 @else
                     <form action="{{ route('dich-vu.destroy', $item->id) }}" method="POST" style="display:inline;">
@@ -66,7 +66,7 @@
                             <i class="fa fa-trash"></i>
                         </button>
                     </form>
-                @endif
+                @endif --}}
             </div>
         </td>
 

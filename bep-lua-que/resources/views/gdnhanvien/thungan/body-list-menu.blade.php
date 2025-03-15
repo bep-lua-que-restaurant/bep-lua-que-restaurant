@@ -1,4 +1,5 @@
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+{{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" /> --}}
+<link href="{{ asset('admin/css/swiper-bundle.min.css') }}" rel="stylesheet" />
 <div class="swiper mySwiper">
     <div class="swiper-wrapper">
         @foreach ($data->chunk(12) as $chunk)
@@ -45,7 +46,7 @@
     var swiper = new Swiper(".mySwiper", {
         slidesPerView: 1, // Hiển thị 1 nhóm 12 món/lượt
         spaceBetween: 20, // Khoảng cách giữa các nhóm
-        allowTouchMove: false, // Không cho vuốt tay, chỉ dùng nút
+        allowTouchMove: true, // Không cho vuốt tay, chỉ dùng nút
     });
 
     // Xử lý sự kiện nút bấm
@@ -58,17 +59,16 @@
 
 
     // tạo hóa đơn 
-
+    window.luuIdHoaDon = null;
     $(document).ready(function() {
         $('.add-mon-btn').on('click', function() {
             var card = $(this).closest('.card'); // Lấy phần tử card chứa món ăn
             var banId = $('#ten-ban').data('currentBan'); // Lấy ID bàn hiện tại
             var monAnId = card.data('banan-id'); // Lấy ID món ăn
             var giaMon = parseInt(card.find('.card-text').text().replace(/[^0-9]/g, "")); // Lấy giá món
-
             // Kiểm tra nếu chưa chọn bàn
             if (!banId) {
-                alert("Vui lòng chọn bàn trước khi thêm món!");
+                showToast("🚨 Vui lòng chọn bàn trước khi thêm món", "warning");
                 return;
             }
 
@@ -83,16 +83,21 @@
                     gia: giaMon
                 },
                 success: function(response) {
-                    console.log("Món đã thêm vào hóa đơn!");
                     showToast("Đã thêm một món vào hóa đơn",
                         "success"); // Thông báo thành công
+                    window.luuIdHoaDon = response.data.id;
+                    var maHoaDonElement = document.getElementById("maHoaDon");
+                    maHoaDonElement.innerText = response.data.ma_hoa_don;
+                    maHoaDonElement.style.color = "#28a745"; 
                 },
-                error: function(error) {
-                    console.error("Lỗi khi thêm món vào hóa đơn:", error);
+                error: function(xhr, status, error) {
+                    console.error("Lỗi khi thêm món vào hóa đơn:", xhr);
+                    console.log("Trạng thái lỗi:", status);
+                    console.log("Chi tiết lỗi:", error);
+                    console.log("Response:", xhr.responseText);
                 }
+
             });
         });
     });
-
-
 </script>

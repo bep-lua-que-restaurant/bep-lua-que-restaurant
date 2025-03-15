@@ -39,17 +39,13 @@
                             </a>
 
                             <!-- Nút Nhập file (Mở Modal) -->
-                            <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
+                            <a href="{{ route('phong-an.import') }}" class="btn btn-sm btn-secondary" data-toggle="modal"
                                 data-target="#importExcelModal">
                                 <i class="fa fa-upload"></i> Nhập file
                             </a>
 
                             <!-- Nút Xuất file -->
-                            <a href="
-                            {{-- {{ route('phong-an.export') }} --}}
-                            
-                            "
-                                class="btn btn-sm btn-success">
+                            <a href="{{ route('phong-an.export') }}" class="btn btn-sm btn-success">
                                 <i class="fa fa-download"></i> Xuất file
                             </a>
 
@@ -73,7 +69,7 @@
                                     <div class="modal-body">
                                         <form
                                             action="
-                                        {{-- {{ route('phong-an.import') }} --}}
+                                        {{ route('phong-an.import') }}
                                         
                                         "
                                             method="POST" enctype="multipart/form-data">

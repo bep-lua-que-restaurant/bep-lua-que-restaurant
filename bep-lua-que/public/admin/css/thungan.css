@@ -1,0 +1,105 @@
+body {
+    background-color: #004080;
+    color: #fff;
+}
+
+.cardd:hover {
+    border-color: #FF6347 !important;
+    box-shadow: 0 4px 10px rgba(255, 99, 71, 0.3);
+    cursor: pointer;
+}
+
+.add-mon-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    padding: 0;
+    font-size: 14px;
+    border: none;
+    transition: 0.3s;
+}
+
+.add-btn:hover {
+    background-color: #007bff;
+}
+
+.filter-room-group label {
+    cursor: pointer;
+    padding: 8px 12px;
+    border: 2px solid transparent;
+    border-radius: 2px;
+    background: #f8f9fa;
+    transition: all 0.3s ease-in-out;
+    display: inline-block;
+}
+
+.filter-room-group input[type="radio"] {
+    display: none;
+}
+
+.filter-room-group input[type="radio"]:checked+label {
+    border-color: #e49b07;
+    background: #e49b07;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0px 0px 10px rgba(0, 123, 255, 0.5);
+}
+
+.empty-invoice {
+    padding: 50px 0;
+    text-align: center;
+    font-style: italic;
+    border: 2px dashed #ccc;
+    /* Viền nét đứt */
+    border-radius: 10px;
+    /* Bo góc nhẹ nhàng */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    width: 100%;
+}
+
+
+/* bàn */
+.ban.active {
+    border: 2px solid #007bff;
+    /* Viền màu xanh */
+    background-color: rgba(0, 123, 255, 0.1);
+    /* Nền nhạt */
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+    /* Đổ bóng */
+}
+
+.custom-badge {
+    font-size: 8px;
+    /* Kích thước font nhỏ hơn */
+    padding: 0.2rem 0.4rem;
+    /* Giảm padding để badge nhỏ hơn */
+    border-radius: 0.2rem;
+    /* Tùy chỉnh bo góc nhẹ */
+}
+
+.ban {
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    /* Viền mờ hơn (rgba với opacity 0.3) */
+    border-radius: 5px;
+    /* Góc tròn nếu cần */
+}
+
+.new-order-icon {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 16px;
+}
+
+.modal-dialog {
+    margin-top: 100px; /* Đẩy modal xuống thấp hơn */
+}
+
+/* thực đơn */

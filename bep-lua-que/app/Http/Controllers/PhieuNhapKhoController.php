@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Exports\PhieuNhapExport;
 use App\Http\Requests\StorePhieuNhapKhoRequest;
 use Illuminate\Http\Request;
 use App\Models\PhieuNhapKho;
@@ -12,6 +12,7 @@ use App\Models\NhaCungCap;
 use App\Models\LoaiNguyenLieu;
 use App\Models\NguyenLieu;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PhieuNhapKhoController extends Controller
 {
@@ -332,5 +333,10 @@ class PhieuNhapKhoController extends Controller
         $phieuNhapKho->restore();
 
         return redirect()->route('phieu-nhap-kho.index')->with('success', 'Khôi phục phiếu nhập kho thành công!');
+    }
+    public function export()
+    {
+        // Xuất file Excel với tên "Combo.xlsx"
+        return Excel::download(new PhieuNhapExport, 'PhieuNhapKho.xlsx');
     }
 }

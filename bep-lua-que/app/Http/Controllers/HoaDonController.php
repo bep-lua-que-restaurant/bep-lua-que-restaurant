@@ -16,9 +16,6 @@ use Carbon\Carbon;
 
 class HoaDonController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $query = HoaDon::query();
@@ -60,6 +57,7 @@ class HoaDonController extends Controller
         $banAnId = $request->input('ban_an_id'); // ID bàn ăn
         $monAnId = $request->input('mon_an_id'); // ID món ăn
         $giaMon = $request->input('gia'); // Giá món ăn
+
         if (!$banAnId || !$monAnId || !$giaMon) {
             return response()->json(['error' => 'Thiếu thông tin đầu vào!'], 400);
         }
@@ -81,7 +79,6 @@ class HoaDonController extends Controller
                 'phuong_thuc_thanh_toan' => 'tien_mat',
                 'mo_ta' => null
             ]);
-            // Nạp luôn chi tiết hóa đơn để gửi đầy đủ dữ liệu
 
             // Liên kết hóa đơn với bàn ăn (trạng thái `dang_xu_ly`)
             $hoaDonBan = HoaDonBan::create([
@@ -91,7 +88,7 @@ class HoaDonController extends Controller
             ]);
         }
 
-        
+
         // Kiểm tra xem món ăn đã có trong hóa đơn chưa
         $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)
             ->where('mon_an_id', $monAnId)
@@ -127,19 +124,21 @@ class HoaDonController extends Controller
         $datBan = DatBan::where('ban_an_id', $banAnId)->get();
         // Kiểm tra xem có bản ghi nào đang xử lý không
         $coDangXuLy = $datBan->contains('trang_thai', 'dang_xu_ly');
-
+        // Tạo mã đặt bàn duy nhất
+        $maDatBan = DatBan::generateMaDatBan(); // Hoặc gọi hàm generateMaDatBan()
         if (!$coDangXuLy) {
             DatBan::create([
                 'ban_an_id' => $banAnId,
                 'khach_hang_id' => 0, // Nếu không có khách hàng thì để null
                 'so_dien_thoai' => '0', // Nếu không có số điện thoại thì để null
+                'gio_du_kien' => Carbon::now(), // Sử dụng Carbon để lấy thời gian hiện tại theo múi giờ Việt Nam
                 'thoi_gian_den' => Carbon::now(), // Sử dụng Carbon để lấy thời gian hiện tại theo múi giờ Việt Nam
                 'so_nguoi' => 1, // Sử dụng số người từ request hoặc mặc định là 1
                 'trang_thai' => 'dang_xu_ly', // Trạng thái mặc định là 'dang_xu_ly'
+                'ma_dat_ban' => $maDatBan, // Mã đặt bàn duy nhất
                 'mo_ta' => null, // Nếu không có mô tả, để null
             ]);
         }
-
 
         // Nạp luôn chi tiết hóa đơn để gửi đầy đủ dữ liệu
         $hoaDon = HoaDon::with('chiTietHoaDons')->find($hoaDon->id);
@@ -147,51 +146,15 @@ class HoaDonController extends Controller
         event(new HoaDonUpdated($hoaDon));
 
         return response()->json([
-            'message' => 'Hóa đơn đã được cập nhật',
             'data' => $hoaDon
         ], 200);
     }
 
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreHoaDonRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
         $hoaDon = HoaDon::with(['chiTietHoaDons.monAn', 'banAns'])->findOrFail($id);
 
         return view('admin.hoadon.show', compact('hoaDon'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(HoaDon $hoaDon)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateHoaDonRequest $request, HoaDon $hoaDon)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(HoaDon $hoaDon)
-    {
-        //
     }
 }

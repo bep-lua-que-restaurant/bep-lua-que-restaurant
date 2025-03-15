@@ -4,125 +4,29 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4>Bảng chấm công</h4>
-            <input type="text" class="form-control w-25" placeholder="Tìm kiếm nhân viên">
-            <a href="{{ route('cham-cong.export') }}" class="btn btn-sm btn-success">
-                <i class="fa fa-download"></i> Xuất file
-            </a>
-        </div>
-
-        <div class="d-flex justify-content-between mb-3">
-            <a href="{{ route('cham-cong.danhsach') }}" class="btn btn-info">
-                <i class="fa fa-list"></i> Danh sách chi tiết
-            </a>
+            {{-- <input type="text" class="form-control w-25" placeholder="Tìm kiếm nhân viên"> --}}
 
             <div>
-                <button class="btn btn-light" onclick="changeWeek(-1)">&#60;</button>
-                <span id="week-label">{{ $weekLabel }}</span>
-                <button class="btn btn-light" onclick="changeWeek(1)">&#62;</button>
+                <button class="btn btn-light" onclick="changeDate(-1)">&#60;</button>
+                <span id="date-label" data-date="{{ $selectedDate }}">{{ $dayLabel }}</span>
+                <button class="btn btn-light" onclick="changeDate(1)">&#62;</button>
+                <a href="{{ route('cham-cong.export') }}" class="btn btn-sm btn-success">
+                    <i class="fa fa-download"></i> Xuất file
+                </a>
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-bordered text-center">
-                <thead>
-                    <tr>
-                        <th>Ca làm việc</th>
-                        @foreach ($dates as $date)
-                            <th>
-                                {{ ucfirst($date->translatedFormat('l')) }} <br>
-                                <span class="badge bg-secondary">{{ $date->format('d') }}</span>
-                            </th>
-                        @endforeach
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($caLams as $caLam)
-                        <tr>
-                            <td>{{ $caLam->ten_ca }} ({{ $caLam->gio_bat_dau }} - {{ $caLam->gio_ket_thuc }})</td>
-                            @foreach ($dates as $date)
-                                @php
-                                    $nhanViens = $chamCongs->filter(function ($chamCong) use ($caLam, $date) {
-                                        return $chamCong->ca_lam_id == $caLam->id &&
-                                            $chamCong->ngay_lam == $date->format('Y-m-d');
-                                    });
-                                @endphp
 
-                                <td>
-                                    @foreach ($nhanViens as $nhanVien)
-                                        @php
-                                            // Kiểm tra xem nhân viên này có chấm công cho ca làm cụ thể chưa
-                                            $daChamCong = collect($chamCongs)->contains(function ($chamCong) use (
-                                                $nhanVien,
-                                                $date,
-                                                $caLam,
-                                            ) {
-                                                return $chamCong->nhan_vien_id == $nhanVien->nhan_vien_id &&
-                                                    $chamCong->ca_lam_id == $caLam->id && // Đảm bảo kiểm tra đúng ca làm
-                                                    $chamCong->ngay_cham_cong == $date->format('Y-m-d'); // Đảm bảo đúng ngày
-                                            });
+        <div id="cham-cong-table" class="table-responsive">
+            @include('admin.chamcong.listchamcong')
 
-                                            // Xác định màu của badge
-                                            if ($nhanVien->deleted_at) {
-                                                $badgeClass = 'bg-danger'; // Bị hủy
-                                            } else {
-                                                $badgeClass = $daChamCong ? 'bg-success' : 'bg-warning'; // Đã chấm công hoặc chưa chấm công
-                                            }
-                                        @endphp
-
-                                        <span class="badge {{ $badgeClass }} cham-cong"
-                                            data-id="{{ $nhanVien->ca_lam_nhan_vien_id }}"
-                                            data-nhanvien-id="{{ $nhanVien->nhan_vien_id }}"
-                                            data-ngay="{{ $date->format('Y-m-d') }}" data-ca="{{ $caLam->id }}">
-                                            {{ $nhanVien->ten_nhan_vien }}
-                                        </span>
-                                        @if ($nhanVien->deleted_at)
-                                            {{-- Nút Khôi phục --}}
-                                            <form action="{{ route('cham-cong.restore') }}" method="POST"
-                                                style="display:inline;">
-                                                @csrf
-                                                <input type="hidden" name="nhan_vien_id"
-                                                    value="{{ $nhanVien->nhan_vien_id }}">
-                                                <input type="hidden" name="ca_lam_id" value="{{ $nhanVien->ca_lam_id }}">
-                                                <input type="hidden" name="ngay_cham_cong"
-                                                    value="{{ $nhanVien->ngay_cham_cong }}">
-                                                <button type="submit"
-                                                    onclick="return confirm('Bạn có chắc muốn khôi phục chấm công này không?')"
-                                                    class="btn btn-success btn-sm" title="Khôi phục">
-                                                    <i class="fa fa-recycle"></i> Khôi phục
-                                                </button>
-                                            </form>
-                                        @else
-                                            {{-- Nút Xóa --}}
-                                            <form action="{{ route('cham-cong.softDelete') }}" method="POST"
-                                                style="display:inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <input type="hidden" name="nhan_vien_id"
-                                                    value="{{ $nhanVien->nhan_vien_id }}">
-                                                <input type="hidden" name="ca_lam_id" value="{{ $nhanVien->ca_lam_id }}">
-                                                <input type="hidden" name="ngay_cham_cong"
-                                                    value="{{ $nhanVien->ngay_cham_cong }}">
-                                                <button type="submit"
-                                                    onclick="return confirm('Bạn muốn hủy chấm công nhân viên này chứ?')"
-                                                    class="btn btn-danger btn-sm" title="Xóa">
-                                                    <i class="fa fa-trash"></i> Xóa
-                                                </button>
-                                            </form>
-                                        @endif
-                                    @endforeach
-
-
-                                </td>
-                            @endforeach
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
         </div>
     </div>
 
+
     <!-- Modal chấm công -->
     @include('admin.chamcong.bangchamcong')
+
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -203,22 +107,22 @@
             });
 
             // Hàm tạo mới chấm công
-            function storeChamCong(data) {
-                $.ajax({
-                    url: "{{ route('chamcong.store') }}",
-                    type: "POST",
-                    data: data,
-                    success: function() {
-                        alert("Chấm công thành công!");
-                        $("#myModal").modal("hide"); // Ẩn modal sau khi lưu
-                        location.reload();
-                    },
-                    error: function(xhr) {
-                        console.error("Lỗi khi tạo mới chấm công:", xhr.responseText);
-                        alert("Lỗi khi tạo mới: " + xhr.responseText);
-                    }
-                });
-            }
+            // function storeChamCong(data) {
+            //     $.ajax({
+            //         url: "{{ route('chamcong.store') }}",
+            //         type: "POST",
+            //         data: data,
+            //         success: function() {
+            //             alert("Chấm công thành công!");
+            //             $("#myModal").modal("hide"); // Ẩn modal sau khi lưu
+            //             location.reload();
+            //         },
+            //         error: function(xhr) {
+            //             console.error("Lỗi khi tạo mới chấm công:", xhr.responseText);
+            //             alert("Lỗi khi tạo mới: " + xhr.responseText);
+            //         }
+            //     });
+            // }
 
             // Hàm cập nhật chấm công
             function updateChamCong(data, nhan_vien_id, ca, ngay) {
@@ -246,10 +150,28 @@
 
         });
 
-        function changeWeek(offset) {
-            let currentOffset = {{ $weekOffset }};
-            let newOffset = currentOffset + offset;
-            window.location.href = "{{ route('cham-cong.index') }}?week_offset=" + newOffset;
+        function changeDate(offset) {
+            let currentDate = $("#date-label").data("date"); // Lấy ngày hiện tại
+            let newDate = new Date(currentDate);
+            newDate.setDate(newDate.getDate() + offset); // Cộng/trừ số ngày
+
+            let formattedDate = newDate.toISOString().split('T')[0]; // Định dạng YYYY-MM-DD
+
+            $.ajax({
+                url: @json(route('cham-cong.index')), // Đảm bảo URL chính xác
+                type: "GET",
+                data: {
+                    selected_date: formattedDate // Đúng với tên biến trong controller
+                },
+                success: function(response) {
+                    $("#date-label").text(response.dayLabel); // Cập nhật nhãn ngày
+                    $("#date-label").data("date", formattedDate); // Cập nhật ngày mới
+                    $("#cham-cong-table").html(response.html); // Cập nhật bảng chấm công
+                },
+                error: function() {
+                    alert("Có lỗi xảy ra, vui lòng thử lại!");
+                }
+            });
         }
     </script>
 @endsection

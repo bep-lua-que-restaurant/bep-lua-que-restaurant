@@ -54,4 +54,6 @@ class NguyenLieu extends Model
             ->withPivot('so_luong', 'don_vi_tinh')
             ->withTimestamps();
     }
+
+    
 }
