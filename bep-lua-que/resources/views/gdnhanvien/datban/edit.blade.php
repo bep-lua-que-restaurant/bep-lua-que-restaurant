@@ -1,4 +1,4 @@
-@extends('admin.datban.layout')
+@extends('gdnhanvien.datban.layout')
 
 @section('content')
     @php
@@ -101,15 +101,6 @@
                                             </td>
                                         @endforeach
                                     @endfor
-
-
-
-
-
-
-
-
-
                                 </tr>
                             @endforeach
                         </tbody>

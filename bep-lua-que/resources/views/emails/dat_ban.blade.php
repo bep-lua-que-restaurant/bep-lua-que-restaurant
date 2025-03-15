@@ -25,19 +25,15 @@
             <p><strong>Thời gian đến:</strong> {{ $danhSachBanDat[0]->thoi_gian_den }}</p>
             <p><strong>Số điện thoại:</strong> {{ $danhSachBanDat[0]->so_dien_thoai }}</p>
             <p><strong>Số người:</strong> {{ $danhSachBanDat[0]->so_nguoi }}</p>
-            {{-- <h3 style="color: #333;">Bàn đã đặt:</h3> --}}
-            {{-- <ul>
+
+            <h3 style="color: #333;">Danh sách bàn đã đặt:</h3>
+            <ul>
                 @foreach ($danhSachBanDat as $datBan)
                     <li>Bàn số: {{ $datBan->ban_an_id }}</li>
                 @endforeach
-            </ul> --}}
+            </ul>
         </div>
 
-        {{-- <p style="text-align: center;">
-            <a href="https://yourrestaurant.com"
-                style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Xem
-                chi tiết</a>
-        </p> --}}
 
         <p style="text-align: center; font-size: 14px; color: #999;">Nhà hàng Bếp Lửa Quê - Chúng tôi mong được phục vụ
             bạn!</p>
