@@ -188,12 +188,24 @@ class ThuNganController extends Controller
 
         $daGhep = $soBanDangXuLy >= 2;
 
-        $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
-            ->join('mon_ans', 'chi_tiet_hoa_dons.mon_an_id', '=', 'mon_ans.id')
-            ->select('chi_tiet_hoa_dons.*', 'mon_ans.ten as tenMon', 'mon_ans.gia as don_gia', 'chi_tiet_hoa_dons.trang_thai') // Thêm trạng thái vào đây
+        // $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
+        //     ->join('mon_ans', 'chi_tiet_hoa_dons.mon_an_id', '=', 'mon_ans.id')
+        //     ->select('chi_tiet_hoa_dons.*', 'mon_ans.ten as tenMon', 'mon_ans.gia as don_gia', 'chi_tiet_hoa_dons.trang_thai') // Thêm trạng thái vào đây
+        //     ->get();
+
+        $chiTietHoaDon = ChiTietHoaDon::where('chi_tiet_hoa_dons.hoa_don_id', $hoaDonId)
+            ->join('mon_ans', 'chi_tiet_hoa_dons.mon_an_id', '=', 'mon_ans.id') // Join bảng mon_ans
+            ->join('hoa_dons', 'hoa_dons.id', '=', 'chi_tiet_hoa_dons.hoa_don_id') // Join bảng hoa_dons để lấy ma_hoa_don
+            ->select(
+                'chi_tiet_hoa_dons.*', // Chọn tất cả các trường từ chi_tiet_hoa_dons
+                'mon_ans.ten as tenMon', // Lấy tên món từ bảng mon_ans
+                'mon_ans.gia as don_gia', // Lấy giá món từ bảng mon_ans
+                'chi_tiet_hoa_dons.trang_thai', // Lấy trạng thái từ chi_tiet_hoa_dons
+                'hoa_dons.ma_hoa_don' // Lấy ma_hoa_don từ bảng hoa_dons
+            )
             ->get();
 
-
+        $maHoaDon = $hoaDon->ma_hoa_don;
 
         $hoaDonBan = HoaDonBan::where('hoa_don_id', $hoaDon->id)->first();
         // Lấy số người từ bảng dat_bans thông qua ban_an_id
@@ -206,14 +218,13 @@ class ThuNganController extends Controller
 
         $tenBanAn = BanAn::whereIn('id', $banAnIds)->pluck('ten_ban')->toArray();
 
-        $maHoaDon = $hoaDon->ma_hoa_don;
         // Trả về chi tiết hóa đơn cùng với số người
         return response()->json([
             'chi_tiet_hoa_don' => $chiTietHoaDon,
             'so_nguoi' => $soNguoi,
             'da_ghep' => $daGhep,
             'ten_ban_an' => $tenBanAn, // Trả về danh sách tên bàn
-            'ma_hoa_don' => $maHoaDon
+            'maHoaDon' => $maHoaDon,
         ]);
     }
 
@@ -375,6 +386,7 @@ class ThuNganController extends Controller
             $khachHangId = $khachHang->id;
         }
 
+        $khachHang = KhachHang::find($khachHangId);
         // Cập nhật trạng thái đặt bàn
         $datBanList = DatBan::whereIn('ban_an_id', $dsBanCungHoaDon)
             ->where('trang_thai', 'dang_xu_ly')
@@ -388,7 +400,16 @@ class ThuNganController extends Controller
             ]);
         }
 
-        return response()->json(['success' => true, 'message' => 'Cập nhật trạng thái thành công.']);
+        $hoaDon = HoaDon::find($hoaDonBan->hoa_don_id);
+
+        return response()->json(
+            [
+                'success' => true,
+                'message' => 'Cập nhật trạng thái thành công.',
+                'hoaDon' => $hoaDon,
+                'khachHang' => $khachHang
+            ]
+        );
     }
 
     public function addCustomer(Request $request)
@@ -434,6 +455,32 @@ class ThuNganController extends Controller
         $hoaDonHienTai = HoaDonBan::where('ban_an_id', $idBanHienTai)
             ->where('trang_thai', 'dang_xu_ly')
             ->first();
+
+        if (!$hoaDonHienTai) {
+            $hoaDon = HoaDon::create([
+                'ma_hoa_don' => $this->generateMaHoaDon(),
+                'khach_hang_id' => 0,
+                'tong_tien' => 0.00,
+                'phuong_thuc_thanh_toan' => 'tien_mat',
+                'mo_ta' => null
+            ]);
+
+            HoaDonBan::create([
+                'hoa_don_id' => $hoaDon->id, // Gán hoa_don_id của hóa đơn mới
+                'ban_an_id' => $idBanHienTai, // Gán bàn hiện tại
+                'trang_thai' => 'dang_xu_ly' // Trạng thái của hóa đơn bàn
+            ]);
+
+            // Lấy ID hóa đơn của bàn hiện tại
+            $hoaDonHienTai = HoaDonBan::where('ban_an_id', $idBanHienTai)
+                ->where('trang_thai', 'dang_xu_ly')
+                ->first();
+
+            // Cập nhật trạng thái bàn mới thành "có khách"
+            BanAn::where('id', $idBanHienTai)->update(['trang_thai' => 'co_khach']);
+            $banAn = BanAn::find($idBanHienTai);
+            event(new BanAnUpdated($banAn));
+        }
 
         // Duyệt qua từng bàn mới để ghép vào bàn hiện tại
         foreach ($idDanhSachBanMoi as $idBanMoi) {
@@ -566,40 +613,6 @@ class ThuNganController extends Controller
         ]);
     }
 
-    public function inHoaDon(Request $request)
-    {
-        try {
-            $data = array_map(function ($value) {
-                return is_string($value) ? mb_convert_encoding($value, 'UTF-8', 'auto') : $value;
-            }, $request->all());
-
-            // Render nội dung HTML từ view
-            $html = view('invoice', ['data' => $data])->render();
-            $html = mb_convert_encoding($html, 'UTF-8', 'auto');
-
-            // Khởi tạo PDF từ HTML
-            $pdf = Pdf::loadHTML($html);
-
-            // Đường dẫn lưu file
-            $filename = 'hoadon_' . time() . '.pdf';
-            $pdfPath = 'public/hoadonpdf/' . $filename;
-
-            // Lưu file vào storage
-            Storage::put($pdfPath, $pdf->output());
-
-            return response()->json([
-                'success' => true,
-                'datas' => $request->all(),
-                'pdf_url' => asset('storage/hoadonpdf/' . $filename),
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Lỗi khi tạo PDF: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
     public function getOrders(Request $request)
     {
         $banAnId = $request->ban_an_id;
@@ -613,4 +626,6 @@ class ThuNganController extends Controller
 
         return response()->json($orders);
     }
+
+
 }

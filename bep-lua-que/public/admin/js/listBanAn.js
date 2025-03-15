@@ -44,6 +44,8 @@ $(document).ready(function () {
                     loadChiTietHoaDon(response.hoa_don_id);
                     loadHoaDonThanhToan(response.hoa_don_id);
                 } else {
+                    var hoaDonId = null;
+                    loadChiTietHoaDon(hoaDonId);
                     // console.log("🔥 Bàn này chưa có hóa đơn.");
                     $("#ten-ban").data("hoaDonId", null);
                     $("#hoa-don-body").html(`
@@ -91,6 +93,12 @@ $(document).ready(function () {
     }
 
     function loadChiTietHoaDon(hoaDonId) {
+        var maHoaDonElement = document.getElementById("maHoaDon");
+        if (hoaDonId == null) {
+            maHoaDonElement.innerText = "Chưa có hóa đơn";
+            maHoaDonElement.style.color = "red";
+            return;
+        }
         $.ajax({
             url: "/hoa-don/get-details",
             method: "GET",
@@ -98,9 +106,11 @@ $(document).ready(function () {
                 hoa_don_id: hoaDonId,
             },
             success: function (response) {
+                maHoaDonElement.innerText = response.maHoaDon;
+                maHoaDonElement.style.color = "#28a745"; 
+
                 let hoaDonBody = $("#hoa-don-body");
                 hoaDonBody.empty();
-
                 let offcanvasBody = $(".offcanvas-body tbody"); // Lấy phần bảng trong offcanvas
                 offcanvasBody.empty(); // Xóa nội dung cũ
                 var soNguoi = response.so_nguoi;
@@ -173,10 +183,6 @@ $(document).ready(function () {
 
                 if (response.da_ghep == true) {
                     $("#ten-ban").text(response.ten_ban_an.join(" + "));
-                }
-
-                if (response.ma_hoa_don) {
-                    $("#ma_hoa_don").text(response.ma_hoa_don);
                 }
 
                 $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
@@ -278,10 +284,6 @@ $(document).ready(function () {
                     offcanvasBody.html(emptyRow);
                 }
 
-                if (response.ma_hoa_don) {
-                    $("#ma_hoa_don").text(response.ma_hoa_don);
-                }
-
                 $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
                 $(".so-nguoi").text(`👥 ${soNguoi}`);
                 $("#totalAmount").val(tongTien.toLocaleString() + " VND");
@@ -334,3 +336,5 @@ function showOrders(element) {
     var modal = new bootstrap.Modal(document.getElementById("ordersModal"));
     modal.show();
 }
+
+

@@ -92,7 +92,10 @@ $(document).ready(function () {
 
 $(document).ready(function () {
     $(".btn-thong-bao").on("click", function () {
-        let hoaDonId = $("#ten-ban").data("hoaDonId");
+        let hoaDonId =
+            window.luuIdHoaDon !== null && window.luuIdHoaDon !== undefined
+                ? window.luuIdHoaDon
+                : $("#ten-ban").data("hoaDonId");
 
         if (!hoaDonId) {
             alert("Không tìm thấy hóa đơn cho bàn này!");
