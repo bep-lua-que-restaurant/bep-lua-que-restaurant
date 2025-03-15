@@ -3,6 +3,7 @@
 use App\Http\Controllers\BangTinhLuongController;
 use App\Http\Controllers\CaLamNhanVienController;
 use App\Http\Controllers\ChamCongController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DanhMucMonAnController;
 use App\Http\Controllers\ComBoController;
 use App\Http\Controllers\DichVuController;
@@ -68,7 +69,10 @@ Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::c
 // Route::get('/', function () {
 //     return view('client.home');
 // });
-
+// chatbot
+Route::get('/chat', [ChatController::class, 'index'])->name('chat.index'); 
+Route::post('/chat/gui', [ChatController::class, 'guiTinNhan'])->name('chat.gui');
+Route::get('/chat/tin-nhan', [ChatController::class, 'layTinNhan'])->name('chat.layTinNhan');
 
 // Phong an
 Route::resource('phong-an', PhongAnController::class);

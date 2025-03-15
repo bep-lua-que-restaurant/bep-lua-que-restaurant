@@ -4,6 +4,7 @@ use App\Http\Controllers\ChamCongController;
 
 use App\Http\Controllers\BanAnController;
 
+use App\Http\Controllers\ChatController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BepController;
@@ -30,3 +31,5 @@ Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('cham
 
 Route::get('/get-so-luong-ban', [BanAnController::class, 'getSoLuongBan']);
 
+Route::get('/chat/tin-nhan', [ChatController::class, 'layTinNhan']);
+Route::post('/chat/gui', [ChatController::class, 'guiTinNhan']);
