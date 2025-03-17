@@ -111,30 +111,38 @@
 
                 let fromDateObj = new Date(fromDate);
                 let toDateObj = new Date(toDate);
+                let currentDate = new Date();
 
-                let fromDay = fromDateObj.getDate();
-                let fromMonth = fromDateObj.getMonth() + 1; // getMonth() trả về từ 0-11 nên cần +1
-                let fromYear = fromDateObj.getFullYear();
+                // Loại bỏ phần giờ, phút, giây
+                currentDate.setHours(0, 0, 0, 0);
+                fromDateObj.setHours(0, 0, 0, 0);
+                toDateObj.setHours(0, 0, 0, 0);
 
-                let toDay = toDateObj.getDate();
-                let toMonth = toDateObj.getMonth() + 1;
-                let toYear = toDateObj.getFullYear();
-
-                // Kiểm tra năm
-                if (toYear < fromYear) {
-                    alert("Năm của ngày kết thúc không thể nhỏ hơn năm của ngày bắt đầu!");
+                // 1️⃣ Kiểm tra năm bắt đầu không lớn hơn năm kết thúc
+                if (fromDateObj.getFullYear() > toDateObj.getFullYear()) {
+                    alert("Năm của ngày bắt đầu không thể lớn hơn năm của ngày kết thúc!");
                     return;
                 }
 
-                // Nếu cùng năm, kiểm tra tháng
-                if (toYear === fromYear && toMonth < fromMonth) {
-                    alert("Tháng của ngày kết thúc không thể nhỏ hơn tháng của ngày bắt đầu!");
+                // 2️⃣ Nếu cùng năm, kiểm tra tháng
+                if (fromDateObj.getFullYear() === toDateObj.getFullYear() &&
+                    fromDateObj.getMonth() > toDateObj.getMonth()) {
+                    alert("Tháng của ngày bắt đầu không thể lớn hơn tháng của ngày kết thúc!");
                     return;
                 }
 
-                // Nếu cùng năm và tháng, kiểm tra ngày
-                if (toYear === fromYear && toMonth === fromMonth && toDay < fromDay) {
-                    alert("Ngày kết thúc không thể nhỏ hơn ngày bắt đầu!");
+                // 3️⃣ Nếu cùng năm và tháng, kiểm tra ngày
+                if (fromDateObj.getFullYear() === toDateObj.getFullYear() &&
+                    fromDateObj.getMonth() === toDateObj.getMonth() &&
+                    fromDateObj.getDate() > toDateObj.getDate()) {
+                    alert("Ngày bắt đầu không thể lớn hơn ngày kết thúc!");
+                    return;
+                }
+
+                // 4️⃣ Kiểm tra ngày không lớn hơn ngày hiện tại
+                if (fromDateObj > currentDate || toDateObj > currentDate) {
+                    alert("Chỉ lọc đến ngày hiện tại! Vui lòng chọn đến ngày " +
+                        currentDate.toLocaleDateString('vi-VN') + ".");
                     return;
                 }
 

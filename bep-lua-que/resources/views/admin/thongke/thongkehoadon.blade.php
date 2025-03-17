@@ -98,10 +98,49 @@
             $('#btnFilter').on('click', function () {
                 let fromDate = $('#startDate').val();
                 let toDate = $('#endDate').val();
+
                 if (!fromDate || !toDate) {
                     alert("Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc!");
                     return;
                 }
+
+                let fromDateObj = new Date(fromDate);
+                let toDateObj = new Date(toDate);
+                let currentDate = new Date();
+
+                // Loại bỏ phần giờ, phút, giây
+                currentDate.setHours(0, 0, 0, 0);
+                fromDateObj.setHours(0, 0, 0, 0);
+                toDateObj.setHours(0, 0, 0, 0);
+
+                // 1️⃣ Kiểm tra năm bắt đầu không lớn hơn năm kết thúc
+                if (fromDateObj.getFullYear() > toDateObj.getFullYear()) {
+                    alert("Năm của ngày bắt đầu không thể lớn hơn năm của ngày kết thúc!");
+                    return;
+                }
+
+                // 2️⃣ Nếu cùng năm, kiểm tra tháng
+                if (fromDateObj.getFullYear() === toDateObj.getFullYear() &&
+                    fromDateObj.getMonth() > toDateObj.getMonth()) {
+                    alert("Tháng của ngày bắt đầu không thể lớn hơn tháng của ngày kết thúc!");
+                    return;
+                }
+
+                // 3️⃣ Nếu cùng năm và tháng, kiểm tra ngày
+                if (fromDateObj.getFullYear() === toDateObj.getFullYear() &&
+                    fromDateObj.getMonth() === toDateObj.getMonth() &&
+                    fromDateObj.getDate() > toDateObj.getDate()) {
+                    alert("Ngày bắt đầu không thể lớn hơn ngày kết thúc!");
+                    return;
+                }
+
+                // 4️⃣ Kiểm tra ngày không lớn hơn ngày hiện tại
+                if (fromDateObj > currentDate || toDateObj > currentDate) {
+                    alert("Chỉ lọc đến ngày hiện tại! Vui lòng chọn đến ngày " +
+                        currentDate.toLocaleDateString('vi-VN') + ".");
+                    return;
+                }
+
                 $.ajax({
                     url: "/thong-ke-hoa-don",
                     type: "GET",
