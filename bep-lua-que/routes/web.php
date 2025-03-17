@@ -16,7 +16,6 @@ use App\Http\Controllers\ThongKeSoLuongHoaDonController;
 use App\Http\Controllers\ThongKeSoLuongKhachController;
 use App\Http\Controllers\ThongKeTopDoanhThuController;
 use Illuminate\Support\Facades\Route;
-use App\Models\PhongAn;
 use App\Http\Controllers\TableBookedController;
 use App\Http\Controllers\CaLamController;
 use App\Http\Controllers\MonAnController;
@@ -31,7 +30,6 @@ use App\Http\Controllers\ThongKeController;
 use App\Http\Controllers\PhieuNhapKhoController;
 use App\Http\Controllers\MaGiamGiaController;
 use App\Http\Controllers\XinNghiController;
-use App\Models\CaLam;
 use Illuminate\Support\Facades\Log;
 
 Route::get('/', function () {
