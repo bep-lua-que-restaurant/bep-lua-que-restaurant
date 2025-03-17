@@ -30,4 +30,9 @@ class BanAn extends Model
             ->withPivot('trang_thai')
             ->withTimestamps();
     }
+    public function scopeTrangThaiBan($query, $tenBan)
+{
+    return $query->where('ten_ban', $tenBan)->first();
+}
+
 }

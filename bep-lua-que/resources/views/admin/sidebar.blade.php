@@ -28,20 +28,23 @@
                     <li><a href="{{ route('mon-an.index') }}">Món ăn</a></li>
                     <li><a href="{{ route('dich-vu.index') }}">Dịch vụ</a></li>
                     <li><a href="{{ route('com-bo.index') }}">Combo - đóng gói</a></li>
-                </ul>
-                <ul aria-expanded="false">
+
                     <li><a href="{{ route('ma-giam-gia.index') }}">Mã giảm giá</a></li>
                 </ul>
+                {{-- <ul aria-expanded="false">
+                    <li><a href="{{ route('loai-nguyen-lieu.index') }}">Loại nguyên liệu</a></li>
+
+                </ul> --}}
             </li>
 
             {{-- Phòng bàn --}}
             <li>
                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                    <i class="fa fa-list"></i>
-                    <span class="nav-text">Phòng\Bàn</span>
+                    <i class="fas fa-utensils"></i>
+                    <span class="nav-text">Bàn</span>
                 </a>
                 <ul aria-expanded="false">
-                    <li><a href="{{ route('phong-an.index') }}">Phòng Ăn</a></li>
+                    {{-- <li><a href="{{ route('phong-an.index') }}">Phòng Ăn</a></li> --}}
                     <li><a href="{{ route('ban-an.index') }}">Bàn Ăn</a></li>
                 </ul>
             </li>
@@ -67,19 +70,19 @@
                 <ul aria-expanded="false">
                     <li><a href="{{ route('hoa-don.index') }}">Hóa đơn</a></li>
                 </ul>
-                <ul aria-expanded="false">
+                {{-- <ul aria-expanded="false">
                     <li><a href="#">Trả hàng</a></li>
-                </ul>
+                </ul> --}}
 
-                <ul aria-expanded="false">
+                {{-- <ul aria-expanded="false">
                     <li><a href="{{ route('phieu-nhap-kho.index') }}">Nhập hàng</a></li>
-                    {{-- <li><a href="#">Trả hàng nhập</a></li> --}}
-                    {{-- <li><a href="#">Xuất hàng</a></li> --}}
-                </ul>
+                    <li><a href="#">Trả hàng nhập</a></li>
+                    <li><a href="#">Xuất hàng</a></li>
+                </ul> --}}
             </li>
 
             {{-- Đối tác --}}
-            <li>
+            {{-- <li>
                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                     <i class="fa fa-briefcase"></i>
                     <span class="nav-text">Đối tác</span>
@@ -90,14 +93,15 @@
                     <li><a href="{{ route('nha-cung-cap.index') }}">Nhà cung cấp</a></li>
                     <li><a href="#">Đối tác giao hàng</a></li>
                 </ul>
-            </li>
+            </li> --}}
 
             {{-- Nhân viên --}}
             <li>
                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                    <i class="fa fa-users"></i>
+                    <i class="fa fa-id-badge"></i>
                     <span class="nav-text">Nhân viên</span>
                 </a>
+
                 <ul aria-expanded="false">
                     <li><a href="{{ route('nhan-vien.index') }}">Nhân viên</a></li>
 
@@ -106,7 +110,7 @@
                     <li><a href="{{ route('ca-lam.index') }}">Ca làm</a></li>
                 </ul>
                 <ul aria-expanded="false">
-                    <li><a href="{{ route('ca-lam-nhan-vien.index') }}">Quản lí ca </a></li>
+                    <li><a href="{{ route('ca-lam-nhan-vien.index') }}">Quản lí ca làm nhân viên </a></li>
                 </ul>
                 <ul aria-expanded="false">
 
@@ -114,7 +118,7 @@
 
 
                     <li><a href="{{ route('luong.index') }}">Bảng tính lương</a></li>
-                    <li><a href="#">Thiết lập nhân viên</a></li>
+                    {{-- <li><a href="#">Thiết lập nhân viên</a></li> --}}
                 </ul>
             </li>
 

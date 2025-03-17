@@ -79,7 +79,6 @@ class HoaDonController extends Controller
                 'phuong_thuc_thanh_toan' => 'tien_mat',
                 'mo_ta' => null
             ]);
-            // Nạp luôn chi tiết hóa đơn để gửi đầy đủ dữ liệu
 
             // Liên kết hóa đơn với bàn ăn (trạng thái `dang_xu_ly`)
             $hoaDonBan = HoaDonBan::create([
@@ -122,21 +121,28 @@ class HoaDonController extends Controller
             BanAn::where('id', $banAnId)->update(['trang_thai' => 'co_khach']);
         }
 
-        $datBan = DatBan::where('ban_an_id', $banAnId)->get();
-        // Kiểm tra xem có bản ghi nào đang xử lý không
-        $coDangXuLy = $datBan->contains('trang_thai', 'dang_xu_ly');
+        // Lấy danh sách các đặt bàn của bàn ăn đó
+        $datBan = DatBan::where('ban_an_id', $banAnId)
+            ->whereIn('trang_thai', ['dang_xu_ly', 'xac_nhan'])
+            ->exists(); // Kiểm tra xem có bản ghi nào không
 
-        if (!$coDangXuLy) {
+        // Nếu không có đặt bàn nào đang xử lý hoặc xác nhận, thì tạo mới
+        if (!$datBan) {
+            $maDatBan = DatBan::generateMaDatBan();
+
             DatBan::create([
                 'ban_an_id' => $banAnId,
                 'khach_hang_id' => 0, // Nếu không có khách hàng thì để null
                 'so_dien_thoai' => '0', // Nếu không có số điện thoại thì để null
-                'thoi_gian_den' => Carbon::now(), // Sử dụng Carbon để lấy thời gian hiện tại theo múi giờ Việt Nam
-                'so_nguoi' => 1, // Sử dụng số người từ request hoặc mặc định là 1
-                'trang_thai' => 'dang_xu_ly', // Trạng thái mặc định là 'dang_xu_ly'
-                'mo_ta' => null, // Nếu không có mô tả, để null
+                'gio_du_kien' => Carbon::now(),
+                'thoi_gian_den' => Carbon::now(),
+                'so_nguoi' => 1, // Mặc định là 1 người
+                'trang_thai' => 'xac_nhan',
+                'ma_dat_ban' => $maDatBan,
+                'mo_ta' => null,
             ]);
         }
+
 
         // Nạp luôn chi tiết hóa đơn để gửi đầy đủ dữ liệu
         $hoaDon = HoaDon::with('chiTietHoaDons')->find($hoaDon->id);
@@ -144,7 +150,6 @@ class HoaDonController extends Controller
         event(new HoaDonUpdated($hoaDon));
 
         return response()->json([
-            'message' => 'Hóa đơn đã được cập nhật',
             'data' => $hoaDon
         ], 200);
     }
