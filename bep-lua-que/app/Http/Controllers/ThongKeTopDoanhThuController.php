@@ -12,6 +12,7 @@ class ThongKeTopDoanhThuController extends Controller
     public function index(Request $request)
     {
         $filterType = $request->input('filterType', 'day');
+        $chartType = $request->input('chartType', 'gioBanChay'); // Lấy giá trị mặc định là giờ bán chạy
         $fromDate = $request->input('fromDate');
         $toDate = $request->input('toDate');
 
@@ -45,20 +46,25 @@ class ThongKeTopDoanhThuController extends Controller
             }
         }
 
-        // Tính tổng doanh thu của tất cả hóa đơn
+        // Tính tổng doanh thu
         $totalSales = $query->sum('tong_tien');
 
-        // Lấy top 8 giờ có doanh thu cao nhất
-        $topDoanhThu = $query->select(
+        // Lấy dữ liệu giờ bán chạy hoặc bán ít
+        $topDoanhThuQuery = $query->select(
             DB::raw("DATE_FORMAT(created_at, '%H:%i') as hour"),
             DB::raw("SUM(tong_tien) as total_revenue")
         )
-            ->groupBy('hour')
-            ->orderByDesc('total_revenue')
-            ->limit(6)
-            ->get();
+            ->groupBy('hour');
 
-        // Gán dữ liệu để hiển thị biểu đồ
+        if ($chartType == 'gioBanChay') {
+            $topDoanhThuQuery->orderByDesc('total_revenue'); // Sắp xếp giảm dần
+        } else {
+            $topDoanhThuQuery->orderBy('total_revenue'); // Sắp xếp tăng dần
+        }
+
+        $topDoanhThu = $topDoanhThuQuery->limit(3)->get();
+
+        // Gán dữ liệu cho biểu đồ
         $labels = $topDoanhThu->pluck('hour')->toArray();
         $data = $topDoanhThu->pluck('total_revenue')->toArray();
 
@@ -66,11 +72,11 @@ class ThongKeTopDoanhThuController extends Controller
             return response()->json([
                 'labels' => $labels,
                 'data' => $data,
-                'totalSales' => number_format($totalSales, 0, ',', '.'), // Format số tiền đúng chuẩn
+                'totalSales' => number_format($totalSales, 0, ',', '.'),
                 'filterType' => $filterType,
             ]);
         }
 
-        return view('admin.thongke.topdoanhthu', compact('labels', 'data', 'filterType', 'totalSales'));
+        return view('admin.thongke.topdoanhthu', compact('labels', 'data', 'filterType', 'totalSales', 'chartType'));
     }
 }

@@ -89,7 +89,6 @@
                     type: "GET",
                     data: { filterType: filterType },
                     success: function (response) {
-                        console.log(response)
                         $('#totalSales').text(response.totalSales);
                         $('#timeRange').text(filterType === 'year' ? 'TRONG NĂM' : filterType === 'month' ? 'TRONG THÁNG' : filterType === 'week' ? 'TRONG TUẦN' : 'TRONG NGÀY');
                         updateChart(response.labels, response.data, filterType);
@@ -139,14 +138,19 @@
                     return;
                 }
 
+                // Format lại ngày thành DD-MM-YYYY
+                function formatDate(dateString) {
+                    let parts = dateString.split(/[-\/]/); // Tách theo cả '-' và '/'
+                    return `${parts[2]}-${parts[1]}-${parts[0]}`; // Định dạng DD-MM-YYYY
+                }
+
                 $.ajax({
                     url: "/thong-ke-doanh-so",
                     type: "GET",
                     data: { fromDate: fromDate, toDate: toDate },
                     success: function (response) {
-                        console.log(response)
                         $('#totalSales').text(response.totalSales);
-                        $('#timeRange').text(`TỪ ${fromDate} ĐẾN ${toDate}`);
+                        $('#timeRange').text(`TỪ ${formatDate(fromDate)} ĐẾN ${formatDate(toDate)}`);
 
                         let from = new Date(fromDate);
                         let to = new Date(toDate);

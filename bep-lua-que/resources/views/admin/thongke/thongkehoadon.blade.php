@@ -79,7 +79,6 @@
                     type: "GET",
                     data: { filterType: filterType },
                     success: function (response) {
-                        console.log(response);  // Kiểm tra dữ liệu nhận được
                         $('#totalInvoices').text(response.totalOrders);
                         $('#timeRange').text(filterType === 'year' ? 'TRONG NĂM' : filterType === 'month' ? 'TRONG THÁNG' : 'TRONG NGÀY');
                         updateChart(response.labels, response.data, filterType);
@@ -89,6 +88,12 @@
                     }
                 });
             });
+
+            // Format lại ngày thành DD-MM-YYYY
+            function formatDate(dateString) {
+                let parts = dateString.split(/[-\/]/); // Tách theo cả '-' và '/'
+                return `${parts[2]}-${parts[1]}-${parts[0]}`; // Định dạng DD-MM-YYYY
+            }
 
             $('#btnFilter').on('click', function () {
                 let fromDate = $('#startDate').val();
@@ -103,8 +108,14 @@
                     data: { fromDate: fromDate, toDate: toDate },
                     success: function (response) {
                         $('#totalInvoices').text(response.totalOrders);
-                        $('#timeRange').text(`TỪ ${fromDate} ĐẾN ${toDate}`);
-                        updateChart(response.labels, response.data);
+                        $('#timeRange').text(`TỪ ${formatDate(fromDate)} ĐẾN ${formatDate(toDate)}`);
+                        let from = new Date(fromDate);
+                        let to = new Date(toDate);
+                        let diffDays = (to - from) / (1000 * 60 * 60 * 24);
+
+                        let formatType = diffDays > 365 ? 'year' : diffDays > 30 ? 'month' : 'day';
+
+                        updateChart(response.labels, response.data, formatType);
                     },
                     error: function () {
                         alert('Lỗi tải dữ liệu, vui lòng thử lại.');

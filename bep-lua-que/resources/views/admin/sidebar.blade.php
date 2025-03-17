@@ -14,7 +14,6 @@
 
                     <li><a href="{{ route('thongke.thongkesoluongkhach') }}">Thống kê số lượng khách hàng</a></li>
                     <li><a href="{{ route('thongke.thongkemonan') }}">Thống kê món ăn</a></li>
-                    <li><a href="#">Thống kê chưa nghĩ ra</a></li>
                 </ul>
             </li>
             {{-- Hàng hóa --}}
