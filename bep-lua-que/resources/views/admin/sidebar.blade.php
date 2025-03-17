@@ -9,6 +9,9 @@
                 </a>
                 <ul aria-expanded="false">
                     <li><a href="{{ route('thongke.thongkedoanhso') }}">Thống kê doanh số</a></li>
+                    <li><a href="{{ route('thongke.thongkehoadon') }}">Thống kê số lượng hóa đơn</a></li>
+                    <li><a href="{{ route('thongke.topdoanhthu') }}">Thống kê top doanh thu</a></li>
+
                     <li><a href="{{ route('thongke.thongkesoluongkhach') }}">Thống kê số lượng khách hàng</a></li>
                     <li><a href="{{ route('thongke.thongkemonan') }}">Thống kê món ăn</a></li>
                     <li><a href="#">Thống kê chưa nghĩ ra</a></li>

@@ -12,7 +12,9 @@ use App\Http\Controllers\PhongAnController;
 use App\Http\Controllers\LuongController;
 use App\Http\Controllers\ThongKeDoanhSoController;
 use App\Http\Controllers\ThongKeMonAnController;
+use App\Http\Controllers\ThongKeSoLuongHoaDonController;
 use App\Http\Controllers\ThongKeSoLuongKhachController;
+use App\Http\Controllers\ThongKeTopDoanhThuController;
 use Illuminate\Support\Facades\Route;
 use App\Models\PhongAn;
 use App\Http\Controllers\TableBookedController;
@@ -38,6 +40,9 @@ Route::get('/', function () {
 
 Route::get('/', [ThongKeController::class, 'index'])->name('dashboard');
 Route::get('/thong-ke-doanh-so', [ThongKeDoanhSoController::class, 'index'])->name('thongke.thongkedoanhso');
+Route::get('/thong-ke-hoa-don', [ThongKeSoLuongHoaDonController::class, 'index'])->name('thongke.thongkehoadon');
+Route::get('/thong-ke-top-doanh-thu', [ThongKeTopDoanhThuController::class, 'index'])->name('thongke.topdoanhthu');
+
 Route::get('/thong-ke-so-luong-khach', [ThongKeSoLuongKhachController::class, 'index'])->name('thongke.thongkesoluongkhach');
 
 

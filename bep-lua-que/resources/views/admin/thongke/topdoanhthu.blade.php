@@ -1,20 +1,23 @@
 @extends('layouts.admin')
 
 @section('title')
-    Thống kê doanh số
+    Thống kê Top 8 Doanh Thu Cao Nhất
 @endsection
 
 @section('content')
     <div class="container">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title fw-bold">DOANH SỐ <span id="timeRange">
-                    @if ($filterType == 'year') TRONG NĂM @elseif ($filterType == 'month') TRONG THÁNG @elseif ($filterType == 'week') TRONG TUẦN @else TRONG NGÀY @endif
+                <h5 class="card-title fw-bold">TOP 8 DOANH THU CAO NHẤT <span id="timeRange">
+                    @if ($filterType == 'year') TRONG NĂM
+                        @elseif ($filterType == 'month') TRONG THÁNG
+                        @elseif ($filterType == 'week') TRONG TUẦN
+                        @else TRONG NGÀY @endif
                 </span></h5>
 
                 <h5 class="text-primary fw-bold">
-                    <i class="bi bi-info-circle"></i>
-                    <span id="totalSales">{{ number_format(array_sum($data), 0, ',', '.') }} VND</span>
+{{--                    <i class="bi bi-info-circle"></i>--}}
+{{--                    <span id="totalSales">{{ number_format($totalSales, 0, ',', '.') }} VND</span>--}}
                 </h5>
 
                 <form id="filterForm">
@@ -35,8 +38,9 @@
                         </div>
                     </div>
                 </form>
+
                 <!-- Biểu đồ -->
-                <canvas id="thongKeChart" height="100"></canvas>
+                <canvas id="topDoanhThuChart" height="100"></canvas>
             </div>
         </div>
     </div>
@@ -48,11 +52,11 @@
         $(document).ready(function () {
             let chart;
 
-            function updateChart(labels, data, formatType) {
+            function updateChart(labels, data) {
                 if (chart) {
                     chart.destroy();
                 }
-                let ctx = document.getElementById('thongKeChart').getContext('2d');
+                let ctx = document.getElementById('topDoanhThuChart').getContext('2d');
                 chart = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -71,7 +75,7 @@
                             x: {
                                 title: {
                                     display: true,
-                                    text: formatType === 'day' ? 'Ngày' : formatType === 'month' ? 'Tháng' : formatType === 'year' ? 'Năm' : 'Tuần'
+                                    text: 'Thời gian (Giờ:Phút)'
                                 }
                             },
                             y: { beginAtZero: true }
@@ -80,19 +84,19 @@
                 });
             }
 
-            // Xử lý tự động khi thay đổi bộ lọc năm/tháng/tuần/ngày
+            // Xử lý khi thay đổi bộ lọc
             $('#filterType').on('change', function () {
                 let filterType = $(this).val();
 
                 $.ajax({
-                    url: "/thong-ke-doanh-so",
+                    url: "/thong-ke-top-doanh-thu",
                     type: "GET",
                     data: { filterType: filterType },
                     success: function (response) {
                         console.log(response)
-                        $('#totalSales').text(response.totalSales);
+                        $('#totalSales').text(response.totalSales + " VND");
                         $('#timeRange').text(filterType === 'year' ? 'TRONG NĂM' : filterType === 'month' ? 'TRONG THÁNG' : filterType === 'week' ? 'TRONG TUẦN' : 'TRONG NGÀY');
-                        updateChart(response.labels, response.data, filterType);
+                        updateChart(response.labels, response.data);
                     },
                     error: function () {
                         alert('Lỗi tải dữ liệu, vui lòng thử lại.');
@@ -100,7 +104,7 @@
                 });
             });
 
-            // Xử lý lọc theo khoảng ngày tháng năm
+            // Xử lý lọc theo khoảng thời gian
             $('#btnFilter').on('click', function () {
                 let fromDate = $('#startDate').val();
                 let toDate = $('#endDate').val();
@@ -113,48 +117,20 @@
                 let fromDateObj = new Date(fromDate);
                 let toDateObj = new Date(toDate);
 
-                let fromDay = fromDateObj.getDate();
-                let fromMonth = fromDateObj.getMonth() + 1; // getMonth() trả về từ 0-11 nên cần +1
-                let fromYear = fromDateObj.getFullYear();
-
-                let toDay = toDateObj.getDate();
-                let toMonth = toDateObj.getMonth() + 1;
-                let toYear = toDateObj.getFullYear();
-
-                // Kiểm tra năm
-                if (toYear < fromYear) {
-                    alert("Năm của ngày kết thúc không thể nhỏ hơn năm của ngày bắt đầu!");
-                    return;
-                }
-
-                // Nếu cùng năm, kiểm tra tháng
-                if (toYear === fromYear && toMonth < fromMonth) {
-                    alert("Tháng của ngày kết thúc không thể nhỏ hơn tháng của ngày bắt đầu!");
-                    return;
-                }
-
-                // Nếu cùng năm và tháng, kiểm tra ngày
-                if (toYear === fromYear && toMonth === fromMonth && toDay < fromDay) {
+                if (toDateObj < fromDateObj) {
                     alert("Ngày kết thúc không thể nhỏ hơn ngày bắt đầu!");
                     return;
                 }
 
                 $.ajax({
-                    url: "/thong-ke-doanh-so",
+                    url: "/thong-ke-top-doanh-thu",
                     type: "GET",
                     data: { fromDate: fromDate, toDate: toDate },
                     success: function (response) {
                         console.log(response)
-                        $('#totalSales').text(response.totalSales);
+                        $('#totalSales').text(response.totalSales + " VND");
                         $('#timeRange').text(`TỪ ${fromDate} ĐẾN ${toDate}`);
-
-                        let from = new Date(fromDate);
-                        let to = new Date(toDate);
-                        let diffDays = (to - from) / (1000 * 60 * 60 * 24);
-
-                        let formatType = diffDays > 365 ? 'year' : diffDays > 30 ? 'month' : 'day';
-
-                        updateChart(response.labels, response.data, formatType);
+                        updateChart(response.labels, response.data);
                     },
                     error: function () {
                         alert('Lỗi tải dữ liệu, vui lòng thử lại.');
@@ -163,7 +139,7 @@
             });
 
             // Cập nhật biểu đồ ban đầu
-            updateChart(@json($labels), @json($data), 'day');
+            updateChart(@json($labels), @json($data));
         });
     </script>
 @endsection
