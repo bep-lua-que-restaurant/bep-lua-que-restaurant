@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\BanAnUpdated;
 use App\Events\DatBanCreated;
+use App\Events\DatBanUpdated;
 use App\Http\Requests\StoreDatBanRequest;
 use App\Models\DatBan;
 use App\Http\Requests\UpdateDatBanRequest;
@@ -17,8 +18,9 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\DatBanMail;
 use App\Models\HoaDon;
 use App\Models\HoaDonBan;
-
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+
 
 class DatBanController extends Controller
 {
@@ -38,32 +40,48 @@ class DatBanController extends Controller
         return view('gdnhanvien.datban.indexngay', compact('today'));
     }
 
+
+    public function getDatBan($maDatBan)
+    {
+        $datBans = DatBan::where('ma_dat_ban', $maDatBan)->with('banAn')->get();
+
+        if ($datBans->isEmpty()) {
+            return response()->json(['message' => 'Không tìm thấy đặt bàn'], 404);
+        }
+
+        return response()->json([
+            'ho_ten' => $datBans->first()->khachHang->ho_ten ?? null, // Lấy thông tin khách hàng từ dòng đầu tiên
+            'so_dien_thoai' => $datBans->first()->so_dien_thoai,
+            'so_nguoi' => $datBans->sum('so_nguoi'), // Tổng số người từ tất cả các dòng
+            'mo_ta' => $datBans->first()->mo_ta,
+            'ban_ans' => $datBans->pluck('banAn.ten_ban')->toArray(), // Lấy danh sách tên bàn
+        ]);
+    }
+
+
     public function getDatBanByDate(Request $request)
     {
         $date = $request->input('date', Carbon::now('Asia/Ho_Chi_Minh')->toDateString());
 
         // Lấy danh sách bàn (PHÂN TRANG 10 bàn/trang)
         $banPhong = BanAn::whereNull('deleted_at')
-            ->whereHas('phongAn', function ($query) {
-                $query->whereNull('deleted_at');
-            })
-            ->orderBy('vi_tri')
             ->orderBy('id')
             ->paginate(10); // Sử dụng phân trang
 
-        // Lấy danh sách đặt bàn theo ngày
+        // Lấy danh sách đặt bàn theo ngày, loại bỏ trạng thái 'da_huy' và 'da_thanh_toan'
         $datBans = DatBan::whereDate('thoi_gian_den', $date)
             ->whereIn('ban_an_id', $banPhong->pluck('id'))
             ->whereNull('deleted_at')
-            ->whereIn('trang_thai', ['dang_xu_ly', 'xac_nhan'])
+            ->whereNotIn('trang_thai', ['da_huy', 'da_thanh_toan']) // Loại bỏ trạng thái không mong muốn
             ->get();
-
 
         return response()->json([
             'banPhong' => $banPhong, // Trả về danh sách có phân trang
             'datBans' => $datBans
         ]);
     }
+
+
 
     public function DanhSach()
     {
@@ -223,6 +241,7 @@ class DatBanController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->mo_ta);
         $request->validate([
             'customer_name'  => 'required|string|max:255',
             'customer_email' => 'nullable|email',
@@ -258,7 +277,7 @@ class DatBanController extends Controller
                     'so_dien_thoai' => $customer->so_dien_thoai,
                     'thoi_gian_den' => $request->thoi_gian_den,
                     'gio_du_kien'   => $request->gio_du_kien,
-                    'mo_ta'         => $request->mo_ta ?? 'Đặt bàn qua hệ thống',
+                    'mo_ta'         => $request->mo_ta,
                     'so_nguoi'      => $request->num_people,
                     'ban_an_id'     => $banAnId,
                     'ma_dat_ban'    => $maDatBan,
@@ -274,7 +293,8 @@ class DatBanController extends Controller
             }
 
             // Sau khi xử lý hết các bàn đặt
-            event(new DatBanCreated($customer, $danhSachBanDat));
+            // event(new DatBanCreated($danhSachBanDat));
+            event(new DatBanCreated($danhSachBanDat, $customer));
 
 
             // Phát sự kiện cập nhật bàn ăn (1 lần, tránh spam event)
@@ -317,23 +337,17 @@ class DatBanController extends Controller
         $datBan = $datBans->first();
 
         // Trả về dữ liệu JSON
-        return response()->json([
-            'error' => false,
-            'datBan' => $datBan,
-            'datBans' => $datBans,
-        ]);
+        // return response()->json([
+        //     'error' => false,
+        //     'datBan' => $datBan,
+        //     'datBans' => $datBans,
+        // ]);
+        return view('gdnhanvien.datban.show', compact('datBan', 'datBans'));
     }
-
-
-
 
     /**
      * Show the form for editing the specified resource.
      */
-    // use Carbon\Carbon;
-
-    // use Carbon\Carbon;
-
     public function edit($maDatBan)
     {
         // Lấy thông tin đặt bàn chính
@@ -353,13 +367,15 @@ class DatBanController extends Controller
         // dd($datBanCurrent->toArray());
 
         // Lấy tất cả các đơn đặt bàn, trừ ma_dat_ban hiện tại
-        $datBansOther = DatBan::where('ma_dat_ban', '!=', $maDatBan)->get();
+        $datBansOther = DatBan::where('ma_dat_ban', '!=', $maDatBan)
+            ->whereIn('trang_thai', ['dang_xu_ly', 'xac_nhan'])
+            ->get();
+
         // dd($datBansOther->toArray());
 
         // Truyền dữ liệu vào view
         return view('gdnhanvien.datban.edit', compact('datBan', 'banAns', 'datBanCurrent', 'datBansOther', 'maDatBan'));
     }
-
 
     /**
      * Update the specified resource in storage.
@@ -368,7 +384,7 @@ class DatBanController extends Controller
     private function generateMaHoaDon()
     {
         // Lấy ngày hiện tại theo định dạng YYYYMMDD
-        $date = date(format: 'Ymd');
+        $date = date('Ymd');
 
         // Tạo một số ngẫu nhiên có 4 chữ số
         $randomNumber = strtoupper(uniqid()); // Dùng uniqid để tạo một chuỗi ngẫu nhiên
@@ -380,67 +396,78 @@ class DatBanController extends Controller
     }
     public function update(UpdateDatBanRequest $request, $maDatBan)
     {
-        // dd($request->toArray());
-        // dd($maDatBan);
-        // 1. Xoá hết đơn đặt bàn với ma_dat_ban hiện tại
-        DatBan::where('ma_dat_ban', $maDatBan)->delete();
+        DB::beginTransaction(); // Bắt đầu transaction
 
+        try {
+            // Xóa đơn đặt bàn cũ
+            DatBan::where('ma_dat_ban', $maDatBan)->forceDelete();
 
-        $thoiGianDen = Carbon::createFromFormat('Y-m-d', $request->ngay_den)->format('Y-m-d') . ' ' . $request->thoi_gian_den . ':00';
-        $gioDuKien = Carbon::createFromFormat('H:i', $request->gio_du_kien)->format('H:i') . ':00';
-        // 2. Thêm mới đơn đặt bàn cho từng ban_an_id
-        $banAnIds = json_decode($request->ban_an_ids, true);
+            // Xử lý thời gian đúng định dạng
+            $thoiGianDen = Carbon::parse($request->thoi_gian_den)->format('Y-m-d H:i:s');
+            $gioDuKien = Carbon::parse($request->gio_du_kien)->format('H:i:s');
 
-        foreach ($banAnIds as $banAnId) {
-            $datBan = DatBan::create([
-                'ma_dat_ban'     => $maDatBan,
-                'ban_an_id'      => $banAnId,
-                'thoi_gian_den' => $thoiGianDen,
-                'gio_du_kien' => $gioDuKien,
-                'khach_hang_id'  => $request->khach_hang_id,
-                'so_dien_thoai'  => $request->so_dien_thoai,
-                'so_nguoi'       => $request->so_nguoi,
-                'mo_ta'          => $request->mo_ta,
-                'trang_thai'     => 'xac_nhan',
-                'created_at'     => now(),
-                'updated_at'     => now(),
-            ]);
-        }
+            // Chuyển danh sách bàn từ chuỗi thành mảng
+            $banAnIds = explode(',', $request->ban_an_ids);
+            $danhSachBanDat = [];
 
-        // 3. Tạo hóa đơn mới
-        $maHoaDon = $this->generateMaHoaDon();
-        $hoaDon = HoaDon::create([
-            'ma_hoa_don' => $maHoaDon,
-            'khach_hang_id' => $request->khach_hang_id,
-            'tong_tien' => 0,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+            // Lấy danh sách bàn ăn cần cập nhật
+            $banAnList = BanAn::whereIn('id', $banAnIds)->get()->keyBy('id');
 
+            // Tạo mới đơn đặt bàn cho từng bàn ăn
+            foreach ($banAnIds as $banAnId) {
+                $datBan = DatBan::create([
+                    'ma_dat_ban'     => $maDatBan,
+                    'ban_an_id'      => $banAnId,
+                    'thoi_gian_den'  => $thoiGianDen,
+                    'gio_du_kien'    => $gioDuKien,
+                    'khach_hang_id'  => $request->khach_hang_id,
+                    'so_dien_thoai'  => $request->so_dien_thoai,
+                    'so_nguoi'       => $request->so_nguoi,
+                    'mo_ta'          => $request->mo_ta,
+                    'trang_thai'     => 'xac_nhan',
+                    'created_at'     => now(),
+                    'updated_at'     => now(),
+                ]);
 
-
-        // 4. Tạo danh sách hoá đơn bàn
-        foreach ($banAnIds as $banAnId) {
-            HoaDonBan::create([
-                'ban_an_id' => $banAnId,
-                'hoa_don_id' => $hoaDon->id,
-                'trang_thai' => 'dang_xu_ly',
-            ]);
-
-            // ✅ Cập nhật trạng thái bàn ăn thành "có khách"
-            $banAn = BanAn::find($banAnId);
-            if ($banAn) {
-                $banAn->update(['trang_thai' => 'co_khach']);
-                event(new BanAnUpdated($banAn));
-                // ✅ Phát sự kiện real-time khi trạng thái bàn thay đổi
-                event(new BanAnUpdated($banAn));
+                $danhSachBanDat[] = $datBan;
             }
+
+            // Phát sự kiện cập nhật đặt bàn
+            event(new DatBanUpdated($danhSachBanDat));
+
+            // Tạo hóa đơn mới
+            $maHoaDon = $this->generateMaHoaDon();
+            $hoaDon = HoaDon::create([
+                'ma_hoa_don'    => $maHoaDon,
+                'ma_dat_ban'    => $maDatBan,
+                'khach_hang_id' => $request->khach_hang_id,
+                'tong_tien'     => 0,
+                'created_at'    => now(),
+                'updated_at'    => now(),
+            ]);
+
+            // Tạo danh sách hóa đơn bàn
+            foreach ($banAnIds as $banAnId) {
+                HoaDonBan::create([
+                    'ban_an_id' => $banAnId,
+                    'hoa_don_id' => $hoaDon->id,
+                    'trang_thai' => 'dang_xu_ly',
+                ]);
+
+                // Cập nhật trạng thái bàn ăn
+                if (isset($banAnList[$banAnId])) {
+                    $banAnList[$banAnId]->update(['trang_thai' => 'co_khach']);
+                    event(new BanAnUpdated($banAnList[$banAnId]));
+                }
+            }
+
+            DB::commit(); // Xác nhận transaction
+
+            return redirect()->back()->with('success', 'Cập nhật thành công! Hóa đơn đã được tạo.');
+        } catch (\Exception $e) {
+            DB::rollBack(); // Hoàn tác nếu lỗi xảy ra
+            return redirect()->back()->with('error', 'Cập nhật thất bại: ' . $e->getMessage());
         }
-
-        // ✅ Phát sự kiện khi đơn đặt bàn được cập nhật thành công
-        // event(new DatBanCreated($datBan));
-
-        return redirect()->back()->with('success', 'Cập nhật thành công! Hóa đơn đã được tạo.');
     }
 
     /**

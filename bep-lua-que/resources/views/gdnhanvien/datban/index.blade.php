@@ -55,7 +55,9 @@
                         let html = '';
 
                         response.banPhong.data.forEach(ban => {
-                            html += `<tr><td class="fw-bold sticky-col">${ban.ten_ban}</td>`;
+                            const tableClass = ban.trang_thai === "co_khach" ? "bg-info" : "";
+                            html +=
+                                `<tr class="${tableClass}"><td class="fw-bold sticky-col">${ban.ten_ban}</td>`;
 
                             for (let i = 8; i <= 22; i++) {
                                 ["00", "30"].forEach(minute => {
@@ -64,68 +66,57 @@
                                     const thoiGianHienTai = new Date(
                                         `${date}T${timeSlot}:00`);
 
-                                    // Tìm đặt bàn trong khoảng thời gian này
                                     const datBan = response.datBans.find(d => {
                                         if (d.ban_an_id !== ban.id)
                                             return false;
 
                                         const thoiGianDen = new Date(d
                                             .thoi_gian_den);
-
-                                        // Lấy giờ và phút từ gio_du_kien
                                         const [hours, minutes] = d.gio_du_kien
                                             .split(':').map(Number);
 
-                                        // Gán thoiGianKetThuc trực tiếp từ gio_du_kien
                                         const thoiGianKetThuc = new Date(
                                             thoiGianDen);
                                         thoiGianKetThuc.setHours(hours);
                                         thoiGianKetThuc.setMinutes(minutes);
 
                                         return thoiGianHienTai >= thoiGianDen &&
-                                            thoiGianHienTai < thoiGianKetThuc;
+                                            thoiGianHienTai <= thoiGianKetThuc;
                                     });
 
-                                    // Xử lý trạng thái button và các thuộc tính dữ liệu
                                     const statusClass = datBan ?
                                         (datBan.trang_thai === 'xac_nhan' ?
-                                            'btn-success' :
-                                            datBan.trang_thai === 'dang_xu_ly' ?
-                                            'btn-danger' : '') : 'bg-light';
+                                            'btn-success' : 'btn-danger') :
+                                        'bg-light';
 
-                                    // Default if no reservation
-
-                                    const maDatBan = datBan ? datBan.ma_dat_ban :
-                                        ''; // Lấy mã đặt bàn nếu có
+                                    const maDatBan = datBan ? datBan.ma_dat_ban : '';
                                     const gioDuKien = datBan ? datBan.gio_du_kien :
-                                        timeSlot; // Nếu có đặt bàn thì dùng giờ dự kiến, nếu không thì dùng giờ hiện tại
+                                        timeSlot;
 
-                                    // Button chứa các thuộc tính dữ liệu bổ sung
-                                    const content = `<button class="btn btn-sm ${statusClass} text-dark btn-view-details selectable-slot" 
+                                    const content = `
+                                <button class="btn btn-sm ${statusClass} text-dark btn-view-details selectable-slot" 
                                     data-ma-dat-ban="${maDatBan}" 
                                     data-ban-id="${ban.id}" 
                                     data-ten-ban="${ban.ten_ban}" 
                                     data-time-slot="${timeSlot}" 
                                     data-date="${date}"
-                                    data-bs-toggle="tooltip">
-                                        +
-                                    </button>`;
+                                    data-bs-toggle="tooltip" 
+                                    data-bs-title="Đang tải..."
+                                >
+                                    +
+                                </button>`;
 
                                     html +=
-                                        `<td class="text-center"  data-ban-id="${ban.id}" >${content}</td>`;
+                                        `<td class="text-center" data-ban-id="${ban.id}">${content}</td>`;
                                 });
                             }
-
-
-
                             html += `</tr>`;
                         });
 
                         $("#ngay-tabs").html(html);
                         $('[data-bs-toggle="tooltip"]').tooltip(); // Kích hoạt tooltip
-
-                        // Hiển thị phân trang
                         renderPagination(response.banPhong, date);
+                        attachTooltipEvents();
                     },
                     error: function() {
                         $("#ngay-tabs").html(
@@ -135,31 +126,74 @@
                 });
             }
 
-            // Hàm hiển thị phân trang
+            function attachTooltipEvents() {
+                $(".selectable-slot").on("mouseenter", function() {
+                    const button = $(this);
+                    const maDatBan = button.data("ma-dat-ban");
+
+                    if (maDatBan) {
+                        fetch(`/api/datban/${maDatBan}`)
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(
+                                        `Lỗi API: ${response.status} - ${response.statusText}`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                const title = data.message ? "Không có thông tin đặt bàn" : `
+                    <strong>Khách:</strong> ${data.ho_ten} <br>
+                    <strong>SĐT:</strong> ${data.so_dien_thoai} <br>
+                    <strong>Số người:</strong> ${data.so_nguoi} <br>
+                    <strong>Mô tả:</strong> ${data.mo_ta} <br>
+                    <strong>Bàn:</strong> ${data.ban_ans.join(", ")}
+                `;
+
+                                button.attr("data-bs-title", title);
+
+                                const oldTooltip = bootstrap.Tooltip.getInstance(button[0]);
+                                if (oldTooltip) oldTooltip.dispose();
+
+                                new bootstrap.Tooltip(button[0], {
+                                    html: true
+                                }).show();
+                            })
+                            .catch(error => console.error("Lỗi khi lấy dữ liệu đặt bàn:", error));
+                    }
+                });
+
+
+                $(".selectable-slot").on("mouseleave", function() {
+                    const tooltip = bootstrap.Tooltip.getInstance(this);
+                    if (tooltip) tooltip.dispose();
+                });
+            }
+
             function renderPagination(paginationData, date) {
                 let paginationHtml = '<nav><ul class="pagination justify-content-center">';
 
                 if (paginationData.prev_page_url) {
                     paginationHtml +=
-                        `<li class="page-item"><a class="page-link pagination-link" href="#" data-page="${paginationData.current_page - 1}" data-date="${date}">«</a></li>`;
+                        `<li class="page-item">
+                <a class="page-link pagination-link" href="#" data-page="${paginationData.current_page - 1}" data-date="${date}">«</a></li>`;
                 }
 
                 for (let i = 1; i <= paginationData.last_page; i++) {
                     let activeClass = (i === paginationData.current_page) ? 'active' : '';
-                    paginationHtml +=
-                        `<li class="page-item ${activeClass}"><a class="page-link pagination-link" href="#" data-page="${i}" data-date="${date}">${i}</a></li>`;
+                    paginationHtml += `<li class="page-item ${activeClass}">
+                <a class="page-link pagination-link" href="#" data-page="${i}" data-date="${date}">${i}</a></li>`;
                 }
 
                 if (paginationData.next_page_url) {
                     paginationHtml +=
-                        `<li class="page-item"><a class="page-link pagination-link" href="#" data-page="${paginationData.current_page + 1}" data-date="${date}">»</a></li>`;
+                        `<li class="page-item">
+                <a class="page-link pagination-link" href="#" data-page="${paginationData.current_page + 1}" data-date="${date}">»</a></li>`;
                 }
 
                 paginationHtml += '</ul></nav>';
                 $("#pagination-controls").html(paginationHtml);
             }
 
-            // Gọi API khi trang load
             $(document).ready(function() {
                 loadDatBan($("#datePicker").val());
 
@@ -167,19 +201,15 @@
                     loadDatBan($(this).val());
                 });
 
-                // Xử lý sự kiện click phân trang
                 $(document).on("click", ".pagination-link", function(e) {
-                    e.preventDefault(); // Ngăn hành vi mặc định
-                    e.stopPropagation(); // Ngăn lan truyền lên các thành phần cha
+                    e.preventDefault();
+                    e.stopPropagation();
 
                     let page = $(this).data("page");
                     let date = $(this).data("date");
                     loadDatBan(date, page);
                 });
-
             });
-
-
         });
     </script>
     <!-- Nút mở modal -->
@@ -241,6 +271,10 @@
                                 @enderror
                             </div>
                         </div>
+                        <div class="mt-3">
+                            <label class="fw-bold">Mô tả:</label>
+                            <textarea class="form-control" name="mo_ta" rows="3"></textarea>
+                        </div>
 
                         <!-- Danh sách các bàn đã chọn -->
                         <ul id="modalContent" class="list-unstyled"></ul>
@@ -267,9 +301,14 @@
 
             // Xử lý sự kiện click để chọn hoặc bỏ chọn
             $(document).on('click', '.selectable-slot', function() {
+                // 🔹 Kiểm tra nếu button có class "btn-success" hoặc "btn-danger" thì không cho click
+                if ($(this).hasClass('btn-success') || $(this).hasClass('btn-danger')) {
+                    return;
+                }
+
                 let banId = $(this).data('ban-id');
                 let tenBan = $(this).data('ten-ban');
-                let timeSlot = $(this).data('time-slot'); // ✅ Đổi thành 'time-slot'
+                let timeSlot = $(this).data('time-slot');
                 let date = $('#datePicker').val();
 
                 if (!date) {
@@ -286,6 +325,17 @@
                 let thoiGianDen = new Date(date);
                 thoiGianDen.setHours(hour);
                 thoiGianDen.setMinutes(minute);
+
+                let now = new Date();
+                if (thoiGianDen < now) {
+                    alert("Không thể chọn thời gian trong quá khứ!");
+                    return;
+                }
+
+                if (!isAdjacentToAnySelectedTime(timeSlot, banId)) {
+                    alert("Thời gian không hợp lệ! Vui lòng chọn slot có khoảng cách ±30 phút.");
+                    return;
+                }
 
                 if (!selectedSlots[banId]) {
                     selectedSlots[banId] = [];
@@ -311,10 +361,25 @@
                     });
                 }
 
-                // console.log('Selected Slots:', selectedSlots);
-
-                updateModalButton(); // ✅ Cập nhật nút mở modal
+                updateModalButton();
             });
+
+
+            // 🔹 Hàm kiểm tra xem có slot nào ±30 phút với thời gian mới không
+            function isAdjacentToAnySelectedTime(newTimeSlot, banId) {
+                if (!selectedSlots[banId] || selectedSlots[banId].length === 0) return true;
+
+                let [newHour, newMinute] = newTimeSlot.split(':').map(Number);
+                let newTime = newHour * 60 + newMinute; // Chuyển thành phút để so sánh
+
+                return selectedSlots[banId].some(slot => {
+                    let [slotHour, slotMinute] = slot.timeSlot.split(':').map(Number);
+                    let slotTime = slotHour * 60 + slotMinute; // Chuyển thành phút để so sánh
+
+                    return Math.abs(slotTime - newTime) <= 30; // Kiểm tra chênh lệch ±30 phút
+                });
+            }
+
 
             // Hiển thị hoặc ẩn nút mở modal
             function updateModalButton() {
@@ -507,6 +572,7 @@
         });
     </script>
 
+    @vite('resources/js/DatBanUpdated.js')
     @vite('resources/js/datban.js')
 
 
@@ -594,13 +660,13 @@
             background-color: #f8f9fa;
         }
 
-        .btn-danger {
-            pointer-events: none;
-        }
+        /* .btn-danger {
+                                pointer-events: none;
+                            }
 
-        .btn-success {
-            pointer-events: none;
-        }
+                            .btn-success {
+                                pointer-events: none;
+                            } */
 
         .border-left-rounded {
             border-top-left-radius: 10px;

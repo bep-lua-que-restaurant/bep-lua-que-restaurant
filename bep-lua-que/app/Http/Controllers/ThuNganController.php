@@ -377,7 +377,7 @@ class ThuNganController extends Controller
 
         // Cập nhật trạng thái đặt bàn
         $datBanList = DatBan::whereIn('ban_an_id', $dsBanCungHoaDon)
-            ->where('trang_thai', 'dang_xu_ly')
+            ->where('trang_thai', 'xac_nhan')
             ->get();
 
         foreach ($datBanList as $datBan) {

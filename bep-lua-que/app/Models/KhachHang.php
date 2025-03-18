@@ -9,7 +9,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class KhachHang extends Model
 {
     use HasFactory, SoftDeletes;
+    protected $table = 'khach_hangs'; // Bảng tương ứng trong database
 
+    protected $primaryKey = 'id'; // Khóa chính
+
+    public $timestamps = true; // Nếu bảng có `created_at` và `updated_at`
     protected $fillable = ['ho_ten', 'email', 'so_dien_thoai', 'dia_chi'];
 
     public function datBans()

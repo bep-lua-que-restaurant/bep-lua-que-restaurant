@@ -1,4 +1,4 @@
-@extends('admin.datban.layout')
+@extends('gdnhanvien.datban.layout')
 
 @section('title')
     Chi tiết Đặt Bàn
@@ -17,14 +17,14 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>Phòng ăn</th>
+                    {{-- <th>Phòng ăn</th> --}}
                     <th>Tên bàn</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($datBans as $datBanItem)
                     <tr>
-                        <td>{{ optional($datBanItem->banAn->phongAn)->ten_phong_an ?? 'Không xác định' }}</td>
+                        {{-- <td>{{ optional($datBanItem->banAn->phongAn)->ten_phong_an ?? 'Không xác định' }}</td> --}}
                         <td>{{ optional($datBanItem->banAn)->ten_ban ?? 'Không xác định' }}</td>
                     </tr>
                 @endforeach

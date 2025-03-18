@@ -100,13 +100,19 @@ Route::get('/danh-sach-dat-ban', [DatBanController::class, 'DanhSach'])->name('d
 
 Route::resource('dat-ban', DatBanController::class);
 // Route::get('/dat-ban/{dat_ban}/edit', [DatBanController::class, 'edit'])->name('dat-ban.edit');
-Route::get('/dat-ban/edit/{maDatBan}', [DatBanController::class, 'edit'])->name('dat-ban.edit');
 Route::get('/dat-ban/{maDatBan}', [DatBanController::class, 'show'])->name('dat-ban.show');
 
 Route::delete('/dat-ban/{ma_dat_ban}', [DatBanController::class, 'destroy'])->name('dat-ban.destroy');
 Route::post('/dat-ban/store', [DatBanController::class, 'store'])->name('dat-ban.store');
 Route::put('/dat-ban/{maDatBan}', [DatBanController::class, 'update'])->where('maDatBan', '[A-Za-z0-9]+')->name('dat-ban.update');
+// Route::put('/dat-ban/{maDatBan}', [DatBanController::class, 'update'])->name('dat-ban.update');
 
+Route::get('/dat-ban/edit/{maDatBan}', [DatBanController::class, 'edit'])->name('dat-ban.edit');
+// Route::put('/dat-ban/{maDatBan}', [DatBanController::class, 'update'])->name('dat-ban.update');
+
+
+
+// Route::put('/dat-ban/{maDatBan}', [DatBanController::class, 'update'])->name('datban.update');
 
 
 

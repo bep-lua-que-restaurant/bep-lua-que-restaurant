@@ -14,13 +14,13 @@ class DatBanCreated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $customer;
     public $danhSachBanDat;
+    public $customer;
 
-    public function __construct(KhachHang $customer, array $danhSachBanDat)
+    public function __construct(array $danhSachBanDat, KhachHang $customer)
     {
-        $this->customer = $customer;
         $this->danhSachBanDat = $danhSachBanDat;
+        $this->customer = $customer;
     }
 
     public function broadcastOn()
@@ -31,11 +31,6 @@ class DatBanCreated implements ShouldBroadcast
     public function broadcastWith()
     {
         return [
-            'khach_hang' => [
-                'id' => $this->customer->id,
-                'ho_ten' => $this->customer->ho_ten,
-                'so_dien_thoai' => $this->customer->so_dien_thoai,
-            ],
             'danh_sach_ban' => collect($this->danhSachBanDat)->map(function ($datBan) {
                 return [
                     'ban_an_id' => $datBan->ban_an_id,
@@ -43,10 +38,16 @@ class DatBanCreated implements ShouldBroadcast
                     'gio_du_kien' => $datBan->gio_du_kien,
                     'so_nguoi' => $datBan->so_nguoi,
                     'trang_thai' => $datBan->trang_thai,
-                    'ma_dat_ban' => $datBan->ma_dat_ban, // Thêm mã đặt bàn
-                    'datban_id' => $datBan->id, // Thêm ID đặt bàn
+                    'ma_dat_ban' => $datBan->ma_dat_ban,
+                    'datban_id' => $datBan->id,
                 ];
             }),
+            'customer' => [
+                'id' => $this->customer->id,
+                'ten' => $this->customer->ten,
+                'so_dien_thoai' => $this->customer->so_dien_thoai,
+                'email' => $this->customer->email ?? null,
+            ]
         ];
     }
 }

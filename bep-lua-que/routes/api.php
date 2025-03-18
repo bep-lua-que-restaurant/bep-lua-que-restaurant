@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use App\Models\BanAn;
 
 
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -69,3 +70,6 @@ Route::get('/datban', function (Request $request) {
         'datBans' => $datBansToday,
     ]);
 });
+
+
+Route::get('/datban/{maDatBan}', [DatBanController::class, 'getDatBan']);
