@@ -410,7 +410,6 @@ class ThuNganController extends Controller
         }
 
         $khachHang = KhachHang::find($khachHangId);
-
         // Cập nhật tất cả các bản ghi có cùng `ma_dat_ban` thành 'da_thanh_toan'
         $updateDatBan = DatBan::where('ma_dat_ban', $maDatBans)->get();
 

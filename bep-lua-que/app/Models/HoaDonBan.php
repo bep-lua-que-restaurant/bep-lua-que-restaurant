@@ -10,7 +10,7 @@ class HoaDonBan extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['hoa_don_id', 'ban_an_id', 'trang_thai'];
+    protected $fillable = ['hoa_don_id', 'ban_an_id', 'trang_thai', 'ma_dat_ban'];
 
     public function banAn()
     {
