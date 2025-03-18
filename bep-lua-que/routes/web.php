@@ -291,6 +291,7 @@ Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.sh
 Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
 Route::get('/thu-ngan/get-orders',[ThuNganController::class, 'getOrders'])->name('thungan.getOrders');
 Route::get('/thu-ngan/hoa-don-info',[ThuNganController::class, 'thongTinHoaDon'])->name('thungan.thongTinHoaDon');
+Route::post('thu-ngan-save-so-nguoi',[ThuNganController::class,'saveSoNguoi'])->name('thungan.saveSoNguoi');
 //Chấm công
 Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
 Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('chamcong.store');

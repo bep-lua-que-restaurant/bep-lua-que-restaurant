@@ -83,7 +83,7 @@
 
 <!-- Offcanvas -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel"
-    style="width: 70%;">
+    style="width: 70%; padding: 20px;">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="offcanvasRightLabel">
             Phiếu thanh toán - <span id="tableInfo"> </span> - <span id="maHoaDonInFo">Chưa có hóa đơn</span>
@@ -116,55 +116,55 @@
                 </tbody>
             </table>
         </div>
+
         <div class="mb-3">
-            <label for="totalAmount" class="form-label">Khách cần trả</label>
-            <input type="text" class="form-control" id="totalAmount" value="" readonly>
+            <label for="discountCode" class="form-label">Mã giảm giá</label>
+            <input type="text" class="form-control" id="discountCode" placeholder="Nhập mã giảm giá">
         </div>
-        <div class="mb-3">
-            <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
-            <select class="form-select" id="paymentMethod">
-                <option value="tien_mat">Tiền mặt</option>
-                <option value="the">Thẻ tín dụng</option>
-                <option value="tai_khoan">Chuyển khoản</option>
-            </select>
+
+        <!-- Đặt Khách cần trả và Phương thức thanh toán nằm ngang -->
+        <div class="d-flex mb-3 align-items-stretch">
+            <div class="flex-fill me-2">
+                <label for="totalAmount" class="form-label">Khách cần trả</label>
+                <input type="text" class="form-control form-control-lg" id="totalAmount" value="" readonly>
+            </div>
+            <div class="flex-fill ms-2">
+                <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
+                <select class="form-select form-select-lg" id="paymentMethod">
+                    <option value="tien_mat">Tiền mặt</option>
+                    <option value="the">Thẻ tín dụng</option>
+                    <option value="tai_khoan">Chuyển khoản</option>
+                </select>
+            </div>
         </div>
+
+
+        <!-- Chi tiết thanh toán -->
         <div class="mb-3">
             <label for="paymentDetails" class="form-label">Chi tiết thanh toán</label>
             <textarea class="form-control" id="paymentDetails" rows="3" placeholder="Nhập chi tiết thanh toán..."></textarea>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Số tiền khách đưa</label>
-            <input type="number" class="form-control" id="amountGiven" placeholder="Nhập số tiền khách đưa"
-                oninput="calculateChange()">
+
+        <!-- Số tiền khách đưa và Tiền thừa trả khách nằm ngang -->
+        <div class="d-flex mb-3 align-items-stretch">
+            <div class="flex-fill me-2">
+                <label class="form-label">Số tiền khách đưa</label>
+                <input type="number" class="form-control form-control-lg" id="amountGiven"
+                    placeholder="Nhập số tiền khách đưa" oninput="calculateChange()">
+            </div>
+            <div class="flex-fill ms-2">
+                <label class="form-label">Tiền thừa trả khách</label>
+                <input type="text" class="form-control form-control-lg" id="changeToReturn" value="0"
+                    readonly>
+            </div>
         </div>
 
-        <!-- Tiền thừa trả khách -->
-        <div class="mb-3">
-            <label class="form-label">Tiền thừa trả khách</label>
-            <input type="text" class="form-control" id="changeToReturn" value="0" readonly>
-        </div>
+
         <!-- Nút xác nhận thanh toán -->
-        <button class="btn btn-success" id="btnThanhToan">Thanh toán </button>
+        <button class="btn btn-success btn-sm" id="btnThanhToan">Thanh toán</button>
     </div>
 </div>
 
-
-<!-- Modal nhập số lượng khách -->
-<div class="modal fade" id="peopleModal" tabindex="-1" aria-labelledby="peopleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-
-            <div class="modal-body">
-                <label for="numPeople" class="form-label">Số lượng khách</label>
-                <input type="number" id="numPeople" class="form-control" value="0" min="0">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary btn-sm" onclick="saveNumberOfPeople()">Lưu</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Modal thêm khách hàng -->
 <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel"
@@ -244,6 +244,7 @@
                             <th>Bàn</th>
                             <th>Mã hóa đơn</th>
                             <th>Số lượng hàng</th>
+                            <th>Số khách</th>
                             <th>Tổng tiền (VNĐ)</th>
                         </tr>
                     </thead>
@@ -253,6 +254,7 @@
                             <td id="tenBan"></td>
                             <td id="maHoaDon"></td>
                             <td id="soLuongMon"></td>
+                            <th id="so_nguoi"></th>
                             <td id="tongTien"></td>
                         </tr>
                     </tbody>
@@ -464,7 +466,9 @@
         var totalAmount = parseFloat($('#totalAmount').val().replace(/\./g, '').trim()) || 0;
         var amountGiven = parseFloat($('#amountGiven').val().replace(/\./g, '').trim()) || 0;
         var changeToReturn = parseFloat($('#changeToReturn').val().replace(/\./g, '').trim()) || 0;
-        // Lấy dữ liệu từ bảng hóa đơn
+        let maHoaDonInFo = document.getElementById("maHoaDonInFo");
+        let maHoaDonFind = maHoaDonInFo.innerText; 
+
         var danhSachSanPham = [];
         $("#hoa-don-thanh-toan-body tr").each(function() {
             var sanPham = {
@@ -490,6 +494,7 @@
                     phuong_thuc_thanh_toan: phuongThucThanhToan,
                     chi_tiet_thanh_toan: paymentDetails,
                     tong_tien: totalAmount,
+                    ma_hoa_don_cua_ban:maHoaDonFind,
                     // tien_khach_dua: amountGiven,
                     // tien_thua: changeToReturn,
                     // san_pham: danhSachSanPham, // Gửi danh sách sản phẩm lên server
@@ -628,29 +633,49 @@
         $("#tableInfo").text("Bàn chưa chọn"); // Reset tên bàn
     }
 
-    // số người
-    document.addEventListener("DOMContentLoaded", function() {
-        let soNguoiElement = document.querySelector(".so-nguoi");
+    $(document).ready(function() {
+        let banId = null
+        let modal = new bootstrap.Modal(document.getElementById('modalSoNguoi'));
+        $(".so-nguoi").click(function() {
+            banId = $('#ten-ban').data('currentBan'); // Lấy ID bàn từ #ten-ban
 
-        soNguoiElement.addEventListener("click", function() {
-            let banId = $('#ten-ban').data('currentBan'); // Lấy ID bàn từ #ten-ban
+            soNguoiEl = $(this).text().replace("👥", "").trim(); // Loại bỏ emoji và lấy số người
+
+            // Cập nhật giá trị trong #soNguoiInput nếu cần
+            $("#soNguoiInput").val(soNguoiEl); // Gán vào ô input
 
             if (!banId || banId === 0) {
                 alert("Vui lòng chọn bàn trước khi nhập số người!");
             } else {
-                let modal = new bootstrap.Modal(document.getElementById('modalSoNguoi'));
                 modal.show(); // Chỉ mở modal khi bàn đã được chọn
             }
         });
 
-        document.getElementById("btnLuuSoNguoi").addEventListener("click", function() {
-            let soNguoi = document.getElementById("soNguoiInput").value;
-            $(".so-nguoi").html(`👥 ${soNguoi}`); // Cập nhật số người hiển thị
-            $(".so-nguoi").data("soNguoi", soNguoi); // Lưu vào jQuery data
-            console.log("Số người đã lưu:", $(".so-nguoi").data("soNguoi"));
-            $('#modalSoNguoi').modal('hide'); // Đóng modal
+        // Dùng jQuery để thêm sự kiện cho nút Lưu
+        $('#btnLuuSoNguoi').click(function() {
+            let soNguoi = $("#soNguoiInput").val();
+
+            $.ajax({
+                url: 'thu-ngan-save-so-nguoi',
+                method: 'POST',
+                data: {
+                    banId: banId,
+                    soNguoi: soNguoi,
+                    _token: $('meta[name="csrf-token"]').attr("content")
+                },
+
+                success: function(response) {
+                    modal.hide();
+                    $('.so-nguoi').text(`👥 ${response.soNguoi}`);
+                },
+
+                error: function(xhr, status, error) {
+                    console.error("Có lỗi xảy ra:", error);
+                }
+            })
         });
     });
+
 
     $(document).ready(function() {
         // Khởi tạo Select2 với multiple
@@ -733,6 +758,7 @@
                                 <td>${response.bill.ten_ban}</td>
                                 <td>${response.bill.ma_hoa_don}</td>
                                 <td>${response.bill.tong_so_luong_mon_an || '0'}</td>
+                                <td>${response.bill.so_nguoi || '0'}</td>    
                                 <td>${tongTien.toLocaleString()} VNĐ</td>
                             </tr>
                         `;
