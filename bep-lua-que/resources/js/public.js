@@ -151,7 +151,6 @@ function loadChiTietHoaDon(hoaDonId) {
         success: function (response) {
             let hoaDonBody = $("#hoa-don-body");
             hoaDonBody.empty();
-
             let offcanvasBody = $(".offcanvas-body tbody"); // Lấy phần bảng trong offcanvas
             offcanvasBody.empty(); // Xóa nội dung cũ
             var soNguoi = response.so_nguoi;

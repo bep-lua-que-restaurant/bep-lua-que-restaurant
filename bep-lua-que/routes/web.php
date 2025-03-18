@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\BangTinhLuongController;
 use App\Http\Controllers\CaLamNhanVienController;
+
+use App\Http\Controllers\ChatController;
+
 use App\Http\Controllers\DanhMucMonAnController;
 use App\Http\Controllers\ComBoController;
 use App\Http\Controllers\DichVuController;
@@ -13,7 +16,9 @@ use App\Http\Controllers\PhongAnController;
 use App\Http\Controllers\LuongController;
 use App\Http\Controllers\ThongKeDoanhSoController;
 use App\Http\Controllers\ThongKeMonAnController;
+use App\Http\Controllers\ThongKeSoLuongHoaDonController;
 use App\Http\Controllers\ThongKeSoLuongKhachController;
+use App\Http\Controllers\ThongKeTopDoanhThuController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TableBookedController;
 use App\Http\Controllers\CaLamController;
@@ -44,6 +49,9 @@ Route::get('/', function () {
 
 Route::get('/', [ThongKeController::class, 'index'])->name('dashboard');
 Route::get('/thong-ke-doanh-so', [ThongKeDoanhSoController::class, 'index'])->name('thongke.thongkedoanhso');
+Route::get('/thong-ke-hoa-don', [ThongKeSoLuongHoaDonController::class, 'index'])->name('thongke.thongkehoadon');
+Route::get('/thong-ke-top-doanh-thu', [ThongKeTopDoanhThuController::class, 'index'])->name('thongke.topdoanhthu');
+
 Route::get('/thong-ke-so-luong-khach', [ThongKeSoLuongKhachController::class, 'index'])->name('thongke.thongkesoluongkhach');
 
 
@@ -76,11 +84,23 @@ Route::post('nha-cung-cap/restore/{id}', [\App\Http\Controllers\NhaCungCapContro
 
 Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'export'])->name('nha-cung-cap.export');
 
+//Route::post('/import-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha-cung-cap.import');
+
+
+// Route::get('/', function () {
+//     return view('client.home');
+// });
+// chatbot
+Route::get('/chat', [ChatController::class, 'index'])->name('chat.index'); 
+Route::post('/chat/gui', [ChatController::class, 'guiTinNhan'])->name('chat.gui');
+Route::get('/chat/tin-nhan', [ChatController::class, 'layTinNhan'])->name('chat.layTinNhan');
+
+
 Route::post('/nha_cung_cap/import', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha_cung_cap.import');
 
 // Phong an
-Route::resource('phong-an', PhongAnController::class);
-Route::post('/phong-an/{banAn}/restore', [PhongAnController::class, 'restore'])->name('phong-an.restore');
+// Route::resource('phong-an', PhongAnController::class);
+// Route::post('/phong-an/{banAn}/restore', [PhongAnController::class, 'restore'])->name('phong-an.restore');
 
 Route::resource('ban-an', BanAnController::class);
 Route::get('/ban-an/{id}', [BanAnController::class, 'show'])->name('ban-an.show');
@@ -280,8 +300,9 @@ Route::post('/hoa-don/delete', [ThuNganController::class, 'deleteMonAn'])->name(
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
 Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
-Route::post('/thu-ngan/in-hoa-don', [ThuNganController::class, 'inHoaDon'])->name('thungan.inHoaDon');
-Route::get('/thu-ngan/get-orders', [ThuNganController::class, 'getOrders'])->name('thungan.getOrders');
+Route::get('/thu-ngan/get-orders',[ThuNganController::class, 'getOrders'])->name('thungan.getOrders');
+Route::get('/thu-ngan/hoa-don-info',[ThuNganController::class, 'thongTinHoaDon'])->name('thungan.thongTinHoaDon');
+Route::post('thu-ngan-save-so-nguoi',[ThuNganController::class,'saveSoNguoi'])->name('thungan.saveSoNguoi');
 //Chấm công
 Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
 Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('chamcong.store');

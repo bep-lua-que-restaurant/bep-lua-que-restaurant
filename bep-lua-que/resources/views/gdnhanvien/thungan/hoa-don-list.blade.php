@@ -1,4 +1,5 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
 <style>
     .select2-results__option {
         background-color: #f0f0f0 !important;
@@ -24,6 +25,13 @@
     <tbody id="hoa-don-body">
         <!-- Dữ liệu hóa đơn sẽ được hiển thị ở đây -->
     </tbody>
+    <tfoot id="tfoot-hoaDon">
+        <tr>
+            <td colspan="6" class="text-start text-muted" style="font-size: 14px; font-weight: 400;">
+                Mã hóa đơn: <span id="maHoaDon"></span>
+            </td>
+        </tr>
+    </tfoot>
 </table>
 <div class="d-flex justify-content-end align-items-center mt-3">
     <span class="text-muted mx-4">Tổng tiền:</span>
@@ -46,7 +54,7 @@
     <!-- Nút bấm -->
     <div>
         <button class="btn btn-success btn-sm px-4" type="button" data-bs-toggle="offcanvas"
-            data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">Thanh toán</button>
+            data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" id="thanhToan-btn">Thanh toán</button>
         <button class="btn-thong-bao btn btn-primary btn-sm px-4">Thông báo</button>
     </div>
 
@@ -75,10 +83,10 @@
 
 <!-- Offcanvas -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel"
-    style="width: 70%;">
+    style="width: 70%; padding: 20px;">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="offcanvasRightLabel">
-            Phiếu thanh toán - <span id="tableInfo"> </span>
+            Phiếu thanh toán - <span id="tableInfo"> </span> - <span id="maHoaDonInFo">Chưa có hóa đơn</span>
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
@@ -108,55 +116,55 @@
                 </tbody>
             </table>
         </div>
+
         <div class="mb-3">
-            <label for="totalAmount" class="form-label">Khách cần trả</label>
-            <input type="text" class="form-control" id="totalAmount" value="" readonly>
+            <label for="discountCode" class="form-label">Mã giảm giá</label>
+            <input type="text" class="form-control" id="discountCode" placeholder="Nhập mã giảm giá">
         </div>
-        <div class="mb-3">
-            <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
-            <select class="form-select" id="paymentMethod">
-                <option value="tien_mat">Tiền mặt</option>
-                <option value="the">Thẻ tín dụng</option>
-                <option value="tai_khoan">Chuyển khoản</option>
-            </select>
+
+        <!-- Đặt Khách cần trả và Phương thức thanh toán nằm ngang -->
+        <div class="d-flex mb-3 align-items-stretch">
+            <div class="flex-fill me-2">
+                <label for="totalAmount" class="form-label">Khách cần trả</label>
+                <input type="text" class="form-control form-control-lg" id="totalAmount" value="" readonly>
+            </div>
+            <div class="flex-fill ms-2">
+                <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
+                <select class="form-select form-select-lg" id="paymentMethod">
+                    <option value="tien_mat">Tiền mặt</option>
+                    <option value="the">Thẻ tín dụng</option>
+                    <option value="tai_khoan">Chuyển khoản</option>
+                </select>
+            </div>
         </div>
+
+
+        <!-- Chi tiết thanh toán -->
         <div class="mb-3">
             <label for="paymentDetails" class="form-label">Chi tiết thanh toán</label>
             <textarea class="form-control" id="paymentDetails" rows="3" placeholder="Nhập chi tiết thanh toán..."></textarea>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Số tiền khách đưa</label>
-            <input type="number" class="form-control" id="amountGiven" placeholder="Nhập số tiền khách đưa"
-                oninput="calculateChange()">
+
+        <!-- Số tiền khách đưa và Tiền thừa trả khách nằm ngang -->
+        <div class="d-flex mb-3 align-items-stretch">
+            <div class="flex-fill me-2">
+                <label class="form-label">Số tiền khách đưa</label>
+                <input type="number" class="form-control form-control-lg" id="amountGiven"
+                    placeholder="Nhập số tiền khách đưa" oninput="calculateChange()">
+            </div>
+            <div class="flex-fill ms-2">
+                <label class="form-label">Tiền thừa trả khách</label>
+                <input type="text" class="form-control form-control-lg" id="changeToReturn" value="0"
+                    readonly>
+            </div>
         </div>
 
-        <!-- Tiền thừa trả khách -->
-        <div class="mb-3">
-            <label class="form-label">Tiền thừa trả khách</label>
-            <input type="text" class="form-control" id="changeToReturn" value="0" readonly>
-        </div>
+
         <!-- Nút xác nhận thanh toán -->
-        <button class="btn btn-success" id="btnThanhToan">Thanh toán </button>
+        <button class="btn btn-success btn-sm" id="btnThanhToan">Thanh toán</button>
     </div>
 </div>
 
-
-<!-- Modal nhập số lượng khách -->
-<div class="modal fade" id="peopleModal" tabindex="-1" aria-labelledby="peopleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-
-            <div class="modal-body">
-                <label for="numPeople" class="form-label">Số lượng khách</label>
-                <input type="number" id="numPeople" class="form-control" value="0" min="0">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary btn-sm" onclick="saveNumberOfPeople()">Lưu</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Modal thêm khách hàng -->
 <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel"
@@ -236,6 +244,7 @@
                             <th>Bàn</th>
                             <th>Mã hóa đơn</th>
                             <th>Số lượng hàng</th>
+                            <th>Số khách</th>
                             <th>Tổng tiền (VNĐ)</th>
                         </tr>
                     </thead>
@@ -245,6 +254,7 @@
                             <td id="tenBan"></td>
                             <td id="maHoaDon"></td>
                             <td id="soLuongMon"></td>
+                            <th id="so_nguoi"></th>
                             <td id="tongTien"></td>
                         </tr>
                     </tbody>
@@ -328,10 +338,58 @@
         </div>
     </div>
 </div>
+
+{{-- giao diện lưu hóa đơn In --}}
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- Select2 JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/print-js/1.6.0/print.min.js"></script>
+
 <script>
+    // Hàm lấy dữ liệu thanh toán
+    $(document).ready(function() {
+        $('#thanhToan-btn').click(function() {
+            let maHoaDonElm = document.getElementById("maHoaDon");
+            let maHoaDon = maHoaDonElm.innerText;
+            let maHoaDonInFo = document.getElementById("maHoaDonInFo");
+            maHoaDonInFo.innerText = maHoaDon
+
+            if (maHoaDon === 'Chưa có hóa đơn') {
+                return;
+            }
+
+            $.ajax({
+                url: '/thu-ngan/hoa-don-info',
+                type: 'GET',
+                data: {
+                    maHoaDon: maHoaDon
+                },
+                success: function(response) {
+                    if (response.khachHang) {
+                        // Nếu có khách hàng, cập nhật thông tin khách hàng vào dropdown
+                        $('#customerSelect').html(`
+                        <option value="${response.khachHang.id}" selected>
+                            ${response.khachHang.ho_ten} - ${response.khachHang.so_dien_thoai}
+                        </option>
+                        <option value="new">Thêm mới khách</option>
+                    `);
+                    } else {
+                        // Nếu không có khách hàng, hiển thị mặc định là "Khách lẻ"
+                        $('#customerSelect').html(`
+                        <option value="0" selected>Khách lẻ</option>
+                        <option value="new">Thêm mới khách</option>
+                    `);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Lỗi khi lấy thông tin hóa đơn:", xhr.responseText);
+                }
+            })
+        });
+    });
+
+
     function calculateChange() {
         let totalAmount = parseInt(document.getElementById("totalAmount").value.replace(/\D/g, "")) || 0;
         let amountGiven = parseInt(document.getElementById("amountGiven").value) || 0;
@@ -408,14 +466,14 @@
         var totalAmount = parseFloat($('#totalAmount').val().replace(/\./g, '').trim()) || 0;
         var amountGiven = parseFloat($('#amountGiven').val().replace(/\./g, '').trim()) || 0;
         var changeToReturn = parseFloat($('#changeToReturn').val().replace(/\./g, '').trim()) || 0;
+        let maHoaDonInFo = document.getElementById("maHoaDonInFo");
+        let maHoaDonFind = maHoaDonInFo.innerText; 
 
-
-        // Lấy dữ liệu từ bảng hóa đơn
         var danhSachSanPham = [];
         $("#hoa-don-thanh-toan-body tr").each(function() {
             var sanPham = {
-                ten_san_pham: $(this).find("td:nth-child(2)").text().normalize("NFD").replace(
-                    /[\u0300-\u036f]/g, "").trim(),
+                ten_san_pham: $(this).find("td:nth-child(2)").text()
+                    .trim(), // Không loại bỏ dấu nữa
                 so_luong: parseInt($(this).find("td:nth-child(3)").text().trim()) || 0,
                 don_gia: parseFloat($(this).find("td:nth-child(4)").text().replace(/\./g, '')
                     .trim()) || 0,
@@ -424,7 +482,6 @@
             };
             danhSachSanPham.push(sanPham);
         });
-
 
         if (banId) {
             $.ajax({
@@ -437,74 +494,111 @@
                     phuong_thuc_thanh_toan: phuongThucThanhToan,
                     chi_tiet_thanh_toan: paymentDetails,
                     tong_tien: totalAmount,
-                    tien_khach_dua: amountGiven,
-                    tien_thua: changeToReturn,
-                    san_pham: danhSachSanPham, // Gửi danh sách sản phẩm lên server
+                    ma_hoa_don_cua_ban:maHoaDonFind,
+                    // tien_khach_dua: amountGiven,
+                    // tien_thua: changeToReturn,
+                    // san_pham: danhSachSanPham, // Gửi danh sách sản phẩm lên server
                     _token: $('meta[name="csrf-token"]').attr("content")
                 },
                 success: function(response) {
                     if (response.success) {
-                        showToast("Đã thanh toán đơn hàng", "success");
+                        hoaDonId = response.hoaDon.id;
+                        // Tạo nội dung in
+                        var maHoaDon = response.hoaDon.ma_hoa_don;
+                        tenKhachHang = response.khachHang.ho_ten
+                        // Tạo nội dung cần in (chỉ in mã hóa đơn)
+                        var printContent = `
+        <!-- Thông tin cửa hàng -->
+            <div>
+                <h2><strong>Hóa đơn bán hàng</h2>
+                <h5><strong>Ngày bán:</strong> 14-03-2025</h5>
+            </div>
 
+            <hr>
+
+            <!-- Thông tin khách hàng -->
+            <div>
+                <p><strong>Khách hàng: ${tenKhachHang}</strong></p>
+                <p><strong>Số điện thoại:</strong>0332491395</p>
+            </div>
+
+ <table class="table table-bordered text-start">
+            <thead>
+                <tr>
+                    <th>Tên món</th>  
+                    <th>SL</th>      
+                    <th>Thành tiền</th> 
+                </tr>
+            </thead>
+            <tbody>
+                ${danhSachSanPham.map(item => `
+                    <tr>
+                        <td>${item.ten_san_pham}</td>
+                        <td>${item.so_luong}</td>
+                        <td>${item.tong_cong}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+
+
+            <hr>
+
+            <!-- Tổng tiền -->
+            <div>
+                <p><strong>Tổng tiền hàng:</strong> ${totalAmount}</p>
+                <p><strong>Tiền khách đưa:</strong>${amountGiven} </p>
+                <p><strong>Tiền thừa trả khách:</strong> ${changeToReturn}</p>
+            </div>
+        </div>
+    `;
+
+                        // Tạo phần tử tạm trong DOM để chứa nội dung in
+                        var tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = printContent;
+
+                        // Thêm phần tử vào body hoặc một phần tử nào đó trong DOM
+                        document.body.appendChild(tempDiv);
+
+                        // In nội dung của phần tử tạm
+                        printJS({
+                            printable: tempDiv, // Truyền phần tử DOM vào Print.js
+                            type: 'html', // Kiểu nội dung (html)
+                            showModal: true,
+                            modalTitle: 'Cài Đặt In',
+                            options: {
+                                orientation: 'portrait', // Chế độ chân dung
+                                color: true, // In màu
+                                duplex: false, // Không in 2 mặt
+                                margins: {
+                                    top: 10,
+                                    left: 10,
+                                    right: 10,
+                                    bottom: 10
+                                } // Cài đặt lề
+                            }
+                        });
+
+                        // Sau khi in xong, có thể xóa phần tử tạm đi
+                        document.body.removeChild(tempDiv);
+
+                        showToast("Đã thanh toán đơn hàng", "success");
                         var offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById(
                             "offcanvasRight"));
                         offcanvas.hide();
                         resetGiaoDienHoaDon();
-
-                        // Gọi AJAX tạo file PDF
-                        $.ajax({
-                            url: "/thu-ngan/in-hoa-don",
-                            method: "POST",
-                            contentType: "application/json",
-                            headers: {
-                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr(
-                                    "content") // Lấy CSRF token từ meta tag
-                            },
-                            data: JSON.stringify({
-                                ban_an_id: banId,
-                                khach_hang_id: khachHangId,
-                                so_nguoi: soNguoi,
-                                phuong_thuc_thanh_toan: phuongThucThanhToan,
-                                chi_tiet_thanh_toan: paymentDetails,
-                                tong_tien: totalAmount,
-                                tien_khach_dua: amountGiven,
-                                tien_thua: changeToReturn,
-                                san_pham: danhSachSanPham
-                            }),
-                            success: function(pdfResponse) {
-                                if (pdfResponse.success) {
-                                    // Mở file PDF trong tab mới
-                                    var printWindow = window.open(pdfResponse.pdf_url,
-                                        '_blank');
-                                    if (printWindow) {
-                                        printWindow.focus();
-                                    } else {
-                                        showToast(
-                                            "Trình duyệt đã chặn popup, vui lòng mở thủ công.",
-                                            "warning");
-                                    }
-                                } else {
-                                    showToast("Lỗi khi tạo hóa đơn PDF: " + (pdfResponse
-                                        .error || ""), "danger");
-                                }
-                            },
-                            error: function(xhr) {
-                                console.error("Lỗi AJAX:", xhr.responseText);
-                                showToast(
-                                    "Không thể tạo hóa đơn PDF. Vui lòng thử lại.",
-                                    "danger");
-                            }
-
-                        });
-
+                        var maHoaDonElement = document.getElementById("maHoaDon");
+                        maHoaDonElement.innerText = "Chưa có hóa đơn";
+                        maHoaDonElement.style.color = "red";
                     } else {
                         showToast("Thanh toán không thành công.", "danger");
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error("Có lỗi xảy ra: ", error);
-                    showToast("Lỗi khi cập nhật trạng thái bàn.", "danger");
+                    console.error("Lỗi chi tiết:", xhr.responseText); // In lỗi chi tiết ra console
+                    showToast("Lỗi khi cập nhật trạng thái bàn: " + xhr.responseText, "danger");
                 }
+
             });
         } else {
             showToast("Không tìm thấy ID bàn!", "warning");
@@ -539,29 +633,49 @@
         $("#tableInfo").text("Bàn chưa chọn"); // Reset tên bàn
     }
 
-    // số người
-    document.addEventListener("DOMContentLoaded", function() {
-        let soNguoiElement = document.querySelector(".so-nguoi");
+    $(document).ready(function() {
+        let banId = null
+        let modal = new bootstrap.Modal(document.getElementById('modalSoNguoi'));
+        $(".so-nguoi").click(function() {
+            banId = $('#ten-ban').data('currentBan'); // Lấy ID bàn từ #ten-ban
 
-        soNguoiElement.addEventListener("click", function() {
-            let banId = $('#ten-ban').data('currentBan'); // Lấy ID bàn từ #ten-ban
+            soNguoiEl = $(this).text().replace("👥", "").trim(); // Loại bỏ emoji và lấy số người
+
+            // Cập nhật giá trị trong #soNguoiInput nếu cần
+            $("#soNguoiInput").val(soNguoiEl); // Gán vào ô input
 
             if (!banId || banId === 0) {
                 alert("Vui lòng chọn bàn trước khi nhập số người!");
             } else {
-                let modal = new bootstrap.Modal(document.getElementById('modalSoNguoi'));
                 modal.show(); // Chỉ mở modal khi bàn đã được chọn
             }
         });
 
-        document.getElementById("btnLuuSoNguoi").addEventListener("click", function() {
-            let soNguoi = document.getElementById("soNguoiInput").value;
-            $(".so-nguoi").html(`👥 ${soNguoi}`); // Cập nhật số người hiển thị
-            $(".so-nguoi").data("soNguoi", soNguoi); // Lưu vào jQuery data
-            console.log("Số người đã lưu:", $(".so-nguoi").data("soNguoi"));
-            $('#modalSoNguoi').modal('hide'); // Đóng modal
+        // Dùng jQuery để thêm sự kiện cho nút Lưu
+        $('#btnLuuSoNguoi').click(function() {
+            let soNguoi = $("#soNguoiInput").val();
+
+            $.ajax({
+                url: 'thu-ngan-save-so-nguoi',
+                method: 'POST',
+                data: {
+                    banId: banId,
+                    soNguoi: soNguoi,
+                    _token: $('meta[name="csrf-token"]').attr("content")
+                },
+
+                success: function(response) {
+                    modal.hide();
+                    $('.so-nguoi').text(`👥 ${response.soNguoi}`);
+                },
+
+                error: function(xhr, status, error) {
+                    console.error("Có lỗi xảy ra:", error);
+                }
+            })
         });
     });
+
 
     $(document).ready(function() {
         // Khởi tạo Select2 với multiple
@@ -644,6 +758,7 @@
                                 <td>${response.bill.ten_ban}</td>
                                 <td>${response.bill.ma_hoa_don}</td>
                                 <td>${response.bill.tong_so_luong_mon_an || '0'}</td>
+                                <td>${response.bill.so_nguoi || '0'}</td>    
                                 <td>${tongTien.toLocaleString()} VNĐ</td>
                             </tr>
                         `;

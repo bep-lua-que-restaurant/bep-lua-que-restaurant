@@ -3,13 +3,21 @@
 @section('content')
     <div class="card" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); background-color: #f8f9fa;">
         <div class="card-body" style="padding: 20px;">
-            <h2
+            <h2 id="chartTitle"
                 style="text-align: center; margin-top: 30px;margin-bottom: 30px; font-weight: bold; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                🍽️ Thống kê Top 10 món ăn bán chạy nhất</h2>
+                🍽️ Thống kê 10 món ăn bán chạy
+            </h2>
 
             <!-- Bộ lọc thời gian -->
             <form id="filterForm" style="margin-bottom: 40px;margin-top: 40px;">
                 <div style="display: flex; justify-content: center; gap: 20px; align-items: center; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label for="chartType" style="font-weight: bold; white-space: nowrap;">Thống kê:</label>
+                        <select id="chartType" class="custom-select" onchange="updateTitle()">
+                            <option value="banchay" selected>Bán chạy nhất</option>
+                            <option value="banit">Bán ít nhất</option>
+                        </select>
+                    </div>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <label for="timeFilter" style="font-weight: bold; white-space: nowrap;">Hiển thị:</label>
                         <select name="filterType" id="timeFilter" class="custom-select">
@@ -18,7 +26,6 @@
                             <option value="year">Theo Năm</option>
                         </select>
                     </div>
-
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <label for="startDate" style="font-weight: bold; white-space: nowrap;">Từ:</label>
                         <input type="date" name="fromDate" id="startDate" class="custom-input"
@@ -81,6 +88,7 @@
 <script>
     $(document).ready(function() {
         let currentDate = new Date().toISOString().split('T')[0];
+        updateTitle();
 
         // Hiển thị alert khi trang vừa tải
         // alert(`Đang hiển thị dữ liệu theo ngày hiện tại: ${currentDate}`);
@@ -91,27 +99,29 @@
         $('#timeFilter').change(function() {
             let filterType = $(this).val();
             let fromDate, toDate;
+            let chartType = $('#chartType').val(); // Lấy giá trị bán chạy hoặc bán ít
 
             if (filterType === 'day') {
                 fromDate = toDate = new Date().toISOString().split('T')[0];
             } else if (filterType === 'month') {
                 let currentDate = new Date();
-                fromDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString()
-                    .split('T')[0];
-                toDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
-                    .toISOString().split('T')[0];
+                let month = currentDate.getMonth() + 1; // Sửa lỗi tháng bị lệch
+                let year = currentDate.getFullYear();
+                fromDate = `${year}-${month.toString().padStart(2, '0')}-01`;
+                toDate = new Date(year, month, 0).toISOString().split('T')[0]; // Lấy ngày cuối tháng
             } else if (filterType === 'year') {
                 let currentYear = new Date().getFullYear();
                 fromDate = `${currentYear}-01-01`;
                 toDate = `${currentYear}-12-31`;
             }
 
-            loadData(fromDate, toDate, filterType);
+            loadData(fromDate, toDate, filterType, chartType);
         });
 
         $('#dateFilterBtn').click(function() {
             let fromDate = $('#startDate').val();
             let toDate = $('#endDate').val();
+            let chartType = $('#chartType').val(); // Lấy giá trị bán chạy hoặc bán ít
 
             if (!fromDate || !toDate) {
                 alert("Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc!");
@@ -156,21 +166,27 @@
             }
 
             // Nếu hợp lệ, gọi hàm loadData
-            loadData(fromDate, toDate, 'custom');
+            loadData(fromDate, toDate, 'custom', chartType);
         });
 
+        $('#chartType').change(function() {
+            let filterType = $('#timeFilter').val();
+            let chartType = $(this).val(); // Lấy giá trị bán chạy hoặc bán ít
+            let fromDate = $('#startDate').val() || currentDate;
+            let toDate = $('#endDate').val() || currentDate;
+            updateTitle();
+            loadData(fromDate, toDate, filterType, chartType);
+        });
 
-
-
-
-        function loadData(fromDate, toDate, filterType) {
+        function loadData(fromDate, toDate, filterType, chartType) {
             $.ajax({
                 url: "/thong-ke-mon-an",
                 type: "GET",
                 data: {
                     fromDate: fromDate,
                     toDate: toDate,
-                    filterType: filterType
+                    filterType: filterType,
+                    chartType: chartType
                 },
                 beforeSend: function() {
                     $('#chartContainer').html(
@@ -178,11 +194,14 @@
                 },
                 success: function(response) {
                     if (response.labels && response.datasets) {
-                        renderChart(response.labels, response.datasets);
+                        renderChart(response.labels, response.datasets, fromDate, toDate,
+                            filterType, chartType);
                     } else {
-                        renderChart(['Không có dữ liệu'], [0]);
+                        renderChart(['Không có dữ liệu'], [0], fromDate, toDate, filterType,
+                            chartType);
                     }
                 },
+
                 error: function(xhr, status, error) {
                     console.error('Lỗi khi gọi API:', error);
                     $('#chartContainer').html(
@@ -192,7 +211,7 @@
             });
         }
 
-        function renderChart(labels, data) {
+        function renderChart(labels, data, fromDate, toDate, filterType, chartType) {
             $('#chartContainer').html('<canvas id="myChart"></canvas>');
             let ctx = document.getElementById('myChart').getContext('2d');
 
@@ -204,6 +223,28 @@
             let maxDataValue = Math.max(...data);
             let yAxisMaxValue = Math.ceil(maxDataValue * 1.2) || 10;
 
+            // 🛠 Định dạng ngày tháng năm cho tiêu đề
+            let titleText = '';
+            let formatDate = (dateStr) => {
+                let date = new Date(dateStr);
+                return date.toLocaleDateString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            };
+
+            if (filterType === 'day') {
+                titleText = `Ngày: ${formatDate(fromDate)}`;
+            } else if (filterType === 'month') {
+                titleText = `Tháng: ${fromDate.split('-')[1]}/${fromDate.split('-')[0]}`;
+            } else if (filterType === 'year') {
+                titleText = `Năm: ${new Date(fromDate).getFullYear()}`;
+            } else if (filterType === 'custom') {
+                titleText = `Khoảng thời gian: ${formatDate(fromDate)} - ${formatDate(toDate)}`;
+            }
+
+
             new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -211,18 +252,21 @@
                     datasets: [{
                         label: 'Số lượng món ăn',
                         data: data,
-                        backgroundColor: labels.length === 1 ?
-                            'rgba(75, 192, 192, 0.7)' : 'rgba(54, 162, 235, 0.7)',
-                        borderColor: labels.length === 1 ?
-                            'rgba(75, 192, 192, 1)' : 'rgba(54, 162, 235, 1)',
+                        backgroundColor: chartType === 'banit' ?
+                            'rgba(255, 99, 132, 0.9)' // Màu đỏ cho bán ít
+                            :
+                            'rgba(144, 197, 238, 0.9)', // Màu xanh cho bán chạy
+                        borderColor: chartType === 'banit' ?
+                            'rgba(255, 59, 92, 1)' : 'rgba(94, 197, 238, 1)',
                         borderWidth: 1.5,
-                        borderRadius: 9, // Làm tròn góc cột
                         barThickness: labels.length <= 3 ? 80 : 'flex',
-
                         categoryPercentage: labels.length === 1 ? 0.5 : 0.8,
-                        hoverBackgroundColor: 'rgba(0, 102, 204, 0.9)',
-                        hoverBorderColor: 'rgba(0, 102, 204, 1)',
+                        hoverBackgroundColor: chartType === 'banit' ?
+                            'rgba(255, 80, 92, 0.95)' : 'rgba(94, 167, 228, 0.95)',
+                        hoverBorderColor: chartType === 'banit' ?
+                            'rgba(255, 40, 60, 1)' : 'rgba(54, 137, 218, 1)',
                     }]
+
                 },
                 options: {
                     responsive: true,
@@ -246,7 +290,7 @@
                         x: {
                             title: {
                                 display: true,
-                                text: 'Món ăn',
+                                text: [`Món ăn`, titleText],
                                 font: {
                                     size: 14,
                                     weight: 'bold'
@@ -281,5 +325,15 @@
             });
         }
 
+        function updateTitle() {
+            const chartType = document.getElementById('chartType').value;
+            const titleElement = document.getElementById('chartTitle');
+
+            if (chartType === 'banchay') {
+                titleElement.innerHTML = '🍽️ Thống kê 10 món ăn bán chạy';
+            } else {
+                titleElement.innerHTML = '🍽️ Thống kê 10 món ăn bán ít';
+            }
+        }
     });
 </script>

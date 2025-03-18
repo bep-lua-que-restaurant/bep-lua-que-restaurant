@@ -1,20 +1,20 @@
 @extends('layouts.admin')
 
 @section('title')
-    Thống kê doanh số
+    Thống kê số lượng khách
 @endsection
 
 @section('content')
     <div class="container">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title fw-bold">DOANH SỐ <span id="timeRange">
+                <h5 class="card-title fw-bold">SỐ LƯỢNG HÓA ĐƠN <span id="timeRange">
                     @if ($filterType == 'year') TRONG NĂM @elseif ($filterType == 'month') TRONG THÁNG @elseif ($filterType == 'week') TRONG TUẦN @else TRONG NGÀY @endif
                 </span></h5>
 
                 <h5 class="text-primary fw-bold">
                     <i class="bi bi-info-circle"></i>
-                    <span id="totalSales">{{ number_format(array_sum($data), 0, ',', '.') }} VND</span>
+                    <span id="totalInvoices">{{ number_format(array_sum($data), 0, ',', '.') }} Hóa đơn</span>
                 </h5>
 
                 <form id="filterForm">
@@ -47,18 +47,15 @@
     <script>
         $(document).ready(function () {
             let chart;
-
             function updateChart(labels, data, formatType) {
-                if (chart) {
-                    chart.destroy();
-                }
+                if (chart) { chart.destroy(); }
                 let ctx = document.getElementById('thongKeChart').getContext('2d');
                 chart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Doanh thu (VND)',
+                            label: 'Số lượng hóa đơn',
                             data: data,
                             backgroundColor: 'rgba(54, 162, 235, 0.6)',
                             borderColor: 'rgba(54, 162, 235, 1)',
@@ -68,29 +65,22 @@
                     options: {
                         responsive: true,
                         scales: {
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: formatType === 'day' ? 'Ngày' : formatType === 'month' ? 'Tháng' : formatType === 'year' ? 'Năm' : 'Tuần'
-                                }
-                            },
+                            x: { title: { display: true, text: formatType === 'day' ? 'Ngày' : formatType === 'month' ? 'Tháng' : formatType === 'week' ? 'Tuần' : 'Năm' } },
                             y: { beginAtZero: true }
                         }
                     }
                 });
             }
 
-            // Xử lý tự động khi thay đổi bộ lọc năm/tháng/tuần/ngày
             $('#filterType').on('change', function () {
                 let filterType = $(this).val();
-
                 $.ajax({
-                    url: "/thong-ke-doanh-so",
+                    url: "/thong-ke-hoa-don",
                     type: "GET",
                     data: { filterType: filterType },
                     success: function (response) {
-                        $('#totalSales').text(response.totalSales);
-                        $('#timeRange').text(filterType === 'year' ? 'TRONG NĂM' : filterType === 'month' ? 'TRONG THÁNG' : filterType === 'week' ? 'TRONG TUẦN' : 'TRONG NGÀY');
+                        $('#totalInvoices').text(response.totalOrders);
+                        $('#timeRange').text(filterType === 'year' ? 'TRONG NĂM' : filterType === 'month' ? 'TRONG THÁNG' : 'TRONG NGÀY');
                         updateChart(response.labels, response.data, filterType);
                     },
                     error: function () {
@@ -99,7 +89,12 @@
                 });
             });
 
-            // Xử lý lọc theo khoảng ngày tháng năm
+            // Format lại ngày thành DD-MM-YYYY
+            function formatDate(dateString) {
+                let parts = dateString.split(/[-\/]/); // Tách theo cả '-' và '/'
+                return `${parts[2]}-${parts[1]}-${parts[0]}`; // Định dạng DD-MM-YYYY
+            }
+
             $('#btnFilter').on('click', function () {
                 let fromDate = $('#startDate').val();
                 let toDate = $('#endDate').val();
@@ -146,20 +141,13 @@
                     return;
                 }
 
-                // Format lại ngày thành DD-MM-YYYY
-                function formatDate(dateString) {
-                    let parts = dateString.split(/[-\/]/); // Tách theo cả '-' và '/'
-                    return `${parts[2]}-${parts[1]}-${parts[0]}`; // Định dạng DD-MM-YYYY
-                }
-
                 $.ajax({
-                    url: "/thong-ke-doanh-so",
+                    url: "/thong-ke-hoa-don",
                     type: "GET",
                     data: { fromDate: fromDate, toDate: toDate },
                     success: function (response) {
-                        $('#totalSales').text(response.totalSales);
+                        $('#totalInvoices').text(response.totalOrders);
                         $('#timeRange').text(`TỪ ${formatDate(fromDate)} ĐẾN ${formatDate(toDate)}`);
-
                         let from = new Date(fromDate);
                         let to = new Date(toDate);
                         let diffDays = (to - from) / (1000 * 60 * 60 * 24);
@@ -174,7 +162,6 @@
                 });
             });
 
-            // Cập nhật biểu đồ ban đầu
             updateChart(@json($labels), @json($data), 'day');
         });
     </script>

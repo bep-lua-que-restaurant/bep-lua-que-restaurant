@@ -25,7 +25,15 @@ class HoaDon extends Model
 
     public function banAns()
     {
-
         return $this->belongsToMany(BanAn::class, 'hoa_don_bans', 'hoa_don_id', 'ban_an_id');
+    }
+    public function scopeTongDoanhThu($query)
+    {
+        return $query->where('deleted_at', null)->sum('tong_tien');
+    }
+
+    public function scopeDoanhThuTheoNgay($query, $ngay)
+    {
+        return $query->whereDate('created_at', $ngay)->sum('tong_tien');
     }
 }
