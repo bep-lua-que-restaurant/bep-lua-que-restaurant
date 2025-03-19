@@ -10,6 +10,20 @@
         background-color: #d1e7fd !important;
         color: black !important;
     }
+
+    .so-luong-tach {
+    width: 60px; /* Giới hạn độ rộng */
+    text-align: center; /* Căn giữa số */
+    border: none; /* Xóa viền để trông gọn gàng */
+    outline: none; /* Xóa viền xanh khi focus */
+    font-size: 16px; /* Cỡ chữ lớn hơn */
+}
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Tạo khoảng cách giữa các nút */
+}
+
 </style>
 <table class="table table-bordered table-sm">
     <thead class="table-light">
@@ -225,7 +239,7 @@
     <div class="modal-dialog modal-lg"> <!-- Thay đổi kích thước modal -->
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalGhepBanLabel">Tách/Ghép Bàn</h5>
+                <h5 class="modal-title" id="modalGhepBanLabel">Ghép Bàn</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -275,9 +289,12 @@
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalTachBanLabel">Tách bàn & món</h5>
+                <h5 class="modal-title" id="modalTachBanLabel">
+                  Tách hóa đơn
+                  <small class="text-muted ms-2">Hóa đơn hiện tại: <span id="tenHoaDon"></span></small>
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
+              </div>
             <div class="modal-body">
                 <form>
                     <!-- Chọn bàn mới hoặc tạo hóa đơn -->
@@ -294,7 +311,7 @@
                             </div>
                         </div>
 
-                        <!-- Cột chọn bàn cần tách -->
+                        <!-- Cột chọn bàn để tách sang -->
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="banGoc" class="form-label">Chọn bàn</label>
@@ -316,9 +333,8 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Tên món</th>
-                                    <th>Số lượng</th>
-                                    <th>Đơn giá</th>
-                                    <th>Thành tiền</th>
+                                    <th>Số lượng trên đơn gốc</th>
+                                    <th>Số lượng tách</th>
                                 </tr>
                             </thead>
                             <tbody id="hoa-don-tach-body">
@@ -338,6 +354,7 @@
         </div>
     </div>
 </div>
+
 
 {{-- giao diện lưu hóa đơn In --}}
 
@@ -806,82 +823,5 @@
         });
     });
 
-    //tách bàn
-    $(document).ready(function() {
-        $('#modalTachBan').on('shown.bs.modal', function() {
-            var idBanHienTai = $('#ten-ban').data('currentBan'); // Lấy ID bàn hiện tại
-            var apiUrlShowBanGhep = "{{ route('thungan.getBanDeGhep') }}"; // API lấy danh sách bàn
-            var hoaDonId = $('#ten-ban').data('hoaDonId'); // Lấy hóa đơn ID đã lưu
-            // console.log("🔥 Hóa đơn ID khi mở modal:", hoaDonId);
-            $.ajax({
-                url: apiUrlShowBanGhep,
-                type: 'GET',
-                dataType: 'json',
-                success: function(data) {
-                    let selectBanGoc = $('#banGoc');
-                    selectBanGoc.empty(); // Xóa danh sách cũ
 
-                    // Lọc bỏ bàn hiện tại khỏi danh sách
-                    let danhSachBan = data.filter(ban => ban.id != idBanHienTai);
-
-                    if (danhSachBan.length === 0) {
-                        selectBanGoc.append('<option value="">Không có bàn nào</option>');
-                        return;
-                    }
-
-                    // Hiển thị danh sách bàn vào #banGoc
-                    danhSachBan.forEach(function(ban, index) {
-                        selectBanGoc.append(
-                            `<option value="${ban.id}" ${index === 0 ? "selected" : ""}>${ban.ten_ban} - ${ban.trang_thai}</option>`
-                        );
-                    });
-                },
-                error: function(xhr) {
-                    console.error("Lỗi API:", xhr.status, xhr.responseText);
-                    alert('Lỗi khi tải danh sách bàn!');
-                }
-            });
-
-            // Gọi API để lấy chi tiết hóa đơn và hiển thị vào modal
-            if (hoaDonId) {
-                $.ajax({
-                    url: "/hoa-don/get-details",
-                    method: "GET",
-                    data: {
-                        hoa_don_id: hoaDonId
-                    },
-                    success: function(response) {
-                        let hoaDonTachBody = $("#hoa-don-tach-body");
-                        hoaDonTachBody.empty();
-                        // console.log("Chi tiết hóa đơn:", response);
-                        if (response.chi_tiet_hoa_don.length > 0) {
-                            let index = 1;
-                            response.chi_tiet_hoa_don.forEach((item) => {
-                                let row = `
-                            <tr>
-                                <td>${index}</td>
-                                <td>${item.tenMon}</td>
-                                <td class="text-center">${item.so_luong}</td>
-                                <td class="text-end">${item.don_gia.toLocaleString()} VNĐ</td>
-                                <td class="text-end">${(item.so_luong * item.don_gia).toLocaleString()} VNĐ</td>
-                            </tr>`;
-                                hoaDonTachBody.append(row);
-                                index++;
-                            });
-                        } else {
-                            hoaDonTachBody.html(
-                                '<tr><td colspan="5" class="text-center">Chưa có món nào</td></tr>'
-                            );
-                        }
-                    },
-                    error: function(xhr) {
-                        console.error("🔥 Lỗi khi tải chi tiết hóa đơn:", xhr.responseText);
-                    }
-                });
-            } else {
-                $("#hoa-don-tach-body").html(
-                    '<tr><td colspan="5" class="text-center">Chưa có hóa đơn</td></tr>');
-            }
-        });
-    });
 </script>
