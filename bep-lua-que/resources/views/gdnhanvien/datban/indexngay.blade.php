@@ -1,642 +1,557 @@
 @extends('gdnhanvien.datban.layout')
 
 @section('content')
+    @php
+        use Carbon\Carbon;
+    @endphp
     <div class="container">
         <h1 class="text-center my-4">Quản lý Đặt Bàn</h1>
 
-        <!-- Chọn ngày -->
-        <div class="row d-flex align-items-center mb-3">
-            <div class="col-auto">
-                <label for="datePicker" class="fw-bold">Hiển thị theo ngày:</label>
-            </div>
-            <div class="col-auto">
-                <input type="date" class="form-control shadow-sm" id="datePicker"
-                    value="{{ \Carbon\Carbon::today()->toDateString() }}">
-            </div>
-        </div>
-
         <!-- Bảng đặt bàn -->
         <div id="ngay-content" class="table-responsive">
-            <table class="table table-bordered table-hover text-center align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th class="sticky-col">Bàn / Giờ</th>
-                        @for ($i = 8; $i <= 22; $i++)
-                            <th>{{ sprintf('%02d', $i) }}:00</th>
-                            <th>{{ sprintf('%02d', $i) }}:30</th>
-                        @endfor
-                    </tr>
-                </thead>
+            <div class="table-responsive">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover text-center align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <!-- Cố định cột "Bàn / Giờ" -->
+                                <th class="sticky-col">Bàn / Giờ</th>
+                                @for ($i = 8; $i <= 22; $i++)
+                                    <th>{{ sprintf('%02d', $i) }}:00</th>
+                                    <th>{{ sprintf('%02d', $i) }}:30</th>
+                                @endfor
+                            </tr>
+                        </thead>
 
-                <tbody id="ngay-tabs">
-                    <tr>
-                        <td colspan="16" class="text-center">Đang tải dữ liệu...</td>
-                    </tr>
-                </tbody>
-            </table>
+                        <tbody>
+                            @foreach ($banAns as $banAn)
+                                <tr>
+                                    <!-- Cố định cột tên bàn -->
+                                    <td class="fw-bold sticky-col">{{ $banAn->ten_ban }}</td>
+
+                                    <!-- Các khung giờ từ 8:00 - 22:30 -->
+                                    {{-- Table hiển thị các ô thời gian --}}
+                                    @for ($i = 8; $i <= 22; $i++)
+                                        @foreach ([0, 30] as $minute)
+                                            @php
+                                                $thoiGianHienTai = sprintf('%02d:%02d', $i, $minute);
+                                                $class = '';
+                                                $isDisabled = false;
+                                                $buttonText = '+';
+
+                                                // Kiểm tra datBanCurrent
+                                                $isCurrentBooked = $datBanCurrent->contains(function ($datBan) use (
+                                                    $banAn,
+                                                    $thoiGianHienTai,
+                                                ) {
+                                                    if ($datBan->ban_an_id !== $banAn->id) {
+                                                        return false;
+                                                    }
+
+                                                    $thoiGianDen = date('H:i', strtotime($datBan->thoi_gian_den));
+                                                    $gioDuKien = $datBan->gio_du_kien;
+
+                                                    return $thoiGianHienTai >= $thoiGianDen &&
+                                                        $thoiGianHienTai < $gioDuKien;
+                                                });
+
+                                                // Kiểm tra datBansOther
+                                                $isOtherBooked = $datBansOther->contains(function ($datBan) use (
+                                                    $banAn,
+                                                    $thoiGianHienTai,
+                                                ) {
+                                                    if ($datBan->ban_an_id !== $banAn->id) {
+                                                        return false;
+                                                    }
+
+                                                    $thoiGianDen = date('H:i', strtotime($datBan->thoi_gian_den));
+                                                    $gioDuKien = $datBan->gio_du_kien;
+
+                                                    return $thoiGianHienTai >= $thoiGianDen &&
+                                                        $thoiGianHienTai < $gioDuKien;
+                                                });
+
+                                                // Gán class màu sắc cho slot
+                                                if ($isCurrentBooked) {
+                                                    $class = 'bg-info text-white'; // Màu xanh cho datBanCurrent
+                                                } elseif ($isOtherBooked) {
+                                                    $class = 'bg-danger text-white'; // Màu đỏ cho datBansOther
+                                                    $isDisabled = true;
+                                                    $buttonText = 'X';
+                                                }
+                                            @endphp
+
+                                            <td class="time-slot {{ $class }} {{ $isDisabled ? 'disabled' : '' }}"
+                                                data-ban="{{ $banAn->id }}" data-time="{{ $thoiGianHienTai }}"
+                                                {{ $isDisabled ? 'data-disabled="true"' : '' }}
+                                                data-current="{{ $isCurrentBooked ? 'true' : 'false' }}">
+
+                                                {{-- Ô màu đỏ chỉ hiển thị X, không có nút --}}
+                                                @if ($isOtherBooked)
+                                                    <span>{{ $buttonText }}</span>
+                                                @else
+                                                    {{-- Ô màu xanh hoặc thường đều có nút để click --}}
+                                                    <button
+                                                        class="btn btn-sm {{ $isCurrentBooked ? 'btn-info' : 'btn-outline-success' }} select-slot"
+                                                        data-ban="{{ $banAn->id }}" data-time="{{ $thoiGianHienTai }}"
+                                                        {{ $isDisabled ? 'disabled' : '' }}>
+                                                        {{ $buttonText }}
+                                                    </button>
+                                                @endif
+                                            </td>
+                                        @endforeach
+                                    @endfor
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
         </div>
-    </div>
-    <div id="pagination-controls" class="mt-3"></div> <!-- Hiển thị các nút phân trang -->
+        {{ $banAns->links('pagination::bootstrap-5') }}
 
 
 
-    <script>
-        $(document).ready(function() {
-            function loadDatBan(date, page = 1) {
-                $("#ngay-tabs").html('<tr><td colspan="30" class="text-center">Đang tải dữ liệu...</td></tr>');
 
-                $.ajax({
-                    url: `/api/datban?page=${page}`,
-                    type: 'GET',
-                    data: {
-                        date: date
-                    },
-                    success: function(response) {
-                        let html = '';
-
-                        response.banPhong.data.forEach(ban => {
-                            html += `<tr><td class="fw-bold sticky-col">${ban.ten_ban}</td>`;
-
-                            for (let i = 8; i <= 22; i++) {
-                                ["00", "30"].forEach(minute => {
-                                    const timeSlot =
-                                        `${i.toString().padStart(2, '0')}:${minute}`;
-                                    const thoiGianHienTai = new Date(
-                                        `${date}T${timeSlot}:00`);
-
-                                    // Tìm đặt bàn trong khoảng thời gian này
-                                    const datBan = response.datBans.find(d => {
-                                        if (d.ban_an_id !== ban.id)
-                                            return false;
-
-                                        const thoiGianDen = new Date(d
-                                            .thoi_gian_den);
-
-                                        // Lấy giờ và phút từ gio_du_kien
-                                        const [hours, minutes] = d.gio_du_kien
-                                            .split(':').map(Number);
-
-                                        // Gán thoiGianKetThuc trực tiếp từ gio_du_kien
-                                        const thoiGianKetThuc = new Date(
-                                            thoiGianDen);
-                                        thoiGianKetThuc.setHours(hours);
-                                        thoiGianKetThuc.setMinutes(minutes);
-
-                                        return thoiGianHienTai >= thoiGianDen &&
-                                            thoiGianHienTai < thoiGianKetThuc;
-                                    });
-
-
-                                    const statusClass = datBan ? (datBan.trang_thai ===
-                                        'xac_nhan' ? 'table-success' :
-                                        'table-warning') : '';
-                                    const content = datBan ?
-                                        `<a href="/dat-ban/${datBan.ma_dat_ban}" class="btn btn-sm btn-info text-white btn-view-details" 
-                                            data-datban-id="${datBan.id}" 
-                                            data-bs-toggle="tooltip" 
-                                            title="Xem chi tiết">
-                                            Chi tiết
-                                        </a>` :
-                                        `<div class="selectable-slot" 
-                                            data-ban-id="${ban.id}" 
-                                            data-ten-ban="${ban.ten_ban}" 
-                                            data-time-slot="${timeSlot}"
-                                            data-date="${date}">
-                                            +
-                                        </div>
-                                        `;
-
-
-                                    html +=
-                                        `<td class="text-center ${statusClass}">${content}</td>`;
-                                });
-                            }
-
-
-                            html += `</tr>`;
-                        });
-
-                        $("#ngay-tabs").html(html);
-                        $('[data-bs-toggle="tooltip"]').tooltip(); // Kích hoạt tooltip
-
-                        // Hiển thị phân trang
-                        renderPagination(response.banPhong, date);
-                    },
-                    error: function() {
-                        $("#ngay-tabs").html(
-                            '<tr><td colspan="30" class="text-center text-danger">Lỗi tải dữ liệu</td></tr>'
-                        );
-                    }
-                });
+        <button id="open-modal-btn" class="btn btn-primary fixed-bottom m-3 right-align">
+            Xem chi tiết đặt bàn
+        </button>
+        <style>
+            #open-modal-btn {
+                width: max-content;
+                float: left;
             }
+        </style>
 
-            // Hàm hiển thị phân trang
-            function renderPagination(paginationData, date) {
-                let paginationHtml = '<nav><ul class="pagination justify-content-center">';
-
-                if (paginationData.prev_page_url) {
-                    paginationHtml +=
-                        `<li class="page-item"><a class="page-link pagination-link" href="#" data-page="${paginationData.current_page - 1}" data-date="${date}">«</a></li>`;
-                }
-
-                for (let i = 1; i <= paginationData.last_page; i++) {
-                    let activeClass = (i === paginationData.current_page) ? 'active' : '';
-                    paginationHtml +=
-                        `<li class="page-item ${activeClass}"><a class="page-link pagination-link" href="#" data-page="${i}" data-date="${date}">${i}</a></li>`;
-                }
-
-                if (paginationData.next_page_url) {
-                    paginationHtml +=
-                        `<li class="page-item"><a class="page-link pagination-link" href="#" data-page="${paginationData.current_page + 1}" data-date="${date}">»</a></li>`;
-                }
-
-                paginationHtml += '</ul></nav>';
-                $("#pagination-controls").html(paginationHtml);
-            }
-
-            // Gọi API khi trang load
-            $(document).ready(function() {
-                loadDatBan($("#datePicker").val());
-
-                $("#datePicker").on("change", function() {
-                    loadDatBan($(this).val());
-                });
-
-                // Xử lý sự kiện click phân trang
-                $(document).on("click", ".pagination-link", function(e) {
-                    e.preventDefault(); // Ngăn hành vi mặc định
-                    e.stopPropagation(); // Ngăn lan truyền lên các thành phần cha
-
-                    let page = $(this).data("page");
-                    let date = $(this).data("date");
-                    loadDatBan(date, page);
-                });
-
-            });
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+            data-bs-backdrop="static">
 
 
-        });
-    </script>
 
-    <!-- Nút mở modal -->
-    <button id="openModalButton" class="btn btn-primary d-none">Xem chi tiết</button>
-
-    <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl"> <!-- Đổi modal-lg thành modal-xl -->
-            <div class="modal-content">
-
-                <form id="bookingForm" method="POST" action="{{ route('dat-ban.store') }}">
-                    @csrf
-                    <div class="modal-header">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="exampleModalLabel">Chi tiết đặt bàn</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
 
-                        <!-- Ô tìm kiếm -->
-                        <div class="mb-3">
-                            {{-- <input type="text" class="form-control" id="searchCustomer" placeholder="Tìm kiếm..."> --}}
+                    <!-- Form để gửi dữ liệu -->
+                    <form id="booking-form" action="{{ route('dat-ban.update', $maDatBan) }}" method="POST">
+                        @csrf
+                        @method('PUT')
 
-                            <input type="text" class="form-control" id="searchCustomer"
-                                placeholder="Nhập tên hoặc số điện thoại">
-                            <ul id="customerList" class="list-group mt-2" style="display: none;"></ul>
+                        <!-- Các input ẩn để đẩy dữ liệu vào form -->
+                        <input type="hidden" name="ban_an_ids" id="banAnIds">
+                        <input type="hidden" name="thoi_gian_den" id="thoiGianDen">
+                        <input type="hidden" name="gio_du_kien" id="gioDuKien">
+                        <input type="hidden" name="khach_hang_id" value="{{ $datBan->khach_hang_id }}">
+                        <input type="hidden" name="so_dien_thoai" value="{{ $datBan->khachHang->so_dien_thoai }}">
+                        <input type="hidden" name="ngay_den" id="ngay_den"
+                            value="{{ $datBan->thoi_gian_den ? date('Y-m-d', strtotime($datBan->thoi_gian_den)) : '' }}">
+
+
+
+                        <!-- Nội dung modal -->
+                        <div class="modal-body">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="customerName" class="form-label fw-bold">Họ tên:</label>
+                                    <input type="text" class="form-control" id="customerName" name="customer_name"
+                                        value="{{ $datBan->khachHang->ho_ten }}" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="customerEmail" class="form-label fw-bold">Email:</label>
+                                    <input type="email" class="form-control" id="customerEmail" name="customer_email"
+                                        value="{{ $datBan->khachHang->email }}" readonly>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="soNguoiInput" class="form-label fw-bold">Số người:</label>
+                                    <input type="number" class="form-control" id="soNguoiInput" name="so_nguoi"
+                                        min="1" value="{{ $datBan->so_nguoi }}">
+                                </div>
+                            </div>
+
+                            <!-- Mô tả -->
+                            <div class="mb-3">
+                                <label for="description" class="form-label fw-bold">Mô tả:</label>
+                                <textarea class="form-control" name="mo_ta" id="description" rows="3">{{ $datBan->mo_ta }}</textarea>
+                            </div>
+
+                            <!-- Dữ liệu từ JS -->
+                            <div id="modal-body">
+                                <!-- Nội dung sẽ được cập nhật bởi JS -->
+                            </div>
                         </div>
 
-                        <!-- Form nhập thông tin -->
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="fullName" class="form-label">Họ tên:</label>
-                                <input type="text" class="form-control" id="customerName" name="customer_name">
-                                @error('customer_name')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label for="email" class="form-label">Email:</label>
-                                <input type="email" class="form-control" id="customerEmail" name="customer_email">
-                                @error('customer_email')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary mt-3" id="confirm-btn">Xác nhận</button>
                         </div>
+                    </form>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="phone" class="form-label">Số điện thoại:</label>
-                                <input type="tel" class="form-control" id="customerPhone" name="customer_phone">
-                                @error('customer_phone')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label for="numberOfGuests" class="form-label">Số người:</label>
-                                <input type="number" class="form-control" name="num_people" id="numPeople" min="1">
-                                @error('num_people')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- Danh sách các bàn đã chọn -->
-                        <ul id="modalContent" class="list-unstyled"></ul>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                        <button id="clearButton" class="btn btn-danger">clearButton</button>
-                        <button type="submit" id="confirmButton" class="btn btn-primary">Xác nhận đặt bàn</button>
-
-                    </div>
-                </form>
-
+                </div>
             </div>
         </div>
+
     </div>
 
-
-
-
     <script>
-        $(document).ready(function() {
-            let selectedSlots = {};
+        let selectedSlots = [];
 
-            // Xử lý sự kiện click để chọn hoặc bỏ chọn
-            $(document).on('click', '.selectable-slot', function() {
-                let banId = $(this).data('ban-id');
-                let tenBan = $(this).data('ten-ban');
-                let timeSlot = $(this).data('time-slot'); // ✅ Đổi thành 'time-slot'
-                let date = $('#datePicker').val();
+        // Tự động thêm vào selectedSlots nếu là datBanCurrent
+        // Tự động thêm vào selectedSlots nếu là datBanCurrent
+        document.querySelectorAll('.time-slot[data-current="true"]').forEach(slot => {
+            const banId = slot.getAttribute('data-ban');
+            const time = slot.getAttribute('data-time');
+            selectedSlots.push({
+                banId,
+                time
+            });
 
-                if (!date) {
-                    alert("Vui lòng chọn ngày!");
-                    return;
+            const button = slot.querySelector('.select-slot');
+            if (button) {
+                button.classList.remove('btn-outline-success');
+                button.classList.add('btn-success');
+            }
+        });
+
+        // 👉 Gọi ngay để cập nhật modal khi tải trang
+        updateModalData();
+
+
+        // Đặt khoảng cách giữa các giờ là 30 phút
+        const timeGap = 30;
+
+        // Hàm cộng thêm 30 phút vào thời gian
+        function addMinutesToTime(time, minutesToAdd) {
+            const [hour, minute] = time.split(':').map(Number);
+            const date = new Date();
+            date.setHours(hour);
+            date.setMinutes(minute + minutesToAdd);
+
+            const newHour = date.getHours().toString().padStart(2, '0');
+            const newMinute = date.getMinutes().toString().padStart(2, '0');
+            return `${newHour}:${newMinute}`;
+        }
+
+        // Kiểm tra xem thời gian A có cách nhau ±30 phút với các thời gian đã chọn chưa
+        function isAdjacentToAnySelectedTime(time, banId) {
+            // Lọc các slot có cùng banId
+            const sameBanSlots = selectedSlots.filter(slot => slot.banId === banId);
+
+            for (let i = 0; i < sameBanSlots.length; i++) {
+                const slotTime = sameBanSlots[i].time;
+                const slotPlus30 = addMinutesToTime(slotTime, timeGap);
+                const slotMinus30 = addMinutesToTime(slotTime, -timeGap);
+
+                if (time === slotPlus30 || time === slotMinus30) {
+                    return true; // Nếu thời gian A cách ±30 phút thì hợp lệ
                 }
+            }
 
-                if (!timeSlot) {
-                    console.error('timeSlot is undefined');
-                    return;
-                }
+            return false; // Nếu không tìm thấy thì không hợp lệ
+        }
 
-                let [hour, minute] = timeSlot.split(':').map(Number);
-                let thoiGianDen = new Date(date);
-                thoiGianDen.setHours(hour);
-                thoiGianDen.setMinutes(minute);
+        // Xử lý khi click vào slot
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('select-slot')) {
+                const banId = event.target.getAttribute('data-ban');
+                const time = event.target.getAttribute('data-time');
 
-                if (!selectedSlots[banId]) {
-                    selectedSlots[banId] = [];
-                }
-
-                let existingIndex = selectedSlots[banId].findIndex(slot =>
-                    slot.timeSlot === timeSlot &&
-                    slot.ngayThangNam.toDateString() === thoiGianDen.toDateString()
+                const index = selectedSlots.findIndex(slot =>
+                    slot.banId === banId && slot.time === time
                 );
 
-                if (existingIndex !== -1) {
-                    $(this).removeClass('selected');
-                    selectedSlots[banId].splice(existingIndex, 1);
+                if (index > -1) {
+                    // Đã chọn -> Hủy chọn
+                    selectedSlots.splice(index, 1);
+                    event.target.classList.remove('btn-success');
+                    event.target.classList.add('btn-outline-success');
                 } else {
-                    $(this).addClass('selected');
-                    selectedSlots[banId].push({
-                        banId,
-                        tenBan,
-                        timeSlot,
-                        thoiGianDen,
-                        thoiGianKetThuc: new Date(thoiGianDen.getTime() + 30 * 60 * 1000),
-                        ngayThangNam: thoiGianDen
-                    });
-                }
+                    // Kiểm tra xem có slot nào với banId này chưa?
+                    const sameBanSlots = selectedSlots.filter(slot => slot.banId === banId);
 
-                console.log('Selected Slots:', selectedSlots);
-
-                updateModalButton(); // ✅ Cập nhật nút mở modal
-            });
-
-            // Hiển thị hoặc ẩn nút mở modal
-            function updateModalButton() {
-                if (Object.keys(selectedSlots).length > 0) {
-                    $("#openModalButton").removeClass("d-none");
-                } else {
-                    $("#openModalButton").addClass("d-none");
-                }
-            }
-
-            // Hiển thị modal và thông tin chi tiết
-            $("#openModalButton").on("click", function() {
-                let modalContent = '';
-
-                Object.keys(selectedSlots).forEach(banId => {
-                    if (selectedSlots[banId].length > 0) {
-                        let gioBatDau = selectedSlots[banId].reduce(
-                            (min, slot) => slot.thoiGianDen < min ? slot.thoiGianDen : min,
-                            selectedSlots[banId][0].thoiGianDen
-                        );
-
-                        let gioKetThuc = selectedSlots[banId].reduce(
-                            (max, slot) => slot.thoiGianKetThuc > max ? slot.thoiGianKetThuc :
-                            max,
-                            selectedSlots[banId][0].thoiGianKetThuc
-                        );
-
-                        let tenBan = selectedSlots[banId][0].tenBan;
-                        let ngayThangNam = selectedSlots[banId][0].ngayThangNam;
-
-                        function pad(n) {
-                            return n.toString().padStart(2, '0');
+                    if (sameBanSlots.length > 0) {
+                        // Nếu đã có slot với banId này thì kiểm tra thời gian liên tiếp
+                        if (!isAdjacentToAnySelectedTime(time, banId)) {
+                            alert(
+                                `Giờ ${time} không hợp lệ. Vui lòng chọn giờ cách nhau ±30 phút với giờ đã chọn trước đó.`
+                            );
+                            return;
                         }
-
-                        let startTime = new Date(
-                            `${ngayThangNam.getFullYear()}-${pad(ngayThangNam.getMonth() + 1)}-${pad(ngayThangNam.getDate())}T${pad(gioBatDau.getHours())}:${pad(gioBatDau.getMinutes())}:00`
-                        );
-                        let endTime = new Date(
-                            `${ngayThangNam.getFullYear()}-${pad(ngayThangNam.getMonth() + 1)}-${pad(ngayThangNam.getDate())}T${pad(gioKetThuc.getHours())}:${pad(gioKetThuc.getMinutes())}:00`
-                        );
-
-                        // Trừ phút nhưng đảm bảo không bị âm
-                        startTime.setMinutes(startTime.getMinutes() - 1);
-                        endTime.setMinutes(endTime.getMinutes() - 5);
-
-                        let formattedGioBatDau =
-                            `${pad(startTime.getHours())}:${pad(startTime.getMinutes())}`;
-                        let formattedGioKetThuc =
-                            `${pad(endTime.getHours())}:${pad(endTime.getMinutes())}`;
-
-                        let formattedDate = ngayThangNam.toLocaleDateString('vi-VN', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit'
-                        }).split('/').reverse().join('-');
-
-                        let diffMinutes = Math.floor((endTime - startTime) / 60000);
-                        let gioDuKien =
-                            // `${pad(Math.floor(diffMinutes / 60))}:${pad(diffMinutes % 60)}:00`;
-                            `${formattedGioKetThuc}:00`;
-
-                        let thoiGianDen = `${formattedDate} ${formattedGioBatDau}:00`;
-
-                        modalContent += `
-                            <li class="d-flex justify-content-around">
-                                <p><strong>Tên bàn: </strong> ${tenBan}</p>
-                                <p><strong>Ngày: </strong>${formattedDate.split('-').reverse().join('/')} </p>
-                                <p><strong>Thời gian: </strong> ${formattedGioBatDau} → ${formattedGioKetThuc}</p>
-                            
-                                <input type="hidden" name="selectedIds[]" value="${banId}">
-                                <input type="hidden" name="ten_ban" value="${tenBan}">
-                                <input type="hidden" name="thoi_gian_den" value="${thoiGianDen}">
-                                <input type="hidden" name="gio_du_kien" value="${gioDuKien}">
-                                <input type="hidden" name="ngay" value="${formattedDate}">
-                            </li>
-                        `;
                     }
 
+                    // Nếu chưa có hoặc đã kiểm tra hợp lệ -> Thêm vào
+                    selectedSlots.push({
+                        banId,
+                        time
+                    });
+                    event.target.classList.remove('btn-outline-success');
+                    event.target.classList.add('btn-success');
+                }
 
-
-                });
-
-                $("#modalContent").html(modalContent);
-                $("#exampleModal").modal("show");
-            });
-
-            // Xử lý sự kiện "Xóa tất cả"
-            $("#clearButton").on("click", function() {
-                selectedSlots = [];
-                $(".selectable-slot").removeClass('selected');
-                $("#exampleModal").modal("hide");
-            });
-
-            // $('#confirmButton').on('click', function() {
-            //     console.log('Button clicked!');
-            //     $('#bookingForm').submit();
-            // });
-
+                updateModalData(); // Cập nhật lại modal khi chọn/hủy
+            }
         });
-    </script>
 
-    <script>
-        $('#confirmButton').on('click', function(event) {
-            event.preventDefault();
 
-            // Ngăn chặn click liên tục bằng cách vô hiệu hóa nút
-            let $button = $(this);
-            if ($button.prop('disabled')) return; // Nếu đã disabled thì bỏ qua
 
-            $button.prop('disabled', true); // Vô hiệu hóa nút khi bắt đầu xử lý
 
-            // Lấy dữ liệu từ form
-            let customerName = $('input[name="customer_name"]').val().trim();
-            let customerPhone = $('input[name="customer_phone"]').val().trim();
-            let customerEmail = $('input[name="customer_email"]').val().trim();
-            let numPeople = $('input[name="num_people"]').val().trim();
-            let thoiGianDen = $('input[name="thoi_gian_den"]').val().trim();
-            let gioDuKien = $('input[name="gio_du_kien"]').val().trim();
-            let selectedIds = $('input[name="selectedIds[]"]').map(function() {
-                return $(this).val();
-            }).get();
 
-            // Kiểm tra hợp lệ
-            let errors = [];
-            if (customerName === '') {
-                errors.push("Họ tên không được để trống.");
-            }
-            if (customerPhone === '' || !/^\d{10}$/.test(customerPhone)) {
-                errors.push("Số điện thoại không hợp lệ. (10 chữ số)");
-            }
-            if (customerEmail === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
-                errors.push("Email không hợp lệ.");
-            }
-            if (numPeople === '' || isNaN(numPeople) || numPeople <= 0) {
-                errors.push("Số người phải lớn hơn 0.");
-            }
-            if (thoiGianDen === '') {
-                errors.push("Vui lòng chọn thời gian đến.");
-            }
-            if (gioDuKien === '') {
-                errors.push("Vui lòng chọn giờ dự kiến.");
-            }
-            if (selectedIds.length === 0) {
-                errors.push("Vui lòng chọn ít nhất một bàn.");
-            }
 
-            // Nếu có lỗi, hiển thị thông báo và kích hoạt lại nút
-            if (errors.length > 0) {
-                alert("Lỗi:\n" + errors.join("\n"));
-                $button.prop('disabled', false); // Kích hoạt lại nút nếu có lỗi
+        // Xử lý hợp nhất thời gian cho cùng id bàn
+        function mergeSlots() {
+            const merged = {};
+
+            selectedSlots.forEach(slot => {
+                const {
+                    banId,
+                    time
+                } = slot;
+                const endTime = addMinutesToTime(time, 25);
+
+                if (!merged[banId]) {
+                    merged[banId] = {
+                        start: time,
+                        end: endTime
+                    };
+                } else {
+                    if (time < merged[banId].start) merged[banId].start = time;
+                    if (endTime > merged[banId].end) merged[banId].end = endTime;
+                }
+            });
+
+            return Object.entries(merged).map(([banId, {
+                start,
+                end
+            }]) => ({
+                banId,
+                start,
+                end
+            }));
+        }
+
+        // Hàm cộng thêm 25 phút vào thời gian
+        function addMinutesToTime(time, minutesToAdd) {
+            const [hour, minute] = time.split(':').map(Number);
+            const date = new Date();
+            date.setHours(hour);
+            date.setMinutes(minute + minutesToAdd);
+
+            const newHour = date.getHours().toString().padStart(2, '0');
+            const newMinute = date.getMinutes().toString().padStart(2, '0');
+            return `${newHour}:${newMinute}`;
+        }
+
+        // Cập nhật dữ liệu vào modal
+        function updateModalData() {
+            const mergedSlots = mergeSlots();
+            const modalBody = document.getElementById('modal-body');
+            modalBody.innerHTML = '';
+
+            if (mergedSlots.length === 0) {
+                modalBody.innerHTML = '<p>Chưa có bàn nào được chọn.</p>';
                 return;
             }
 
-            // Dữ liệu hợp lệ, tiếp tục gửi AJAX
-            let formData = {
-                customer_name: customerName,
-                customer_phone: customerPhone,
-                customer_email: customerEmail,
-                num_people: numPeople,
-                thoi_gian_den: thoiGianDen,
-                gio_du_kien: gioDuKien,
-                selectedIds: selectedIds,
-                _token: '{{ csrf_token() }}'
-            };
-
-            $.ajax({
-                url: '{{ route('dat-ban.store') }}',
-                type: 'POST',
-                data: formData,
-                success: function(response) {
-                    console.log('Success:', response);
-                    alert('Đặt bàn thành công!');
-                    window.location.href = '{{ route('dat-ban.index') }}';
-                },
-                error: function(xhr) {
-                    console.error('Error:', xhr);
-                    console.error('Response:', xhr.responseText);
-
-                    let errors = xhr.responseJSON.errors;
-                    let errorMsg = Object.values(errors).flat().join("\n");
-                    alert('Lỗi:\n' + errorMsg);
-                },
-                complete: function() {
-                    $button.prop('disabled', false); // Hoàn thành -> Kích hoạt lại nút
-                }
+            mergedSlots.forEach(slot => {
+                modalBody.innerHTML += `
+            <div>
+                <strong>Bàn ${slot.banId}:</strong> ${slot.start} - ${slot.end}
+            </div>
+        `;
             });
-        });
-    </script>
-
-
-
-
-    <script>
-        $(document).ready(function() {
-            $(document).ready(function() {
-                // Khi người dùng nhập tìm kiếm
-                $('#searchCustomer').on('keyup', function() {
-                    var query = $(this).val(); // Lấy giá trị tìm kiếm từ ô input
-
-                    if (query.length >= 3) { // Chỉ tìm kiếm khi có ít nhất 3 ký tự
-                        $.ajax({
-                            url: '{{ route('admin.khachhang.search') }}', // Gọi route tìm kiếm khách hàng
-                            method: 'GET',
-                            data: {
-                                search: query
-                            },
-                            success: function(data) {
-                                // Cập nhật danh sách khách hàng tìm được
-                                $('#customerList')
-                                    .empty(); // Xóa danh sách trước khi cập nhật
-                                if (data.customers.length > 0) {
-                                    data.customers.forEach(function(customer) {
-                                        $('#customerList').append(
-                                            '<li class="list-group-item" data-id="' +
-                                            customer.id +
-                                            '" data-name="' + customer
-                                            .ho_ten +
-                                            '" data-phone="' + customer
-                                            .so_dien_thoai +
-                                            '" data-email="' + customer
-                                            .email +
-                                            '" data-cancuoc="' + customer
-                                            .can_cuoc + '">' +
-                                            customer.ho_ten + ' (' +
-                                            customer.so_dien_thoai +
-                                            ')</li>'
-                                        );
-                                    });
-                                    $('#customerList').show();
-                                } else {
-                                    $('#customerList')
-                                        .hide(); // Nếu không tìm thấy khách hàng, ẩn danh sách
-                                }
-                            }
-                        });
-                    } else {
-                        $('#customerList')
-                            .hide(); // Nếu không có gì trong ô tìm kiếm, ẩn danh sách khách hàng
-                    }
-                });
-
-                // Khi click vào khách hàng từ danh sách, điền thông tin vào form
-                $(document).on('click', '#customerList li', function() {
-                    var customerName = $(this).data('name');
-                    var customerPhone = $(this).data('phone');
-                    var customerEmail = $(this).data('email');
-                    var customerCanCuoc = $(this).data('cancuoc');
-
-                    $('#customerName').val(customerName);
-                    $('#customerPhone').val(customerPhone);
-                    $('#customerEmail').val(customerEmail);
-                    $('#customerCanCuoc').val(customerCanCuoc);
-
-                    $('#customerList').hide();
-                });
-            });
-        });
-    </script>
-    <style>
-        .table th,
-        .table td {
-            text-align: center;
-            vertical-align: middle;
         }
 
+
+
+
+        // Mở modal khi click vào nút mở modal
+        // Mở modal khi nhấn vào nút mở modal
+        document.addEventListener('DOMContentLoaded', () => {
+            const modalElement = document.getElementById('exampleModal');
+            const modal = new bootstrap.Modal(modalElement);
+
+            document.getElementById('open-modal-btn').addEventListener('click', () => {
+                modal.show();
+            });
+
+            // Đặt lại focus khi modal mở
+            modalElement.addEventListener('shown.bs.modal', () => {
+                modalElement.focus();
+            });
+        });
+
+
+
+        //Xử lý sự kiện khi nhấn vào nút xác nhận
+
+
+
+        document.getElementById('confirm-btn').addEventListener('click', (event) => {
+            event.preventDefault(); // Chặn hành động mặc định để xử lý thủ công
+
+            const mergedSlots = mergeSlots();
+
+            if (mergedSlots.length === 0) {
+                alert('Vui lòng chọn ít nhất một bàn!');
+                return;
+            }
+
+
+            // Sắp xếp các slot theo thời gian bắt đầu
+            mergedSlots.sort((a, b) => a.start.localeCompare(b.start));
+
+            // Kiểm tra khoảng trống giữa các slot
+            for (let i = 0; i < mergedSlots.length - 1; i++) {
+                const endTime = mergedSlots[i].end;
+                const nextStartTime = mergedSlots[i + 1].start;
+
+                if (endTime < nextStartTime) {
+                    alert(`Có khoảng trống từ ${endTime} đến ${nextStartTime}. Vui lòng chọn đầy đủ!`);
+                    return;
+                }
+            }
+
+            // Format lại giờ theo định dạng HH:MM:SS
+            const formatTime = (time) => {
+                if (!time) return null;
+                const [hour, minute] = time.split(':');
+                return `${hour}:${minute}:00`;
+            };
+
+
+            const soNguoiInput = document.getElementById('soNguoiInput');
+            const soNguoi = soNguoiInput ? soNguoiInput.value : '';
+
+            // Đẩy dữ liệu vào input hidden
+            document.getElementById('banAnIds').value = JSON.stringify(mergedSlots.map(slot => slot.banId));
+            document.getElementById('thoiGianDen').value = mergedSlots.length > 0 ? mergedSlots[0].start : '';
+            document.getElementById('gioDuKien').value = mergedSlots.length > 0 ? mergedSlots[0].end : '';
+
+            console.log({
+                banAnIds: mergedSlots.map(slot => slot.banId),
+                thoiGianDen: mergedSlots.length > 0 ? mergedSlots[0].start : '',
+                gioDuKien: mergedSlots.length > 0 ? mergedSlots[0].end : '',
+                khachHangId: document.getElementById('khachHangIdInput')?.value,
+                soDienThoai: document.getElementById('soDienThoaiInput')?.value
+            });
+            document.getElementById('booking-form').submit();
+
+            const formData = new FormData(document.getElementById('booking-form'));
+
+            fetch(`/dat-ban/${document.getElementById('maDatBanInput').value}`, {
+                    method: 'POST', // Laravel xử lý PUT/PATCH qua _method
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        window.location.reload(); // Reload trang hoặc chuyển hướng nếu cần
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Đã xảy ra lỗi khi gửi dữ liệu!');
+                });
+        });
+    </script>
+
+
+    <style>
+        /* Cố định tiêu đề khi cuộn */
+        thead th {
+            position: sticky;
+            top: 0;
+            background-color: #343a40;
+            color: #fff;
+            z-index: 3;
+        }
+
+        /* Cố định cột tên bàn */
         .sticky-col {
             position: sticky;
             left: 0;
-            background: #fff;
+            background-color: #f8f9fa;
             z-index: 2;
+            white-space: nowrap;
         }
 
-        .table-hover tbody tr:hover {
-            background-color: #f8f9fa;
+        /* Kích thước bảng co giãn theo nội dung */
+        .table {
+            width: max-content;
         }
 
-        .border-left-rounded {
-            border-top-left-radius: 10px;
-            border-bottom-left-radius: 10px;
-        }
-
-        .border-right-rounded {
-            border-top-right-radius: 10px;
-            border-bottom-right-radius: 10px;
-        }
-
-        .select-slot {
+        /* Kiểu cho các ô giờ */
+        .time-slot {
+            background-color: #e9ecef;
             cursor: pointer;
-            background-color: #f8f9fa;
-            border: 1px solid #ddd;
             transition: background-color 0.2s ease;
         }
 
-        .select-slot:hover {
-            background-color: #e2e6ea;
+        .time-slot:hover {
+            background-color: #dee2e6;
         }
 
-        .select-slot.selected {
-            background-color: #007bff;
+        .time-slot.active {
+            background-color: #ffc107;
             color: #fff;
-            border-color: #007bff;
         }
 
-        .selected {
-            background-color: #ffc107 !important;
-            /* Màu vàng để làm nổi bật */
-            color: #000;
+
+
+
+
+
+        .time-slot.bg-danger {
+            background-color: #dc3545 !important;
+            /* Màu đỏ */
+            pointer-events: none;
+            /* Ngăn click */
+            cursor: not-allowed;
+            opacity: 0.6;
+            text-align: center;
             font-weight: bold;
         }
 
-        #openModalButton {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
+        .time-slot.bg-info {
+            background-color: #17a2b8 !important;
+            /* Màu xanh */
+            cursor: pointer;
         }
 
-        .modal-xl {
-            max-width: 50%;
-            /* Chiều rộng modal */
+        .time-slot.disabled {
+            pointer-events: none;
         }
 
-        .modal-body {
-            max-height: 70vh;
-            /* Giới hạn chiều cao để có thể cuộn */
-            overflow-y: auto;
+        .select-slot {
+            margin-top: 3px;
+            width: 40px;
+            height: 30px;
+            padding: 0;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .btn-success {
+            background-color: #28a745 !important;
+            color: #fff !important;
+        }
+
+        .btn-outline-success {
+            border-color: #28a745 !important;
+            color: #28a745 !important;
         }
     </style>
 @endsection

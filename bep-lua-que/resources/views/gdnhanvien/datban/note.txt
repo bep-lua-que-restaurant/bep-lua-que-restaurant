@@ -4,6 +4,8 @@ php artisan schedule:work
 
 php artisan queue:work
 
+ notepad storage/logs/laravel.log
+
 Loại bàn cùng 1 dòng ( vi_tri)-> thời gian vào + số người + bàn  
 
 Chỉ nhận số người 
@@ -24,3 +26,5 @@ ALTER TABLE dat_bans ALTER COLUMN trang_thai SET DEFAULT 'dang_xu_ly';
 
          notepad storage/logs/laravel.log
 echo "" > storage/logs/laravel.log
+
+

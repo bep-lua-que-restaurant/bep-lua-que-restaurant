@@ -3,9 +3,11 @@
 @section('content')
     @php
         use Carbon\Carbon;
+
     @endphp
     <div class="container">
         <h1 class="text-center my-4">Quản lý Đặt Bàn</h1>
+        {{-- {{ dd($maDatBan) }} --}}
 
         <!-- Bảng đặt bàn -->
         <div id="ngay-content" class="table-responsive">
@@ -25,79 +27,69 @@
 
                         <tbody>
                             @foreach ($banAns as $banAn)
-                                <tr>
-                                    <!-- Cố định cột tên bàn -->
+                                @php
+                                    // Lấy ngày đặt bàn đầu tiên từ danh sách DatBansOther nếu có
+                                    $date = $datBanCurrent->first()
+                                        ? \Carbon\Carbon::parse($datBanCurrent->first()->thoi_gian_den)->format('Y-m-d')
+                                        : $date;
+                                @endphp
+                                <tr class="{{ $banAn->trang_thai == 'co_khach' ? 'bg-info' : '' }}"
+                                    data-ban-id="{{ $banAn->id }}">
                                     <td class="fw-bold sticky-col">{{ $banAn->ten_ban }}</td>
 
-                                    <!-- Các khung giờ từ 8:00 - 22:30 -->
-                                    {{-- Table hiển thị các ô thời gian --}}
                                     @for ($i = 8; $i <= 22; $i++)
                                         @foreach ([0, 30] as $minute)
                                             @php
-                                                $thoiGianHienTai = sprintf('%02d:%02d', $i, $minute);
-                                                $class = '';
-                                                $isDisabled = false;
-                                                $buttonText = '+';
+                                                $timeSlot = sprintf('%02d:%02d', $i, $minute);
+                                                $class = 'bg-light';
+                                                $maDatBan = '';
+                                                foreach ($datBansOther as $datBan) {
+                                                    if ($datBan->ban_an_id == $banAn->id) {
+                                                        $start = \Carbon\Carbon::parse($datBan->thoi_gian_den)->format(
+                                                            'H:i',
+                                                        );
+                                                        $end = \Carbon\Carbon::parse($datBan->gio_du_kien)->format(
+                                                            'H:i',
+                                                        );
 
-                                                // Kiểm tra datBanCurrent
-                                                $isCurrentBooked = $datBanCurrent->contains(function ($datBan) use (
-                                                    $banAn,
-                                                    $thoiGianHienTai,
-                                                ) {
-                                                    if ($datBan->ban_an_id !== $banAn->id) {
-                                                        return false;
+                                                        if ($timeSlot >= $start && $timeSlot <= $end) {
+                                                            // Kiểm tra trạng thái đặt bàn
+                                                            if ($datBan->trang_thai === 'dang_xu_ly') {
+                                                                $class = 'btn-danger';
+                                                            } elseif ($datBan->trang_thai === 'xac_nhan') {
+                                                                $class = 'btn-success';
+                                                            }
+                                                            break; // Thoát vòng lặp sau khi tìm thấy đặt bàn phù hợp
+                                                        }
                                                     }
+                                                }
 
-                                                    $thoiGianDen = date('H:i', strtotime($datBan->thoi_gian_den));
-                                                    $gioDuKien = $datBan->gio_du_kien;
+                                                foreach ($datBanCurrent as $datBan) {
+                                                    if ($datBan->ban_an_id == $banAn->id) {
+                                                        $start = \Carbon\Carbon::parse($datBan->thoi_gian_den)->format(
+                                                            'H:i',
+                                                        );
+                                                        $end = \Carbon\Carbon::parse($datBan->gio_du_kien)->format(
+                                                            'H:i',
+                                                        );
 
-                                                    return $thoiGianHienTai >= $thoiGianDen &&
-                                                        $thoiGianHienTai < $gioDuKien;
-                                                });
-
-                                                // Kiểm tra datBansOther
-                                                $isOtherBooked = $datBansOther->contains(function ($datBan) use (
-                                                    $banAn,
-                                                    $thoiGianHienTai,
-                                                ) {
-                                                    if ($datBan->ban_an_id !== $banAn->id) {
-                                                        return false;
+                                                        if ($timeSlot >= $start && $timeSlot <= $end) {
+                                                            $class = 'btn-warning';
+                                                            $maDatBan = $datBan->ma_dat_ban;
+                                                            break;
+                                                        }
                                                     }
-
-                                                    $thoiGianDen = date('H:i', strtotime($datBan->thoi_gian_den));
-                                                    $gioDuKien = $datBan->gio_du_kien;
-
-                                                    return $thoiGianHienTai >= $thoiGianDen &&
-                                                        $thoiGianHienTai < $gioDuKien;
-                                                });
-
-                                                // Gán class màu sắc cho slot
-                                                if ($isCurrentBooked) {
-                                                    $class = 'bg-info text-white'; // Màu xanh cho datBanCurrent
-                                                } elseif ($isOtherBooked) {
-                                                    $class = 'bg-danger text-white'; // Màu đỏ cho datBansOther
-                                                    $isDisabled = true;
-                                                    $buttonText = 'X';
                                                 }
                                             @endphp
 
-                                            <td class="time-slot {{ $class }} {{ $isDisabled ? 'disabled' : '' }}"
-                                                data-ban="{{ $banAn->id }}" data-time="{{ $thoiGianHienTai }}"
-                                                {{ $isDisabled ? 'data-disabled="true"' : '' }}
-                                                data-current="{{ $isCurrentBooked ? 'true' : 'false' }}">
-
-                                                {{-- Ô màu đỏ chỉ hiển thị X, không có nút --}}
-                                                @if ($isOtherBooked)
-                                                    <span>{{ $buttonText }}</span>
-                                                @else
-                                                    {{-- Ô màu xanh hoặc thường đều có nút để click --}}
-                                                    <button
-                                                        class="btn btn-sm {{ $isCurrentBooked ? 'btn-info' : 'btn-outline-success' }} select-slot"
-                                                        data-ban="{{ $banAn->id }}" data-time="{{ $thoiGianHienTai }}"
-                                                        {{ $isDisabled ? 'disabled' : '' }}>
-                                                        {{ $buttonText }}
-                                                    </button>
-                                                @endif
+                                            <td class="text-center {{ $banAn->trang_thai == 'co_khach' ? 'bg-info' : '' }}"
+                                                data-ban-id="{{ $banAn->id }}">
+                                                <button class="btn btn-sm text-dark {{ $class }} selectable-slot"
+                                                    data-ma-dat-ban="{{ $maDatBan }}" data-ban-id="{{ $banAn->id }}"
+                                                    data-ten-ban="{{ $banAn->ten_ban }}"
+                                                    data-time-slot="{{ $timeSlot }}" data-date="{{ $date }}">
+                                                    +
+                                                </button>
                                             </td>
                                         @endforeach
                                     @endfor
@@ -106,452 +98,449 @@
                         </tbody>
                     </table>
                 </div>
-
             </div>
 
         </div>
-        {{ $banAns->links('pagination::bootstrap-5') }}
 
+        <div class="row">
+            <div class="col-12 text-center">
+                {{ $banAns->links('pagination::bootstrap-5') }}
+            </div>
+        </div>
 
-
-
-        <button id="open-modal-btn" class="btn btn-primary fixed-bottom m-3 right-align">
-            Xem chi tiết đặt bàn
-        </button>
-        <style>
-            #open-modal-btn {
-                width: max-content;
-                float: left;
-            }
-        </style>
-
-        <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-            data-bs-backdrop="static">
-
-
+        <!-- Modal hiển thị danh sách đã chọn -->
+        <div id="bookingModal" class="modal fade" tabindex="-1">
 
             <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="exampleModalLabel">Chi tiết đặt bàn</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
+                <div class="modal-content p-3">
+                    <form method="POST" action="{{ route('dat-ban.update', ['maDatBan' => $datBan->ma_dat_ban]) }}">
 
-                    <!-- Form để gửi dữ liệu -->
-                    <form id="booking-form" action="{{ route('dat-ban.update', $maDatBan) }}" method="POST">
+
                         @csrf
                         @method('PUT')
-
-                        <!-- Các input ẩn để đẩy dữ liệu vào form -->
-                        <input type="hidden" name="ban_an_ids" id="banAnIds">
-                        <input type="hidden" name="thoi_gian_den" id="thoiGianDen">
-                        <input type="hidden" name="gio_du_kien" id="gioDuKien">
-                        <input type="hidden" name="khach_hang_id" value="{{ $datBan->khach_hang_id }}">
-                        <input type="hidden" name="so_dien_thoai" value="{{ $datBan->khachHang->so_dien_thoai }}">
-                        <input type="hidden" name="ngay_den" id="ngay_den"
-                            value="{{ $datBan->thoi_gian_den ? date('Y-m-d', strtotime($datBan->thoi_gian_den)) : '' }}">
+                        <input type="hidden" name="_method" value="PUT">
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
 
 
-                        <!-- Nội dung modal -->
+
+
+                        <!-- Header -->
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title fw-bold">Xác nhận đặt bàn</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <!-- Thông tin khách hàng -->
                         <div class="modal-body">
-                            <div class="row g-3 mb-3">
+                            <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label for="customerName" class="form-label fw-bold">Họ tên:</label>
-                                    <input type="text" class="form-control" id="customerName" name="customer_name"
-                                        value="{{ $datBan->khachHang->ho_ten }}" readonly>
+                                    <label class="fw-bold">Họ tên:</label>
+                                    <input type="text" class="form-control" value="{{ $datBan->khachHang->ho_ten }}"
+                                        readonly>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="customerEmail" class="form-label fw-bold">Email:</label>
-                                    <input type="email" class="form-control" id="customerEmail" name="customer_email"
-                                        value="{{ $datBan->khachHang->email }}" readonly>
+                                    <label class="fw-bold">Email:</label>
+                                    <input type="email" class="form-control" value="{{ $datBan->khachHang->email }}"
+                                        readonly>
                                 </div>
                             </div>
 
-                            <div class="row g-3 mb-3">
+                            <div class="row g-3 mt-2">
                                 <div class="col-md-6">
-                                    <label for="soNguoiInput" class="form-label fw-bold">Số người:</label>
-                                    <input type="number" class="form-control" id="soNguoiInput" name="so_nguoi"
-                                        min="1" value="{{ $datBan->so_nguoi }}">
+                                    <label class="fw-bold">Số điện thoại:</label>
+                                    <input type="text" class="form-control"
+                                        value="{{ $datBan->khachHang->so_dien_thoai }}" name="so_dien_thoai" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="fw-bold">Số người:</label>
+                                    <input type="number" class="form-control" name="so_nguoi" min="1"
+                                        value="{{ $datBan->so_nguoi }}">
                                 </div>
                             </div>
 
                             <!-- Mô tả -->
-                            <div class="mb-3">
-                                <label for="description" class="form-label fw-bold">Mô tả:</label>
-                                <textarea class="form-control" name="mo_ta" id="description" rows="3">{{ $datBan->mo_ta }}</textarea>
+                            <div class="mt-3">
+                                <label class="fw-bold">Mô tả:</label>
+                                <textarea class="form-control" name="mo_ta" rows="3">{{ $datBan->mo_ta }}</textarea>
                             </div>
 
-                            <!-- Dữ liệu từ JS -->
-                            <div id="modal-body">
-                                <!-- Nội dung sẽ được cập nhật bởi JS -->
+                            <!-- Danh sách bàn đã chọn -->
+                            <div class="mt-3">
+                                <h6 class="fw-bold">Danh sách bàn đã chọn</h6>
+                                <div class="table-responsive"> <!-- Thêm div này để bảng có thể co giãn tốt hơn -->
+                                    <table class="table table-bordered table-striped w-100">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>Bàn</th>
+                                                <th>Giờ bắt đầu</th>
+                                                <th>Giờ kết thúc</th>
+                                                <th>Ngày</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="selectedSlots"></tbody>
+                                    </table>
+                                </div>
                             </div>
+
                         </div>
 
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary mt-3" id="confirm-btn">Xác nhận</button>
+                        <!-- Input ẩn để gửi dữ liệu -->
+                        <input type="hidden" name="ban_an_ids" id="banAnIds">
+                        <input type="hidden" name="thoi_gian_den" id="thoiGianDen">
+                        <input type="hidden" name="gio_du_kien" id="gioDuKien">
+                        <input type="" name="khach_hang_id" value="{{ $datBan->khach_hang_id }}">
+                        <input type="hidden" name="ma_dat_ban" id="maDatBan" value="{{ $datBan->ma_dat_ban }}">
+
+                        <!-- Footer -->
+                        <div class="modal-footer d-flex justify-content-between">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-success">Xác nhận</button>
                         </div>
+
+
                     </form>
-
                 </div>
             </div>
         </div>
 
-    </div>
+        @vite('resources/js/datban.js')
 
-    <script>
-        let selectedSlots = [];
+        <!-- Nút mở modal -->
+        <button id="openModalBtn" class="btn btn-primary position-fixed end-0 m-3" style="bottom: 80px; display: none;">
+            Xem đặt bàn
+        </button>
 
-        // Tự động thêm vào selectedSlots nếu là datBanCurrent
-        // Tự động thêm vào selectedSlots nếu là datBanCurrent
-        document.querySelectorAll('.time-slot[data-current="true"]').forEach(slot => {
-            const banId = slot.getAttribute('data-ban');
-            const time = slot.getAttribute('data-time');
-            selectedSlots.push({
-                banId,
-                time
-            });
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const selectedSlots = new Map(); // Lưu danh sách đã chọn
+                const openModalBtn = document.getElementById("openModalBtn");
+                const selectedSlotsList = document.getElementById("selectedSlots");
 
-            const button = slot.querySelector('.select-slot');
-            if (button) {
-                button.classList.remove('btn-outline-success');
-                button.classList.add('btn-success');
-            }
-        });
+                const banAnIdsInput = document.getElementById("banAnIds");
+                const thoiGianDenInput = document.getElementById("thoiGianDen");
+                const gioDuKienInput = document.getElementById("gioDuKien");
+                const ngayDenInput = document.getElementById("ngay_den");
 
-        // 👉 Gọi ngay để cập nhật modal khi tải trang
-        updateModalData();
+                document.querySelectorAll(".selectable-slot").forEach((button) => {
+                    const banId = button.getAttribute("data-ban-id");
+                    const tenBan = button.getAttribute("data-ten-ban");
+                    const timeSlot = button.getAttribute("data-time-slot");
+                    const maDatBan = button.getAttribute("data-ma-dat-ban");
+                    const date = button.getAttribute("data-date");
 
+                    const slotKey = `${banId}-${timeSlot}-${date}`;
 
-        // Đặt khoảng cách giữa các giờ là 30 phút
-        const timeGap = 30;
+                    // Nếu button có class btn-warning => Thêm vào danh sách đã chọn ngay từ đầu
+                    if (button.classList.contains("btn-warning")) {
+                        selectedSlots.set(slotKey, {
+                            banId,
+                            tenBan,
+                            timeSlot,
+                            maDatBan,
+                            date
+                        });
+                    }
 
-        // Hàm cộng thêm 30 phút vào thời gian
-        function addMinutesToTime(time, minutesToAdd) {
-            const [hour, minute] = time.split(':').map(Number);
-            const date = new Date();
-            date.setHours(hour);
-            date.setMinutes(minute + minutesToAdd);
+                    // Xử lý chọn / hủy chọn khi click
+                    button.addEventListener("click", function() {
+                        if (button.classList.contains("btn-danger") || button.classList.contains(
+                                "btn-success"))
+                            return; // Không chọn được btn-danger
 
-            const newHour = date.getHours().toString().padStart(2, '0');
-            const newMinute = date.getMinutes().toString().padStart(2, '0');
-            return `${newHour}:${newMinute}`;
-        }
+                        if (!button.classList.contains("btn-warning")) {
+                            // Kiểm tra thời gian trong quá khứ nếu button chưa được chọn
+                            const now = new Date();
+                            const currentHour = now.getHours();
+                            const currentMinute = now.getMinutes();
+                            const formattedCurrentTime =
+                                `${String(currentHour).padStart(2, "0")}:${String(currentMinute).padStart(2, "0")}`;
+                            const todayDate = now.toISOString().split("T")[0];
 
-        // Kiểm tra xem thời gian A có cách nhau ±30 phút với các thời gian đã chọn chưa
-        function isAdjacentToAnySelectedTime(time, banId) {
-            // Lọc các slot có cùng banId
-            const sameBanSlots = selectedSlots.filter(slot => slot.banId === banId);
+                            if (date === todayDate && timeSlot < formattedCurrentTime) {
+                                alert("Không thể chọn thời gian trong quá khứ!");
+                                return;
+                            }
 
-            for (let i = 0; i < sameBanSlots.length; i++) {
-                const slotTime = sameBanSlots[i].time;
-                const slotPlus30 = addMinutesToTime(slotTime, timeGap);
-                const slotMinus30 = addMinutesToTime(slotTime, -timeGap);
+                            // Kiểm tra hơn kém nhau 30 phút trong cùng bàn
+                            const selectedTimes = [...selectedSlots.values()]
+                                .filter(slot => slot.banId === banId)
+                                .map(slot => slot.timeSlot)
+                                .sort();
 
-                if (time === slotPlus30 || time === slotMinus30) {
-                    return true; // Nếu thời gian A cách ±30 phút thì hợp lệ
-                }
-            }
+                            if (selectedTimes.length > 0) {
+                                const [hour, minute] = timeSlot.split(":").map(Number);
+                                const newSlotMinutes = hour * 60 + minute;
+                                let isValid = false;
 
-            return false; // Nếu không tìm thấy thì không hợp lệ
-        }
+                                for (const selectedTime of selectedTimes) {
+                                    const [selectedHour, selectedMinute] = selectedTime.split(":").map(
+                                        Number);
+                                    const selectedSlotMinutes = selectedHour * 60 + selectedMinute;
 
-        // Xử lý khi click vào slot
-        document.addEventListener('click', function(event) {
-            if (event.target.classList.contains('select-slot')) {
-                const banId = event.target.getAttribute('data-ban');
-                const time = event.target.getAttribute('data-time');
+                                    if (Math.abs(newSlotMinutes - selectedSlotMinutes) === 30) {
+                                        isValid = true;
+                                        break;
+                                    }
+                                }
 
-                const index = selectedSlots.findIndex(slot =>
-                    slot.banId === banId && slot.time === time
-                );
-
-                if (index > -1) {
-                    // Đã chọn -> Hủy chọn
-                    selectedSlots.splice(index, 1);
-                    event.target.classList.remove('btn-success');
-                    event.target.classList.add('btn-outline-success');
-                } else {
-                    // Kiểm tra xem có slot nào với banId này chưa?
-                    const sameBanSlots = selectedSlots.filter(slot => slot.banId === banId);
-
-                    if (sameBanSlots.length > 0) {
-                        // Nếu đã có slot với banId này thì kiểm tra thời gian liên tiếp
-                        if (!isAdjacentToAnySelectedTime(time, banId)) {
-                            alert(
-                                `Giờ ${time} không hợp lệ. Vui lòng chọn giờ cách nhau ±30 phút với giờ đã chọn trước đó.`
-                            );
-                            return;
+                                if (!isValid) {
+                                    alert(
+                                        "Chỉ có thể chọn giờ hơn kém nhau 30 phút trong cùng một bàn!"
+                                    );
+                                    return;
+                                }
+                            }
                         }
-                    }
 
-                    // Nếu chưa có hoặc đã kiểm tra hợp lệ -> Thêm vào
-                    selectedSlots.push({
-                        banId,
-                        time
+                        if (button.classList.contains("btn-warning")) {
+                            // Hủy chọn
+                            button.classList.remove("btn-warning");
+                            button.classList.add("bg-light");
+                            selectedSlots.delete(slotKey);
+                        } else {
+                            // Chọn
+                            button.classList.remove("bg-light");
+                            button.classList.add("btn-warning");
+                            selectedSlots.set(slotKey, {
+                                banId,
+                                tenBan,
+                                timeSlot,
+                                maDatBan,
+                                date
+                            });
+                        }
+
+                        updateModal();
                     });
-                    event.target.classList.remove('btn-outline-success');
-                    event.target.classList.add('btn-success');
-                }
-
-                updateModalData(); // Cập nhật lại modal khi chọn/hủy
-            }
-        });
-
-
-
-
-
-
-        // Xử lý hợp nhất thời gian cho cùng id bàn
-        function mergeSlots() {
-            const merged = {};
-
-            selectedSlots.forEach(slot => {
-                const {
-                    banId,
-                    time
-                } = slot;
-                const endTime = addMinutesToTime(time, 25);
-
-                if (!merged[banId]) {
-                    merged[banId] = {
-                        start: time,
-                        end: endTime
-                    };
-                } else {
-                    if (time < merged[banId].start) merged[banId].start = time;
-                    if (endTime > merged[banId].end) merged[banId].end = endTime;
-                }
-            });
-
-            return Object.entries(merged).map(([banId, {
-                start,
-                end
-            }]) => ({
-                banId,
-                start,
-                end
-            }));
-        }
-
-        // Hàm cộng thêm 25 phút vào thời gian
-        function addMinutesToTime(time, minutesToAdd) {
-            const [hour, minute] = time.split(':').map(Number);
-            const date = new Date();
-            date.setHours(hour);
-            date.setMinutes(minute + minutesToAdd);
-
-            const newHour = date.getHours().toString().padStart(2, '0');
-            const newMinute = date.getMinutes().toString().padStart(2, '0');
-            return `${newHour}:${newMinute}`;
-        }
-
-        // Cập nhật dữ liệu vào modal
-        function updateModalData() {
-            const mergedSlots = mergeSlots();
-            const modalBody = document.getElementById('modal-body');
-            modalBody.innerHTML = '';
-
-            if (mergedSlots.length === 0) {
-                modalBody.innerHTML = '<p>Chưa có bàn nào được chọn.</p>';
-                return;
-            }
-
-            mergedSlots.forEach(slot => {
-                modalBody.innerHTML += `
-            <div>
-                <strong>Bàn ${slot.banId}:</strong> ${slot.start} - ${slot.end}
-            </div>
-        `;
-            });
-        }
-
-
-
-
-        // Mở modal khi click vào nút mở modal
-        // Mở modal khi nhấn vào nút mở modal
-        document.addEventListener('DOMContentLoaded', () => {
-            const modalElement = document.getElementById('exampleModal');
-            const modal = new bootstrap.Modal(modalElement);
-
-            document.getElementById('open-modal-btn').addEventListener('click', () => {
-                modal.show();
-            });
-
-            // Đặt lại focus khi modal mở
-            modalElement.addEventListener('shown.bs.modal', () => {
-                modalElement.focus();
-            });
-        });
-
-
-
-        //Xử lý sự kiện khi nhấn vào nút xác nhận
-
-
-
-        document.getElementById('confirm-btn').addEventListener('click', (event) => {
-            event.preventDefault(); // Chặn hành động mặc định để xử lý thủ công
-
-            const mergedSlots = mergeSlots();
-
-            if (mergedSlots.length === 0) {
-                alert('Vui lòng chọn ít nhất một bàn!');
-                return;
-            }
-
-
-            // Sắp xếp các slot theo thời gian bắt đầu
-            mergedSlots.sort((a, b) => a.start.localeCompare(b.start));
-
-            // Kiểm tra khoảng trống giữa các slot
-            for (let i = 0; i < mergedSlots.length - 1; i++) {
-                const endTime = mergedSlots[i].end;
-                const nextStartTime = mergedSlots[i + 1].start;
-
-                if (endTime < nextStartTime) {
-                    alert(`Có khoảng trống từ ${endTime} đến ${nextStartTime}. Vui lòng chọn đầy đủ!`);
-                    return;
-                }
-            }
-
-            // Format lại giờ theo định dạng HH:MM:SS
-            const formatTime = (time) => {
-                if (!time) return null;
-                const [hour, minute] = time.split(':');
-                return `${hour}:${minute}:00`;
-            };
-
-
-            const soNguoiInput = document.getElementById('soNguoiInput');
-            const soNguoi = soNguoiInput ? soNguoiInput.value : '';
-
-            // Đẩy dữ liệu vào input hidden
-            document.getElementById('banAnIds').value = JSON.stringify(mergedSlots.map(slot => slot.banId));
-            document.getElementById('thoiGianDen').value = mergedSlots.length > 0 ? mergedSlots[0].start : '';
-            document.getElementById('gioDuKien').value = mergedSlots.length > 0 ? mergedSlots[0].end : '';
-
-            console.log({
-                banAnIds: mergedSlots.map(slot => slot.banId),
-                thoiGianDen: mergedSlots.length > 0 ? mergedSlots[0].start : '',
-                gioDuKien: mergedSlots.length > 0 ? mergedSlots[0].end : '',
-                khachHangId: document.getElementById('khachHangIdInput')?.value,
-                soDienThoai: document.getElementById('soDienThoaiInput')?.value
-            });
-            document.getElementById('booking-form').submit();
-
-            const formData = new FormData(document.getElementById('booking-form'));
-
-            fetch(`/dat-ban/${document.getElementById('maDatBanInput').value}`, {
-                    method: 'POST', // Laravel xử lý PUT/PATCH qua _method
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(data.message);
-                        window.location.reload(); // Reload trang hoặc chuyển hướng nếu cần
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Đã xảy ra lỗi khi gửi dữ liệu!');
                 });
-        });
-    </script>
 
-
-    <style>
-        /* Cố định tiêu đề khi cuộn */
-        thead th {
-            position: sticky;
-            top: 0;
-            background-color: #343a40;
-            color: #fff;
-            z-index: 3;
-        }
-
-        /* Cố định cột tên bàn */
-        .sticky-col {
-            position: sticky;
-            left: 0;
-            background-color: #f8f9fa;
-            z-index: 2;
-            white-space: nowrap;
-        }
-
-        /* Kích thước bảng co giãn theo nội dung */
-        .table {
-            width: max-content;
-        }
-
-        /* Kiểu cho các ô giờ */
-        .time-slot {
-            background-color: #e9ecef;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .time-slot:hover {
-            background-color: #dee2e6;
-        }
-
-        .time-slot.active {
-            background-color: #ffc107;
-            color: #fff;
-        }
+                // Cập nhật modal ngay khi vào trang
+                updateModal();
 
 
 
+                function updateModal() {
+                    const selectedSlotsList = document.getElementById("selectedSlots");
+                    selectedSlotsList.innerHTML = "";
+
+                    if (selectedSlots.size === 0) {
+                        openModalBtn.style.display = "none";
+                        return;
+                    }
+
+                    openModalBtn.style.display = "block";
+
+                    const groupedSlots = {};
+                    selectedSlots.forEach((slot) => {
+                        if (!groupedSlots[slot.banId]) {
+                            groupedSlots[slot.banId] = {
+                                tenBan: slot.tenBan,
+                                times: [],
+                                date: slot.date,
+                            };
+                        }
+                        groupedSlots[slot.banId].times.push(slot.timeSlot);
+                    });
+
+                    let allBanAnIds = [];
+                    let allNgayDen = [];
+                    let earliestTime = null;
+                    let latestTime = null;
+
+                    Object.entries(groupedSlots).forEach(([banId, group]) => {
+                        // Sắp xếp thời gian theo thứ tự tăng dần
+                        group.times.sort();
+
+                        const startTime = group.times[0]; // Giờ bắt đầu
+                        const endTime = group.times[group.times.length - 1]; // Giờ kết thúc
+
+                        // Format thời gian theo định dạng HH:mm:ss
+                        const formattedStartTime = startTime + ':00';
+
+                        // Tính giờ kết thúc + 25 phút
+                        const [hour, minute] = endTime.split(':').map(Number);
+                        let date = new Date();
+                        date.setHours(hour);
+                        date.setMinutes(minute + 25); // +25 phút
+
+                        // Format lại giờ kết thúc sau khi cộng thêm
+                        const formattedEndTime =
+                            `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:00`;
+
+                        console.log("Start Time:", formattedStartTime);
+                        console.log("End Time:", formattedEndTime);
+
+                        // Thêm hàng vào bảng danh sách đã chọn
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+        <td>${group.tenBan}</td>
+        <td>${formattedStartTime}</td>
+        <td>${formattedEndTime}</td>
+        <td>${group.date}</td>
+    `;
+                        selectedSlotsList.appendChild(row);
+
+                        // Lưu ID bàn ăn vào danh sách
+                        allBanAnIds.push(banId);
+                        allNgayDen.push(group.date);
+
+                        // Tìm thời gian sớm nhất và muộn nhất
+                        if (!earliestTime || startTime < earliestTime) earliestTime = startTime;
+                        if (!latestTime || endTime > latestTime) latestTime = endTime;
+                    });
+
+
+                    // ✅ Gán giá trị cho input ẩn
+                    document.getElementById("banAnIds").value = allBanAnIds.join(",");
+
+                    // ✅ Nếu có nhiều ngày đến khác nhau → Lấy ngày đầu tiên
+                    const uniqueDates = [...new Set(allNgayDen)];
+                    if (uniqueDates.length > 1) {
+                        alert("Không thể chọn các khung giờ từ nhiều ngày khác nhau.");
+                        return;
+                    }
+
+                    // ✅ Gộp `ngay_den` và `thoi_gian_den` thành `thoiGianDen`
+                    if (earliestTime && uniqueDates.length === 1) {
+                        const thoiGianDen = `${uniqueDates[0]} ${earliestTime}:00`;
+                        document.getElementById("thoiGianDen").value = thoiGianDen;
+                    }
+
+                    // ✅ Đổi `gioDuKien` thành thời gian kết thúc
+                    if (latestTime) {
+                        document.getElementById("gioDuKien").value = latestTime + ':00';
+                    }
 
 
 
-        .time-slot.bg-danger {
-            background-color: #dc3545 !important;
-            /* Màu đỏ */
-            pointer-events: none;
-            /* Ngăn click */
-            cursor: not-allowed;
-            opacity: 0.6;
-            text-align: center;
-            font-weight: bold;
-        }
 
-        .time-slot.bg-info {
-            background-color: #17a2b8 !important;
-            /* Màu xanh */
-            cursor: pointer;
-        }
 
-        .time-slot.disabled {
-            pointer-events: none;
-        }
+                }
 
-        .select-slot {
-            margin-top: 3px;
-            width: 40px;
-            height: 30px;
-            padding: 0;
-            text-align: center;
-            font-size: 14px;
-        }
+                // Mở modal khi click nút xem danh sách
+                openModalBtn.addEventListener("click", function() {
+                    const bookingModal = new bootstrap.Modal(document.getElementById("bookingModal"));
+                    bookingModal.show();
+                });
 
-        .btn-success {
-            background-color: #28a745 !important;
-            color: #fff !important;
-        }
+            });
+        </script>
 
-        .btn-outline-success {
-            border-color: #28a745 !important;
-            color: #28a745 !important;
-        }
-    </style>
-@endsection
+
+
+        <script>
+            document.getElementById('datBanForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                let formData = new FormData(this);
+                fetch(this.action, {
+                        method: 'PUT',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => alert('Cập nhật thành công!'))
+                    .catch(error => console.error('Lỗi:', error));
+
+            });
+        </script>
+        <style>
+            /* Cố định tiêu đề khi cuộn */
+            thead th {
+                position: sticky;
+                top: 0;
+                background-color: #343a40;
+                color: #fff;
+                z-index: 3;
+            }
+
+
+            .btn-danger {
+                pointer-events: none;
+            }
+
+            /* Cố định cột tên bàn */
+            .sticky-col {
+                position: sticky;
+                left: 0;
+                background-color: #f8f9fa;
+                z-index: 2;
+                white-space: nowrap;
+            }
+
+            /* Kích thước bảng co giãn theo nội dung */
+            .table {
+                width: max-content;
+            }
+
+            /* Kiểu cho các ô giờ */
+            .time-slot {
+                background-color: #e9ecef;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+            }
+
+            .time-slot:hover {
+                background-color: #dee2e6;
+            }
+
+            .time-slot.active {
+                background-color: #ffc107;
+                color: #fff;
+            }
+
+
+
+
+
+
+            .time-slot.bg-danger {
+                background-color: #dc3545 !important;
+                /* Màu đỏ */
+                pointer-events: none;
+                /* Ngăn click */
+                cursor: not-allowed;
+                opacity: 0.6;
+                text-align: center;
+                font-weight: bold;
+            }
+
+            .time-slot.bg-info {
+                background-color: #17a2b8 !important;
+                /* Màu xanh */
+                cursor: pointer;
+            }
+
+            .time-slot.disabled {
+                pointer-events: none;
+            }
+
+            .select-slot {
+                margin-top: 3px;
+                width: 40px;
+                height: 30px;
+                padding: 0;
+                text-align: center;
+                font-size: 14px;
+            }
+
+            .btn-success {
+                background-color: #28a745 !important;
+                color: #fff !important;
+            }
+
+            .btn-outline-success {
+                border-color: #28a745 !important;
+                color: #28a745 !important;
+            }
+        </style>
+    @endsection

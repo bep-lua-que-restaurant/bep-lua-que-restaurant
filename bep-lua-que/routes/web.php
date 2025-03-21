@@ -120,13 +120,19 @@ Route::get('/danh-sach-dat-ban', [DatBanController::class, 'DanhSach'])->name('d
 
 Route::resource('dat-ban', DatBanController::class);
 // Route::get('/dat-ban/{dat_ban}/edit', [DatBanController::class, 'edit'])->name('dat-ban.edit');
-Route::get('/dat-ban/edit/{maDatBan}', [DatBanController::class, 'edit'])->name('dat-ban.edit');
 Route::get('/dat-ban/{maDatBan}', [DatBanController::class, 'show'])->name('dat-ban.show');
 
 Route::delete('/dat-ban/{ma_dat_ban}', [DatBanController::class, 'destroy'])->name('dat-ban.destroy');
 Route::post('/dat-ban/store', [DatBanController::class, 'store'])->name('dat-ban.store');
 Route::put('/dat-ban/{maDatBan}', [DatBanController::class, 'update'])->where('maDatBan', '[A-Za-z0-9]+')->name('dat-ban.update');
+// Route::put('/dat-ban/{maDatBan}', [DatBanController::class, 'update'])->name('dat-ban.update');
 
+Route::get('/dat-ban/edit/{maDatBan}', [DatBanController::class, 'edit'])->name('dat-ban.edit');
+// Route::put('/dat-ban/{maDatBan}', [DatBanController::class, 'update'])->name('dat-ban.update');
+
+
+
+// Route::put('/dat-ban/{maDatBan}', [DatBanController::class, 'update'])->name('datban.update');
 
 
 
@@ -296,6 +302,7 @@ Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.sh
 Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
 Route::get('/thu-ngan/get-orders',[ThuNganController::class, 'getOrders'])->name('thungan.getOrders');
 Route::get('/thu-ngan/hoa-don-info',[ThuNganController::class, 'thongTinHoaDon'])->name('thungan.thongTinHoaDon');
+Route::post('thu-ngan-save-so-nguoi',[ThuNganController::class,'saveSoNguoi'])->name('thungan.saveSoNguoi');
 //Chấm công
 Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
 Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('chamcong.store');
