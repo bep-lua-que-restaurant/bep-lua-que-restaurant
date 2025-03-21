@@ -10,7 +10,7 @@ class BanAn extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['ten_ban', 'so_ghe', 'mo_ta', 'vi_tri','trang_thai'];
+    protected $fillable = ['ten_ban', 'so_ghe', 'mo_ta', 'vi_tri', 'trang_thai'];
 
 
 
@@ -24,10 +24,16 @@ class BanAn extends Model
         return $this->hasMany(DatBan::class, 'ban_an_id');
     }
 
+
     public function hoaDons()
     {
         return $this->belongsToMany(HoaDon::class, 'hoa_don_bans', 'ban_an_id', 'hoa_don_id')
             ->withPivot('trang_thai')
             ->withTimestamps();
     }
+    public function scopeTrangThaiBan($query, $tenBan)
+{
+    return $query->where('ten_ban', $tenBan)->first();
+}
+
 }

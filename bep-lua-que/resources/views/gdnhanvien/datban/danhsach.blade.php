@@ -1,4 +1,4 @@
-@extends('admin.datban.layout')
+@extends('gdnhanvien.datban.layout')
 
 @section('title')
     Danh mục Bàn Ăn
@@ -21,6 +21,7 @@
                         <option value="dang_xu_ly">Đang xử lý</option>
                         <option value="xac_nhan">Xác nhận</option>
                         <option value="da_huy">Đã hủy</option>
+                        <option value="da_thanh_toan">Đã thanh toán </option>
                     </select>
                 </div>
             </div>
@@ -63,6 +64,9 @@
                                     @elseif ($datban->trang_thai == 'dang_xu_ly')
                                         <span class="badge bg-warning trang_thai" data-value="{{ $datban->trang_thai }}">
                                             Đang xử lý</span>
+                                    @elseif ($datban->trang_thai == 'da_thanh_toan')
+                                        <span class="badge bg-warning trang_thai" data-value="{{ $datban->trang_thai }}">
+                                            Đã thanh toán</span>
                                     @else
                                         <span class="badge bg-danger trang_thai" data-value="{{ $datban->trang_thai }}">
                                             Đã hủy</span>

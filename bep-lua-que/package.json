@@ -10,6 +10,10 @@
         "laravel-echo": "^1.19.0",
         "laravel-vite-plugin": "^1.0.0",
         "pusher-js": "^8.4.0",
-        "vite": "^5.0.0"
+        "vite": "^6.2.2"
+    },
+    "dependencies": {
+        "dayjs": "^1.11.13",
+        "moment": "^2.30.1"
     }
 }

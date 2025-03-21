@@ -92,7 +92,10 @@ $(document).ready(function () {
 
 $(document).ready(function () {
     $(".btn-thong-bao").on("click", function () {
-        let hoaDonId = $("#ten-ban").data("hoaDonId");
+        let hoaDonId =
+            window.luuIdHoaDon !== null && window.luuIdHoaDon !== undefined
+                ? window.luuIdHoaDon
+                : $("#ten-ban").data("hoaDonId");
 
         if (!hoaDonId) {
             alert("Không tìm thấy hóa đơn cho bàn này!");
@@ -126,10 +129,16 @@ $(document).ready(function () {
 //
 
 window.Echo.channel("datban-channel").listen("DatBanCreated", (e) => {
-    let banId = e.ban_an_id; // Nhận ID bàn ăn từ Laravel
-    let icon = document.getElementById(`icon-${banId}`);
+    if (e.danh_sach_ban && e.danh_sach_ban.length > 0) {
+        e.danh_sach_ban.forEach((ban) => {
+            let maDatBan = ban.ma_dat_ban; // Lấy mã đặt bàn
+            console.log("Mã đặt bàn:", maDatBan); // Hiển thị trên console
 
-    if (icon) {
-        icon.classList.remove("d-none"); // Hiển thị icon 🔔
+            let icon = document.getElementById(`icon-${ban.ban_an_id}`);
+
+            if (icon) {
+                icon.classList.remove("d-none"); // Hiển thị icon 🔔
+            }
+        });
     }
 });

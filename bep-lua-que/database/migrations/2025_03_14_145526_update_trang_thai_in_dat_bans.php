@@ -12,18 +12,18 @@ return new class extends Migration
     public function up()
     {
         Schema::table('dat_bans', function (Blueprint $table) {
-            $table->string('ma_dat_ban', 20)->unique()->after('id');
-            $table->time('gio_du_kien')->after('thoi_gian_den');
+            $table->enum('trang_thai', ['dang_xu_ly', 'xac_nhan', 'da_huy', 'da_thanh_toan'])
+                ->default('dang_xu_ly')
+                ->change();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down()
     {
         Schema::table('dat_bans', function (Blueprint $table) {
-            $table->dropColumn(['ma_dat_ban', 'gio_du_kien']);
+            $table->enum('trang_thai', ['dang_xu_ly', 'xac_nhan', 'da_huy'])
+                ->default('dang_xu_ly')
+                ->change();
         });
     }
 };

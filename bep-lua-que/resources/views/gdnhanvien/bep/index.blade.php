@@ -332,7 +332,7 @@
         window.Echo.channel("bep-channel")
             .listen(".mon-moi-duoc-them", (data) => {
                 console.log("🔥 Món mới nhận được:", data);
-
+                
                 if (!data || !data.monAns) {
                     console.error("Dữ liệu món ăn không hợp lệ");
                     return;

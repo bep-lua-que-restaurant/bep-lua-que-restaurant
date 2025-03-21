@@ -11,7 +11,7 @@ class HoaDon extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['ma_hoa_don', 'tong_tien', 'phuong_thuc_thanh_toan', 'mo_ta'];
+    protected $fillable = ['ma_hoa_don', 'ma_dat_ban', 'tong_tien', 'phuong_thuc_thanh_toan', 'mo_ta'];
 
     public function chiTietHoaDons()
     {
@@ -25,8 +25,15 @@ class HoaDon extends Model
 
     public function banAns()
     {
-
         return $this->belongsToMany(BanAn::class, 'hoa_don_bans', 'hoa_don_id', 'ban_an_id');
+    }
+    public function scopeTongDoanhThu($query)
+    {
+        return $query->where('deleted_at', null)->sum('tong_tien');
+    }
 
+    public function scopeDoanhThuTheoNgay($query, $ngay)
+    {
+        return $query->whereDate('created_at', $ngay)->sum('tong_tien');
     }
 }

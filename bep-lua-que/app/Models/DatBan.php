@@ -40,8 +40,14 @@ class DatBan extends Model
         return $this->belongsTo(BanAn::class, 'ban_an_id');
     }
 
+
     public function khachHang()
     {
         return $this->belongsTo(KhachHang::class, 'khach_hang_id');
+    }
+
+    public function banAns()
+    {
+        return $this->belongsToMany(BanAn::class, 'ban_dat_bans', 'dat_ban_id', 'ban_an_id');
     }
 }
