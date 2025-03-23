@@ -36,4 +36,8 @@ class HoaDon extends Model
     {
         return $query->whereDate('created_at', $ngay)->sum('tong_tien');
     }
+    public function hoaDonBan()
+    {
+        return $this->hasOne(HoaDonBan::class, 'hoa_don_id', 'id');
+    }
 }

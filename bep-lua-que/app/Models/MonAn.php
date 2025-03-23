@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class MonAn extends Model
 {
@@ -38,15 +39,13 @@ class MonAn extends Model
     {
         return $this->hasMany(ChiTietHoaDon::class, 'mon_an_id');
     }
-    public function nguyenLieuMonAn()
+    public static function getMonAnYeuThich($limit = 3)
     {
-        return $this->hasMany(CongThucMonAn::class, 'mon_an_id');
-    }
-
-    public function nguyenLieus()
-    {
-        return $this->belongsToMany(NguyenLieu::class, 'nguyen_lieu_mon_ans', 'mon_an_id', 'nguyen_lieu_id')
-            ->withPivot('so_luong', 'don_vi_tinh') // Nếu bảng trung gian có thêm cột
-            ->withTimestamps();
+        return self::withCount(['chiTietHoaDons as tong_so_luong' => function ($query) {
+            $query->select(DB::raw('SUM(so_luong)'));
+        }])
+            ->orderByDesc('tong_so_luong')
+            ->limit($limit)
+            ->get(['id', 'ten_mon_an']);
     }
 }
