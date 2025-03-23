@@ -22,9 +22,10 @@
         <div class="row">
             <div class="col-lg-12">
                 <form method="GET" action="{{ route('hoa-don.index') }}">
+                    @csrf
                     <div class="input-group mb-3">
-                        <input type="text" name="search" class="form-control" placeholder="Tìm kiếm hóa đơn..."
-                            value="{{ request('search') }}">
+                        <input type="text" id="search" name="search" class="form-control"
+                            placeholder="Tìm kiếm hóa đơn..." value="{{ request('search') }}">
                         <button type="submit" class="btn btn-primary">Tìm kiếm</button>
                     </div>
                 </form>
@@ -54,44 +55,12 @@
                                     </tr>
                                 </thead>
 
-                                <tbody class="text-center">
-                                    @foreach ($hoa_don as $hoa_dons)
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td class="fw-bold text-primary">{{ $hoa_dons->ma_hoa_don }}</td>
-                                            <td>{{ $hoa_dons->ho_ten }}</td>
-                                            <td>{{ $hoa_dons->so_dien_thoai }}</td>
-                                            <td class="text-danger fw-bold">
-                                                {{ number_format($hoa_dons->tong_tien, 0, ',', '.') }} VNĐ
-                                            </td>
-                                            @php
-                                                $paymentMethods = [
-                                                    'tien_mat' => 'Tiền mặt',
-                                                    'the' => 'Thẻ',
-                                                    'tai_khoan' => 'Tài khoản',
-                                                ];
-                                            @endphp
-                                            <td>{{ $paymentMethods[$hoa_dons->phuong_thuc_thanh_toan] ?? 'Không xác định' }}
-                                            </td>
-                                            <td>{{ $hoa_dons->ngay_tao ? \Carbon\Carbon::parse($hoa_dons->ngay_tao)->format('d/m/Y H:i') : 'Chưa có' }}
-                                            </td>
-
-                                            <td>
-                                                <a href="{{ route('hoa-don.show', $hoa_dons->id) }}"
-                                                    class="btn btn-primary btn-sm">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <button class="btn btn-success btn-sm"
-                                                    onclick="printInvoice({{ $hoa_dons->id }})">
-                                                    <i class="fas fa-print"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @endforeach
+                                <tbody id="hoaDonTableBody" class="text-center">
+                                    @include('admin.hoadon.listhoadon')
                                 </tbody>
                             </table>
                         </div>
-                        <div class="d-flex justify-content-center mt-3">
+                        <div id="pagination" class="d-flex justify-content-center mt-3">
                             {{ $hoa_don->links('pagination::bootstrap-5') }}
                         </div>
                     </div>
@@ -121,7 +90,13 @@
             <p><strong>Ngày:</strong> {{ \Carbon\Carbon::parse($hoa_dons->ngay_tao)->format('d/m/Y H:i') }}</p>
 
 
-            <p><strong>Bàn số:</strong> {{ $hoa_dons->ten_ban }}</p>
+            {{-- @foreach ($hoa_dons as $hoa_don)
+                <p><strong>Bàn số:</strong> {{ $hoa_don->ten_ban }}</p>
+            @endforeach --}}
+
+
+
+
             <p><strong>Khách hàng:</strong> {{ $hoa_dons->ho_ten }}</p>
             <p><strong>Số điện thoại:</strong> {{ $hoa_dons->so_dien_thoai }}</p>
 
@@ -191,4 +166,52 @@
         myWindow.document.close();
         myWindow.print();
     }
+
+    // JavaScript (Blade Template)
+    document.addEventListener("DOMContentLoaded", function() {
+        let searchInput = document.getElementById("search");
+
+        if (searchInput) {
+            searchInput.addEventListener("input", function() {
+                let query = this.value.trim(); // Lấy dữ liệu nhập vào
+
+                // Nếu input rỗng, không gọi AJAX
+                if (query === "") {
+                    fetchData("{{ route('hoa-don.index') }}", {});
+                    return;
+                }
+
+                fetchData("{{ route('hoa-don.index') }}", {
+                    search: query
+                });
+            });
+        }
+
+        // Xử lý phân trang AJAX
+        document.addEventListener("click", function(e) {
+            if (e.target.closest("#pagination a")) {
+                e.preventDefault();
+                let url = e.target.closest("#pagination a").getAttribute("href");
+                let query = searchInput.value.trim();
+                fetchData(url, {
+                    search: query
+                });
+            }
+        });
+
+        function fetchData(url, params = {}) {
+            fetch(url + '?' + new URLSearchParams(params), {
+                    method: "GET",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("hoaDonTableBody").innerHTML = data.html;
+                    document.getElementById("pagination").innerHTML = data.pagination;
+                })
+                .catch(error => console.error("Lỗi AJAX:", error));
+        }
+    });
 </script>

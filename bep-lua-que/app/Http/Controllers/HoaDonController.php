@@ -14,51 +14,54 @@ use App\Models\HoaDonBan;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 
 class HoaDonController extends Controller
 {
     public function index(Request $request)
     {
-        $query = HoaDon::with(['chiTietHoaDons.monAn']) // Load chi tiết hóa đơn + món ăn
-        ->leftJoin('hoa_don_bans', 'hoa_don_bans.hoa_don_id', '=', 'hoa_dons.id')
-        ->leftJoin('ban_ans', 'ban_ans.id', '=', 'hoa_don_bans.ban_an_id')
-        ->leftJoin('dat_bans', function ($join) {
-            $join->on('dat_bans.ban_an_id', '=', 'ban_ans.id')
-                 ->whereNotNull('dat_bans.khach_hang_id');
-        })
-        ->leftJoin('khach_hangs', 'khach_hangs.id', '=', 'dat_bans.khach_hang_id')
-        ->select(
-            'hoa_dons.*',  // Thêm dòng này để giữ toàn bộ dữ liệu của hóa đơn
-            'khach_hangs.ho_ten',
-            'khach_hangs.so_dien_thoai',
-            'ban_ans.ten_ban',
-            'hoa_dons.created_at as ngay_tao'
-        )
-        ->orderByDesc('hoa_dons.created_at');
+        $query = HoaDon::with(['chiTietHoaDons.monAn'])
+    ->leftJoin('hoa_don_bans', 'hoa_don_bans.hoa_don_id', '=', 'hoa_dons.id')
+    ->leftJoin('ban_ans', 'ban_ans.id', '=', 'hoa_don_bans.ban_an_id')
+    ->leftJoin('dat_bans', function ($join) {
+        $join->on('dat_bans.ban_an_id', '=', 'ban_ans.id')
+            ->whereNotNull('dat_bans.khach_hang_id');
+    })
+    ->leftJoin('khach_hangs', 'khach_hangs.id', '=', 'dat_bans.khach_hang_id')
+    ->select(
+        'hoa_dons.id',
+        'hoa_dons.ma_hoa_don',
+        'hoa_dons.tong_tien',
+        'hoa_dons.phuong_thuc_thanh_toan',
+        'hoa_dons.created_at as ngay_tao',
+        DB::raw('MAX(khach_hangs.ho_ten) as ho_ten'),
+        DB::raw('MAX(khach_hangs.so_dien_thoai) as so_dien_thoai'),
+        DB::raw('GROUP_CONCAT(DISTINCT ban_ans.ten_ban ORDER BY ban_ans.ten_ban ASC SEPARATOR ", ") as ten_ban')
+    )
+    ->groupBy('hoa_dons.id', 'hoa_dons.ma_hoa_don', 'hoa_dons.tong_tien', 'hoa_dons.phuong_thuc_thanh_toan', 'hoa_dons.created_at')
+    ->orderByDesc('hoa_dons.created_at');
+
     
-    
-        // Kiểm tra nếu có từ khóa tìm kiếm
         if ($request->has('search') && !empty($request->search)) {
-            $query->where(function ($q) use ($request) {
-                $q->where('hoa_dons.ma_hoa_don', 'like', '%' . $request->search . '%')
-                  ->orWhere('khach_hangs.ho_ten', 'like', '%' . $request->search . '%')
-                  ->orWhere('khach_hangs.so_dien_thoai', 'like', '%' . $request->search . '%'); // Tìm theo số điện thoại
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('hoa_dons.ma_hoa_don', 'like', "%{$search}%")
+                  ->orWhereRaw("IFNULL(khach_hangs.ho_ten, '') LIKE ?", ["%{$search}%"])
+                  ->orWhereRaw("IFNULL(khach_hangs.so_dien_thoai, '') LIKE ?", ["%{$search}%"]);
             });
         }
         
+        $hoa_don = $query->paginate(10);
     
-        // ❌ KHÔNG DÙNG get() TRƯỚC paginate()
-        $hoa_don = $query->paginate(10); // ✅ Dùng paginate() trực tiếp trên query
-    
-        // Nếu là Ajax request, trả về HTML của bảng luôn
         if ($request->ajax()) {
             return response()->json([
-                'html' => view('admin.hoadon.index_table', compact('hoa_don'))->render(),
+                'html' => view('admin.hoadon.listhoadon', compact('hoa_don'))->render(),
+                'pagination' => $hoa_don->links('pagination::bootstrap-5')->toHtml()
             ]);
         }
-    
         return view('admin.hoadon.index', compact('hoa_don'));
     }
+
     
 
 
