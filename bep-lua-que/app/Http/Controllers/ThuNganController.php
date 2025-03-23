@@ -47,7 +47,6 @@ class ThuNganController extends Controller
 
         $data = $query->latest('id')->get();
         $hoaDons = HoaDon::latest('id')->get();
-        $phongBans = PhongAn::all();
         // Xử lý trả về khi yêu cầu là Ajax
         if ($request->ajax()) {
             return response()->json([
@@ -55,7 +54,7 @@ class ThuNganController extends Controller
             ]);
         }
 
-        return view('gdnhanvien.thungan.index', compact('data', 'hoaDons', 'phongBans'));
+        return view('gdnhanvien.thungan.index', compact('data', 'hoaDons'));
     }
 
     public function getBanDeGhep()
@@ -704,17 +703,31 @@ class ThuNganController extends Controller
 
     public function getOrders(Request $request)
     {
-        $banAnId = $request->ban_an_id;
+        // Lấy tất cả mã đặt bàn có trạng thái 'dang_xu_ly'
+        $maDatBanList = DatBan::where('trang_thai', 'dang_xu_ly')
+            ->pluck('ma_dat_ban'); // Lấy danh sách tất cả mã đặt bàn có trạng thái 'dang_xu_ly'
 
+        if ($maDatBanList->isEmpty()) {
+            return response()->json([]); // Nếu không có dữ liệu -> trả về mảng rỗng
+        }
+
+        // Gộp danh sách bàn theo các mã đặt bàn liên quan
         $orders = DatBan::join('ban_ans', 'dat_bans.ban_an_id', '=', 'ban_ans.id')
             ->join('khach_hangs', 'dat_bans.khach_hang_id', '=', 'khach_hangs.id')
-            ->where('dat_bans.ban_an_id', $banAnId)
-            ->where('dat_bans.trang_thai', 'dang_xu_ly')
-            ->select('dat_bans.*', 'khach_hangs.ho_ten', 'ban_ans.ten_ban') // Lấy cả tên bàn
+            ->whereIn('dat_bans.ma_dat_ban', $maDatBanList) // Tìm tất cả đơn có trạng thái 'dang_xu_ly'
+            ->groupBy('dat_bans.ma_dat_ban', 'khach_hangs.ho_ten', 'dat_bans.so_nguoi', 'dat_bans.thoi_gian_den')
+            ->selectRaw('
+                dat_bans.ma_dat_ban, 
+                khach_hangs.ho_ten, 
+                dat_bans.so_nguoi, 
+                dat_bans.thoi_gian_den, 
+                GROUP_CONCAT(ban_ans.ten_ban ORDER BY ban_ans.ten_ban SEPARATOR ", ") as danh_sach_ban
+            ')
             ->get();
 
         return response()->json($orders);
     }
+
 
     public function thongTinHoaDon(Request $request)
     {

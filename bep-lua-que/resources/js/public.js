@@ -14,26 +14,12 @@ window.Echo.channel("banan-channel").listen("BanAnUpdated", (data) => {
 
         if (data.trang_thai === "trong") {
             badge.addClass("badge-success").text("Có sẵn");
-            updatedBan.find(".new-order-icon").remove(); // Xóa icon chuông nếu có
         } else if (data.trang_thai === "co_khach") {
             badge.addClass("badge-warning").text("Có khách");
-            updatedBan.find(".new-order-icon").remove(); // Xóa icon chuông nếu có
         } else if (data.trang_thai === "da_dat_truoc") {
             badge.addClass("badge-success").text("Có sẵn");
-
-            // Kiểm tra xem đã có icon chuông chưa, nếu chưa thì thêm vào
-            if (updatedBan.find(".new-order-icon").length === 0) {
-                updatedBan.append(
-                    `<span class="new-order-icon position-absolute top-0 end-0 p-1" data-bs-toggle="tooltip" data-bs-placement="top" 
-                    title="Có đơn đặt trước cho bàn này"
-                     data-id="{{ $banAn->id }}" onclick="showOrders(this)">
-                        <i class="fas fa-bell text-danger"></i>
-                    </span>`
-                );
-            }
         } else {
             badge.addClass("badge-secondary").text("Không xác định");
-            updatedBan.find(".new-order-icon").remove(); // Xóa icon chuông nếu có
         }
     } else {
         // Nếu bàn ăn chưa có trên UI, chỉ gọi fetchUpdatedList() một lần
@@ -132,14 +118,6 @@ window.Echo.channel("hoa-don-channel")
         }
     });
 
-// Lắng nghe sự kiện real-time từ server
-// window.Echo.channel("hoa-don-channel").listen("HoaDonUpdated", (data) => {
-//     console.log("🔔 Có thông báo mới từ server:", data);
-//     let hoaDonId = $("#ten-ban").data("hoaDonId");
-//     if (hoaDonId && hoaDonId == data.hoa_don.id) {
-//         loadChiTietHoaDon(hoaDonId);
-//     }
-// });
 
 function loadChiTietHoaDon(hoaDonId) {
     $.ajax({
