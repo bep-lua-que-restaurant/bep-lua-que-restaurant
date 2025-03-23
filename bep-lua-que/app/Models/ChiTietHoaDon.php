@@ -14,7 +14,7 @@ class ChiTietHoaDon extends Model
 
     public function monAn()
     {
-        return $this->belongsTo(MonAn::class, 'mon_an_id');
+        return $this->belongsTo(MonAn::class, 'mon_an_id','id');
     }
 
     public function hoaDon()
