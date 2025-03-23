@@ -129,16 +129,13 @@ $(document).ready(function () {
 //
 
 window.Echo.channel("datban-channel").listen("DatBanCreated", (e) => {
-    if (e.danh_sach_ban && e.danh_sach_ban.length > 0) {
-        e.danh_sach_ban.forEach((ban) => {
-            let maDatBan = ban.ma_dat_ban; // Lấy mã đặt bàn
-            console.log("Mã đặt bàn:", maDatBan); // Hiển thị trên console
-
-            let icon = document.getElementById(`icon-${ban.ban_an_id}`);
-
-            if (icon) {
-                icon.classList.remove("d-none"); // Hiển thị icon 🔔
-            }
-        });
-    }
+    capNhatIconBan(e.danh_sach_ban);
 });
+
+window.Echo.channel("datban-channel").listen("DatBanUpdated", (e) => {
+    capNhatIconBan(e.danh_sach_ban);
+});
+
+function capNhatIconBan(danhSachBan) {
+    console.log(danhSachBan);
+}

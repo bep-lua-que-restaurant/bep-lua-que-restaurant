@@ -107,7 +107,7 @@ $(document).ready(function () {
             },
             success: function (response) {
                 maHoaDonElement.innerText = response.maHoaDon;
-                maHoaDonElement.style.color = "#28a745"; 
+                maHoaDonElement.style.color = "#28a745";
 
                 let hoaDonBody = $("#hoa-don-body");
                 hoaDonBody.empty();
@@ -297,44 +297,3 @@ $(document).ready(function () {
         });
     }
 });
-
-function showOrders(element) {
-    let banAnId = element.getAttribute("data-id"); // Lấy ID bàn ăn
-    let ordersList = document.getElementById("ordersList");
-    let tenBanAn = document.getElementById("ten-ban-an");
-    // Xóa danh sách cũ trước khi tải mới
-    ordersList.innerHTML = "<p>Đang tải...</p>";
-    // Gửi AJAX để lấy danh sách đơn đặt trước
-    $.ajax({
-        url: "/thu-ngan/get-orders", // Đường dẫn API lấy danh sách đơn
-        method: "GET",
-        data: { ban_an_id: banAnId },
-        success: function (response) {
-            ordersList.innerHTML = ""; // Xóa dòng "Đang tải..."
-            if (response.length > 0) {
-                response.forEach((order, index) => {
-                    let row = `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${order.ho_ten}</td>
-                            <td>${order.thoi_gian_den}</td>
-                            <td><span class="badge bg-warning">Đặt trước</span></td>
-                        </tr>`;
-                    ordersList.innerHTML += row;
-                    tenBanAn.innerText = order.ten_ban;
-                });
-            } else {
-                ordersList.innerHTML = `<tr><td colspan="4">Không có đơn đặt trước nào!</td></tr>`;
-            }
-        },
-        error: function () {
-            ordersList.innerHTML = `<tr><td colspan="4">Lỗi khi tải danh sách đơn!</td></tr>`;
-        },
-    });
-
-    // Hiển thị modal
-    var modal = new bootstrap.Modal(document.getElementById("ordersModal"));
-    modal.show();
-}
-
-

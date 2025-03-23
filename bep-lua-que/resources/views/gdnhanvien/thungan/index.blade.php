@@ -57,7 +57,14 @@
                                         class="fas fa-utensils me-2"></i> Bếp</a></li>
                             <li><a class="dropdown-item text-danger" href="dat-ban"><i
                                         class="fas fa-concierge-bell me-2"></i> Lễ tân</a></li>
+                            <li>
+                                <button class="dropdown-item text-warning" onclick="showOrders()" type="button">
+                                    <i class="fas fa-list me-2"></i> Đơn đặt bàn
+                                </button>
+                            </li>
+
                         </ul>
+
                     </div>
                 </div>
 
@@ -114,11 +121,6 @@
         </section>
     </main>
 
-
-    <footer>
-        <!-- Footer content (nếu cần) -->
-    </footer>
-
     {{-- toast --}}
     <div class="position-fixed top-0 start-0 p-3" style="z-index: 1050">
         <div id="toastMessage" class="toast align-items-center text-bg-success border-0" role="alert"
@@ -133,6 +135,39 @@
         </div>
     </div>
 
+<!-- Modal -->
+<div class="modal fade" id="ordersModal" tabindex="-1" aria-labelledby="ordersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ordersModalLabel">Danh sách đơn đặt trước</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body modal-fix">
+                <table class="table-dat-ban table table-bordered table-sm text-center">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Mã đặt bàn</th>
+                            <th>Tên khách</th>
+                            <th>Số người</th>
+                            <th>Bàn</th>
+                            <th>Thời gian đến</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersList">
+                        <tr>
+                            <td colspan="7">Đang tải...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
 
     <!-- Script -->
 
@@ -146,6 +181,7 @@
     <script src="{{ asset('admin/js/swiper-bundle.min.js') }}"></script>
     <script src="{{ asset('js/jquery-3.6.4.min.js') }}"></script>
     <script src="{{ asset('admin') }}/js/tachBan.js" type="text/javascript"></script>
+    <script src="{{ asset('admin') }}/js/donDatBan.js" type="text/javascript"></script>
     <script>
         var apiUrl = "{{ route('thungan.getBanAn') }}";
 
@@ -165,7 +201,7 @@
 
         var dingSoundUrl = "{{ asset('sounds/ding.mp3') }}";
     </script>
-    
+
     @vite('resources/js/public.js')
     @vite('resources/js/thungan.js')
 

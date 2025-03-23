@@ -100,7 +100,6 @@
 </div>
 
 
-
 <!-- Offcanvas -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel"
     style="width: 70%; padding: 20px;">
@@ -184,7 +183,6 @@
         <button class="btn btn-success btn-sm" id="btnThanhToan">Thanh toán</button>
     </div>
 </div>
-
 
 <!-- Modal thêm khách hàng -->
 <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel"
