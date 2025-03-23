@@ -9,6 +9,7 @@ use App\Models\HoaDon;
 use App\Models\HoaDonBan;
 use App\Models\KhachHang;
 use App\Events\BanAnUpdated;
+use App\Events\DatBanUpdated;
 use App\Models\PhongAn;
 use Illuminate\Http\Request;
 use App\Events\HoaDonUpdated;
@@ -353,13 +354,13 @@ class ThuNganController extends Controller
         $banTheoHoaDon = HoaDonBan::where('hoa_don_id', $hoaDonTheoMa->id)->get();
 
         // lấy ra id bàn
-        $banIds = $banTheoHoaDon->pluck('ban_an_id')->toArray(); 
+        $banIds = $banTheoHoaDon->pluck('ban_an_id')->toArray();
         // lấy ra mã đặt bàn của bàn này
         $maDatBans = DatBan::whereIn('ban_an_id', $banIds)
-        ->where('trang_thai', 'xac_nhan')
-        ->pluck('ma_dat_ban')
-        ->toArray(); // Chuyển về mảng nếu cần
-    
+            ->where('trang_thai', 'xac_nhan')
+            ->pluck('ma_dat_ban')
+            ->toArray(); // Chuyển về mảng nếu cần
+
         if (!$maDatBans) {
             return response()->json(['success' => false, 'message' => 'Không tìm thấy mã đặt bàn.']);
         }
@@ -411,7 +412,12 @@ class ThuNganController extends Controller
 
         $khachHang = KhachHang::find($khachHangId);
         // Cập nhật tất cả các bản ghi có cùng `ma_dat_ban` thành 'da_thanh_toan'
+        // $updateDatBan = DatBan::where('ma_dat_ban', $maDatBans)->get();
+
+
+        $datBanList = DatBan::whereIn('ban_an_id', $dsBanCungHoaDon)->where('trang_thai', 'xac_nhan')->get();
         $updateDatBan = DatBan::where('ma_dat_ban', $maDatBans)->get();
+
 
         foreach ($updateDatBan as $datBan) {
             $datBan->update([
@@ -419,6 +425,9 @@ class ThuNganController extends Controller
                 'khach_hang_id' => $khachHangId ?: null,
             ]);
         }
+        // 🔥 Phát sự kiện **sau khi đã hoàn thành** cập nhật dữ liệu
+        event(new DatBanUpdated($datBanList));
+
 
         $hoaDon = HoaDon::find($hoaDonBan->hoa_don_id);
 
