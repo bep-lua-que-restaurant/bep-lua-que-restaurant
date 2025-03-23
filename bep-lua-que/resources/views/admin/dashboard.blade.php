@@ -105,5 +105,4 @@
             setInterval(loadTodayStats, 300000);
         });
     </script>
-
 @endsection
