@@ -100,9 +100,9 @@
                 });
             }
 
-            // Gọi AJAX ban đầu và sau mỗi 8 giây
+            // Gọi AJAX ban đầu và sau mỗi 5 phút
             loadTodayStats();
-            setInterval(loadTodayStats, 8000);
+            setInterval(loadTodayStats, 300000);
         });
     </script>
 
