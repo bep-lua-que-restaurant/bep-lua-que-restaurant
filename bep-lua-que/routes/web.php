@@ -301,6 +301,8 @@ Route::post('/hoa-don/delete', [ThuNganController::class, 'deleteMonAn'])->name(
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
 Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
+Route::get('/hoa-don/{id}/in', [HoaDonController::class, 'printInvoice'])->name('hoa-don.print');
+
 Route::get('/thu-ngan/get-orders',[ThuNganController::class, 'getOrders'])->name('thungan.getOrders');
 Route::get('/thu-ngan/hoa-don-info',[ThuNganController::class, 'thongTinHoaDon'])->name('thungan.thongTinHoaDon');
 Route::post('thu-ngan-save-so-nguoi',[ThuNganController::class,'saveSoNguoi'])->name('thungan.saveSoNguoi');
