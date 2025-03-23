@@ -12,18 +12,24 @@
     }
 
     .so-luong-tach {
-    width: 60px; /* Giới hạn độ rộng */
-    text-align: center; /* Căn giữa số */
-    border: none; /* Xóa viền để trông gọn gàng */
-    outline: none; /* Xóa viền xanh khi focus */
-    font-size: 16px; /* Cỡ chữ lớn hơn */
-}
-.input-group {
-    display: flex;
-    align-items: center;
-    gap: 5px; /* Tạo khoảng cách giữa các nút */
-}
+        width: 60px;
+        /* Giới hạn độ rộng */
+        text-align: center;
+        /* Căn giữa số */
+        border: none;
+        /* Xóa viền để trông gọn gàng */
+        outline: none;
+        /* Xóa viền xanh khi focus */
+        font-size: 16px;
+        /* Cỡ chữ lớn hơn */
+    }
 
+    .input-group {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        /* Tạo khoảng cách giữa các nút */
+    }
 </style>
 <table class="table table-bordered table-sm">
     <thead class="table-light">
@@ -290,11 +296,11 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalTachBanLabel">
-                  Tách hóa đơn
-                  <small class="text-muted ms-2">Hóa đơn hiện tại: <span id="tenHoaDon"></span></small>
+                    Tách hóa đơn
+                    <small class="text-muted ms-2">Hóa đơn hiện tại: <span id="tenHoaDon"></span></small>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
+            </div>
             <div class="modal-body">
                 <form>
                     <!-- Chọn bàn mới hoặc tạo hóa đơn -->
@@ -315,15 +321,13 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="banGoc" class="form-label">Chọn bàn</label>
-                                <select class="form-select" id="banGoc">
-                                    <option value="1" selected>Bàn 1</option>
-                                    <option value="2">Bàn 2</option>
-                                    <option value="3">Bàn 3</option>
+                                <select class="form-select" id="banGoc" multiple="multiple" style="width: 100%;">
+                                    <option value="" selected hidden>Chọn bàn...</option>
                                 </select>
+
                             </div>
                         </div>
                     </div>
-
 
                     <!-- Danh sách món ăn -->
                     <div class="mb-3">
@@ -347,7 +351,7 @@
                     </div>
 
                     <div class="text-end mt-3">
-                        <button type="submit" class="btn btn-primary btn-sm">Tách</button>
+                        <button id="xacNhanTach-btn" type="button" class="btn btn-primary btn-sm">Tách</button>
                     </div>
                 </form>
             </div>
@@ -484,7 +488,7 @@
         var amountGiven = parseFloat($('#amountGiven').val().replace(/\./g, '').trim()) || 0;
         var changeToReturn = parseFloat($('#changeToReturn').val().replace(/\./g, '').trim()) || 0;
         let maHoaDonInFo = document.getElementById("maHoaDonInFo");
-        let maHoaDonFind = maHoaDonInFo.innerText; 
+        let maHoaDonFind = maHoaDonInFo.innerText;
 
         var danhSachSanPham = [];
         $("#hoa-don-thanh-toan-body tr").each(function() {
@@ -511,7 +515,7 @@
                     phuong_thuc_thanh_toan: phuongThucThanhToan,
                     chi_tiet_thanh_toan: paymentDetails,
                     tong_tien: totalAmount,
-                    ma_hoa_don_cua_ban:maHoaDonFind,
+                    ma_hoa_don_cua_ban: maHoaDonFind,
                     // tien_khach_dua: amountGiven,
                     // tien_thua: changeToReturn,
                     // san_pham: danhSachSanPham, // Gửi danh sách sản phẩm lên server
@@ -822,6 +826,4 @@
             });
         });
     });
-
-
 </script>
