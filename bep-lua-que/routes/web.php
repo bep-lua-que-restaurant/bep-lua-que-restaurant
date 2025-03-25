@@ -300,7 +300,10 @@ Route::post('/hoa-don/update-quantity', [ThuNganController::class, 'updateQuanti
 Route::post('/hoa-don/delete', [ThuNganController::class, 'deleteMonAn'])->name('thungan.deleteMonAn');
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
-Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
+//search hóa đơn
+
+
+
 Route::get('/hoa-don/{id}/in', [HoaDonController::class, 'printInvoice'])->name('hoa-don.print');
 
 Route::get('/thu-ngan/get-orders',[ThuNganController::class, 'getOrders'])->name('thungan.getOrders');

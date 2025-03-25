@@ -15,7 +15,7 @@ class HoaDon extends Model
 
     public function chiTietHoaDons()
     {
-        return $this->hasMany(ChiTietHoaDon::class, 'hoa_don_id');
+        return $this->hasMany(ChiTietHoaDon::class, 'hoa_don_id','id');
     }
 
     public function hoaDonBans()

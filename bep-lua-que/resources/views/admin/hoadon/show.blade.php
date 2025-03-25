@@ -75,7 +75,7 @@
                                         </td>
                                         <td>{{ $chiTiet->monAn->ten ?? 'Không có' }}</td>
                                         <td>{{ $chiTiet->so_luong }}</td>
-                                        <td>{{ number_format($chiTiet->don_gia, 0, ',', '.') }} đ</td>
+                                        <td>{{ number_format($chiTiet->don_gia, 0, ',', '.') }} VND</td>
                                         <td>{{ number_format($chiTiet->thanh_tien, 0, ',', '.') }} VND</td>
 
                                     </tr>
