@@ -141,7 +141,7 @@
 
     <div id="chatIcon">💬</div>
 
-    <div id="chatbox">
+    <div id="chatbox" style="display: none;">
         <header>
             Chat hỗ trợ
             <button id="closeChat">&times;</button>
@@ -152,8 +152,7 @@
             <span class="suggestion" onclick="setMessage('Trạng thái bàn 1')">🪑 Bàn 1</span>
             <span class="suggestion" onclick="setMessage('Doanh thu tổng')">📊 Doanh thu tổng</span>
             <span class="suggestion" onclick="setMessage('Doanh thu ngày 12-03-2025')">📅 Doanh thu ngày 12-03</span>
-            <span class="suggestion" onclick="setMessage('Doanh thu từ 01-03-2025 đến 10-03-2025')">📆 Doanh thu từ ngày 01-03 đến
-                10-03</span>
+            <span class="suggestion" onclick="setMessage('Doanh thu từ 01-03-2025 đến 10-03-2025')">📆 Doanh thu từ ngày 01-03 đến 10-03</span>
             <span class="suggestion" onclick="setMessage('Món ăn yêu thích')">🍽️ Món yêu thích</span>
         </div>
 
@@ -166,53 +165,13 @@
     <script>
         $(document).ready(function() {
             $("#chatIcon").click(function() {
-                $("#chatbox").toggle();
+                $("#chatbox").fadeToggle();
             });
 
             $("#closeChat").click(function() {
-                $("#chatbox").hide();
+                $("#chatbox").fadeOut();
             });
-
-            function loadMessages() {
-                $.get("{{ route('chat.layTinNhan') }}", function(data) {
-                    $('#messages').html('');
-                    data.forEach(msg => {
-                        let className = msg.ten === "Bạn" ? "user" : "bot";
-                        $('#messages').append(
-                            `<p class="message ${className}"><strong>${msg.ten}:</strong> ${msg.noi_dung}</p>`
-                        );
-                    });
-                });
-            }
-
-            $("#sendBtn").click(function() {
-                var message = $("#messageInput").val();
-                if (message.trim() === '') return;
-
-                $.post("{{ route('chat.gui') }}", {
-                    _token: "{{ csrf_token() }}",
-                    nguoi_dung_id: 1,
-                    noi_dung: message
-                }, function(response) {
-                    $("#messages").append(
-                        `<p class="message user"><strong>Bạn:</strong> ${message}</p>`);
-                    if (response.phan_hoi) {
-                        $("#messages").append(
-                            `<p class="message bot"><strong>Bot:</strong> ${response.phan_hoi}</p>`
-                        );
-                    }
-                    $("#messageInput").val('');
-                    $('#messages').scrollTop($('#messages')[0].scrollHeight); // Scroll cuối
-                });
-            });
-
-            loadMessages();
-            setInterval(loadMessages, 5000);
         });
-
-        function setMessage(text) {
-            document.getElementById('messageInput').value = text;
-        }
     </script>
 
 </body>
