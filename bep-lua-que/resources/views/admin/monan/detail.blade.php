@@ -5,77 +5,64 @@
 @endsection
 
 @section('content')
-<div class="container">
-    <h2>Chi tiết Món Ăn</h2>
+<div class="container my-4">
+    <div class="card shadow rounded p-4">
+        <h2 class="mb-4 text-center">🍽️ Chi Tiết Món Ăn</h2>
 
-    <div class="mb-3">
-        <label class="form-label"><strong>Tên món ăn:</strong></label>
-        <p>{{ $monAn->ten }}</p>
-    </div>
+        <div class="row mb-3">
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Tên món ăn:</label>
+                <div class="border p-2 rounded bg-light">{{ $monAn->ten }}</div>
+            </div>
 
-    <div class="mb-3">
-        <label class="form-label"><strong>Danh mục:</strong></label>
-        <p>{{ $monAn->danhMuc->ten ?? 'Chưa có danh mục' }}</p>
-    </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Danh mục:</label>
+                <div class="border p-2 rounded bg-light">{{ $monAn->danhMuc->ten ?? 'Chưa có danh mục' }}</div>
+            </div>
 
-    <div class="mb-3">
-        <label class="form-label"><strong>Mô tả:</strong></label>
-        <div>{!! $monAn->mo_ta !!}</div>
-    </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Giá:</label>
+                <div class="border p-2 rounded bg-light text-success">
+                    {{ number_format($monAn->gia, 0, ',', '.') }} VNĐ
+                </div>
+            </div>
 
-    <div class="mb-3">
-        <label class="form-label"><strong>Giá:</strong></label>
-        <p>{{ number_format($monAn->gia, 0, ',', '.') }} VND</p>
-    </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Trạng thái:</label>
+                <div class="border p-2 rounded bg-light">
+                    @if ($monAn->trang_thai == 'dang_ban')
+                        <span class="badge bg-success">Đang bán</span>
+                    @elseif ($monAn->trang_thai == 'het_hang')
+                        <span class="badge bg-warning text-dark">Hết hàng</span>
+                    @else
+                        <span class="badge bg-secondary">Ngừng bán</span>
+                    @endif
+                </div>
+            </div>
 
-    <div class="mb-3">
-        <label class="form-label"><strong>Trạng thái:</strong></label>
-        <p>
-            @if ($monAn->trang_thai == 'dang_ban') Đang bán
-            @elseif ($monAn->trang_thai == 'het_hang') Hết hàng
-            @else Ngừng bán
-            @endif
-        </p>
-    </div>
+            <div class="col-12 mb-3">
+                <label class="form-label fw-bold">Mô tả:</label>
+                <div class="border p-3 rounded bg-light">{!! $monAn->mo_ta !!}</div>
+            </div>
 
-    <div class="mb-3">
-        <label class="form-label"><strong>Hình ảnh:</strong></label>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            @forelse($monAn->hinhAnhs as $hinhAnh)
-                <img src="{{ asset('storage/' . $hinhAnh->hinh_anh) }}" class="img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;">
-            @empty
-                <p>Chưa có hình ảnh</p>
-            @endforelse
+            <div class="col-12 mb-4">
+                <label class="form-label fw-bold">Hình ảnh:</label>
+                <div class="d-flex flex-wrap gap-3 mt-2">
+                    @forelse($monAn->hinhAnhs as $hinhAnh)
+                        <img src="{{ asset('storage/' . $hinhAnh->hinh_anh) }}" class="img-thumbnail shadow-sm"
+                            style="width: 140px; height: 140px; object-fit: cover; border-radius: 8px;">
+                    @empty
+                        <p>Chưa có hình ảnh</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="{{ route('mon-an.index') }}" class="btn btn-outline-primary px-4">
+                <i class="fas fa-arrow-left"></i> Quay lại danh sách
+            </a>
         </div>
     </div>
-
-    <!-- Danh sách nguyên liệu -->
-    <div class="mb-3">
-        <label class="form-label"><strong>Nguyên liệu:</strong></label>
-        @if ($monAn->nguyenLieus->isEmpty())
-            <p>Chưa có nguyên liệu</p>
-        @else
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Tên nguyên liệu</th>
-                        <th>Số lượng</th>
-                        <th>Đơn vị tính</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($monAn->nguyenLieus as $nguyenLieu)
-                        <tr>
-                            <td>{{ $nguyenLieu->ten_nguyen_lieu }}</td>
-                            <td>{{ $nguyenLieu->pivot->so_luong }}</td>
-                            <td>{{ $nguyenLieu->pivot->don_vi_tinh }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endif
-    </div>
-
-    <a href="{{ route('mon-an.index') }}" class="btn btn-secondary">Quay lại danh sách</a>
 </div>
 @endsection

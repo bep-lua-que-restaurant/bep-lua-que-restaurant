@@ -15,7 +15,7 @@ class HoaDon extends Model
 
     public function chiTietHoaDons()
     {
-        return $this->hasMany(ChiTietHoaDon::class, 'hoa_don_id');
+        return $this->hasMany(ChiTietHoaDon::class, 'hoa_don_id','id');
     }
 
     public function hoaDonBans()
@@ -35,5 +35,9 @@ class HoaDon extends Model
     public function scopeDoanhThuTheoNgay($query, $ngay)
     {
         return $query->whereDate('created_at', $ngay)->sum('tong_tien');
+    }
+    public function hoaDonBan()
+    {
+        return $this->hasOne(HoaDonBan::class, 'hoa_don_id', 'id');
     }
 }

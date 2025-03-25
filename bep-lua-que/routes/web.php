@@ -164,36 +164,6 @@ Route::post('/import-mon-an', [MonAnController::class, 'importMonAn'])->name('mo
 
 Route::delete('/mon-an/xoa-hinh-anh/{hinhAnhId}', [MonAnController::class, 'xoaHinhAnh'])->name('mon-an.xoa-hinh-anh');
 
-// loại nguyên liêu
-Route::resource('loai-nguyen-lieu', LoaiNguyenLieuController::class);
-Route::get('export-loai-nguyen-lieu', [LoaiNguyenLieuController::class, 'export'])->name('loai-nguyen-lieu.export');
-Route::post('loai-nguyen-lieu/{id}/restore', [LoaiNguyenLieuController::class, 'restore'])->name('loai-nguyen-lieu.restore');
-
-// Nguyên liệu kho
-Route::resource('nguyen-lieu', NguyenLieuController::class);
-Route::get('/nguyen-lieu-export', [NguyenLieuController::class, 'export'])->name('nguyen-lieu.export');
-Route::post('/nguyen-lieu/import', [NguyenLieuController::class, 'import'])->name('nguyen-lieu.import');
-// // phiếu nhập nguyên liệu
-Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
-Route::post('/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore'); // Khôi phục phiếu nhập
-Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'exportPhieuNhapKho'])->name('phieu-nhap-kho.export');
-Route::put('/phieu-nhap-kho/{id}/duyet', [PhieuNhapKhoController::class, 'duyet'])->name('phieu-nhap-kho.duyet');
-Route::put('/phieu-nhap-kho/{id}/huy', [PhieuNhapKhoController::class, 'huy'])->name('phieu-nhap-kho.huy');
-// Route để xem chi tiết nguyên liệu
-Route::get(
-    'phieu-nhap-kho/{phieuNhapId}/nguyen-lieu/{nguyenLieuId}',
-    [PhieuNhapKhoController::class, 'xemChiTietNguyenLieu']
-)
-    ->name('phieu-nhap-kho.chitiet-nguyenlieu');
-Route::post(
-    '/phieu-nhap-kho/{phieuNhapId}/nguyen-lieu/{nguyenLieuId}/cap-nhat-trang-thai',
-    [PhieuNhapKhoController::class, 'capNhatTrangThai']
-)
-    ->name('phieu-nhap-kho.capnhaptrangthai');
-
-
-
-Route::get('/phieu-nhap-export', [PhieuNhapKhoController::class, 'export'])->name('phieu-nhap.export');
 
 // Quản lí nhân viên
 Route::get('/nhan-vien', [NhanVienController::class, 'index'])->name('nhan-vien.index');
@@ -300,7 +270,12 @@ Route::post('/hoa-don/update-quantity', [ThuNganController::class, 'updateQuanti
 Route::post('/hoa-don/delete', [ThuNganController::class, 'deleteMonAn'])->name('thungan.deleteMonAn');
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
-Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
+//search hóa đơn
+
+
+
+Route::get('/hoa-don/{id}/in', [HoaDonController::class, 'printInvoice'])->name('hoa-don.print');
+
 Route::get('/thu-ngan/get-orders',[ThuNganController::class, 'getOrders'])->name('thungan.getOrders');
 Route::get('/thu-ngan/hoa-don-info',[ThuNganController::class, 'thongTinHoaDon'])->name('thungan.thongTinHoaDon');
 Route::post('thu-ngan-save-so-nguoi',[ThuNganController::class,'saveSoNguoi'])->name('thungan.saveSoNguoi');

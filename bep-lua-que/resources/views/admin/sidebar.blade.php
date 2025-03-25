@@ -47,18 +47,7 @@
                     <li><a href="{{ route('ban-an.index') }}">Bàn Ăn</a></li>
                 </ul>
             </li>
-            {{-- kho --}}
-            <li>
-                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
-                    <i class="fa fa-list"></i>
-                    <span class="nav-text">Kho</span>
-                </a>
-                <ul aria-expanded="false">
-                    <li><a href="{{ route('loai-nguyen-lieu.index') }}">Loại nguyên liệu</a></li>
-
-                    <li><a href="{{ route('nguyen-lieu.index') }}">Nguyên liệu</a></li>
-                </ul>
-            </li>
+            
             {{-- Giao dịch --}}
             <li>
                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
