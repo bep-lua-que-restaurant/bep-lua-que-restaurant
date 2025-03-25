@@ -58,23 +58,24 @@ class CaLamNhanVienController extends Controller
             $query->whereDate('ngay_lam', '=', $request->search_ngaylam);
         }
 
-        // Lấy dữ liệu sau khi lọc
+        // ✅ Lấy dữ liệu sau khi lọc
         $caLamNhanViens = $query->get();
 
-        // Hiển thị thông báo khi không có kết quả
-        if ($caLamNhanViens->isEmpty()) {
-            return redirect()->route('ca-lam-nhan-vien.index')->with('error', 'Không tìm thấy kết quả nào!');
-        }
+        // 🚨 Không redirect khi không có kết quả, tránh reset bộ lọc
+        $errorMessage = $caLamNhanViens->isEmpty() ? 'Không tìm thấy kết quả nào!' : null;
+
         $caLams = CaLam::all();
         $nhanViens = NhanVien::all();
 
-
-        // ✅ Sử dụng Eloquent Model với quan hệ
-        $caLamNhanViens = CaLamNhanVien::with(['caLam', 'nhanVien'])->get();
-        $caLams = CaLam::all();
-        $nhanViens = NhanVien::all();
-
-        return view('admin.caLamNhanVien.index')->with(compact('dates', 'caLams', 'caLamNhanViens', 'weekLabel', 'weekOffset', 'nhanViens'));
+        return view('admin.caLamNhanVien.index', compact(
+            'dates',
+            'caLams',
+            'caLamNhanViens',
+            'weekLabel',
+            'weekOffset',
+            'nhanViens',
+            'errorMessage'
+        ));
     }
 
 

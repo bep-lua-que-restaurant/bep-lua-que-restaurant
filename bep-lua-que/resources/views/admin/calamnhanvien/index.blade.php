@@ -1,100 +1,94 @@
 @extends('layouts.admin')
-@if (session('error'))
-    <div class="alert alert-danger">
-        {{ session('error') }}
-    </div>
-@endif
+
 @section('content')
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4>📅 Bảng Lịch Làm Việc</h4>
-            <!-- 🔍 FORM TÌM KIẾM -->
-            <form action="{{ route('ca-lam-nhan-vien.index') }}" method="GET" class="d-flex gap-2">
-                <!-- Tìm theo tên nhân viên -->
-                <input type="text" name="search_nhanvien" class="form-control" placeholder="🔍 Tìm nhân viên..."
-                    value="{{ request('search_nhanvien') }}">
+    <div class="container py-4">
+        <div class="card shadow-sm p-4">
+            <h4 class="mb-4 text-primary">📅 Bảng Lịch Làm Việc</h4>
 
-                <!-- Tìm theo ca làm -->
-                <select name="search_ca" class="form-select">
-                    <option value="">🔎 Chọn ca làm</option>
-                    @foreach ($caLams as $caLam)
-                        <option value="{{ $caLam->id }}" {{ request('search_ca') == $caLam->id ? 'selected' : '' }}>
-                            {{ $caLam->ten_ca }} ({{ $caLam->gio_bat_dau }} - {{ $caLam->gio_ket_thuc }})
-                        </option>
-                    @endforeach
-                </select>
+            @if (session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
 
-                <!-- Tìm theo ngày làm -->
-                <input type="date" name="search_ngaylam" class="form-control" value="{{ request('search_ngaylam') }}">
-
-                <!-- Nút tìm kiếm -->
-                <button type="submit" class="btn btn-primary">🔎 Lọc</button>
-
-                <!-- Nút reset tìm kiếm -->
-                <a href="{{ route('ca-lam-nhan-vien.index') }}" class="btn btn-secondary">🔄 Reset</a>
+            <!-- Form Tìm Kiếm -->
+            <form action="{{ route('ca-lam-nhan-vien.index') }}" method="GET" class="row g-2 mb-3">
+                <div class="col-md-3">
+                    <input type="text" name="search_nhanvien" class="form-control" placeholder="🔍 Tìm nhân viên..."
+                        value="{{ request('search_nhanvien') }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="search_ca" class="form-select">
+                        <option value="">🔎 Chọn ca làm</option>
+                        @foreach ($caLams as $caLam)
+                            <option value="{{ $caLam->id }}" {{ request('search_ca') == $caLam->id ? 'selected' : '' }}>
+                                {{ $caLam->ten_ca }} ({{ $caLam->gio_bat_dau }} - {{ $caLam->gio_ket_thuc }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="date" name="search_ngaylam" class="form-control"
+                        value="{{ request('search_ngaylam') }}">
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">🔎 Lọc</button>
+                    <a href="{{ route('ca-lam-nhan-vien.index') }}" class="btn btn-secondary">🔄 Reset</a>
+                </div>
             </form>
 
-            <a href="{{ route('ca-lam-nhan-vien.export') }}" class="btn btn-success">📤 Xuất file</a>
-        </div>
+            <div class="d-flex justify-content-between mb-3">
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addShiftModal">➕ Thêm Ca
+                    Làm</button>
+                <a href="{{ route('ca-lam-nhan-vien.export') }}" class="btn btn-outline-primary">📤 Xuất file</a>
+            </div>
 
-    </div>
-
-    <div class="d-flex justify-content-between mb-3">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addShiftModal">➕ Thêm Ca Làm</button>
-    </div>
-
-    <div class="table-responsive">
-        <table class="table table-bordered text-center">
-            <thead class="table-dark">
-                <tr>
-                    <th style="background-color: #198754;">Ca làm việc</th>
-                    <th style="background-color: #198754;">Ngày làm</th>
-                    <th style="background-color: #198754;">Nhân viên</th>
-                    <th style="background-color: #198754;">Trạng thái</th>
-                    <th style="background-color: #198754;">Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (isset($caLamNhanViens) && $caLamNhanViens->count() > 0)
-                    @foreach ($caLamNhanViens as $caLamNhanVien)
+            <!-- Bảng Lịch Làm Việc -->
+            <div class="table-responsive">
+                <table class="table table-hover text-center">
+                    <thead class="table-dark">
                         <tr>
-                            <td>
-                                {{ optional($caLamNhanVien->caLam)->ten_ca ?? 'Chưa có ca' }}
-                                ({{ optional($caLamNhanVien->caLam)->gio_bat_dau ?? '--:--' }} -
-                                {{ optional($caLamNhanVien->caLam)->gio_ket_thuc ?? '--:--' }})
-                            </td>
-                            <td>{{ $caLamNhanVien->ngay_lam }}</td>
-                            <td>{{ optional($caLamNhanVien->nhanVien)->ho_ten ?? 'Không có nhân viên' }}</td>
-                            <td>
-                                <span
-                                    class='badge bg-{{ trim($caLamNhanVien->trang_thai) === 'Chờ duyệt' ? 'warning' : 'success' }}'>
-                                    {{ $caLamNhanVien->trang_thai }}
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn btn-info btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#updateShiftModal"
-                                    onclick="setUpdateShift({{ $caLamNhanVien->id }}, '{{ $caLamNhanVien->nhan_vien_id }}', '{{ $caLamNhanVien->ca_lam_id }}', '{{ $caLamNhanVien->ngay_lam }}')">✏️
-                                    Cập nhật</button>
-                               
-                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalXoaCa"
-                                    onclick="setXoaCa({{ $caLamNhanVien->id }})">🗑️ Xóa
-                                </button>
-                              
-                                @if (strcasecmp(trim($caLamNhanVien->trang_thai), 'Chờ duyệt') == 0)
-                                    
-                                @endif
-                            </td>
+                            <th>Ca làm việc</th>
+                            <th>Ngày làm</th>
+                            <th>Nhân viên</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
                         </tr>
-                    @endforeach
-                @else
-                    <tr>
-                        <td colspan="5">Không có dữ liệu lịch làm việc.</td>
-                    </tr>
-                @endif
-            </tbody>
-        </table>
-    </div>
+                    </thead>
+                    <tbody>
+                        @if ($caLamNhanViens->count() > 0)
+                            @foreach ($caLamNhanViens as $caLamNhanVien)
+                                <tr>
+                                    <td>{{ optional($caLamNhanVien->caLam)->ten_ca ?? 'Chưa có ca' }}
+                                        ({{ optional($caLamNhanVien->caLam)->gio_bat_dau ?? '--:--' }} -
+                                        {{ optional($caLamNhanVien->caLam)->gio_ket_thuc ?? '--:--' }})</td>
+                                    <td>{{ $caLamNhanVien->ngay_lam }}</td>
+                                    <td>{{ optional($caLamNhanVien->nhanVien)->ho_ten ?? 'Không có nhân viên' }}</td>
+                                    <td>
+                                        <span
+                                            class='badge bg-{{ trim($caLamNhanVien->trang_thai) === 'Chờ duyệt' ? 'warning' : 'success' }}'>
+                                            {{ $caLamNhanVien->trang_thai }}
+                                        </span>
+  
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#updateShiftModal"
+                                            onclick="setUpdateShift({{ $caLamNhanVien->id }}, '{{ $caLamNhanVien->nhan_vien_id }}', '{{ $caLamNhanVien->ca_lam_id }}', '{{ $caLamNhanVien->ngay_lam }}')">✏️
+                                            Cập nhật</button>
+                                        <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#modalXoaCa" onclick="setXoaCa({{ $caLamNhanVien->id }})">🗑️
+                                            Xóa</button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="5" class="text-muted">Không có dữ liệu lịch làm việc.</td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
     {{-- //them ca --}}
     <div class="modal fade" id="addShiftModal" tabindex="-1" aria-labelledby="addShiftModalLabel" aria-hidden="true">
@@ -145,8 +139,7 @@
 
 
     <!-- Modal Cập Nhật Ca Làm -->
-    <div class="modal fade" id="updateShiftModal" tabindex="-1" aria-labelledby="updateShiftModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="updateShiftModal" tabindex="-1" aria-labelledby="updateShiftModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -250,32 +243,33 @@
         }
     </script>
 
-{{-- Kiểm tra trùng ca làm bằng AJAX --}}
-<script>
-    document.getElementById("registerShiftForm").addEventListener("submit", function(event) {
-        event.preventDefault(); // Ngăn chặn submit mặc định
+    {{-- Kiểm tra trùng ca làm bằng AJAX --}}
+    <script>
+        document.getElementById("registerShiftForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Ngăn chặn submit mặc định
 
-        let nhanVienId = document.getElementById("employee").value;
-        let caLamId = document.getElementById("shift").value;
-        let ngayLam = document.getElementById("workDate").value;
+            let nhanVienId = document.getElementById("employee").value;
+            let caLamId = document.getElementById("shift").value;
+            let ngayLam = document.getElementById("workDate").value;
 
-        fetch("{{ route('ca-lam-nhan-vien.index') }}?nhan_vien_id=" + nhanVienId + "&ca_lam_id=" + caLamId + "&ngay_lam=" + ngayLam)
-            .then(response => response.json())
-            .then(data => {
-                if (data.trung) {
-                    alert("❌ Nhân viên đã đăng ký ca làm này rồi! Không thể đăng ký lại.");
-                } else {
-                    document.getElementById("registerShiftForm").submit(); // Submit form nếu không trùng
-                }
-            });
-    });
+            fetch("{{ route('ca-lam-nhan-vien.index') }}?nhan_vien_id=" + nhanVienId + "&ca_lam_id=" + caLamId +
+                    "&ngay_lam=" + ngayLam)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.trung) {
+                        alert("❌ Nhân viên đã đăng ký ca làm này rồi! Không thể đăng ký lại.");
+                    } else {
+                        document.getElementById("registerShiftForm").submit(); // Submit form nếu không trùng
+                    }
+                });
+        });
 
-    function setXoaCa(id) {
-        document.getElementById('xoaCaId').value = id;
-        let form = document.getElementById('xoaCaForm');
-        form.action = form.action.replace(':id', id);
-    }
-</script>
+        function setXoaCa(id) {
+            document.getElementById('xoaCaId').value = id;
+            let form = document.getElementById('xoaCaForm');
+            form.action = form.action.replace(':id', id);
+        }
+    </script>
 
 
 
