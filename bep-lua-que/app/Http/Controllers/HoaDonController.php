@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\BanAnUpdated;
 use App\Events\HoaDonAdded;
 use App\Events\HoaDonUpdated;
 use App\Models\HoaDon;
@@ -119,6 +120,8 @@ class HoaDonController extends Controller
         $soLuongMon = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)->count();
         if ($soLuongMon > 0) {
             BanAn::where('id', $banAnId)->update(['trang_thai' => 'co_khach']);
+            $ban_an = BanAn::find($banAnId);
+            broadcast(new BanAnUpdated($ban_an))->toOthers();
         }
 
         // Lấy danh sách các đặt bàn của bàn ăn đó
