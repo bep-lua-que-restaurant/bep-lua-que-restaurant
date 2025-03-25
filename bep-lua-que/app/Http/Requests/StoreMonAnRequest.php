@@ -29,13 +29,7 @@ class StoreMonAnRequest extends FormRequest
             'trang_thai' => 'nullable|in:dang_ban,het_hang,ngung_ban',
             'hinh_anh.*' => 'nullable|image|max:2048',
 
-            // Validate nguyên liệu món ăn
-            'nguyen_lieu_id' => 'required|array|min:1',
-            'nguyen_lieu_id.*' => 'exists:nguyen_lieus,id', // Mỗi nguyên liệu phải tồn tại trong bảng nguyen_lieus
-            'so_luong' => 'required|array|min:1',
-            'so_luong.*' => 'numeric|min:0.01', // Số lượng phải là số dương
-            'don_vi_tinh' => 'required|array|min:1',
-            'don_vi_tinh.*' => 'string|max:50', // Đơn vị tính phải là chuỗi không quá 50 ký tự
+           
         ];
     }
     
@@ -53,15 +47,7 @@ class StoreMonAnRequest extends FormRequest
             'hinh_anh.*.image' => 'Tệp tải lên phải là hình ảnh.',
             'hinh_anh.*.max' => 'Hình ảnh không được vượt quá 2MB.',
 
-            // Thông báo lỗi cho nguyên liệu món ăn
-            'nguyen_lieu_id.required' => 'Vui lòng chọn ít nhất một nguyên liệu.',
-            'nguyen_lieu_id.*.exists' => 'Nguyên liệu không hợp lệ.',
-            'so_luong.required' => 'Số lượng nguyên liệu không được để trống.',
-            'so_luong.*.numeric' => 'Số lượng nguyên liệu phải là số.',
-            'so_luong.*.min' => 'Số lượng nguyên liệu phải lớn hơn 0.',
-            'don_vi_tinh.required' => 'Đơn vị tính không được để trống.',
-            'don_vi_tinh.*.string' => 'Đơn vị tính phải là một chuỗi.',
-            'don_vi_tinh.*.max' => 'Đơn vị tính không được quá 50 ký tự.',
+           
         ];
     }
 }
