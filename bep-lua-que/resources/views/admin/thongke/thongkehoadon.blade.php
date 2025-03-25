@@ -36,7 +36,7 @@
                     </div>
                 </form>
                 <!-- Biểu đồ -->
-                <canvas id="thongKeChart" height="100"></canvas>
+                <canvas id="thongKeHoaDon" height="100"></canvas>
             </div>
         </div>
     </div>
@@ -49,9 +49,9 @@
             let chart;
             function updateChart(labels, data, formatType) {
                 if (chart) { chart.destroy(); }
-                let ctx = document.getElementById('thongKeChart').getContext('2d');
+                let ctx = document.getElementById('thongKeHoaDon').getContext('2d');
                 chart = new Chart(ctx, {
-                    type: 'line',
+                    type: 'bar',
                     data: {
                         labels: labels,
                         datasets: [{
@@ -59,9 +59,7 @@
                             data: data,
                             backgroundColor: 'rgba(54, 162, 235, 0.6)',
                             borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.1 // Làm mượt đường
+                            borderWidth: 1,
                         }]
                     },
                     options: {

@@ -39,7 +39,7 @@ class ThongKeController extends Controller
         // Truy vấn số khách hôm nay & hôm qua
         $customerData = DatBan::whereDate('created_at', '>=', $yesterday)
             ->where('trang_thai', 'xac_nhan')
-            ->selectRaw('DATE(created_at) as date, SUM(so_nguoi) as total_customers')
+            ->selectRaw('DATE(thoi_gian_den) as date, SUM(so_nguoi) as total_customers')
             ->groupBy('date')
             ->pluck('total_customers', 'date');
 
