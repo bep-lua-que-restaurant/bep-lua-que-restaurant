@@ -51,7 +51,7 @@
                 if (chart) { chart.destroy(); }
                 let ctx = document.getElementById('thongKeHoaDon').getContext('2d');
                 chart = new Chart(ctx, {
-                    type: 'bar',
+                    type: 'line',
                     data: {
                         labels: labels,
                         datasets: [{
@@ -59,7 +59,13 @@
                             data: data,
                             backgroundColor: 'rgba(54, 162, 235, 0.6)',
                             borderColor: 'rgba(54, 162, 235, 1)',
+
                             borderWidth: 1,
+
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.1 // Làm mượt đường
+
                         }]
                     },
                     options: {
