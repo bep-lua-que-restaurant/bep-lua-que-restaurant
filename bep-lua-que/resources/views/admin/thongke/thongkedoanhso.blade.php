@@ -39,35 +39,6 @@
                 <canvas id="thongKeChart" height="100"></canvas>
             </div>
         </div>
-
-        <div class="card mt-4">
-            <div class="card-body">
-                <h5 class="card-title fw-bold">So sánh Doanh số</h5>
-                <div class="row d-flex justify-content-center mt-4">
-                    <div class="col-md-3 text-center">
-                        <h6>Năm nay với Năm trước</h6>
-                        <canvas id="bieuDoTronNam"></canvas>
-                        <p class="fw-bold"></p>
-                    </div>
-                    <div class="col-md-3 text-center">
-                        <h6>Tháng này vs Tháng trước</h6>
-                        <canvas id="bieuDoTronThang"></canvas>
-                        <p class="fw-bold"></p>
-                    </div>
-                    <div class="col-md-3 text-center">
-                        <h6>Tuần này với Tuần trước</h6>
-                        <canvas id="bieuDoTronTuan"></canvas>
-                        <p class="fw-bold"></p>
-                    </div>
-                    <div class="col-md-3 text-center">
-                        <h6>Hôm nay với Hôm qua</h6>
-                        <canvas id="bieuDoTronNgay"></canvas>
-                        <p class="fw-bold"></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <!-- Nhúng Chart.js -->

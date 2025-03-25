@@ -55,11 +55,7 @@ class ThongKeTopDoanhThuController extends Controller
 
         // Lấy dữ liệu giờ bán chạy hoặc bán ít
         $topDoanhThuQuery = $query->select(
-
             DB::raw("DATE_FORMAT(hoa_dons.created_at, '%H:00') as hour"),
-
-            DB::raw("DATE_FORMAT(hoa_dons.created_at, '%H:%i') as hour"),
-
             DB::raw("SUM(hoa_dons.tong_tien) as total_revenue")
         )
             ->groupBy('hour');
