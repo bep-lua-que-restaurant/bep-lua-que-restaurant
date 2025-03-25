@@ -69,7 +69,7 @@
                 }
                 let ctx = document.getElementById('thongKeTopDoanhThu').getContext('2d');
                 chart = new Chart(ctx, {
-                    type: 'line',
+                    type: 'bar',
                     data: {
                         labels: labels,
                         datasets: [{
@@ -77,9 +77,7 @@
                             data: data,
                             backgroundColor: 'rgba(54, 162, 235, 0.6)',
                             borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.1 // Làm mượt đường
+                            borderWidth: 1,
                         }]
                     },
                     options: {

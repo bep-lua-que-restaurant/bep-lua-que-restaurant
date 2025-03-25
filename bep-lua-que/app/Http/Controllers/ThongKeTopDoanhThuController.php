@@ -66,7 +66,7 @@ class ThongKeTopDoanhThuController extends Controller
             $topDoanhThuQuery->orderBy('total_revenue'); // Sắp xếp tăng dần
         }
 
-        $topDoanhThu = $topDoanhThuQuery->limit(6)->get();
+        $topDoanhThu = $topDoanhThuQuery->limit(5)->get();
 
         // Gán dữ liệu cho biểu đồ
         $labels = $topDoanhThu->pluck('hour')->toArray();
