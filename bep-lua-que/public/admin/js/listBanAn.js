@@ -8,11 +8,20 @@ function setActive(element) {
     element.classList.add("active");
 }
 var swiper = new Swiper(".mySwiper", {
-    slidesPerView: 1, // Mỗi lần hiển thị 1 nhóm 12 sản phẩm
+    slidesPerView: 1, // Mỗi lần hiển thị 1 nhóm sản phẩm
     spaceBetween: 20, // Khoảng cách giữa các nhóm
-    allowTouchMove: true, // Không cho trượt bằng tay, chỉ dùng nút
+    allowTouchMove: true, // Cho phép kéo bằng chuột/tay
 });
-// Xử lý sự kiện nút bấm
+
+// Hàm cập nhật số trang
+function updatePageIndicator() {
+    var currentPage = swiper.activeIndex + 1; // Trang hiện tại (bắt đầu từ 1)
+    var totalPages = swiper.slides.length; // Tổng số trang
+    document.getElementById("pageIndicator").textContent =
+        currentPage + " / " + totalPages;
+}
+
+// Lắng nghe sự kiện khi đổi trang bằng nút bấm
 document.getElementById("nextBtn").addEventListener("click", function () {
     swiper.slideNext();
 });
@@ -20,6 +29,14 @@ document.getElementById("nextBtn").addEventListener("click", function () {
 document.getElementById("prevBtn").addEventListener("click", function () {
     swiper.slidePrev();
 });
+
+// Lắng nghe sự kiện khi kéo/swipe bằng chuột hoặc tay
+swiper.on("slideChange", function () {
+    updatePageIndicator();
+});
+
+// Cập nhật số trang ban đầu
+updatePageIndicator();
 
 $(document).ready(function () {
     $(".ban").on("click", function () {

@@ -8,7 +8,7 @@
 
 <div class="swiper mySwiper">
     <div class="swiper-wrapper">
-        @foreach ($data->chunk(12) as $chunk)
+        @foreach ($data->chunk(18) as $chunk)
             <div class="swiper-slide">
                 <div class="row">
                     @foreach ($chunk as $banAn)
@@ -37,7 +37,10 @@
             </div>
         @endforeach
     </div>
-    <div class="swiper-pagination"></div>
+
+</div>
+<div class="text-center mt-2">
+    <span id="pageIndicator">1 / 1</span>
 </div>
 
 <!-- Nút điều hướng TÙY CHỈNH -->
