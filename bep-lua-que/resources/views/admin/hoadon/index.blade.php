@@ -90,9 +90,7 @@
             <p><strong>Ngày:</strong> {{ \Carbon\Carbon::parse($hoa_dons->ngay_tao)->format('d/m/Y H:i') }}</p>
 
 
-            {{-- @foreach ($hoa_dons as $hoa_don)
-                <p><strong>Bàn số:</strong> {{ $hoa_don->ten_ban }}</p>
-            @endforeach --}}
+            <p><strong>Khách hàng:</strong> {{ $hoa_dons->ten_ban }}</p>
 
 
 

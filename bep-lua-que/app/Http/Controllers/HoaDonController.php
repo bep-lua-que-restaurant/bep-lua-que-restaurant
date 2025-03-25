@@ -36,7 +36,7 @@ class HoaDonController extends Controller
         'hoa_dons.created_at as ngay_tao',
         DB::raw('MAX(khach_hangs.ho_ten) as ho_ten'),
         DB::raw('MAX(khach_hangs.so_dien_thoai) as so_dien_thoai'),
-        DB::raw('GROUP_CONCAT(DISTINCT ban_ans.ten_ban ORDER BY ban_ans.ten_ban ASC SEPARATOR ", ") as ten_ban')
+        DB::raw('IFNULL(GROUP_CONCAT(DISTINCT ban_ans.ten_ban ORDER BY ban_ans.ten_ban ASC SEPARATOR ", "), "Chưa có bàn") as ten_ban')
     )
     ->groupBy('hoa_dons.id', 'hoa_dons.ma_hoa_don', 'hoa_dons.tong_tien', 'hoa_dons.phuong_thuc_thanh_toan', 'hoa_dons.created_at')
     ->orderByDesc('hoa_dons.created_at');
@@ -52,7 +52,7 @@ class HoaDonController extends Controller
         }
         
         $hoa_don = $query->paginate(10);
-    
+        // dd($hoa_don);`
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('admin.hoadon.listhoadon', compact('hoa_don'))->render(),
