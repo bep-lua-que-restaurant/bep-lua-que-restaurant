@@ -135,39 +135,54 @@
         </div>
     </div>
 
-<!-- Modal -->
-<div class="modal fade" id="ordersModal" tabindex="-1" aria-labelledby="ordersModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="ordersModalLabel">Danh sách đơn đặt trước</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body modal-fix">
-                <table class="table-dat-ban table table-bordered table-sm text-center">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Mã đặt bàn</th>
-                            <th>Tên khách</th>
-                            <th>Số người</th>
-                            <th>Bàn</th>
-                            <th>Thời gian đến</th>
-                            <th>Trạng thái</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ordersList">
-                        <tr>
-                            <td colspan="7">Đang tải...</td>
-                        </tr>
-                    </tbody>
-                </table>
+    <!-- Modal -->
+    <div class="modal fade" id="ordersModal" tabindex="-1" aria-labelledby="ordersModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ordersModalLabel">Danh sách đơn đặt trước</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body modal-fix">
+                    <!-- Bộ lọc nâng cao -->
+                    <div class="row g-2 mb-3">
+                        <!-- Ô tìm kiếm -->
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="searchInput"
+                                placeholder="Nhập mã đặt bàn, tên khách hoặc thời gian đến">
+                        </div>
+
+                        <!-- Lọc theo khoảng ngày -->
+                        <div class="col-md-3">
+                            <input type="date" class="form-control" id="fromDate" placeholder="Từ ngày">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="date" class="form-control" id="toDate" placeholder="Đến ngày">
+                        </div>
+                    </div>
+
+                    <!-- Bảng danh sách đơn đặt trước -->
+                    <table class="table-dat-ban table table-bordered table-sm text-center">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Mã đặt bàn</th>
+                                <th>Tên khách</th>
+                                <th>Số người</th>
+                                <th>Bàn</th>
+                                <th>Thời gian đến</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersList">
+                            <tr>
+                                <td colspan="6">Đang tải...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-    
 
     <!-- Script -->
 

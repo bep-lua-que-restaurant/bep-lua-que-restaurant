@@ -2,7 +2,7 @@
 <link href="{{ asset('admin/css/swiper-bundle.min.css') }}" rel="stylesheet" />
 <div class="swiper mySwiper">
     <div class="swiper-wrapper">
-        @foreach ($data->chunk(12) as $chunk)
+        @foreach ($data->chunk(20) as $chunk)
             <!-- Mỗi slide chứa 12 món -->
             <div class="swiper-slide">
                 <div class="row">
@@ -88,7 +88,7 @@
                     window.luuIdHoaDon = response.data.id;
                     var maHoaDonElement = document.getElementById("maHoaDon");
                     maHoaDonElement.innerText = response.data.ma_hoa_don;
-                    maHoaDonElement.style.color = "#28a745"; 
+                    maHoaDonElement.style.color = "#28a745";
                 },
                 error: function(xhr, status, error) {
                     console.error("Lỗi khi thêm món vào hóa đơn:", xhr);

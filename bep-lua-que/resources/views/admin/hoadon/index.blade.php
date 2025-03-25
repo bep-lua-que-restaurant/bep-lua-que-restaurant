@@ -186,16 +186,27 @@
         }
 
         // Xử lý phân trang AJAX
-        document.addEventListener("click", function(e) {
-            if (e.target.closest("#pagination a")) {
-                e.preventDefault();
-                let url = e.target.closest("#pagination a").getAttribute("href");
-                let query = searchInput.value.trim();
-                fetchData(url, {
-                    search: query
-                });
-            }
+        $(document).on("click", "#pagination a", function(e) {
+            e.preventDefault();
+            let url = $(this).attr("href");
+            let search = $("#search").val().trim(); // Lấy giá trị tìm kiếm nếu có
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                data: {
+                    search: search
+                },
+                success: function(response) {
+                    $("#hoaDonTableBody").html(response.html);
+                    $("#pagination").html(response.pagination);
+                },
+                error: function(xhr) {
+                    console.log("Lỗi AJAX:", xhr.responseText);
+                }
+            });
         });
+
 
         function fetchData(url, params = {}) {
             fetch(url + '?' + new URLSearchParams(params), {

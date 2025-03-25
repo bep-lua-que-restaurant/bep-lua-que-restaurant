@@ -21,26 +21,49 @@ class HoaDonController extends Controller
     public function index(Request $request)
     {
         $query = HoaDon::with(['chiTietHoaDons.monAn'])
-    ->leftJoin('hoa_don_bans', 'hoa_don_bans.hoa_don_id', '=', 'hoa_dons.id')
-    ->leftJoin('ban_ans', 'ban_ans.id', '=', 'hoa_don_bans.ban_an_id')
-    ->leftJoin('dat_bans', function ($join) {
-        $join->on('dat_bans.ban_an_id', '=', 'ban_ans.id')
-            ->whereNotNull('dat_bans.khach_hang_id');
-    })
-    ->leftJoin('khach_hangs', 'khach_hangs.id', '=', 'dat_bans.khach_hang_id')
-    ->select(
-        'hoa_dons.id',
-        'hoa_dons.ma_hoa_don',
-        'hoa_dons.tong_tien',
-        'hoa_dons.phuong_thuc_thanh_toan',
-        'hoa_dons.created_at as ngay_tao',
-        DB::raw('MAX(khach_hangs.ho_ten) as ho_ten'),
-        DB::raw('MAX(khach_hangs.so_dien_thoai) as so_dien_thoai'),
-        DB::raw('IFNULL(GROUP_CONCAT(DISTINCT ban_ans.ten_ban ORDER BY ban_ans.ten_ban ASC SEPARATOR ", "), "Chưa có bàn") as ten_ban')
-    )
-    ->groupBy('hoa_dons.id', 'hoa_dons.ma_hoa_don', 'hoa_dons.tong_tien', 'hoa_dons.phuong_thuc_thanh_toan', 'hoa_dons.created_at')
-    ->orderByDesc('hoa_dons.created_at');
-
+        ->leftJoin('hoa_don_bans', 'hoa_don_bans.hoa_don_id', '=', 'hoa_dons.id')
+        ->leftJoin('ban_ans', 'ban_ans.id', '=', 'hoa_don_bans.ban_an_id')
+        ->leftJoin('dat_bans', function ($join) {
+            $join->on('dat_bans.ban_an_id', '=', 'ban_ans.id')
+                ->whereNotNull('dat_bans.khach_hang_id');
+        })
+        ->leftJoin('khach_hangs', 'khach_hangs.id', '=', 'dat_bans.khach_hang_id')
+        ->select(
+            'hoa_dons.id',
+            'hoa_dons.ma_hoa_don',
+            'hoa_dons.tong_tien',
+            'hoa_dons.phuong_thuc_thanh_toan',
+            'hoa_dons.created_at as ngay_tao',
+            DB::raw('IFNULL(
+                SUBSTRING_INDEX(
+                    GROUP_CONCAT(
+                        DISTINCT CASE 
+                            WHEN khach_hangs.ho_ten IS NOT NULL 
+                            THEN khach_hangs.ho_ten 
+                            ELSE "Khách lẻ" 
+                        END 
+                        ORDER BY khach_hangs.ho_ten ASC
+                        SEPARATOR ", "
+                    ), 
+                ",", 1), 
+            "Không có khách") as ho_ten'),
+            DB::raw('IFNULL(
+                SUBSTRING_INDEX(
+                    GROUP_CONCAT(
+                        DISTINCT CASE 
+                            WHEN khach_hangs.so_dien_thoai IS NOT NULL 
+                            THEN khach_hangs.so_dien_thoai 
+                            ELSE "Không có số" 
+                        END 
+                        ORDER BY khach_hangs.so_dien_thoai ASC
+                        SEPARATOR ", "
+                    ), 
+                ",", 1), 
+            "Không có số") as so_dien_thoai'),
+            DB::raw('IFNULL(GROUP_CONCAT(DISTINCT ban_ans.ten_ban ORDER BY ban_ans.ten_ban ASC SEPARATOR ", "), "Chưa có bàn") as ten_ban')
+        )
+        ->groupBy('hoa_dons.id', 'hoa_dons.ma_hoa_don', 'hoa_dons.tong_tien', 'hoa_dons.phuong_thuc_thanh_toan', 'hoa_dons.created_at')
+        ->orderByDesc('hoa_dons.created_at');
     
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
