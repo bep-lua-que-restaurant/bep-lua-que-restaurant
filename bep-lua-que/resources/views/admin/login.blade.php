@@ -55,7 +55,13 @@
                                     <div class="text-center mb-3">
                                         <a href="index.html"><img src="public/images/logo-full.png" alt=""></a>
                                     </div>
-                                    <h4 class="text-center mb-4">Bếp Lửa Quê</h4>
+                                    <div style="display: flex; justify-content: center;">
+                                        <img src="{{ url('storage/logo.jpg') }}" alt="Logo"
+                                            style="width: 60%; height: auto; display: block; ; 
+                                        border-radius: 10px;">
+
+                                    </div>
+
                                     <form action="{{ route('login') }}" method="POST">
                                         @csrf
                                         {{-- <input type="hidden" name="_token" value="{{ csrf_token() }}"> --}}
