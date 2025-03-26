@@ -14,7 +14,11 @@
     </form>
 </div> --}}
 
-
+{{-- @if (session('errors'))
+    <div class="alert alert-danger">
+        {{ session('errors')->first() }}
+    </div>
+@endif --}}
 <!DOCTYPE html>
 <html lang="en" class="h-100">
 
@@ -58,11 +62,18 @@
 
                                         <div class="form-group">
                                             <label class="mb-1"><strong>Email</strong></label>
-                                            <input type="email" class="form-control" name="email">
+                                            <input type="email" class="form-control" name="email"
+                                                value="{{ old('email') }}">
+                                            @error('email')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
                                         </div>
                                         <div class="form-group">
                                             <label class="mb-1"><strong>Mật khẩu</strong></label>
                                             <input type="password" class="form-control" name="password">
+                                            @error('password')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
                                         </div>
                                         <div class="form-row d-flex justify-content-between mt-4 mb-2">
                                             <div class="form-group">
