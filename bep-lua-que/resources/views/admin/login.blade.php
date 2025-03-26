@@ -31,7 +31,7 @@
     <meta name="csrf-token" content="3pvIDLSX29wd150Hxi6MALt7d8F4BtSQooZ74xzA">
     <meta name="description" content="Some description for the page" />
 
-    <title>Uena | Login 2</title>
+    <title> Đăng nhập</title>
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="public/images/favicon.png">
     <link href="{{ asset('admin') }}/css/style.css" rel="stylesheet">
@@ -54,6 +54,8 @@
                                     <h4 class="text-center mb-4">Bếp Lửa Quê</h4>
                                     <form action="{{ route('login') }}" method="POST">
                                         @csrf
+                                        {{-- <input type="hidden" name="_token" value="{{ csrf_token() }}"> --}}
+
                                         <div class="form-group">
                                             <label class="mb-1"><strong>Email</strong></label>
                                             <input type="email" class="form-control" name="email">

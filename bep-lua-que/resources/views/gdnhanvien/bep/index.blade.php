@@ -66,8 +66,8 @@
                     <i class="fas fa-bars"></i>
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <li><a class="dropdown-item" href="{{ route('thungan.getBanAn') }}"><i
-                                class="fas fa-cash-register"></i></a></li> <!-- Icon thu ngân -->
+                    {{-- <li><a class="dropdown-item" href="{{ route('thungan.getBanAn') }}"><i
+                                class="fas fa-cash-register"></i></a></li> <!-- Icon thu ngân --> --}}
                     <li><a class="dropdown-item" href=""><i class="fas fa-concierge-bell"></i></a></li>
                     <!-- Icon lễ tân -->
                     <li><a class="dropdown-item" href="/"><i class="fas fa-tachometer-alt"></i></a></li>
@@ -332,7 +332,7 @@
         window.Echo.channel("bep-channel")
             .listen(".mon-moi-duoc-them", (data) => {
                 console.log("🔥 Món mới nhận được:", data);
-                
+
                 if (!data || !data.monAns) {
                     console.error("Dữ liệu món ăn không hợp lệ");
                     return;

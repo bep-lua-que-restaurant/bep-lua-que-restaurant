@@ -213,7 +213,7 @@
         });
     </script>
     <!-- Nút mở modal -->
-    <button id="openModalButton" class="btn btn-primary d-none">Xem chi tiết</button>
+    <button id="openModalButton" class="btn btn-primary d-none">Thông tin đặt bàn</button>
 
     <!-- Modal -->
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -661,12 +661,12 @@
         }
 
         /* .btn-danger {
-                                            pointer-events: none;
-                                        }
+                                                pointer-events: none;
+                                            }
 
-                                        .btn-success {
-                                            pointer-events: none;
-                                        } */
+                                            .btn-success {
+                                                pointer-events: none;
+                                            } */
 
         .border-left-rounded {
             border-top-left-radius: 10px;

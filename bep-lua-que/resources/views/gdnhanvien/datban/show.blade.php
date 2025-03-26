@@ -31,5 +31,5 @@
             </tbody>
         </table>
     </div>
-    <a class="btn btn-primary" href="{{ route('dat-ban.index') }}">Quay lại</a>
+    <a class="btn btn-primary" href="{{ route('datban.danhsach') }}">Quay lại</a>
 @endsection
