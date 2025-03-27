@@ -2,12 +2,12 @@
 <link href="{{ asset('admin/css/swiper-bundle.min.css') }}" rel="stylesheet" />
 <div class="swiper mySwiper">
     <div class="swiper-wrapper">
-        @foreach ($data->chunk(20) as $chunk)
+        @foreach ($data->chunk(8) as $chunk)
             <!-- Mỗi slide chứa 12 món -->
             <div class="swiper-slide">
                 <div class="row">
                     @foreach ($chunk as $monAn)
-                        <div class="col-md-2 col-4 mb-2">
+                    <div class="col-md-3 col-6 mb-2">
                             <div class="cardd card text-center p-1" data-banan-id="{{ $monAn->id }}">
                                 <div class="card-body p-2">
                                     <!-- Hình ảnh món ăn -->
@@ -35,7 +35,9 @@
     </div>
 </div>
 
-
+<div class="text-center mt-2">
+    <span id="pageIndicator">1 / 1</span>
+</div>
 <!-- Nút điều hướng TÙY CHỈNH -->
 <div class="text-centerr mt-3">
     <button id="prevBtn" class="btn btn-primary btn-sm px-4">⬅ </button>
@@ -44,18 +46,37 @@
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
     var swiper = new Swiper(".mySwiper", {
-        slidesPerView: 1, // Hiển thị 1 nhóm 12 món/lượt
+        slidesPerView: 1, // Mỗi lần hiển thị 1 nhóm sản phẩm
         spaceBetween: 20, // Khoảng cách giữa các nhóm
-        allowTouchMove: true, // Không cho vuốt tay, chỉ dùng nút
+        allowTouchMove: true, // Cho phép kéo bằng chuột/tay
+        grabCursor: true
+
     });
 
-    // Xử lý sự kiện nút bấm
+    // Hàm cập nhật số trang
+    function updatePageIndicator() {
+        var currentPage = swiper.activeIndex + 1; // Trang hiện tại (bắt đầu từ 1)
+        var totalPages = swiper.slides.length; // Tổng số trang
+        document.getElementById("pageIndicator").textContent =
+            currentPage + " / " + totalPages;
+    }
+
+    // Lắng nghe sự kiện khi đổi trang bằng nút bấm
     document.getElementById("nextBtn").addEventListener("click", function() {
         swiper.slideNext();
     });
+
     document.getElementById("prevBtn").addEventListener("click", function() {
         swiper.slidePrev();
     });
+
+    // Lắng nghe sự kiện khi kéo/swipe bằng chuột hoặc tay
+    swiper.on("slideChange", function() {
+        updatePageIndicator();
+    });
+
+    // Cập nhật số trang ban đầu
+    updatePageIndicator();
 
 
     // tạo hóa đơn 

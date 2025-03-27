@@ -11,6 +11,7 @@ var swiper = new Swiper(".mySwiper", {
     slidesPerView: 1, // Mỗi lần hiển thị 1 nhóm sản phẩm
     spaceBetween: 20, // Khoảng cách giữa các nhóm
     allowTouchMove: true, // Cho phép kéo bằng chuột/tay
+    grabCursor: true
 });
 
 // Hàm cập nhật số trang
