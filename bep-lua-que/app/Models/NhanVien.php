@@ -41,10 +41,10 @@ class NhanVien extends Authenticatable
     /**
      * Mỗi nhân viên có thể nhập nhiều phiếu nhập kho.
      */
-    public function phieuNhapKho()
-    {
-        return $this->hasMany(PhieuNhapKho::class, 'nhan_vien_id');
-    }
+    // public function phieuNhapKho()
+    // {
+    //     return $this->hasMany(PhieuNhapKho::class, 'nhan_vien_id');
+    // }
 
     public function luong()
     {

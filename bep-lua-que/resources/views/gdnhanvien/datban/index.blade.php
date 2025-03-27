@@ -142,7 +142,7 @@
                             })
                             .then(data => {
                                 if (!data.ho_ten)
-                            return; // Không có thông tin thì không hiển thị tooltip
+                                    return; // Không có thông tin thì không hiển thị tooltip
 
                                 const title = `
                         <strong>Khách:</strong> ${data.ho_ten} <br>
@@ -225,7 +225,10 @@
         });
     </script>
     <!-- Nút mở modal -->
-    <button id="openModalButton" class="btn btn-primary d-none">Thông tin đặt bàn </button>
+    {{-- <button id="openModalButton" class="btn btn-primary d-none">Thông tin đặt bàn </button> --}}
+
+    <button id="openModalButton" class="btn btn-primary d-none">Thông tin đặt bàn</button>
+
 
     <!-- Modal -->
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -672,13 +675,10 @@
             background-color: #f8f9fa;
         }
 
-        /* .btn-danger {
-                                                                        pointer-events: none;
-                                                                    }
 
-                                                                    .btn-success {
-                                                                        pointer-events: none;
-                                                                    } */
+        /* .btn-success .btn-danger {
+                    pointer-events: none;
+                } */
 
         .border-left-rounded {
             border-top-left-radius: 10px;

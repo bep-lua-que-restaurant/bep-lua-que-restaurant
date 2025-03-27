@@ -29,30 +29,34 @@ class ThongKeTopDoanhThuController extends Controller
                 $filterType = 'day';
             }
 
-            $query = HoaDon::whereBetween('created_at', [$from, $to]);
+            $query = HoaDon::whereBetween('hoa_dons.created_at', [$from, $to]);
         } else {
             if ($filterType == 'year') {
-                $query = HoaDon::whereYear('created_at', Carbon::now()->year);
+                $query = HoaDon::whereYear('hoa_dons.created_at', Carbon::now()->year);
             } elseif ($filterType == 'month') {
-                $query = HoaDon::whereYear('created_at', Carbon::now()->year)
-                    ->whereMonth('created_at', Carbon::now()->month);
+                $query = HoaDon::whereYear('hoa_dons.created_at', Carbon::now()->year)
+                    ->whereMonth('hoa_dons.created_at', Carbon::now()->month);
             } elseif ($filterType == 'week') {
-                $query = HoaDon::whereBetween('created_at', [
+                $query = HoaDon::whereBetween('hoa_dons.created_at', [
                     Carbon::now()->startOfWeek(),
                     Carbon::now()->endOfWeek()
                 ]);
             } elseif ($filterType == 'day') {
-                $query = HoaDon::whereDate('created_at', Carbon::now()->toDateString());
+                $query = HoaDon::whereDate('hoa_dons.created_at', Carbon::now()->toDateString());
             }
         }
 
+        // Thêm điều kiện chỉ lấy các hóa đơn có trạng thái "đã thanh toán"
+        $query->join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
+            ->where('hoa_don_bans.trang_thai', 'da_thanh_toan');
+
         // Tính tổng doanh thu
-        $totalSales = $query->sum('tong_tien');
+        $totalSales = $query->sum('hoa_dons.tong_tien');
 
         // Lấy dữ liệu giờ bán chạy hoặc bán ít
         $topDoanhThuQuery = $query->select(
-            DB::raw("DATE_FORMAT(created_at, '%H:%i') as hour"),
-            DB::raw("SUM(tong_tien) as total_revenue")
+            DB::raw("DATE_FORMAT(hoa_dons.created_at, '%H:00') as hour"),
+            DB::raw("SUM(hoa_dons.tong_tien) as total_revenue")
         )
             ->groupBy('hour');
 
@@ -62,7 +66,7 @@ class ThongKeTopDoanhThuController extends Controller
             $topDoanhThuQuery->orderBy('total_revenue'); // Sắp xếp tăng dần
         }
 
-        $topDoanhThu = $topDoanhThuQuery->limit(6)->get();
+        $topDoanhThu = $topDoanhThuQuery->limit(5)->get();
 
         // Gán dữ liệu cho biểu đồ
         $labels = $topDoanhThu->pluck('hour')->toArray();

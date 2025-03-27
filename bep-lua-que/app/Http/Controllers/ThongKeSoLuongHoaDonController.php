@@ -36,12 +36,15 @@ class ThongKeSoLuongHoaDonController extends Controller
                     $labels[] = $date->format('d/m/Y');
                 }
 
-                $rawData = HoaDon::selectRaw('DATE(created_at) as date, COUNT(*) as total_orders')
-                    ->whereBetween('created_at', [$from, $to])
+                $rawData = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
+                    ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
+                    ->selectRaw('DATE(hoa_dons.created_at) as date, COUNT(*) as total_orders')
+                    ->whereBetween('hoa_dons.created_at', [$from, $to])
                     ->groupBy('date')
                     ->orderBy('date')
                     ->pluck('total_orders', 'date')
                     ->toArray();
+
 
                 foreach ($labels as $label) {
                     $data[] = $rawData[Carbon::createFromFormat('d/m/Y', $label)->toDateString()] ?? 0;
@@ -54,8 +57,10 @@ class ThongKeSoLuongHoaDonController extends Controller
                     $labels[] = $date->format('m/Y');
                 }
 
-                $rawData = HoaDon::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, COUNT(*) as total_orders')
-                    ->whereBetween('created_at', [$from, $to])
+                $rawData = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
+                    ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
+                    ->selectRaw('DATE_FORMAT(hoa_dons.created_at, "%Y-%m") as month, COUNT(*) as total_orders')
+                    ->whereBetween('hoa_dons.created_at', [$from, $to])
                     ->groupBy('month')
                     ->orderBy('month')
                     ->pluck('total_orders', 'month')
@@ -69,8 +74,10 @@ class ThongKeSoLuongHoaDonController extends Controller
             // Lọc theo năm
             elseif ($filterType === 'year') {
                 $labels = range($from->year, $to->year);
-                $rawData = HoaDon::selectRaw('YEAR(created_at) as year, COUNT(*) as total_orders')
-                    ->whereBetween('created_at', [$from, $to])
+                $rawData = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
+                    ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
+                    ->selectRaw('YEAR(hoa_dons.created_at) as year, COUNT(*) as total_orders')
+                    ->whereBetween('hoa_dons.created_at', [$from, $to])
                     ->groupBy('year')
                     ->orderBy('year')
                     ->pluck('total_orders', 'year')
@@ -85,8 +92,10 @@ class ThongKeSoLuongHoaDonController extends Controller
             if ($filterType == 'day') {
                 $date = Carbon::now()->toDateString();
                 $labels = array_map(fn($h) => "$h:00", range(0, 23));
-                $rawData = HoaDon::selectRaw('HOUR(created_at) as hour, COUNT(*) as total_orders')
-                    ->whereDate('created_at', $date)
+                $rawData = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
+                    ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
+                    ->selectRaw('HOUR(hoa_dons.created_at) as hour, COUNT(*) as total_orders')
+                    ->whereDate('hoa_dons.created_at', $date)
                     ->groupBy('hour')
                     ->orderBy('hour')
                     ->pluck('total_orders', 'hour')
@@ -105,8 +114,10 @@ class ThongKeSoLuongHoaDonController extends Controller
                     $labels[] = "Ngày " . $date->format('d/m');
                 }
 
-                $rawData = HoaDon::selectRaw('DATE(created_at) as date, COUNT(*) as total_orders')
-                    ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+                $rawData = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
+                    ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
+                    ->selectRaw('DATE(hoa_dons.created_at) as date, COUNT(*) as total_orders')
+                    ->whereBetween('hoa_dons.created_at', [$startOfWeek, $endOfWeek])
                     ->groupBy('date')
                     ->orderBy('date')
                     ->pluck('total_orders', 'date')
@@ -123,9 +134,11 @@ class ThongKeSoLuongHoaDonController extends Controller
                 $month = Carbon::now()->month;
                 $daysInMonth = Carbon::now()->daysInMonth;
                 $labels = array_map(fn($d) => "Ngày $d", range(1, $daysInMonth));
-                $rawData = HoaDon::selectRaw('DAY(created_at) as day, COUNT(*) as total_orders')
-                    ->whereYear('created_at', $year)
-                    ->whereMonth('created_at', $month)
+                $rawData = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
+                    ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
+                    ->whereYear('hoa_dons.created_at', $year)
+                    ->whereMonth('hoa_dons.created_at', $month)
+                    ->selectRaw('DAY(hoa_dons.created_at) as day, COUNT(*) as total_orders')
                     ->groupBy('day')
                     ->orderBy('day')
                     ->pluck('total_orders', 'day')
@@ -140,8 +153,10 @@ class ThongKeSoLuongHoaDonController extends Controller
             elseif ($filterType == 'year') {
                 $year = Carbon::now()->year;
                 $labels = array_map(fn($m) => "Tháng $m", range(1, 12));
-                $rawData = HoaDon::selectRaw('MONTH(created_at) as month, COUNT(*) as total_orders')
-                    ->whereYear('created_at', $year)
+                $rawData = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
+                    ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
+                    ->whereYear('hoa_dons.created_at', $year)
+                    ->selectRaw('MONTH(hoa_dons.created_at) as month, COUNT(*) as total_orders')
                     ->groupBy('month')
                     ->orderBy('month')
                     ->pluck('total_orders', 'month')

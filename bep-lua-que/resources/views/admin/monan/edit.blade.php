@@ -5,12 +5,12 @@
 @endsection
 
 @section('content')
-    <div class="container">
-        <h2>Cập nhật Món Ăn</h2>
+    <div class="container mt-4">
+        <h2 class="mb-4">Cập nhật Món Ăn</h2>
 
         @if ($errors->any())
             <div class="alert alert-danger">
-                <ul>
+                <ul class="mb-0">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
@@ -22,21 +22,24 @@
             @csrf
             @method('PUT')
 
+            <!-- Tên món ăn -->
             <div class="mb-3">
                 <label for="ten" class="form-label">Tên món ăn</label>
                 <input type="text" name="ten" id="ten" class="form-control"
-                    value="{{ old('ten', $monAn->ten) }}">
+                    value="{{ old('ten', $monAn->ten) }}" placeholder="Nhập tên món ăn">
             </div>
 
+            <!-- Giá -->
             <div class="mb-3">
                 <label for="gia" class="form-label">Giá món ăn (VNĐ)</label>
                 <input type="number" name="gia" id="gia" class="form-control"
-                    value="{{ old('gia', $monAn->gia) }}" min="0">
+                    value="{{ old('gia', $monAn->gia) }}" min="0" placeholder="Nhập giá món ăn">
             </div>
 
+            <!-- Danh mục -->
             <div class="mb-3">
                 <label for="danh_muc_mon_an_id" class="form-label">Danh mục</label>
-                <select name="danh_muc_mon_an_id" id="danh_muc_mon_an_id" class="form-control">
+                <select name="danh_muc_mon_an_id" id="danh_muc_mon_an_id" class="form-select">
                     @foreach ($danhMucs as $danhMuc)
                         <option value="{{ $danhMuc->id }}"
                             {{ old('danh_muc_mon_an_id', $monAn->danh_muc_mon_an_id) == $danhMuc->id ? 'selected' : '' }}>
@@ -46,107 +49,69 @@
                 </select>
             </div>
 
+            <!-- Trạng thái -->
             <div class="mb-3">
                 <label for="trang_thai" class="form-label">Trạng thái</label>
-                <select name="trang_thai" id="trang_thai" class="form-control">
+                <select name="trang_thai" id="trang_thai" class="form-select">
                     <option value="dang_ban" {{ old('trang_thai', $monAn->trang_thai) == 'dang_ban' ? 'selected' : '' }}>
-                        Đang bán</option>
-                    <option value="het_hang" {{ old('trang_thai', $monAn->trang_thai) == 'het_hang' ? 'selected' : '' }}>Hết
-                        hàng</option>
+                        Đang bán
+                    </option>
+                    <option value="het_hang" {{ old('trang_thai', $monAn->trang_thai) == 'het_hang' ? 'selected' : '' }}>
+                        Hết hàng
+                    </option>
                     <option value="ngung_ban" {{ old('trang_thai', $monAn->trang_thai) == 'ngung_ban' ? 'selected' : '' }}>
-                        Ngừng bán</option>
+                        Ngừng bán
+                    </option>
                 </select>
             </div>
 
+            <!-- Ảnh hiện tại -->
             <div class="mb-3">
                 <label class="form-label">Ảnh hiện tại</label>
-                <div id="currentImages" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <div class="d-flex flex-wrap gap-2">
                     @foreach ($monAn->hinhAnhs as $hinhAnh)
-                        <div class="image-preview" style="position: relative; display: inline-block;">
-                            <img src="{{ asset('storage/' . $hinhAnh->hinh_anh) }}" class="img-thumbnail"
-                                style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;">
-                        </div>
+                        <img src="{{ asset('storage/' . $hinhAnh->hinh_anh) }}" class="img-thumbnail"
+                            style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">
                     @endforeach
                 </div>
             </div>
 
+            <!-- Ảnh mới -->
             <div class="mb-3">
                 <label for="hinh_anh" class="form-label">Chọn ảnh mới</label>
                 <input type="file" name="hinh_anh[]" id="hinh_anh" class="form-control" multiple accept="image/*">
-                <div id="previewImages" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;"></div>
+                <div id="previewImages" class="d-flex flex-wrap gap-2 mt-2"></div>
             </div>
 
-            <!-- Nguyên liệu món ăn -->
-            <div id="nguyenLieuContainer">
-                <h4>Nguyên Liệu Món Ăn</h4>
-                @foreach ($monAnNguyenLieus as $index => $chiTiet)
-                    <div class="nguyen-lieu-row d-flex align-items-center mb-2">
-                        <select name="nguyen_lieu_id[]" class="form-control me-2">
-                            <option value="">Chọn nguyên liệu</option>
-                            @foreach ($nguyenLieus as $nguyenLieu)
-                                <option value="{{ $nguyenLieu->id }}"
-                                    {{ $chiTiet->pivot->nguyen_lieu_id == $nguyenLieu->id ? 'selected' : '' }}>
-                                    {{ $nguyenLieu->ten_nguyen_lieu }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <input type="number" name="so_luong[]" class="form-control me-2" placeholder="Số lượng"
-                            value="{{ $chiTiet->pivot->so_luong }}">
-                        <input type="text" name="don_vi_tinh[]" class="form-control me-2" placeholder="Đơn vị tính"
-                            value="{{ $chiTiet->pivot->don_vi_tinh }}">
-                        <button type="button" class="btn btn-danger remove-row">Xóa</button>
-                    </div>
-                @endforeach
-            </div>
-
-            <button type="button" id="addNguyenLieu" class="btn btn-success mb-3">Thêm nguyên liệu</button>
-
-            <div class="d-flex justify-content-between">
+            <!-- Nút -->
+            <div class="d-flex justify-content-between mt-4">
                 <a href="{{ route('mon-an.index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                    <i class="fas fa-arrow-left"></i> Quay lại
                 </a>
                 <button type="submit" class="btn btn-primary">Cập nhật</button>
             </div>
         </form>
     </div>
 
+    <!-- JS preview ảnh -->
     <script>
-
-        document.getElementById('hinh_anh').addEventListener('change', function(event) {
+        document.getElementById('hinh_anh').addEventListener('change', function (event) {
             const previewContainer = document.getElementById('previewImages');
             previewContainer.innerHTML = '';
-            const files = event.target.files;
-            Array.from(files).forEach(file => 
-            {
+            Array.from(event.target.files).forEach(file => {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     const img = document.createElement('img');
                     img.src = e.target.result;
                     img.classList.add('img-thumbnail');
                     img.style.width = '100px';
                     img.style.height = '100px';
                     img.style.objectFit = 'cover';
-                    img.style.borderRadius = '5px';
+                    img.style.borderRadius = '8px';
                     previewContainer.appendChild(img);
                 };
                 reader.readAsDataURL(file);
             });
-        });
-
-        document.getElementById('addNguyenLieu').addEventListener('click', function() {
-            let newRow = `
-                <div class="nguyen-lieu-row d-flex align-items-center mb-2">
-                    <select name="nguyen_lieu_id[]" class="form-control me-2">
-                        <option value="">Chọn nguyên liệu</option>
-                        @foreach ($nguyenLieus as $nguyenLieu)
-                            <option value="{{ $nguyenLieu->id }}">{{ $nguyenLieu->ten_nguyen_lieu }}</option>
-                        @endforeach
-                    </select>
-                    <input type="number" name="so_luong[]" class="form-control me-2" placeholder="Số lượng">
-                    <input type="text" name="don_vi_tinh[]" class="form-control me-2" placeholder="Đơn vị tính">
-                    <button type="button" class="btn btn-danger remove-row">Xóa</button>
-                </div>`;
-            document.getElementById('nguyenLieuContainer').insertAdjacentHTML('beforeend', newRow);
         });
     </script>
 @endsection

@@ -127,8 +127,9 @@
 ***********************************-->
         <div class="footer">
             <div class="copyright">
-                <p>Copyright © Designed &amp; Developed by <a href="https://dexignzone.com/"
-                        target="_blank">DexignZone</a> 2022</p>
+                <p>Copyright © Thiết kế &amp; Phát triển bởi <a href="https://wd-57.com/" target="_blank">WD-57</a> 2025
+                </p>
+
             </div>
         </div>
         <!--**********************************
