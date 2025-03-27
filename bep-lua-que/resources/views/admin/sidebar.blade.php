@@ -46,10 +46,12 @@
 {{-- <li><a href="{{ route('phong-an.index') }}">Phòng Ăn</a></li> --}}
 {{-- <li><a href="{{ route('ban-an.index') }}">Bàn Ăn</a></li>
                 </ul>
+
             </li> --}}
 
 {{-- Giao dịch --}}
 {{-- <li>
+
                 <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
                     <i class="fa fa-credit-card"></i>
                     <span class="nav-text">Giao dịch</span>

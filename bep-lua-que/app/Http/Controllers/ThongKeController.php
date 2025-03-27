@@ -13,9 +13,11 @@ class ThongKeController extends Controller
 {
     public function index(Request $request)
     {
+
         if (!Auth::check()) {
             return redirect('/login');
         }
+
         $today = Carbon::today();
         $yesterday = Carbon::yesterday();
 
