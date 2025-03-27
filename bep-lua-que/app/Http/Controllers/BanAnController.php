@@ -21,14 +21,9 @@ class BanAnController extends Controller
     /**
      * Display a listing of the resource.
      */
-
     public function index(Request $request)
     {
-        $query = BanAn::with([
-            'phongAn' => function ($q) {
-                $q->withTrashed(); // Lấy cả phòng đã bị xóa mềm
-            }
-        ]);
+        $query = BanAn::query(); // Xóa with('phongAn') vì không cần nữa
 
         // Lọc theo tên
         if ($request->has('ten') && $request->ten != '') {
@@ -60,6 +55,7 @@ class BanAnController extends Controller
             'searchInputId' => 'search-name',
         ]);
     }
+
 
     public function getSoLuongBan(Request $request)
     {
@@ -98,19 +94,23 @@ class BanAnController extends Controller
      */
     public function store(StoreBanAnRequest $request)
     {
-        //
         $data = $request->validated();
+
+        // Nếu không có 'so_ghe', đặt giá trị mặc định là 4
+        $data['so_ghe'] = $data['so_ghe'] ?? 4;
+
+        // Debug (nếu cần)
         // dd($data);
 
-
-
-        // gioi han 1 phong
+        // Tạo bản ghi mới
         $banAn = BanAn::create($data);
 
+        // Gửi sự kiện realtime
         broadcast(new BanAnUpdated($banAn))->toOthers();
 
         return redirect()->route('ban-an.index')->with('success', 'Thêm bàn ăn thành công!');
     }
+
 
 
 
@@ -145,16 +145,19 @@ class BanAnController extends Controller
      */
     public function update(UpdateBanAnRequest $request, BanAn $banAn)
     {
-        //
-        // Lấy dữ liệu hợp lệ từ request
         $validatedData = $request->validated();
 
-        // Cập nhật thông tin bàn ăn
+        // Debug để kiểm tra dữ liệu nhận được
+        // dd($validatedData);
+
         $banAn->update($validatedData);
 
         broadcast(new BanAnUpdated($banAn))->toOthers();
+
         return redirect()->route('ban-an.index')->with('success', 'Cập nhật bàn ăn thành công!');
     }
+
+
 
     /**
      * Remove the specified resource from storage.

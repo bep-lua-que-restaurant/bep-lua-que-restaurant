@@ -46,11 +46,11 @@
             <nav class="col-2 bg-light pt-3">
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a href="{{ route('dat-ban.index') }}" class="btn btn-primary">Danh sách bàn đặt</a>
+                        <a href="{{ route('dat-ban.index') }}" class="btn btn-primary">Đặt bàn </a>
                     </li>
                     <br>
                     <li class="nav-item">
-                        <a href="{{ route('datban.danhsach') }}" class="btn btn-primary">Danh sách đặt bàn</a>
+                        <a href="{{ route('datban.danhsach') }}" class="btn btn-primary">Danh sách </a>
                     </li>
                 </ul>
             </nav>
