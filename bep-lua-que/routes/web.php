@@ -5,6 +5,7 @@ use App\Http\Controllers\CaLamNhanVienController;
 
 use App\Http\Controllers\ChatController;
 
+use App\Http\Controllers\ChucVuController;
 use App\Http\Controllers\DanhMucMonAnController;
 use App\Http\Controllers\ComBoController;
 use App\Http\Controllers\DichVuController;
@@ -129,7 +130,11 @@ Route::resource('dich-vu', DichVuController::class);
 Route::post('dich-vu/restore/{id}', [DichVuController::class, 'restore'])->name('dich-vu.restore');
 Route::get('export-dich-vu', [DichVuController::class, 'export'])->name('dich-vu.export');
 Route::post('/import-dich-vu', [DichVuController::class, 'importDichVu'])->name('dich-vu.import');
-
+//Chức vụ
+Route::resource('chuc-vu', ChucVuController::class);
+Route::post('chuc-vu/restore/{id}', [ChucVuController::class, 'restore'])->name('chuc-vu.restore');
+Route::get('export-chuc-vu', [ChucVuController::class, 'export'])->name('chuc-vu.export');
+Route::post('/import-chuc-vu', [ChucVuController::class, 'importChucVu'])->name('chuc-vu.import');
 // Ca làm
 Route::resource('ca-lam', CaLamController::class);
 Route::post('ca-lam/restore/{id}', [CaLamController::class, 'restore'])->name('ca-lam.restore');

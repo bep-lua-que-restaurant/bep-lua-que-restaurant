@@ -11,7 +11,7 @@ class StoreChucVuRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,19 @@ class StoreChucVuRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'ten_chuc_vu' => ['required', 'unique:chuc_vus', 'string', 'max:255'],
+            'mo_ta' => ['string','nullable'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'ten_chuc_vu.required' => 'Tên chức vụ không được để trống',
+            'ten_chuc_vu.unique' => 'Tên chức vụ đã tồn tại',
+            'ten_chuc_vu.string' => 'Tên chức vụ phải là chuỗi',
+            'ten_chuc_vu.max' => 'Tên chức vụ không được quá 255 ký tự',
+            'mo_ta.string' => 'Mô tả phải là chuỗi',
         ];
     }
 }
