@@ -7,11 +7,17 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\HoaDon;
 use App\Models\HoaDonBan;
+use Illuminate\Support\Facades\Auth;
 
 class ThongKeController extends Controller
 {
     public function index(Request $request)
     {
+
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
         $today = Carbon::today();
         $yesterday = Carbon::yesterday();
 

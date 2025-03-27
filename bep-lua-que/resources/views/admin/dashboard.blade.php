@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-    Dashboard
+    Trang chủ
 @endsection
 
 @section('content')
@@ -12,20 +12,26 @@
                 <div class="row">
                     <div class="col-md-4 text-center">
                         <h5>Đơn đã xong hôm nay</h5>
-                        <p id="totalRevenueToday" class="text-danger" style="font-size: 24px; font-weight: bold;">{{ number_format($totalRevenueToday, 0, ',', '.') }} VND</p>
-                        <small class="text-muted">Hôm qua: <span id="totalRevenueYesterday">{{ number_format($totalRevenueYesterday, 0, ',', '.') }} VND</span></small>
+                        <p id="totalRevenueToday" class="text-danger" style="font-size: 24px; font-weight: bold;">
+                            {{ number_format($totalRevenueToday, 0, ',', '.') }} VND</p>
+                        <small class="text-muted">Hôm qua: <span
+                                id="totalRevenueYesterday">{{ number_format($totalRevenueYesterday, 0, ',', '.') }}
+                                VND</span></small>
                     </div>
                     <div class="col-md-4 text-center">
                         <h5>Đơn đang phục vụ</h5>
                         <p id="OderToday" class="text-danger" style="font-size: 24px; font-weight: bold;">
                             {{ $ordersServingToday }}
                         </p>
-                        <small class="text-muted">Hôm qua: <span id="OderYesterday">{{ $ordersCompletedYesterday }}</span></small>
+                        <small class="text-muted">Hôm qua: <span
+                                id="OderYesterday">{{ $ordersCompletedYesterday }}</span></small>
                     </div>
                     <div class="col-md-4 text-center">
                         <h5>Khách hàng hôm nay</h5>
-                        <p id="customersToday" class="text-danger" style="font-size: 24px; font-weight: bold;">{{ $customersToday }}</p>
-                        <small class="text-muted">Hôm qua: <span id="customersYesterday">{{ $customersYesterday }}</span></small>
+                        <p id="customersToday" class="text-danger" style="font-size: 24px; font-weight: bold;">
+                            {{ $customersToday }}</p>
+                        <small class="text-muted">Hôm qua: <span
+                                id="customersYesterday">{{ $customersYesterday }}</span></small>
                     </div>
                 </div>
             </div>
@@ -51,7 +57,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             let chart;
             let isFirstLoad = true; // Đánh dấu lần load đầu tiên
 
@@ -74,8 +80,14 @@
                     },
                     options: {
                         responsive: true,
-                        animation: isFirstLoad ? { duration: 1000 } : false, // Chỉ animation khi tải lần đầu
-                        scales: { y: { beginAtZero: true } }
+                        animation: isFirstLoad ? {
+                            duration: 1000
+                        } : false, // Chỉ animation khi tải lần đầu
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
                     }
                 });
                 isFirstLoad = false;

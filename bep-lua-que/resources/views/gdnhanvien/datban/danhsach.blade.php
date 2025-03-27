@@ -7,7 +7,7 @@
 @section('content')
     <div class="row">
         <div id="booked-list-section">
-            <h2>Danh sách bàn đã được đặt</h2>
+            <h2 class="text-center my-3">Danh sách bàn đã được đặt</h2>
 
             <!-- Bộ lọc tìm kiếm -->
             <div class="row d-flex p-3">
@@ -28,9 +28,9 @@
 
             <!-- Bảng dữ liệu -->
             <div class="container">
-                <h2 class="text-center">Danh Sách Đặt Bàn</h2>
+                {{-- <h2 class="text-center my-2">Danh Sách Đặt Bàn</h2> --}}
                 <table class="table table-bordered" id="tableBanDat">
-                    <thead>
+                    <thead class="text-center">
                         <tr>
                             <th>Thời Gian Đến</th>
                             <th>Họ Tên</th>
@@ -38,13 +38,13 @@
                             <th>Số Người</th>
                             <th>Danh Sách Bàn</th>
                             <th>Trạng Thái</th>
-                            <th>Hoạt Động</th>
+                            <th>Hành Động</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         @foreach ($banhSachDatban as $datban)
-                            <tr>
+                            <tr class="text-center">
                                 <td>{{ \Carbon\Carbon::parse($datban->thoi_gian_den)->format('d/m/Y H:i') }}</td>
                                 <td>{{ $datban->ho_ten }}</td>
                                 <td>{{ $datban->so_dien_thoai }}</td>
@@ -72,26 +72,29 @@
                                             Đã hủy</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td
+                                    class="{{ $datban->trang_thai === 'dang_xu_ly' ? 'd-flex justify-content-center gap-2' : '' }}">
                                     <a href="{{ route('dat-ban.show', $datban->ma_dat_ban) }}"
-                                        class="btn btn-primary btn-sm">Xem</a>
+                                        class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye"></i> <!-- Icon "Xem" -->
+                                    </a>
+
                                     @if ($datban->trang_thai === 'dang_xu_ly')
                                         <form action="{{ route('dat-ban.destroy', $datban->ma_dat_ban) }}" method="post">
                                             @csrf
                                             @method('DELETE')
-                                            <input type="submit" class="btn btn-danger btn-sm mt-2" value="Hủy đặt">
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Hủy đặt">
+                                                <i class="fas fa-times"></i> <!-- Icon "Hủy đặt" -->
+                                            </button>
                                         </form>
 
-
-                                        {{-- <form action="{{ route('dat-ban.update', $datban->ma_dat_ban) }}" method="post">
-                                            @csrf
-                                            @method('PUT')
-                                            <input type="submit" class="btn btn-warning btn-sm mt-2" value="Xác nhận">
-                                        </form> --}}
                                         <a href="{{ route('dat-ban.edit', $datban->ma_dat_ban) }}"
-                                            class="btn btn-warning btn-sm mt-2">Xác nhận</a>
+                                            class="btn btn-success  btn-sm">
+                                            <i class="fas fa-check"></i> <!-- Icon "Xác nhận" -->
+                                        </a>
                                     @endif
                                 </td>
+
                             </tr>
                         @endforeach
                     </tbody>
