@@ -153,7 +153,7 @@
     <div class="deznav-scroll">
         <ul class="metismenu" id="menu">
             @php
-                $role = auth()->user()->chuc_vu_id ?? 'Không có role';
+                $role = auth()->user()->chuc_vu_id ?? 'Không có chức vụ';
                 // echo "Role hiện tại: $role";
             @endphp
 
