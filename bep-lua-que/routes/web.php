@@ -149,7 +149,7 @@ Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::c
 //     return view('client.home');
 // });
 // chatbot
-Route::get('/chat', [ChatController::class, 'index'])->name('chat.index'); 
+Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
 Route::post('/chat/gui', [ChatController::class, 'guiTinNhan'])->name('chat.gui');
 Route::get('/chat/tin-nhan', [ChatController::class, 'layTinNhan'])->name('chat.layTinNhan');
 

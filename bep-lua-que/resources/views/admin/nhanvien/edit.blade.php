@@ -71,7 +71,7 @@
                 <div class="col-md-6 mb-3">
                     <label>Ngày vào làm</label>
                     <input type="date" name="ngay_vao_lam" class="form-control"
-                        value="{{ $nhanVien->ngay_vao_lam ? $nhanVien->ngay_vao_lam->format('Y-m-d') : '' }}">
+                           value="{{ $nhanVien->ngay_vao_lam ? \Carbon\Carbon::parse($nhanVien->ngay_vao_lam)->format('Y-m-d') : '' }}"
                 </div>
 
                 <div class="col-md-6 mb-3">

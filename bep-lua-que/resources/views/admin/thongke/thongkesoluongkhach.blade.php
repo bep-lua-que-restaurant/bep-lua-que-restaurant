@@ -36,7 +36,7 @@
                     </div>
                 </form>
                 <!-- Biểu đồ -->
-                <canvas id="thongKeChart" height="100"></canvas>
+                <canvas id="thongKeSoLuongKhach" height="100"></canvas>
             </div>
         </div>
     </div>
@@ -52,7 +52,7 @@
                 if (chart) {
                     chart.destroy();
                 }
-                let ctx = document.getElementById('thongKeChart').getContext('2d');
+                let ctx = document.getElementById('thongKeSoLuongKhach').getContext('2d');
                 chart = new Chart(ctx, {
                     type: 'line',
                     data: {
