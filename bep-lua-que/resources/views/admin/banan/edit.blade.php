@@ -42,37 +42,22 @@
                                 @endif
                             </div>
 
-                            <!-- Vị trí -->
-                            <div class="form-group">
-                                <label for="vi_tri">Vị trí</label>
-                                <select name="vi_tri" id="vi_tri" class="form-control" onchange="laySoLuongBan()">
-                                    <option value="">Chọn vị trí bàn</option>
-                                    @foreach ($phongAns as $phongAn)
-                                        <option value="{{ $phongAn->id }}"
-                                            {{ old('vi_tri', $banAn->vi_tri ?? '') == $phongAn->id ? 'selected' : '' }}>
-                                            {{ $phongAn->ten_phong_an }}
-                                            @if ($phongAn->deleted_at)
-                                                (Phòng không còn sử dụng)
-                                            @endif
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <small id="vi_tri_error" class="text-danger"></small>
-                            </div>
-
                             <!-- Loại bàn -->
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label for="so_ghe">Loại bàn</label>
                                 <select name="so_ghe" id="so_ghe" class="form-control">
-                                    <option value="">Chọn loại bàn</option>
-                                    <option value="4" id="ban4" <?php echo $banAn->so_ghe == 4 ? 'selected' : ''; ?>>Loại bàn 2-4 ghế</option>
-                                    <option value="8" id="ban8" <?php echo $banAn->so_ghe == 8 ? 'selected' : ''; ?>>Loại bàn 6-8 ghế</option>
-                                    <option value="10" id="ban10" <?php echo $banAn->so_ghe == 10 ? 'selected' : ''; ?>>Loại bàn 8-10 ghế</option>
+                                    <option value="4" {{ old('so_ghe', $banAn->so_ghe ?? 4) == 4 ? 'selected' : '' }}>
+                                        Loại bàn 2-4 ghế</option>
+                                    <option value="8" {{ old('so_ghe', $banAn->so_ghe ?? 4) == 8 ? 'selected' : '' }}>
+                                        Loại bàn 6-8 ghế</option>
+                                    <option value="10" {{ old('so_ghe', $banAn->so_ghe ?? 4) == 10 ? 'selected' : '' }}>
+                                        Loại bàn 8-10 ghế</option>
                                 </select>
-                                <small id="so_ghe_error" class="text-danger"></small>
-                            </div>
-
-
+                                @if ($errors->has('so_ghe'))
+                                    <small class="text-danger">*{{ $errors->first('so_ghe') }}</small>
+                                @endif
+                            </div> --}}
+                            <input type="hidden" name="so_ghe" value="4">
                             <!-- Mô tả -->
                             <div class="form-group">
                                 <label for="mo_ta">Mô tả</label>
@@ -81,8 +66,6 @@
                                     <small class="text-danger">*{{ $errors->first('mo_ta') }}</small>
                                 @endif
                             </div>
-
-
 
                             <!-- Nút lưu -->
                             <div class="form-group text-right">
@@ -100,114 +83,4 @@
             </div>
         </div>
     </div>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        let soLuongBanHienTai = {};
-        const gioiHan = {
-            "4": 6,
-            "8": 4,
-            "10": 2
-        };
-
-        function laySoLuongBan() {
-            let viTri = $("#vi_tri").val();
-            if (!viTri) return;
-
-            $.ajax({
-                url: `/api/get-so-luong-ban?vi_tri=${viTri}`,
-                type: "GET",
-                success: function(data) {
-                    if (data.success) {
-                        soLuongBanHienTai = data.soLuongBan;
-                        capNhatThongTin();
-                        capNhatTrangThaiTuyChon();
-                    } else {
-                        $("#soLuongBanHienCo").html("❌ Không thể lấy dữ liệu.");
-                    }
-                },
-                error: function() {
-                    $("#soLuongBanHienCo").html("❌ Lỗi kết nối đến server.");
-                }
-            });
-        }
-
-        function capNhatThongTin() {
-            let hienThi = `
-                🔹 Bàn 4 ghế: ${soLuongBanHienTai[4] || 0}/6 <br>
-                🔹 Bàn 8 ghế: ${soLuongBanHienTai[8] || 0}/4 <br>
-                🔹 Bàn 10 ghế: ${soLuongBanHienTai[10] || 0}/2
-                `;
-            $("#soLuongBanHienCo").html(hienThi);
-        }
-
-        function capNhatTrangThaiTuyChon() {
-            // Xóa tất cả option cũ và tạo lại từ đầu
-            $("#so_ghe").empty().append(`<option value="">Chọn loại bàn</option>`);
-
-            Object.keys(gioiHan).forEach((loai) => {
-                let soBanHienCo = soLuongBanHienTai[loai] || 0;
-
-                if (soBanHienCo < gioiHan[loai]) {
-                    $("#so_ghe").append(
-                        `<option value="${loai}">Loại bàn ${loai} ghế</option>`
-                    );
-                }
-            });
-
-            // Nếu không còn bàn nào khả dụng, thông báo
-            if ($("#so_ghe option").length === 1) {
-                $("#so_ghe").append(`<option disabled>⚠️ Tất cả loại bàn đã đủ số lượng</option>`);
-            }
-        }
-
-        function kiemTraVaGui() {
-            let viTri = $("#vi_tri").val();
-            let soGhe = $("#so_ghe").val();
-
-            if (!viTri) {
-                $("#vi_tri_error").text("Vui lòng chọn vị trí!");
-                return;
-            } else {
-                $("#vi_tri_error").text("");
-            }
-
-            if (!soGhe) {
-                $("#so_ghe_error").text("Vui lòng chọn loại bàn!");
-                return;
-            } else {
-                $("#so_ghe_error").text("");
-            }
-
-            let soBanHienCo = soLuongBanHienTai[soGhe] || 0;
-
-            if (soBanHienCo >= gioiHan[soGhe]) {
-                alert(`⚠️ Bàn ${soGhe} ghế đã đạt tối đa ${gioiHan[soGhe]} bàn!`);
-                return;
-            }
-
-            // Gửi AJAX để cập nhật bàn
-            $.ajax({
-                url: "/api/ban-an/update",
-                type: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    _method: "PUT",
-                    vi_tri: viTri,
-                    so_ghe: soGhe
-                },
-                success: function(data) {
-                    if (data.success) {
-                        alert(data.message);
-                        laySoLuongBan(); // Cập nhật số bàn mới
-                    } else {
-                        alert(data.message);
-                    }
-                },
-                error: function() {
-                    alert("❌ Có lỗi xảy ra khi cập nhật bàn.");
-                }
-            });
-        }
-    </script>
 @endsection

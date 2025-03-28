@@ -38,7 +38,7 @@
                             </div>
 
                             <!-- Vị trí -->
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label for="vi_tri">Vị trí</label>
                                 <select name="vi_tri" id="vi_tri" class="form-control" onchange="laySoLuongBan()">
                                     <option value="">Chọn vị trí bàn</option>
@@ -47,10 +47,10 @@
                                     @endforeach
                                 </select>
                                 <small id="vi_tri_error" class="text-danger"></small>
-                            </div>
+                            </div> --}}
 
                             <!-- Loại bàn -->
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label for="so_ghe">Loại bàn</label>
                                 <select name="so_ghe" id="so_ghe" class="form-control">
                                     <option value="">Chọn loại bàn</option>
@@ -59,7 +59,7 @@
                                     <option value="10" id="ban10">Loại bàn 8-10 ghế</option>
                                 </select>
                                 <small id="so_ghe_error" class="text-danger"></small>
-                            </div>
+                            </div> --}}
 
                             <!-- Mô tả -->
                             <div class="form-group">

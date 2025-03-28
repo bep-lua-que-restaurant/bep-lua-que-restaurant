@@ -18,14 +18,12 @@ class StoreBanAnRequest extends FormRequest
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
-    public function rules(): array
+     */ public function rules(): array
     {
         return [
-            'ten_ban' => ['required', 'unique:ban_ans', 'string', 'max:20'], //  Chỉnh lại bảng đúng
-            'so_ghe' => ['required', 'integer', 'min:1', 'max:10'], //  Sửa lỗi chính tả và thêm ràng buộc min:1
-            'mo_ta' => ['nullable', 'string', 'max:500'], //  Thêm max:500 để tránh nhập quá dài
-            'vi_tri' => ['required', 'string', 'max:255'], //  Thêm validate cho vi_tri
+            'ten_ban' => ['required', 'unique:ban_ans', 'string', 'max:20'], // Chỉnh lại bảng đúng
+            'so_ghe' => ['integer', 'min:1', 'max:10'], // Không cần 'required' vì có giá trị mặc định
+            'mo_ta' => ['nullable', 'string', 'max:500'], // Thêm max:500 để tránh nhập quá dài
         ];
     }
 

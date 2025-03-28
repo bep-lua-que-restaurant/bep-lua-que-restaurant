@@ -19,15 +19,15 @@ class UpdateBanAnRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules()
     {
         return [
             'ten_ban' => ['required', 'string', 'max:20'],
             'so_ghe' => ['required', 'integer', 'min:1', 'max:10'],
             'mo_ta' => ['nullable', 'string', 'max:500'],
-            'vi_tri' => ['required', 'string', 'max:255'],
         ];
     }
+
 
     public function messages(): array
     {

@@ -2,10 +2,10 @@
 
 @section('content')
     <div class="container">
-        <h1 class="text-center my-4">Quản lý Đặt Bàn</h1>
+        {{-- <h1 class="text-center my-4">Quản lý Đặt Bàn</h1> --}}
 
         <!-- Chọn ngày -->
-        <div class="row d-flex align-items-center mb-3">
+        <div class="row d-flex align-items-center mb-3 mt-5">
             <div class="col-auto">
                 <label for="datePicker" class="fw-bold">Hiển thị theo ngày:</label>
             </div>
@@ -141,33 +141,45 @@
                                 return response.json();
                             })
                             .then(data => {
-                                const title = data.message ? "Không có thông tin đặt bàn" : `
-                    <strong>Khách:</strong> ${data.ho_ten} <br>
-                    <strong>SĐT:</strong> ${data.so_dien_thoai} <br>
-                    <strong>Số người:</strong> ${data.so_nguoi} <br>
-                    <strong>Mô tả:</strong> ${data.mo_ta} <br>
-                    <strong>Bàn:</strong> ${data.ban_ans.join(", ")}
-                `;
+                                if (!data.ho_ten)
+                                    return; // Không có thông tin thì không hiển thị tooltip
+
+                                const title = `
+                        <strong>Khách:</strong> ${data.ho_ten} <br>
+                        <strong>SĐT:</strong> ${data.so_dien_thoai} <br>
+                        <strong>Số người:</strong> ${data.so_nguoi} <br>
+                        <strong>Mô tả:</strong> ${data.mo_ta || "Không có mô tả"} <br>
+                        <strong>Bàn:</strong> ${data.ban_ans ? data.ban_ans.join(", ") : "Không có bàn"}
+                    `;
 
                                 button.attr("data-bs-title", title);
 
+                                // Xóa tooltip cũ nếu có
                                 const oldTooltip = bootstrap.Tooltip.getInstance(button[0]);
                                 if (oldTooltip) oldTooltip.dispose();
 
-                                new bootstrap.Tooltip(button[0], {
+                                // Tạo tooltip mới
+                                const tooltip = new bootstrap.Tooltip(button[0], {
                                     html: true
-                                }).show();
+                                });
+                                tooltip.show();
+
+                                // Ẩn tooltip sau 3 giây
+                                setTimeout(() => {
+                                    tooltip.dispose();
+                                }, 3000);
                             })
                             .catch(error => console.error("Lỗi khi lấy dữ liệu đặt bàn:", error));
                     }
                 });
-
 
                 $(".selectable-slot").on("mouseleave", function() {
                     const tooltip = bootstrap.Tooltip.getInstance(this);
                     if (tooltip) tooltip.dispose();
                 });
             }
+
+
 
             function renderPagination(paginationData, date) {
                 let paginationHtml = '<nav><ul class="pagination justify-content-center">';
@@ -213,7 +225,10 @@
         });
     </script>
     <!-- Nút mở modal -->
+    {{-- <button id="openModalButton" class="btn btn-primary d-none">Thông tin đặt bàn </button> --}}
+
     <button id="openModalButton" class="btn btn-primary d-none">Thông tin đặt bàn</button>
+
 
     <!-- Modal -->
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -223,7 +238,7 @@
                 <form id="bookingForm" method="POST" action="{{ route('dat-ban.store') }}">
                     @csrf
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Chi tiết đặt bàn</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Thông tin đặt bàn </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -660,13 +675,10 @@
             background-color: #f8f9fa;
         }
 
-        /* .btn-danger {
-                                                pointer-events: none;
-                                            }
 
-                                            .btn-success {
-                                                pointer-events: none;
-                                            } */
+        /* .btn-success .btn-danger {
+                    pointer-events: none;
+                } */
 
         .border-left-rounded {
             border-top-left-radius: 10px;
