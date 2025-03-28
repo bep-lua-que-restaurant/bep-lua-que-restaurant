@@ -41,7 +41,9 @@ $(document).ready(function () {
                 } else {
                     danhSachMon.forEach((mon, index) => {
                         tbody.append(`
-                           <tr data-index="${index}" data-id-mon="${mon.id_mon}">
+                           <tr data-index="${index}" data-id-mon="${
+                            mon.id_mon
+                        }">
                                 <td>${index + 1}</td>
                                 <td>${mon.ten_mon}</td>
                                 <td class="so-luong-goc">${mon.so_luong}</td>
@@ -60,41 +62,38 @@ $(document).ready(function () {
                         let index = row.data("index");
                         let slGocEl = row.find(".so-luong-goc");
                         let slTachEl = row.find(".so-luong-tach");
-                    
+
                         let slGoc = parseInt(slGocEl.text());
                         let slTach = parseInt(slTachEl.text());
-                    
+
                         if (slTach > 0) {
                             slTach--;
                             slGoc++;
                             danhSachMon[index].so_luong = slGoc;
                         }
-                    
+
                         slGocEl.text(slGoc);
                         slTachEl.text(slTach); // Cập nhật số lượng hiển thị
                     });
-                    
+
                     $(document).on("click", ".tang", function () {
                         let row = $(this).closest("tr");
                         let index = row.data("index");
                         let slGocEl = row.find(".so-luong-goc");
                         let slTachEl = row.find(".so-luong-tach");
-                    
+
                         let slGoc = parseInt(slGocEl.text());
                         let slTach = parseInt(slTachEl.text());
-                    
+
                         if (slGoc > 0) {
                             slTach++;
                             slGoc--;
                             danhSachMon[index].so_luong = slGoc;
                         }
-                    
+
                         slGocEl.text(slGoc);
                         slTachEl.text(slTach); // Cập nhật số lượng hiển thị
                     });
-                    
-
-
                 }
             },
         });
@@ -143,10 +142,10 @@ $(document).ready(function () {
                 mon_tach: danhSachTach,
             }),
             success: function (res) {
-               console.log(res);
+                showToast("Đã tách bàn và tạo hóa đơn mới!", "success");
             },
             error: function (err) {
-                console.log(err.responseJSON); 
+                console.log(err.responseJSON);
             },
         });
     });
