@@ -189,7 +189,7 @@
                         <input type="hidden" name="ban_an_ids" id="banAnIds">
                         <input type="hidden" name="thoi_gian_den" id="thoiGianDen">
                         <input type="hidden" name="gio_du_kien" id="gioDuKien">
-                        <input type="" name="khach_hang_id" value="{{ $datBan->khach_hang_id }}">
+                        <input type="hidden" name="khach_hang_id" value="{{ $datBan->khach_hang_id }}">
                         <input type="hidden" name="ma_dat_ban" id="maDatBan" value="{{ $datBan->ma_dat_ban }}">
 
                         <!-- Footer -->

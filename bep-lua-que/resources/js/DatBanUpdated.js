@@ -31,9 +31,9 @@ window.Echo.channel("datban-channel").listen("DatBanUpdated", (event) => {
                     timeSlotDate.isSameOrAfter(gioBatDauDate) &&
                     timeSlotDate.isSameOrBefore(gioDuKienDate) // Cho phép cả ô 13:30
                 ) {
-                    // console.log(
-                    //     `✅ Đổi màu cho slot: ${buttonTimeSlot} (Bàn ${banAnId})`
-                    // );
+                    console.log(
+                        `✅ Đổi màu cho slot: ${buttonTimeSlot} (Bàn ${banAnId})`
+                    );
 
                     // Xóa các class cũ
                     button.classList.remove(

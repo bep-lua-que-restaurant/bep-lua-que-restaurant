@@ -213,7 +213,7 @@
         });
     </script>
     <!-- Nút mở modal -->
-    <button id="openModalButton" class="btn btn-primary d-none">Xem chi tiết</button>
+    <button id="openModalButton" class="btn btn-primary d-none">Thông tin đặt bàn</button>
 
     <!-- Modal -->
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -271,10 +271,10 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="mt-3">
+                        {{-- <div class="mt-3">
                             <label class="fw-bold">Mô tả:</label>
                             <textarea class="form-control" name="mo_ta" rows="3"></textarea>
-                        </div>
+                        </div> --}}
 
                         <!-- Danh sách các bàn đã chọn -->
                         <ul id="modalContent" class="list-unstyled"></ul>
@@ -661,12 +661,12 @@
         }
 
         /* .btn-danger {
-                                pointer-events: none;
-                            }
+                                                pointer-events: none;
+                                            }
 
-                            .btn-success {
-                                pointer-events: none;
-                            } */
+                                            .btn-success {
+                                                pointer-events: none;
+                                            } */
 
         .border-left-rounded {
             border-top-left-radius: 10px;

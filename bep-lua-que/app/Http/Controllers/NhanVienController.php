@@ -29,6 +29,8 @@ class NhanVienController extends Controller
 
     public function store(Request $request)
     {
+//        dd($request->all());
+
         $request->validate([
             'ho_ten' => 'required|string|max:255',
             'email' => 'required|email|unique:nhan_viens,email',
@@ -45,7 +47,10 @@ class NhanVienController extends Controller
 
 
 
-        $maNhanVien = 'NV' . str_pad(NhanVien::count() + 1, 4, '0', STR_PAD_LEFT);
+        // Lấy mã nhân viên mới không bị trùng
+        $lastNhanVien = NhanVien::orderBy('id', 'desc')->first();
+        $nextId = $lastNhanVien ? ((int)substr($lastNhanVien->ma_nhan_vien, 2)) + 1 : 1;
+        $maNhanVien = 'NV' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
 
         // Tạo nhân viên
         $nhanVien = NhanVien::create([

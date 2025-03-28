@@ -99,7 +99,14 @@ body {
 }
 
 .modal-dialog {
-    margin-top: 100px; /* Đẩy modal xuống thấp hơn */
+    margin-top: 100px;
+    /* Đẩy modal xuống thấp hơn */
 }
 
 /* thực đơn */
+
+/* */
+.modal-fix {
+    max-height: 400px;
+    overflow-y: auto;
+}

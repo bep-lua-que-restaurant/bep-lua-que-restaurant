@@ -14,7 +14,11 @@
     </form>
 </div> --}}
 
-
+{{-- @if (session('errors'))
+    <div class="alert alert-danger">
+        {{ session('errors')->first() }}
+    </div>
+@endif --}}
 <!DOCTYPE html>
 <html lang="en" class="h-100">
 
@@ -31,7 +35,7 @@
     <meta name="csrf-token" content="3pvIDLSX29wd150Hxi6MALt7d8F4BtSQooZ74xzA">
     <meta name="description" content="Some description for the page" />
 
-    <title>Uena | Login 2</title>
+    <title> Đăng nhập</title>
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="public/images/favicon.png">
     <link href="{{ asset('admin') }}/css/style.css" rel="stylesheet">
@@ -51,16 +55,31 @@
                                     <div class="text-center mb-3">
                                         <a href="index.html"><img src="public/images/logo-full.png" alt=""></a>
                                     </div>
-                                    <h4 class="text-center mb-4">Bếp Lửa Quê</h4>
+                                    <div style="display: flex; justify-content: center;">
+                                        <img src="{{ url('storage/logo.jpg') }}" alt="Logo"
+                                            style="width: 60%; height: auto; display: block; ; 
+                                        border-radius: 10px;">
+
+                                    </div>
+
                                     <form action="{{ route('login') }}" method="POST">
                                         @csrf
+                                        {{-- <input type="hidden" name="_token" value="{{ csrf_token() }}"> --}}
+
                                         <div class="form-group">
                                             <label class="mb-1"><strong>Email</strong></label>
-                                            <input type="email" class="form-control" name="email">
+                                            <input type="email" class="form-control" name="email"
+                                                value="{{ old('email') }}">
+                                            @error('email')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
                                         </div>
                                         <div class="form-group">
                                             <label class="mb-1"><strong>Mật khẩu</strong></label>
                                             <input type="password" class="form-control" name="password">
+                                            @error('password')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
                                         </div>
                                         <div class="form-row d-flex justify-content-between mt-4 mb-2">
                                             <div class="form-group">

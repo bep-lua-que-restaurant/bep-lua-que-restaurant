@@ -7,7 +7,7 @@
         <div class="row page-titles mx-0">
             <div class="col-sm-6 p-md-0">
                 <div class="welcome-text">
-                    <h4>Chi tiết Hóa đơn #{{ $hoaDon->id }}</h4>
+                    <h4>Chi tiết Hóa đơn {{ $hoaDon->ma_hoa_don }}</h4>
                 </div>
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
@@ -26,8 +26,9 @@
             </div>
             <div class="card-body">
                 <p><strong>Mã hóa đơn:</strong> {{ $hoaDon->ma_hoa_don }}</p>
-                <p><strong>Khách hàng:</strong> {{ $hoaDon->khach_hang_id }}</p>
-                <p><strong>Tổng tiền:</strong> {{ number_format($hoaDon->tong_tien, 0, ',', '.') }} đ</p>
+                <p><strong>Khách hàng:</strong> {{ $hoaDon->ten_khach_hang }}</p>
+                <p><strong>Số điện thoại:</strong> {{ $hoaDon->so_dien_thoai }}</p>
+                <p><strong>Tổng tiền:</strong> {{ number_format($hoaDon->tong_tien, 0, ',', '.') }} VND</p>
                 <p><strong>Phương thức thanh toán:</strong>
                     {{ $hoaDon->phuong_thuc_thanh_toan == 'tien_mat'
                         ? 'Tiền mặt'
@@ -74,8 +75,8 @@
                                         </td>
                                         <td>{{ $chiTiet->monAn->ten ?? 'Không có' }}</td>
                                         <td>{{ $chiTiet->so_luong }}</td>
-                                        <td>{{ number_format($chiTiet->don_gia, 0, ',', '.') }} đ</td>
-                                        <td>{{ number_format($chiTiet->thanh_tien, 0, ',', '.') }} đ</td>
+                                        <td>{{ number_format($chiTiet->don_gia, 0, ',', '.') }} VND</td>
+                                        <td>{{ number_format($chiTiet->thanh_tien, 0, ',', '.') }} VND</td>
 
                                     </tr>
                                 @endforeach

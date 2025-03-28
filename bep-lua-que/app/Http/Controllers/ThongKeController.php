@@ -7,18 +7,25 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\HoaDon;
 use App\Models\HoaDonBan;
-
+use Illuminate\Support\Facades\Auth;
 
 class ThongKeController extends Controller
 {
     public function index(Request $request)
     {
+
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
         $today = Carbon::today();
         $yesterday = Carbon::yesterday();
 
-        // Truy vấn tất cả dữ liệu trong một lần
-        $revenueData = HoaDon::whereDate('created_at', '>=', $yesterday)
-            ->selectRaw('DATE(created_at) as date, SUM(tong_tien) as revenue')
+        // Truy vấn doanh thu chỉ với hóa đơn có trạng thái 'da_thanh_toan'
+        $revenueData = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
+            ->where('hoa_don_bans.trang_thai', 'da_thanh_toan') // Chỉ lấy hóa đơn đã thanh toán
+            ->whereDate('hoa_dons.created_at', '>=', $yesterday)
+            ->selectRaw('DATE(hoa_dons.created_at) as date, SUM(hoa_dons.tong_tien) as revenue')
             ->groupBy('date')
             ->pluck('revenue', 'date');
 
@@ -38,16 +45,18 @@ class ThongKeController extends Controller
         // Truy vấn số khách hôm nay & hôm qua
         $customerData = DatBan::whereDate('created_at', '>=', $yesterday)
             ->where('trang_thai', 'xac_nhan')
-            ->selectRaw('DATE(created_at) as date, SUM(so_nguoi) as total_customers')
+            ->selectRaw('DATE(thoi_gian_den) as date, SUM(so_nguoi) as total_customers')
             ->groupBy('date')
             ->pluck('total_customers', 'date');
 
         $customersToday = $customerData[$today->toDateString()] ?? 0;
         $customersYesterday = $customerData[$yesterday->toDateString()] ?? 0;
 
-        // Truy vấn doanh số theo giờ trong ngày hôm nay
-        $salesData = HoaDon::whereDate('created_at', $today)
-            ->selectRaw('HOUR(created_at) as hour, SUM(tong_tien) as revenue')
+        // Truy vấn doanh số theo giờ trong ngày hôm nay (chỉ lấy hóa đơn đã thanh toán)
+        $salesData = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
+            ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
+            ->whereDate('hoa_dons.created_at', $today)
+            ->selectRaw('HOUR(hoa_dons.created_at) as hour, SUM(hoa_dons.tong_tien) as revenue')
             ->groupBy('hour')
             ->pluck('revenue', 'hour');
 
@@ -74,6 +83,4 @@ class ThongKeController extends Controller
             'customersToday', 'customersYesterday'
         ));
     }
-
-
 }

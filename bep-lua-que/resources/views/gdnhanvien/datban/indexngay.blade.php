@@ -134,7 +134,8 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="exampleModalLabel">Chi tiết đặt bàn</h5>
+                        <h5 class="modal-title text-center" id="exampleModalLabel">Chi tiết đặt bàn</h5>
+
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 

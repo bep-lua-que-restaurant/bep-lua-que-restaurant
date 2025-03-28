@@ -44,6 +44,63 @@ use App\Models\DatBan;
 use Carbon\Carbon;
 
 
+
+// // Tất cả roles đều truy cập 
+Route::middleware(['auth'])->group(function () {
+    // Nếu là bếp, chuyển hướng ngay đến trang bếp
+    Route::get('/', function () {
+        if (auth()->check() && auth()->user()->role == 2) {
+            return redirect()->route('bep.dashboard');
+        }
+        return redirect()->route('dashboard');
+    });
+    Route::get('/', [ThongKeController::class, 'index'])->name('dashboard');
+
+    // Lễ tân (1) - Được vào lễ tân, thống kê, hóa đơn
+    Route::middleware(['role:1'])->group(function () {
+        Route::get('/letan', [DatBanController::class, 'index'])->name('letan.index');
+        Route::get('/thongke', [ThongkeController::class, 'index'])->name('thongke.index');
+        Route::get('/hoadon', [HoadonController::class, 'index'])->name('hoadon.index');
+    });
+
+    // Bếp (2) - Chỉ vào được bếp
+    Route::middleware(['role:2'])->group(function () {
+        Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
+    });
+
+    // Thu ngân (3) - Được vào thu ngân, lễ tân, thống kê, hóa đơn
+    Route::middleware(['role:3'])->group(function () {
+        Route::get('/thungan', [ThunganController::class, 'index'])->name('thungan.index');
+        Route::get('/letan', [DatBanController::class, 'index'])->name('letan.index');
+        Route::get('/thongke', [ThongkeController::class, 'index'])->name('thongke.index');
+        Route::get('/hoadon', [HoadonController::class, 'index'])->name('hoadon.index');
+    });
+
+    // Quản lý (4) - Truy cập toàn bộ
+    Route::middleware(['role:4'])->group(function () {
+        Route::get('/quanly', [ThongKeController::class, 'index'])->name('quanly.index');
+        Route::get('/letan', [DatBanController::class, 'index'])->name('letan.index');
+        Route::get('/thongke', [ThongkeController::class, 'index'])->name('thongke.index');
+        Route::get('/hoadon', [HoadonController::class, 'index'])->name('hoadon.index');
+        Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
+        Route::get('/thungan', [ThunganController::class, 'index'])->name('thungan.index');
+
+        // Các tính năng khác của quản lý
+        Route::get('/danh-muc-mon-an', [DanhMucMonAnController::class, 'index'])->name('danh-muc-mon-an.index');
+        Route::get('/mon-an', [MonAnController::class, 'index'])->name('mon-an.index');
+        Route::get('/dich-vu', [DichVuController::class, 'index'])->name('dich-vu.index');
+        Route::get('/com-bo', [ComboController::class, 'index'])->name('com-bo.index');
+        Route::get('/ma-giam-gia', [MaGiamGiaController::class, 'index'])->name('ma-giam-gia.index');
+        Route::get('/ban-an', [BanAnController::class, 'index'])->name('ban-an.index');
+
+        Route::get('/nhan-vien', [NhanVienController::class, 'index'])->name('nhan-vien.index');
+        Route::get('/ca-lam', [CaLamController::class, 'index'])->name('ca-lam.index');
+        Route::get('/ca-lam-nhan-vien', [CaLamNhanVienController::class, 'index'])->name('ca-lam-nhan-vien.index');
+        Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
+        Route::get('/luong', [LuongController::class, 'index'])->name('luong.index');
+    });
+
+});
 Route::get('/', function () {
     return view('admin.dashboard');
 });
@@ -164,36 +221,6 @@ Route::post('/import-mon-an', [MonAnController::class, 'importMonAn'])->name('mo
 
 Route::delete('/mon-an/xoa-hinh-anh/{hinhAnhId}', [MonAnController::class, 'xoaHinhAnh'])->name('mon-an.xoa-hinh-anh');
 
-// loại nguyên liêu
-Route::resource('loai-nguyen-lieu', LoaiNguyenLieuController::class);
-Route::get('export-loai-nguyen-lieu', [LoaiNguyenLieuController::class, 'export'])->name('loai-nguyen-lieu.export');
-Route::post('loai-nguyen-lieu/{id}/restore', [LoaiNguyenLieuController::class, 'restore'])->name('loai-nguyen-lieu.restore');
-
-// Nguyên liệu kho
-Route::resource('nguyen-lieu', NguyenLieuController::class);
-Route::get('/nguyen-lieu-export', [NguyenLieuController::class, 'export'])->name('nguyen-lieu.export');
-Route::post('/nguyen-lieu/import', [NguyenLieuController::class, 'import'])->name('nguyen-lieu.import');
-// // phiếu nhập nguyên liệu
-Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
-Route::post('/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore'); // Khôi phục phiếu nhập
-Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'exportPhieuNhapKho'])->name('phieu-nhap-kho.export');
-Route::put('/phieu-nhap-kho/{id}/duyet', [PhieuNhapKhoController::class, 'duyet'])->name('phieu-nhap-kho.duyet');
-Route::put('/phieu-nhap-kho/{id}/huy', [PhieuNhapKhoController::class, 'huy'])->name('phieu-nhap-kho.huy');
-// Route để xem chi tiết nguyên liệu
-Route::get(
-    'phieu-nhap-kho/{phieuNhapId}/nguyen-lieu/{nguyenLieuId}',
-    [PhieuNhapKhoController::class, 'xemChiTietNguyenLieu']
-)
-    ->name('phieu-nhap-kho.chitiet-nguyenlieu');
-Route::post(
-    '/phieu-nhap-kho/{phieuNhapId}/nguyen-lieu/{nguyenLieuId}/cap-nhat-trang-thai',
-    [PhieuNhapKhoController::class, 'capNhatTrangThai']
-)
-    ->name('phieu-nhap-kho.capnhaptrangthai');
-
-
-
-Route::get('/phieu-nhap-export', [PhieuNhapKhoController::class, 'export'])->name('phieu-nhap.export');
 
 // Quản lí nhân viên
 Route::get('/nhan-vien', [NhanVienController::class, 'index'])->name('nhan-vien.index');
@@ -212,17 +239,17 @@ Route::post('/nhan-vien/import', [NhanVienController::class, 'importNhanVien'])-
 
 Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
 Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
-Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
+// Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 
 // // Đăng nhập phân quyền
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::middleware(['auth'])->group(function () {
+// Route::middleware(['auth'])->group(function () {
 
-    Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
-});
-Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
+//     Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
+// });
+// Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
 Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
 
@@ -300,12 +327,13 @@ Route::post('/hoa-don/update-quantity', [ThuNganController::class, 'updateQuanti
 Route::post('/hoa-don/delete', [ThuNganController::class, 'deleteMonAn'])->name('thungan.deleteMonAn');
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
-Route::get('/hoa-don/search', [HoaDonController::class, 'search'])->name('hoa-don.search');
-Route::get('/thu-ngan/get-orders', [ThuNganController::class, 'getOrders'])->name('thungan.getOrders');
-Route::get('/thu-ngan/hoa-don-info', [ThuNganController::class, 'thongTinHoaDon'])->name('thungan.thongTinHoaDon');
-Route::post('thu-ngan-save-so-nguoi', [ThuNganController::class, 'saveSoNguoi'])->name('thungan.saveSoNguoi');
-Route::get('/thu-ngan-thong-tin-don', [TachBanController::class, 'getDon'])->name('thungan.getDon');
-Route::post('/thu-ngan-tach-mon', [TachBanController::class, 'tachDon'])->name('thungan.tachDon');
+Route::get('/hoa-don/{id}/in', [HoaDonController::class, 'printInvoice'])->name('hoa-don.print');
+Route::get('/thu-ngan/get-orders',[ThuNganController::class, 'getOrders'])->name('thungan.getOrders');
+Route::get('/thu-ngan/hoa-don-info',[ThuNganController::class, 'thongTinHoaDon'])->name('thungan.thongTinHoaDon');
+Route::post('thu-ngan-save-so-nguoi',[ThuNganController::class,'saveSoNguoi'])->name('thungan.saveSoNguoi');
+Route::get('/thu-ngan-thong-tin-don',[TachBanController::class,'getDon'])->name('thungan.getDon');
+Route::post('/thu-ngan-tach-mon',[TachBanController::class,'tachDon'])->name('thungan.tachDon');
+
 //Chấm công
 Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
 Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('chamcong.store');
@@ -371,12 +399,6 @@ Route::get('/test-log', function () {
     return 'Đã ghi log!';
 });
 
-
-
-
-
-
-
 Route::get('/get-dat-ban-by-date', function (Request $request) {
     $date = $request->input('date', Carbon::now('Asia/Ho_Chi_Minh')->toDateString());
 
@@ -394,3 +416,8 @@ Route::get('/get-dat-ban-by-date', function (Request $request) {
         'datBans' => $datBans
     ]);
 });
+
+
+
+
+

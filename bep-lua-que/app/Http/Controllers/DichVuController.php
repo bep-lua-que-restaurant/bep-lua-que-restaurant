@@ -38,7 +38,7 @@ class DichVuController extends Controller
         return view('admin.dichvu.list', [
             'data' => $data,
             'route' => route('dich-vu.index'), // URL route cho AJAX
-            'tableId' => 'list-container', // ID của bảng
+            'tableId' => 'list-container', // ID của bảng'
             'searchInputId' => 'search-name', // ID của ô tìm kiếm
         ]);  
     }

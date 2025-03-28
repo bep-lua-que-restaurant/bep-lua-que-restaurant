@@ -24,6 +24,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
 
 
@@ -46,12 +47,19 @@
             <nav class="col-2 bg-light pt-3">
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a href="{{ route('dat-ban.index') }}" class="btn btn-primary">Danh sách bàn đặt</a>
+                        {{-- <a class="dropdown-item" href="/"><i class="fas fa-tachometer-alt"></i>dashboard</a> --}}
+                        <a href="/" class="btn btn-primary  w-100">Trang chủ</a>
                     </li>
                     <br>
                     <li class="nav-item">
-                        <a href="{{ route('datban.danhsach') }}" class="btn btn-primary">Danh sách đặt bàn</a>
+                        <a href="{{ route('dat-ban.index') }}" class="btn btn-primary  w-100"> Đặt bàn</a>
                     </li>
+                    <br>
+                    <li class="nav-item">
+                        <a href="{{ route('datban.danhsach') }}" class="btn btn-primary  w-100">Danh sách bàn đã được
+                            đặt</a>
+                    </li>
+
                 </ul>
             </nav>
             <!-- Main Content -->
