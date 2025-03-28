@@ -47,9 +47,7 @@ $(document).ready(function () {
                                 <td class="so-luong-goc">${mon.so_luong}</td>
                                 <td class="input-group">
                                     <button type="button" class="btn btn-sm btn-outline-secondary giam">-</button>
-                                    <input type="number" class="form-control so-luong-tach" value="0" min="0" max="${
-                                        mon.so_luong
-                                    }">
+                                   <span class="so-luong-tach">0</span>
                                     <button type="button" class="btn btn-sm btn-outline-secondary tang">+</button>
                                 </td>
                             </tr>
@@ -62,38 +60,41 @@ $(document).ready(function () {
                         let index = row.data("index");
                         let slGocEl = row.find(".so-luong-goc");
                         let slTachEl = row.find(".so-luong-tach");
-
+                    
                         let slGoc = parseInt(slGocEl.text());
-                        let slTach = parseInt(slTachEl.val());
-
+                        let slTach = parseInt(slTachEl.text());
+                    
                         if (slTach > 0) {
                             slTach--;
                             slGoc++;
                             danhSachMon[index].so_luong = slGoc;
                         }
-
+                    
                         slGocEl.text(slGoc);
-                        slTachEl.val(slTach); // Cập nhật giá trị của input
+                        slTachEl.text(slTach); // Cập nhật số lượng hiển thị
                     });
-
+                    
                     $(document).on("click", ".tang", function () {
                         let row = $(this).closest("tr");
                         let index = row.data("index");
                         let slGocEl = row.find(".so-luong-goc");
                         let slTachEl = row.find(".so-luong-tach");
-
+                    
                         let slGoc = parseInt(slGocEl.text());
-                        let slTach = parseInt(slTachEl.val());
-
+                        let slTach = parseInt(slTachEl.text());
+                    
                         if (slGoc > 0) {
                             slTach++;
                             slGoc--;
                             danhSachMon[index].so_luong = slGoc;
                         }
-
+                    
                         slGocEl.text(slGoc);
-                        slTachEl.val(slTach); // Cập nhật giá trị của input
+                        slTachEl.text(slTach); // Cập nhật số lượng hiển thị
                     });
+                    
+
+
                 }
             },
         });
@@ -106,7 +107,8 @@ $(document).ready(function () {
 
         $("#hoa-don-tach-body tr").each(function () {
             let tenMon = $(this).find("td:nth-child(2)").text().trim();
-            let slTach = parseInt($(this).find(".so-luong-tach").val());
+            let slTach = parseInt($(this).find(".so-luong-tach").text().trim());
+
             let idMon = $(this).data("id-mon");
             if (slTach > 0) {
                 danhSachTach.push({
