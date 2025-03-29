@@ -14,7 +14,7 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
                     <li class="breadcrumb-item active"><a href="javascript:void(0)">Cập nhật nhân viên</a></li>
                 </ol>
             </div>
@@ -71,59 +71,62 @@
                 <div class="col-md-6 mb-3">
                     <label>Ngày vào làm</label>
                     <input type="date" name="ngay_vao_lam" class="form-control"
-                           value="{{ $nhanVien->ngay_vao_lam ? \Carbon\Carbon::parse($nhanVien->ngay_vao_lam)->format('Y-m-d') : '' }}"
-                </div>
+                        value="{{ $nhanVien->ngay_vao_lam ? \Carbon\Carbon::parse($nhanVien->ngay_vao_lam)->format('Y-m-d') : '' }}"
+                        </div>
 
-                <div class="col-md-6 mb-3">
-                    <label>Địa chỉ</label>
-                    <input type="text" name="dia_chi" class="form-control"
-                        value="{{ old('dia_chi', $nhanVien->dia_chi) }}">
+                    <div class="col-md-6 mb-3">
+                        <label>Địa chỉ</label>
+                        <input type="text" name="dia_chi" class="form-control"
+                            value="{{ old('dia_chi', $nhanVien->dia_chi) }}">
 
-                </div>
+                    </div>
 
-                <div class="col-md-6 mb-3">
-                    <label>Hình ảnh</label>
-                    <input type="file" name="hinh_anh" class="form-control">
-                    @if ($nhanVien->hinh_anh)
-                        <img src="{{ asset('storage/' . $nhanVien->hinh_anh) }}" alt="Hình ảnh nhân viên"
-                            style="width: 100px; margin-top: 10px;">
-                    @endif
-                </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Hình ảnh</label>
+                        <input type="file" name="hinh_anh" class="form-control">
+                        @if ($nhanVien->hinh_anh)
+                            <img src="{{ asset('storage/' . $nhanVien->hinh_anh) }}" alt="Hình ảnh nhân viên"
+                                style="width: 100px; margin-top: 10px;">
+                        @endif
+                    </div>
 
-                <div class="col-md-6 mb-3">
-                    <label>Mật khẩu (nếu thay đổi)</label>
-                    <input type="password" name="password" class="form-control">
-                </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Mật khẩu (nếu thay đổi)</label>
+                        <input type="password" name="password" class="form-control">
+                    </div>
 
-                <!-- Hình thức lương -->
-                <div class="col-md-6 mb-3">
-                    <label>Hình thức lương</label>
-                    <select name="hinh_thuc_luong" class="form-control" id="hinhThucLuong" required>
-                        <option value="thang" {{ optional($nhanVien->luong)->hinh_thuc == 'thang' ? 'selected' : '' }}>
-                            Lương tháng</option>
-                        <option value="ca" {{ optional($nhanVien->luong)->hinh_thuc == 'ca' ? 'selected' : '' }}>Lương
-                            theo ca</option>
-                        <option value="gio" {{ optional($nhanVien->luong)->hinh_thuc == 'gio' ? 'selected' : '' }}>Lương
-                            theo giờ</option>
-                    </select>
-                </div>
+                    <!-- Hình thức lương -->
+                    <div class="col-md-6 mb-3">
+                        <label>Hình thức lương</label>
+                        <select name="hinh_thuc_luong" class="form-control" id="hinhThucLuong" required>
+                            <option value="thang"
+                                {{ optional($nhanVien->luong)->hinh_thuc == 'thang' ? 'selected' : '' }}>
+                                Lương tháng</option>
+                            <option value="ca" {{ optional($nhanVien->luong)->hinh_thuc == 'ca' ? 'selected' : '' }}>
+                                Lương
+                                theo ca</option>
+                            <option value="gio" {{ optional($nhanVien->luong)->hinh_thuc == 'gio' ? 'selected' : '' }}>
+                                Lương
+                                theo giờ</option>
+                        </select>
+                    </div>
 
-                <!-- Mức lương -->
-                <div class="col-md-6 mb-3">
-                    <label>Mức lương</label>
-                    <div class="input-group">
-                        <input type="number" name="muc_luong" class="form-control" id="mucLuong"
-                            value="{{ optional($nhanVien->luong)->muc_luong }}" required>
-                        <div class="input-group-append">
-                            <span class="input-group-text" id="donViLuong">VNĐ / Tháng</span>
+                    <!-- Mức lương -->
+                    <div class="col-md-6 mb-3">
+                        <label>Mức lương</label>
+                        <div class="input-group">
+                            <input type="number" name="muc_luong" class="form-control" id="mucLuong"
+                                value="{{ optional($nhanVien->luong)->muc_luong }}" required>
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="donViLuong">VNĐ / Tháng</span>
+                            </div>
                         </div>
                     </div>
+
                 </div>
 
-            </div>
-
-            <button type="submit" class="btn btn-primary">Cập nhật</button>
-            <a href="{{ route('nhan-vien.index') }}" class="btn btn-secondary">Trở lại danh sách</a>
+                <button type="submit" class="btn btn-primary">Cập nhật</button>
+                <a href="{{ route('nhan-vien.index') }}" class="btn btn-secondary">Trở lại danh sách</a>
         </form>
     </div>
 

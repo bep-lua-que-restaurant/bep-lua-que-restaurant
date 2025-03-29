@@ -14,7 +14,7 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
                     <li class="breadcrumb-item active"><a href="javascript:void(0)"> Sửa nhà cung cấp</a></li>
                 </ol>
             </div>
@@ -41,7 +41,7 @@
                             <div class="form-group">
                                 <label for="dia_chi">Địa chỉ</label>
                                 <input type="text" id="dia_chi" name="dia_chi" class="form-control"
-                                       value="{{ $nhaCungCap->dia_chi }}">
+                                    value="{{ $nhaCungCap->dia_chi }}">
                                 @if ($errors->has('dia_chi'))
                                     <small class="text-danger">*{{ $errors->first('dia_chi') }}</small>
                                 @endif
@@ -50,7 +50,7 @@
                             <div class="form-group">
                                 <label for="so_dien_thoai">Số điện thoại</label>
                                 <input type="tel" id="so_dien_thoai" name="so_dien_thoai" class="form-control"
-                                       value="{{ $nhaCungCap->so_dien_thoai }}">
+                                    value="{{ $nhaCungCap->so_dien_thoai }}">
                                 @if ($errors->has('so_dien_thoai'))
                                     <small class="text-danger">*{{ $errors->first('so_dien_thoai') }}</small>
                                 @endif
@@ -59,7 +59,7 @@
                             <div class="form-group">
                                 <label for="email">Email</label>
                                 <input type="email" id="email" name="email" class="form-control"
-                                       value="{{ $nhaCungCap->email }}">
+                                    value="{{ $nhaCungCap->email }}">
                                 @if ($errors->has('email'))
                                     <small class="text-danger">*{{ $errors->first('email') }}</small>
                                 @endif
@@ -106,7 +106,8 @@
 
                             <!-- Nút submit -->
                             <div class="form-group text-right">
-                                <a href="{{route('nha-cung-cap.index' )}}" class="btn btn-primary btn-sm"> <i class="fa fa-arrow-left"></i> Quay lại
+                                <a href="{{ route('nha-cung-cap.index') }}" class="btn btn-primary btn-sm"> <i
+                                        class="fa fa-arrow-left"></i> Quay lại
                                 </a>
                                 <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-save"></i> Lưu
                                 </button>

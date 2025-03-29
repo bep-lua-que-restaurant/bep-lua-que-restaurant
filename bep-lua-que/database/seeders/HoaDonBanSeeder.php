@@ -20,8 +20,10 @@ class HoaDonBanSeeder extends Seeder
             $randomDate = Carbon::now()->subDays(rand(0, 730));
 
             $data[] = [
+
                 'ban_an_id' => rand(76, 95), // Bàn từ 1 đến 20
                 'hoa_don_id' => rand(3105, 4104), // Hóa đơn giả định từ 1091 đến 2100
+
                 'trang_thai' => 'da_thanh_toan',
                 'deleted_at' => null,
                 'created_at' => $randomDate,

@@ -12,7 +12,7 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
                     <li class="breadcrumb-item"><a href="{{ route('hoa-don.index') }}">Hóa đơn</a></li>
                     <li class="breadcrumb-item active">Chi tiết</li>
                 </ol>

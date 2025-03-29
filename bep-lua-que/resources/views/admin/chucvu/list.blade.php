@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-    Danh sách món ăn
+    Chức vụ
 @endsection
 
 @section('content')
@@ -15,7 +15,7 @@
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
-                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Danh sách món ăn</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Chức vụ</a></li>
                 </ol>
             </div>
         </div>
@@ -31,17 +31,17 @@
                         <h4 class="card-title">Danh sách</h4>
 
                         <div class="btn-group">
-                            <a href="{{ route('mon-an.create') }}" class="btn btn-sm btn-primary">
+                            <a href="{{ route('chuc-vu.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
                             <!-- Nút Nhập file sẽ hiển thị Modal -->
-                            <a href="{{ route('mon-an.import') }}" class="btn btn-sm btn-secondary" data-toggle="modal"
+                            <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
                                 data-target=".bd-example-modal-lg">
-                                <i class="fa fa-download"></i> Nhập file
+                                <i class="fa fa-upload"></i> Nhập file
                             </a>
 
-                            <a href="{{ route('mon-an.export') }}" class="btn btn-sm btn-success">
-                                <i class="fa fa-upload"></i> Xuất file
+                            <a href="{{ route('chuc-vu.export') }}" class="btn btn-sm btn-success">
+                                <i class="fa fa-download"></i> Xuất file
                             </a>
                             <a href="#" class="btn btn-sm btn-info">
                                 <i class="fa fa-list"></i> Danh sách
@@ -61,14 +61,14 @@
                                             </div>
                                         </th>
                                         <th><strong>ID.</strong></th>
-                                        <th><strong>Tên</strong></th>
-                                        <th><strong>Trạng thái kinh doanh</strong></th>
-                                        <th><strong>Trạng thái món ăn</strong></th> <!-- Cột trạng thái món ăn -->
+                                        <th><strong>Tên chức vụ </strong></th>
+
+                                        <th><strong>Trạng thái</strong></th>
                                         <th><strong>Hành động</strong></th>
                                     </tr>
                                 </thead>
                                 <tbody id="{{ $tableId }}">
-                                    @include('admin.monan.body-list')
+                                    @include('admin.chucvu.body-list')
                                 </tbody>
 
                             </table>
@@ -91,7 +91,7 @@
                 </div>
                 <div class="modal-body">
                     <!-- Form nhập file -->
-                    <form action="{{ route('mon-an.import') }}" method="POST" enctype="multipart/form-data"
+                    <form action="{{ route('chuc-vu.import') }}" method="POST" enctype="multipart/form-data"
                         id="importFileForm">
                         @csrf
                         <div class="mb-3">
