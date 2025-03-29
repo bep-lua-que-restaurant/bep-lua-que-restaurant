@@ -142,7 +142,35 @@ $(document).ready(function () {
                 mon_tach: danhSachTach,
             }),
             success: function (res) {
-                showToast("Đã tách bàn và tạo hóa đơn mới!", "success");
+                if (res.xac_nhan_xoa) {
+                    // Nếu hóa đơn gốc trống, hỏi xác nhận xóa
+                    if (confirm("Hóa đơn này đã trống, bạn có muốn xóa không?")) {
+                        $.ajax({
+                            url: "/thu-ngan-xoa-hoa-don",
+                            method: "POST",
+                            contentType: "application/json",
+                            headers: {
+                                "X-CSRF-TOKEN": $(
+                                    'meta[name="csrf-token"]'
+                                ).attr("content"),
+                            },
+                            data: JSON.stringify({
+                                ma_hoa_don: res.hoa_don_goc.ma_hoa_don,
+                            }),
+                            success: function (deleteRes) {
+                                showToast(deleteRes.message, "success");
+                            },
+                            error: function (err) {
+                                console.log(err.responseJSON);
+                                showToast("Lỗi khi xóa hóa đơn!", "error");
+                            },
+                        });
+                    } else {
+                        showToast("Hóa đơn trống nhưng chưa bị xóa!", "info");
+                    }
+                } else {
+                    showToast("Đã tách bàn và tạo hóa đơn mới!", "success");
+                }
             },
             error: function (err) {
                 console.log(err.responseJSON);

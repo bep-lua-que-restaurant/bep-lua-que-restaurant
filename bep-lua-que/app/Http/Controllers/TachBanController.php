@@ -11,6 +11,7 @@ use App\Models\HoaDonBan;
 use App\Models\MonAn;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TachBanController extends Controller
 {
@@ -72,170 +73,160 @@ class TachBanController extends Controller
     }
 
 
+
     public function tachDon(Request $request)
     {
-        $maHoaDon = $request->input('ma_hoa_don');
-        $banAnMoiIds = $request->input('ban_moi_id');
-        $monTach = $request->input('mon_tach');
+        return DB::transaction(function () use ($request) {
+            $maHoaDon = $request->input('ma_hoa_don');
+            $banAnMoiIds = $request->input('ban_moi_id');
+            $monTach = $request->input('mon_tach');
 
-        // Kiểm tra hóa đơn gốc
-        $hoaDonGoc = HoaDon::where('ma_hoa_don', $maHoaDon)->first();
-        if (!$hoaDonGoc) {
-            return response()->json(['error' => "Không tìm thấy hóa đơn gốc với mã: $maHoaDon"], 404);
-        }
-
-        // Generate mã hóa đơn mới
-        $maHoaDonMoi = $this->generateMaHoaDon();
-
-        // Tạo hóa đơn mới
-        $newHoaDon = HoaDon::create([
-            'ma_hoa_don' => $maHoaDonMoi,
-            'khach_hang_id' => 0,
-            'phuong_thuc_thanh_toan' => 'tien_mat',
-            'tong_tien' => 0
-        ]);
-
-        // Gán bàn mới vào hóa đơn
-        $banAnMoiIds = is_array($banAnMoiIds) ? $banAnMoiIds : [$banAnMoiIds];
-
-        foreach ($banAnMoiIds as $banAnId) {
-            HoaDonBan::create([
-                'hoa_don_id' => $newHoaDon->id,
-                'ban_an_id' => $banAnId,
-                'trang_thai' => 'dang_xu_ly'
-            ]);
-        }
-
-
-
-        // Lấy danh sách ID món và thông tin món ăn
-        $monAnIds = collect($monTach)->pluck('id_mon')->toArray();
-        $monAnList = MonAn::whereIn('id', $monAnIds)->get()->keyBy('id');
-
-        // Lưu chi tiết món ăn vào hóa đơn mới và tính tổng tiền
-        $tongTienMoi = 0;
-
-        foreach ($monTach as $mon) {
-            $idMon = $mon['id_mon'];
-            $soLuongTach = $mon['so_luong_tach'];
-
-            if (!isset($monAnList[$idMon])) {
-                return response()->json(['error' => "Không tìm thấy món ăn với ID: $idMon"], 404);
-            }
-
-            $donGia = $monAnList[$idMon]->gia;
-            $thanhTien = $donGia * $soLuongTach;
-            $tongTienMoi += $thanhTien;
-
-            ChiTietHoaDon::create([
-                'hoa_don_id' => $newHoaDon->id,
-                'mon_an_id' => $idMon,
-                'so_luong' => $soLuongTach,
-                'don_gia' => $donGia,
-                'thanh_tien' => $thanhTien
-            ]);
-        }
-
-        // Cập nhật tổng tiền cho hóa đơn mới
-        $newHoaDon->update(['tong_tien' => $tongTienMoi]);
-
-        // Cập nhật số lượng món ăn trong hóa đơn gốc
-        foreach ($monTach as $mon) {
-            $idMon = $mon['id_mon'];
-            $soLuongTach = $mon['so_luong_tach'];
-
-            $chiTietMonAn = ChiTietHoaDon::where('hoa_don_id', $hoaDonGoc->id)
-                ->where('mon_an_id', $idMon)
-                ->first();
-
-            if ($chiTietMonAn) {
-                // Giảm số lượng món ăn
-                $chiTietMonAn->so_luong -= $soLuongTach;
-
-                // Nếu số lượng về 0 thì xóa luôn món ăn
-                if ($chiTietMonAn->so_luong <= 0) {
-                    $chiTietMonAn->delete();
-                } else {
-                    $chiTietMonAn->thanh_tien = $chiTietMonAn->so_luong * $chiTietMonAn->don_gia;
-                    $chiTietMonAn->save();
-                }
-            }
-        }
-
-        // Cập nhật lại tổng tiền của hóa đơn gốc
-        $tongTienGoc = ChiTietHoaDon::where('hoa_don_id', $hoaDonGoc->id)->sum('thanh_tien');
-        $hoaDonGoc->update(['tong_tien' => $tongTienGoc]);
-
-
-        // Xóa hóa đơn gốc nếu không còn món nào
-        if ($tongTienGoc == 0) {
             $hoaDonGoc = HoaDon::where('ma_hoa_don', $maHoaDon)->first();
+            if (!$hoaDonGoc) {
+                throw new \Exception("Không tìm thấy hóa đơn gốc với mã: $maHoaDon");
+            }
 
-            if ($hoaDonGoc) {
-                // Lấy danh sách bàn có trong hóa đơn
-                $banIds = HoaDonBan::where('hoa_don_id', $hoaDonGoc->id)->pluck('ban_an_id')->toArray();
+            $maHoaDonMoi = $this->generateMaHoaDon();
+            $newHoaDon = HoaDon::create([
+                'ma_hoa_don' => $maHoaDonMoi,
+                'khach_hang_id' => 0,
+                'phuong_thuc_thanh_toan' => 'tien_mat',
+                'tong_tien' => 0
+            ]);
 
-                // Cập nhật trạng thái bàn về 'trống'
-                BanAn::whereIn('id', $banIds)->update(['trang_thai' => 'trong']);
+            $banAnMoiIds = is_array($banAnMoiIds) ? $banAnMoiIds : [$banAnMoiIds];
 
-                // Lấy danh sách bàn đã cập nhật
-                $banAnCuList = BanAn::whereIn('id', $banIds)->get();
+            foreach ($banAnMoiIds as $banAnId) {
+                HoaDonBan::create([
+                    'hoa_don_id' => $newHoaDon->id,
+                    'ban_an_id' => $banAnId,
+                    'trang_thai' => 'dang_xu_ly'
+                ]);
+            }
 
-                // Gửi sự kiện real-time cho từng bàn
-                foreach ($banAnCuList as $banAnCu) {
-                    event(new BanAnUpdated($banAnCu));
+            $monAnIds = collect($monTach)->pluck('id_mon')->toArray();
+            $monAnList = MonAn::whereIn('id', $monAnIds)->get()->keyBy('id');
+            $tongTienMoi = 0;
+
+            foreach ($monTach as $mon) {
+                $idMon = $mon['id_mon'];
+                $soLuongTach = $mon['so_luong_tach'];
+
+                if (!isset($monAnList[$idMon])) {
+                    throw new \Exception("Không tìm thấy món ăn với ID: $idMon");
+                }
+
+                $donGia = $monAnList[$idMon]->gia;
+                $thanhTien = $donGia * $soLuongTach;
+                $tongTienMoi += $thanhTien;
+
+                ChiTietHoaDon::create([
+                    'hoa_don_id' => $newHoaDon->id,
+                    'mon_an_id' => $idMon,
+                    'so_luong' => $soLuongTach,
+                    'don_gia' => $donGia,
+                    'thanh_tien' => $thanhTien
+                ]);
+            }
+
+            $newHoaDon->update(['tong_tien' => $tongTienMoi]);
+
+            foreach ($monTach as $mon) {
+                $idMon = $mon['id_mon'];
+                $soLuongTach = $mon['so_luong_tach'];
+
+                $chiTietMonAn = ChiTietHoaDon::where('hoa_don_id', $hoaDonGoc->id)
+                    ->where('mon_an_id', $idMon)
+                    ->first();
+
+                if ($chiTietMonAn) {
+                    $chiTietMonAn->so_luong -= $soLuongTach;
+                    if ($chiTietMonAn->so_luong <= 0) {
+                        $chiTietMonAn->delete();
+                    } else {
+                        $chiTietMonAn->thanh_tien = $chiTietMonAn->so_luong * $chiTietMonAn->don_gia;
+                        $chiTietMonAn->save();
+                    }
                 }
             }
 
-            $hoaDonGoc->forceDelete();
-        }
+            BanAn::whereIn('id', $banAnMoiIds)->update(['trang_thai' => 'co_khach']);
+            $banAnMoiList = BanAn::whereIn('id', $banAnMoiIds)->get();
+            foreach ($banAnMoiList as $banAn) {
+                event(new BanAnUpdated($banAn));
+            }
 
-        // Lấy thông tin hóa đơn gốc sau khi cập nhật
-        $hoaDonGocChiTiet = [
-            'ma_hoa_don' => $hoaDonGoc->ma_hoa_don,
-            'tong_tien' => $hoaDonGoc->tong_tien,
-            'mon_an' => ChiTietHoaDon::where('hoa_don_id', $hoaDonGoc->id)->get()
-        ];
+            $maDatBanMoi = DatBan::generateMaDatBan();
+            foreach ($banAnMoiIds as $banAnId) {
+                DatBan::create([
+                    'ma_dat_ban' => $maDatBanMoi,
+                    'khach_hang_id' => 0,
+                    'so_dien_thoai' => '0',
+                    'so_nguoi' => 1,
+                    'gio_du_kien' => Carbon::now(),
+                    'thoi_gian_den' => Carbon::now(),
+                    'hoa_don_id' => $newHoaDon->id,
+                    'ban_an_id' => $banAnId,
+                    'trang_thai' => 'xac_nhan',
+                    'thoi_gian_dat' => now(),
+                    'mo_ta' => null,
+                ]);
+            }
 
-        // Lấy thông tin hóa đơn mới
-        $hoaDonMoiChiTiet = [
-            'ma_hoa_don' => $newHoaDon->ma_hoa_don,
-            'tong_tien' => $newHoaDon->tong_tien,
-            'mon_an' => ChiTietHoaDon::where('hoa_don_id', $newHoaDon->id)->get()
-        ];
+            $tongTienGoc = ChiTietHoaDon::where('hoa_don_id', $hoaDonGoc->id)->sum('thanh_tien');
+            $hoaDonGoc->update(['tong_tien' => $tongTienGoc]);
 
-        BanAn::whereIn('id', $banAnMoiIds)->update(['trang_thai' => 'co_khach']);
+            if ($tongTienGoc == 0) {
+                return response()->json([
+                    'xac_nhan_xoa' => true,
+                    'hoa_don_goc' => [
+                        'ma_hoa_don' => $hoaDonGoc->ma_hoa_don,
+                        'tong_tien' => $hoaDonGoc->tong_tien,
+                    ]
+                ]);
+            }
 
-        // Lấy danh sách bàn đã cập nhật
-        $banAnMoiList = BanAn::whereIn('id', $banAnMoiIds)->get();
-
-        // Gửi sự kiện real-time cho từng bàn
-        foreach ($banAnMoiList as $banAn) {
-            event(new BanAnUpdated($banAn));
-        }
-
-        $maDatBanMoi = DatBan::generateMaDatBan();
-
-        // Lưu đặt bàn vào bảng dat_ban
-        foreach ($banAnMoiIds as $banAnId) {
-            DatBan::create([
-                'ma_dat_ban' => $maDatBanMoi,
-                'khach_hang_id' => 0,
-                'so_dien_thoai' => '0', // Nếu không có số điện thoại thì để null
-                'so_nguoi' => 1, // Mặc định là 1 người
-                'gio_du_kien' => Carbon::now(),
-                'thoi_gian_den' => Carbon::now(),
-                'hoa_don_id' => $newHoaDon->id,
-                'ban_an_id' => $banAnId,
-                'trang_thai' => 'xac_nhan', // hoặc trạng thái phù hợp
-                'thoi_gian_dat' => now(), // Lưu thời gian đặt bàn hiện tại
-                'mo_ta' => null,
+            return response()->json([
+                'message' => 'Success'
             ]);
+        });
+    }
+
+    public function xoaHoaDonGoc(Request $request)
+    {
+        $maHoaDon = $request->input('ma_hoa_don');
+
+        $hoaDon = HoaDon::where('ma_hoa_don', $maHoaDon)->first();
+        if (!$hoaDon) {
+            return response()->json(['error' => 'Hóa đơn không tồn tại'], 404);
         }
 
-        return response()->json([
-            'hoa_don_goc' => $hoaDonGocChiTiet,
-            'hoa_don_moi' => $hoaDonMoiChiTiet
-        ]);
+        if ($hoaDon->tong_tien > 0) {
+            return response()->json(['error' => 'Không thể xóa hóa đơn vì vẫn còn tiền'], 400);
+        }
+
+        $this->xoaHoaDonRong($hoaDon);
+
+        return response()->json(['message' => 'Hóa đơn đã được xóa thành công']);
+    }
+
+    private function xoaHoaDonRong($hoaDon)
+    {
+        if ($hoaDon->tong_tien == 0) {
+            // Lấy danh sách bàn từ hóa đơn
+            $banIds = HoaDonBan::where('hoa_don_id', $hoaDon->id)->pluck('ban_an_id')->toArray();
+
+            // Cập nhật trạng thái bàn về "trống"
+            BanAn::whereIn('id', $banIds)->update(['trang_thai' => 'trong']);
+
+            // Gửi sự kiện cập nhật bàn (nếu cần)
+            foreach ($banIds as $banId) {
+                event(new BanAnUpdated(BanAn::find($banId)));
+            }
+
+            // Xóa hóa đơn cũ
+            $hoaDon->forceDelete();
+        }
+        $hoaDon->forceDelete();
     }
 }
