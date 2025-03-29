@@ -228,5 +228,5 @@ class TachBanController extends Controller
             $hoaDon->forceDelete();
         }
         $hoaDon->forceDelete();
-    }
+        }
 }

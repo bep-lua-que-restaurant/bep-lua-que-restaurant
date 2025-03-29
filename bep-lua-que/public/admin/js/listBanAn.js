@@ -11,7 +11,7 @@ var swiper = new Swiper(".mySwiper", {
     slidesPerView: 1, // Mỗi lần hiển thị 1 nhóm sản phẩm
     spaceBetween: 20, // Khoảng cách giữa các nhóm
     allowTouchMove: true, // Cho phép kéo bằng chuột/tay
-    grabCursor: true
+    grabCursor: true,
 });
 
 // Hàm cập nhật số trang
@@ -137,7 +137,7 @@ $(document).ready(function () {
                     let index = 1;
                     response.chi_tiet_hoa_don.forEach((item) => {
                         let row = `
-                        <tr id="mon-${item.id}">
+                        <tr data-id-mon="${item.mon_an_id}" id="mon-${item.id}">
 <td class="small">${index}</td>
 <td class="small">
     <!-- Thêm điều kiện để thay đổi màu tên món tùy theo trạng thái -->
@@ -193,8 +193,17 @@ $(document).ready(function () {
                         index++;
                     });
                 } else {
-                    let emptyRow =
-                        '<tr><td colspan="4" class="text-center">Chưa có món nào</td></tr>';
+                    let emptyRow = `
+                        <tr>
+    <td colspan="5" class="text-center">
+        <div class="empty-invoice w-100 p-5 border border-2 rounded bg-light">
+            <i class="bi bi-receipt text-muted" style="font-size: 50px;"></i>
+            <div class="mt-2">Chưa có món nào trong đơn</div>
+            <div>🍔 Mời bạn chọn món!</div>
+        </div>
+    </td>
+</tr>
+`;
                     hoaDonBody.html(emptyRow);
                     offcanvasBody.html(emptyRow);
                 }
@@ -313,5 +322,24 @@ $(document).ready(function () {
                 );
             },
         });
+    }
+});
+
+window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (data) => {
+    let monAnId = data.monAn.id;
+    let trangThaiMoi = data.monAn.trang_thai;
+    let monAn = data.monAn.mon_an_id
+    // console.log(monAnId,trangThaiMoi,monAn)
+    let row = $(`tr[data-id-mon="${monAn}"]`);
+    if (row.length) {
+        let tenMonElement = row.find("td:nth-child(2)"); // Cột chứa tên món ăn
+
+        if (trangThaiMoi === "cho_che_bien") {
+            tenMonElement.removeClass().addClass("small text-danger"); // Đỏ
+        } else if (trangThaiMoi === "dang_nau") {
+            tenMonElement.removeClass().addClass("small text-warning"); // Vàng
+        } else if (trangThaiMoi === "hoan_thanh") {
+            tenMonElement.removeClass().addClass("small text-success"); // Xanh
+        }
     }
 });

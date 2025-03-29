@@ -43,7 +43,7 @@
         </tr>
     </thead>
     <tbody id="hoa-don-body">
-        <!-- Dữ liệu hóa đơn sẽ được hiển thị ở đây -->
+
     </tbody>
     <tfoot id="tfoot-hoaDon">
         <tr>
