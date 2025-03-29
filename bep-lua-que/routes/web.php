@@ -338,6 +338,7 @@ Route::get('/thu-ngan/hoa-don-info',[ThuNganController::class, 'thongTinHoaDon']
 Route::post('thu-ngan-save-so-nguoi',[ThuNganController::class,'saveSoNguoi'])->name('thungan.saveSoNguoi');
 Route::get('/thu-ngan-thong-tin-don',[TachBanController::class,'getDon'])->name('thungan.getDon');
 Route::post('/thu-ngan-tach-mon',[TachBanController::class,'tachDon'])->name('thungan.tachDon');
+Route::post('/thu-ngan-xoa-hoa-don',[TachBanController::class,'xoaHoaDonGoc'])->name('thungan.xoaHoaDon');
 
 //Chấm công
 Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
