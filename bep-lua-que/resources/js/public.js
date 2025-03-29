@@ -118,7 +118,6 @@ window.Echo.channel("hoa-don-channel")
         }
     });
 
-
 function loadChiTietHoaDon(hoaDonId) {
     $.ajax({
         url: "/hoa-don/get-details",
@@ -138,7 +137,7 @@ function loadChiTietHoaDon(hoaDonId) {
                 let index = 1;
                 response.chi_tiet_hoa_don.forEach((item) => {
                     let row = `
-                <tr id="mon-${item.id}">
+                <tr data-id-mon="${item.mon_an_id}"  id="mon-${item.id}">
     <td class="small">${index}</td>
     <td class="small">
         <!-- Thêm điều kiện để thay đổi màu tên món tùy theo trạng thái -->
@@ -196,8 +195,17 @@ function loadChiTietHoaDon(hoaDonId) {
                     index++;
                 });
             } else {
-                let emptyRow =
-                    '<tr><td colspan="4" class="text-center">Chưa có món nào</td></tr>';
+                let emptyRow = `
+                        <tr>
+    <td colspan="5" class="text-center">
+        <div class="empty-invoice w-100 p-5 border border-2 rounded bg-light">
+            <i class="bi bi-receipt text-muted" style="font-size: 50px;"></i>
+            <div class="mt-2">Chưa có món nào trong đơn</div>
+            <div>🍔 Mời bạn chọn món!</div>
+        </div>
+    </td>
+</tr>
+`;
                 hoaDonBody.html(emptyRow);
                 offcanvasBody.html(emptyRow);
             }
@@ -291,7 +299,7 @@ function loadHoaDonThanhToan(hoaDonId) {
                 offcanvasBody.html(rows.join(""));
             } else {
                 let emptyRow =
-                    '<tr><td colspan="5" class="text-center">Chưa có món nào</td></tr>';
+                    '<tr><td colspan="4" class="thong-bao-rong text-center">Chưa có món nào</td></tr>';
                 hoaDonThanhToan.html(emptyRow);
                 offcanvasBody.html(emptyRow);
             }

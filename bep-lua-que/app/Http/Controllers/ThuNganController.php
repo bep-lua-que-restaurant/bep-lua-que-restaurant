@@ -194,17 +194,13 @@ class ThuNganController extends Controller
 
         $daGhep = $soBanDangXuLy >= 2;
 
-        // $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
-        //     ->join('mon_ans', 'chi_tiet_hoa_dons.mon_an_id', '=', 'mon_ans.id')
-        //     ->select('chi_tiet_hoa_dons.*', 'mon_ans.ten as tenMon', 'mon_ans.gia as don_gia', 'chi_tiet_hoa_dons.trang_thai') // Thêm trạng thái vào đây
-        //     ->get();
-
         $chiTietHoaDon = ChiTietHoaDon::where('chi_tiet_hoa_dons.hoa_don_id', $hoaDonId)
             ->join('mon_ans', 'chi_tiet_hoa_dons.mon_an_id', '=', 'mon_ans.id') // Join bảng mon_ans
             ->join('hoa_dons', 'hoa_dons.id', '=', 'chi_tiet_hoa_dons.hoa_don_id') // Join bảng hoa_dons để lấy ma_hoa_don
             ->select(
                 'chi_tiet_hoa_dons.*', // Chọn tất cả các trường từ chi_tiet_hoa_dons
                 'mon_ans.ten as tenMon', // Lấy tên món từ bảng mon_ans
+                'mon_ans.id as mon_an_id', 
                 'mon_ans.gia as don_gia', // Lấy giá món từ bảng mon_ans
                 'chi_tiet_hoa_dons.trang_thai', // Lấy trạng thái từ chi_tiet_hoa_dons
                 'hoa_dons.ma_hoa_don' // Lấy ma_hoa_don từ bảng hoa_dons

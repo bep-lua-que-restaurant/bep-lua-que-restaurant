@@ -7,7 +7,7 @@
             <div class="swiper-slide">
                 <div class="row">
                     @foreach ($chunk as $monAn)
-                    <div class="col-md-3 col-6 mb-2">
+                        <div class="col-md-3 col-6 mb-2">
                             <div class="cardd card text-center p-1" data-banan-id="{{ $monAn->id }}">
                                 <div class="card-body p-2">
                                     <!-- Hình ảnh món ăn -->
@@ -93,6 +93,8 @@
                 return;
             }
 
+            capNhatHoaDon(monAnId, card.find('.card-title').text(), giaMon);
+
             // Gửi AJAX để tạo hóa đơn và thêm món ăn
             $.ajax({
                 url: "{{ route('thungan.createHoaDon') }}",
@@ -119,6 +121,75 @@
                 }
 
             });
+
+            function capNhatHoaDon(monAnId, tenMon, giaMon) {
+                let tbody = $("#hoa-don-body");
+                let existingRow = $(`tr[data-id-mon="${monAnId}"]`);
+
+               
+                // Xóa dòng "Chưa có món nào trong đơn" nếu có
+                if ($(".empty-invoice").length) {
+                    $(".empty-invoice").closest("tr").remove();
+                }
+
+                if (existingRow.length) {
+                    // Nếu món đã có, tăng số lượng và cập nhật tổng giá
+                    let soLuongSpan = existingRow.find(".so-luong");
+                    let soLuongMoi = parseInt(soLuongSpan.text()) + 1;
+                    soLuongSpan.text(soLuongMoi);
+
+                    let tongTienCell = existingRow.find(".text-end:last");
+                    tongTienCell.text((soLuongMoi * giaMon).toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                    }));
+                } else {
+                    // Nếu món chưa có, thêm mới vào bảng hóa đơn
+                    let row = `
+        <tr data-id-mon="${monAnId}">
+            <td class="small">${tbody.children().length + 1}</td>
+            <td class="small">${tenMon}</td>
+            <td class="text-center">
+                <i class="bi bi-dash-circle text-danger giam-soluong" data-id="${monAnId}" style="cursor: pointer; font-size: 20px;"></i>
+                <span class="so-luong mx-2 small">1</span>
+                <i class="bi bi-plus-circle text-success tang-soluong" data-id="${monAnId}" style="cursor: pointer; font-size: 20px;"></i>
+            </td>
+            <td class="text-end small">
+                ${giaMon.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
+            </td>
+            <td class="text-end small">
+                ${(1 * giaMon).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
+            </td>
+            <td class="text-center">
+                <button class="btn btn-sm btn-outline-danger xoa-mon" data-id="${monAnId}">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        </tr>
+        `;
+                    tbody.append(row);
+                }
+
+                tinhTongHoaDon(); // Cập nhật tổng hóa đơn
+            }
+
+            function tinhTongHoaDon() {
+                let tongTien = 0;
+                $("#hoa-don-body tr").each(function() {
+                    let tongTienMon = $(this).find("td.text-end:last").text().replace(/[^0-9]/g,
+                        "");
+                    tongTien += parseInt(tongTienMon);
+                });
+
+                $("#tong-tien").text(
+                    tongTien.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND"
+                    })
+                );
+            }
+
+
         });
     });
 </script>
