@@ -106,8 +106,6 @@ class TachBanController extends Controller
             ]);
         }
 
-
-
         // Lấy danh sách ID món và thông tin món ăn
         $monAnIds = collect($monTach)->pluck('id_mon')->toArray();
         $monAnList = MonAn::whereIn('id', $monAnIds)->get()->keyBy('id');
@@ -166,6 +164,28 @@ class TachBanController extends Controller
         $tongTienGoc = ChiTietHoaDon::where('hoa_don_id', $hoaDonGoc->id)->sum('thanh_tien');
         $hoaDonGoc->update(['tong_tien' => $tongTienGoc]);
 
+        // Xóa hóa đơn gốc nếu không còn món nào
+        if ($tongTienGoc == 0) {
+            $hoaDonGoc = HoaDon::where('ma_hoa_don', $maHoaDon)->first();
+
+            if ($hoaDonGoc) {
+                // Lấy danh sách bàn có trong hóa đơn
+                $banIds = HoaDonBan::where('hoa_don_id', $hoaDonGoc->id)->pluck('ban_an_id')->toArray();
+
+                // Cập nhật trạng thái bàn về 'trống'
+                BanAn::whereIn('id', $banIds)->update(['trang_thai' => 'trong']);
+
+                // Lấy danh sách bàn đã cập nhật
+                $banAnCuList = BanAn::whereIn('id', $banIds)->get();
+
+                // Gửi sự kiện real-time cho từng bàn
+                foreach ($banAnCuList as $banAnCu) {
+                    event(new BanAnUpdated($banAnCu));
+                }
+            }
+
+            $hoaDonGoc->forceDelete();
+        }
         // Lấy thông tin hóa đơn gốc sau khi cập nhật
         $hoaDonGocChiTiet = [
             'ma_hoa_don' => $hoaDonGoc->ma_hoa_don,
