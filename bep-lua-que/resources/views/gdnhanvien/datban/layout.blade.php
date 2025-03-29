@@ -47,12 +47,22 @@
             <nav class="col-2 bg-light pt-3">
                 <ul class="nav flex-column">
                     <li class="nav-item">
+
+                        {{-- <a href="{{ route('dat-ban.index') }}" class="btn btn-primary">Đặt bàn </a>
+                    </li>
+                    <br>
+                    <li class="nav-item">
+                        <a href="{{ route('datban.danhsach') }}" class="btn btn-primary">Danh sách </a> --}}
+
                         {{-- <a class="dropdown-item" href="/"><i class="fas fa-tachometer-alt"></i>dashboard</a> --}}
+
                         <a href="/" class="btn btn-primary  w-100">Trang chủ</a>
                     </li>
                     <br>
                     <li class="nav-item">
                         <a href="{{ route('dat-ban.index') }}" class="btn btn-primary  w-100"> Đặt bàn</a>
+
+
                     </li>
                     <br>
                     <li class="nav-item">

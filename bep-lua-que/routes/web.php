@@ -332,17 +332,13 @@ Route::post('/hoa-don/update-quantity', [ThuNganController::class, 'updateQuanti
 Route::post('/hoa-don/delete', [ThuNganController::class, 'deleteMonAn'])->name('thungan.deleteMonAn');
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
-//search hóa đơn
-
-
-
 Route::get('/hoa-don/{id}/in', [HoaDonController::class, 'printInvoice'])->name('hoa-don.print');
-
 Route::get('/thu-ngan/get-orders',[ThuNganController::class, 'getOrders'])->name('thungan.getOrders');
 Route::get('/thu-ngan/hoa-don-info',[ThuNganController::class, 'thongTinHoaDon'])->name('thungan.thongTinHoaDon');
 Route::post('thu-ngan-save-so-nguoi',[ThuNganController::class,'saveSoNguoi'])->name('thungan.saveSoNguoi');
 Route::get('/thu-ngan-thong-tin-don',[TachBanController::class,'getDon'])->name('thungan.getDon');
 Route::post('/thu-ngan-tach-mon',[TachBanController::class,'tachDon'])->name('thungan.tachDon');
+
 //Chấm công
 Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
 Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('chamcong.store');

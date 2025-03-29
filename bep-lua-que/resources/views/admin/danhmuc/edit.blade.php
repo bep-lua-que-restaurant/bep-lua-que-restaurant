@@ -14,7 +14,7 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
                     <li class="breadcrumb-item active"><a href="javascript:void(0)"> Sửa danh mục</a></li>
                 </ol>
             </div>
@@ -79,7 +79,8 @@
 
                             <!-- Nút submit -->
                             <div class="form-group text-right">
-                                <a href="{{route('danh-muc-mon-an.index' )}}" class="btn btn-primary btn-sm"> <i class="fa fa-arrow-left"></i> Quay lại
+                                <a href="{{ route('danh-muc-mon-an.index') }}" class="btn btn-primary btn-sm"> <i
+                                        class="fa fa-arrow-left"></i> Quay lại
                                 </a>
                                 <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-save"></i> Lưu
                                 </button>

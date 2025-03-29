@@ -160,10 +160,10 @@
                             </div>
 
                             <!-- Mô tả -->
-                            <div class="mt-3">
+                            {{-- <div class="mt-3">
                                 <label class="fw-bold">Mô tả:</label>
                                 <textarea class="form-control" name="mo_ta" rows="3">{{ $datBan->mo_ta }}</textarea>
-                            </div>
+                            </div> --}}
 
                             <!-- Danh sách bàn đã chọn -->
                             <div class="mt-3">
