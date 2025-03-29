@@ -40,6 +40,7 @@ class DatBanCreated implements ShouldBroadcast
                     'trang_thai' => $datBan->trang_thai,
                     'ma_dat_ban' => $datBan->ma_dat_ban,
                     'datban_id' => $datBan->id,
+                    'mo_ta' => $datBan->mo_ta,
                 ];
             }),
             'customer' => [

@@ -1,5 +1,10 @@
 import "./bootstrap";
 import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 // Lắng nghe sự kiện từ Laravel Echo
 window.Echo.channel("banan-channel").listen("BanAnUpdated", (data) => {
@@ -62,7 +67,7 @@ window.Echo.channel("datban-channel").listen("DatBanCreated", (event) => {
         const thoiGianDenFormat = thoiGianDen.format("YYYY-MM-DD");
         const gioBatDauFormat = thoiGianDen.format("HH:mm");
         const gioDuKienFormat = dayjs(
-            `${thoiGianDen.format("YYYY-MM-DD")} ${item.gio_du_kien}`
+            `${thoiGianDenFormat} ${item.gio_du_kien}`
         ).format("HH:mm");
 
         banAnId.push(item.ban_an_id);
@@ -73,7 +78,6 @@ window.Echo.channel("datban-channel").listen("DatBanCreated", (event) => {
     });
 
     document.querySelectorAll(".selectable-slot").forEach((button) => {
-        const maDatBanButton = button.getAttribute("data-ma-dat-ban");
         const banIdButton = button.getAttribute("data-ban-id");
         const timeSlotButton = button.getAttribute("data-time-slot");
         const dateButton = button.getAttribute("data-date");
@@ -85,12 +89,11 @@ window.Echo.channel("datban-channel").listen("DatBanCreated", (event) => {
                 const gioDuKienDate = dayjs(`${dateButton} ${gioDuKien[i]}`);
 
                 if (
-                    timeSlotDate.isAfter(gioBatDauDate) &&
-                    timeSlotDate.isBefore(gioDuKienDate)
+                    timeSlotDate.isSameOrAfter(gioBatDauDate) &&
+                    timeSlotDate.isSameOrBefore(gioDuKienDate)
                 ) {
-                    button.classList.remove("bg-light");
-                    button.classList.remove("btn-info");
-                    button.classList.add("btn-danger"); // Chuyển thành btn-success
+                    button.classList.remove("bg-light", "btn-info");
+                    button.classList.add("btn-danger"); // Chuyển thành btn-success nếu cần
                     button.setAttribute("data-ma-dat-ban", maDatBan[i]);
                     break;
                 }

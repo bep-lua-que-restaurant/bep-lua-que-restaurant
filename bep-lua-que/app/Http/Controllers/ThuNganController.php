@@ -414,7 +414,7 @@ class ThuNganController extends Controller
         // $updateDatBan = DatBan::where('ma_dat_ban', $maDatBans)->get();
 
 
-        $datBanList = DatBan::whereIn('ban_an_id', $dsBanCungHoaDon)->where('trang_thai', 'xac_nhan')->get();
+        // $datBanList = DatBan::whereIn('ban_an_id', $dsBanCungHoaDon)->where('trang_thai', 'xac_nhan')->get();
         $updateDatBan = DatBan::where('ma_dat_ban', $maDatBans)->get();
 
 
@@ -425,7 +425,7 @@ class ThuNganController extends Controller
             ]);
         }
         // 🔥 Phát sự kiện **sau khi đã hoàn thành** cập nhật dữ liệu
-        event(new DatBanUpdated($datBanList));
+        // event(new DatBanUpdated($datBanList));
 
 
         $hoaDon = HoaDon::find($hoaDonBan->hoa_don_id);

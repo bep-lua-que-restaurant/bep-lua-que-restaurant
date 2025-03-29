@@ -38,8 +38,85 @@
     </div>
     <div id="pagination-controls" class="mt-3"></div> <!-- Hiển thị các nút phân trang -->
 
+    <!-- Nút mở modal -->
+    <button id="openModalButton" class="btn btn-primary d-none">Thông tin đặt bàn</button>
 
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl"> <!-- Đổi modal-lg thành modal-xl -->
+            <div class="modal-content">
 
+                <form id="bookingForm" method="POST" action="{{ route('dat-ban.store') }}">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Thông tin đặt bàn </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <!-- Ô tìm kiếm -->
+                        <div class="mb-3">
+                            {{-- <input type="text" class="form-control" id="searchCustomer" placeholder="Tìm kiếm..."> --}}
+
+                            <input type="text" class="form-control" id="searchCustomer"
+                                placeholder="Nhập tên hoặc số điện thoại">
+                            <ul id="customerList" class="list-group mt-2" style="display: none;"></ul>
+                        </div>
+
+                        <!-- Form nhập thông tin -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="fullName" class="form-label">Họ tên:</label>
+                                <input type="text" class="form-control" id="customerName" name="customer_name">
+                                @error('customer_name')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email:</label>
+                                <input type="email" class="form-control" id="customerEmail" name="customer_email">
+                                @error('customer_email')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label">Số điện thoại:</label>
+                                <input type="tel" class="form-control" id="customerPhone" name="customer_phone">
+                                @error('customer_phone')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label for="numberOfGuests" class="form-label">Số người:</label>
+                                <input type="number" class="form-control" name="num_people" id="numPeople" min="1">
+                                @error('num_people')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label class="fw-bold">Mô tả:</label>
+                            <textarea class="form-control" name="mo_ta" id="moTa" rows="3"></textarea>
+                        </div>
+
+                        <!-- Danh sách các bàn đã chọn -->
+                        <ul id="modalContent" class="list-unstyled"></ul>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        {{-- <button id="clearButton" class="btn btn-danger">clearButton</button> --}}
+                        <button type="submit" id="confirmButton" class="btn btn-primary">Xác nhận đặt bàn</button>
+
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
     <script>
         $(document).ready(function() {
             function loadDatBan(date, page = 1) {
@@ -107,7 +184,7 @@
                                 </button>`;
 
                                     html +=
-                                        `<td class="text-center" data-ban-id="${ban.id}">${content}</td>`;
+                                        `<td class="text-center ${tableClass}"  data-ban-id="${ban.id}">${content}</td>`;
                                 });
                             }
                             html += `</tr>`;
@@ -164,10 +241,10 @@
                                 });
                                 tooltip.show();
 
-                                // Ẩn tooltip sau 3 giây
+                                // Ẩn tooltip sau 2  giây
                                 setTimeout(() => {
                                     tooltip.dispose();
-                                }, 3000);
+                                }, 2000);
                             })
                             .catch(error => console.error("Lỗi khi lấy dữ liệu đặt bàn:", error));
                     }
@@ -178,8 +255,6 @@
                     if (tooltip) tooltip.dispose();
                 });
             }
-
-
 
             function renderPagination(paginationData, date) {
                 let paginationHtml = '<nav><ul class="pagination justify-content-center">';
@@ -224,119 +299,28 @@
             });
         });
     </script>
-    <!-- Nút mở modal -->
-    {{-- <button id="openModalButton" class="btn btn-primary d-none">Thông tin đặt bàn </button> --}}
-
-    <button id="openModalButton" class="btn btn-primary d-none">Thông tin đặt bàn</button>
-
-
-    <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl"> <!-- Đổi modal-lg thành modal-xl -->
-            <div class="modal-content">
-
-                <form id="bookingForm" method="POST" action="{{ route('dat-ban.store') }}">
-                    @csrf
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Thông tin đặt bàn </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-
-                        <!-- Ô tìm kiếm -->
-                        <div class="mb-3">
-                            {{-- <input type="text" class="form-control" id="searchCustomer" placeholder="Tìm kiếm..."> --}}
-
-                            <input type="text" class="form-control" id="searchCustomer"
-                                placeholder="Nhập tên hoặc số điện thoại">
-                            <ul id="customerList" class="list-group mt-2" style="display: none;"></ul>
-                        </div>
-
-                        <!-- Form nhập thông tin -->
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="fullName" class="form-label">Họ tên:</label>
-                                <input type="text" class="form-control" id="customerName" name="customer_name">
-                                @error('customer_name')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label for="email" class="form-label">Email:</label>
-                                <input type="email" class="form-control" id="customerEmail" name="customer_email">
-                                @error('customer_email')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="phone" class="form-label">Số điện thoại:</label>
-                                <input type="tel" class="form-control" id="customerPhone" name="customer_phone">
-                                @error('customer_phone')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label for="numberOfGuests" class="form-label">Số người:</label>
-                                <input type="number" class="form-control" name="num_people" id="numPeople" min="1">
-                                @error('num_people')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                        </div>
-                        {{-- <div class="mt-3">
-                            <label class="fw-bold">Mô tả:</label>
-                            <textarea class="form-control" name="mo_ta" rows="3"></textarea>
-                        </div> --}}
-
-                        <!-- Danh sách các bàn đã chọn -->
-                        <ul id="modalContent" class="list-unstyled"></ul>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                        {{-- <button id="clearButton" class="btn btn-danger">clearButton</button> --}}
-                        <button type="submit" id="confirmButton" class="btn btn-primary">Xác nhận đặt bàn</button>
-
-                    </div>
-                </form>
-
-            </div>
-        </div>
-    </div>
-
-
-
 
     <script>
         $(document).ready(function() {
             let selectedSlots = {};
 
-            // Xử lý sự kiện click để chọn hoặc bỏ chọn
-            $(document).on('click', '.selectable-slot', function() {
-                // 🔹 Kiểm tra nếu button có class "btn-success" hoặc "btn-danger" thì không cho click
-                if ($(this).hasClass('btn-success') || $(this).hasClass('btn-danger')) {
+            // Xử lý sự kiện click để chọn hoặc bỏ chọn slot
+            $(document).on("click", ".selectable-slot", function() {
+                if ($(this).hasClass("btn-success") || $(this).hasClass("btn-danger")) {
                     return;
                 }
 
-                let banId = $(this).data('ban-id');
-                let tenBan = $(this).data('ten-ban');
-                let timeSlot = $(this).data('time-slot');
-                let date = $('#datePicker').val();
+                let banId = $(this).data("ban-id");
+                let tenBan = $(this).data("ten-ban");
+                let timeSlot = $(this).data("time-slot");
+                let date = $("#datePicker").val();
 
                 if (!date) {
                     alert("Vui lòng chọn ngày!");
                     return;
                 }
 
-                if (!timeSlot) {
-                    console.error('timeSlot is undefined');
-                    return;
-                }
-
-                let [hour, minute] = timeSlot.split(':').map(Number);
+                let [hour, minute] = timeSlot.split(":").map(Number);
                 let thoiGianDen = new Date(date);
                 thoiGianDen.setHours(hour);
                 thoiGianDen.setMinutes(minute);
@@ -362,10 +346,13 @@
                 );
 
                 if (existingIndex !== -1) {
-                    $(this).removeClass('selected');
+                    $(this).removeClass("selected");
                     selectedSlots[banId].splice(existingIndex, 1);
+                    if (selectedSlots[banId].length === 0) {
+                        delete selectedSlots[banId]; // Xóa bàn khỏi danh sách nếu không còn slot nào
+                    }
                 } else {
-                    $(this).addClass('selected');
+                    $(this).addClass("selected");
                     selectedSlots[banId].push({
                         banId,
                         tenBan,
@@ -379,22 +366,19 @@
                 updateModalButton();
             });
 
-
-            // 🔹 Hàm kiểm tra xem có slot nào ±30 phút với thời gian mới không
+            // 🔹 Kiểm tra xem có slot nào ±30 phút với thời gian mới không
             function isAdjacentToAnySelectedTime(newTimeSlot, banId) {
                 if (!selectedSlots[banId] || selectedSlots[banId].length === 0) return true;
 
-                let [newHour, newMinute] = newTimeSlot.split(':').map(Number);
+                let [newHour, newMinute] = newTimeSlot.split(":").map(Number);
                 let newTime = newHour * 60 + newMinute; // Chuyển thành phút để so sánh
 
                 return selectedSlots[banId].some(slot => {
-                    let [slotHour, slotMinute] = slot.timeSlot.split(':').map(Number);
-                    let slotTime = slotHour * 60 + slotMinute; // Chuyển thành phút để so sánh
-
-                    return Math.abs(slotTime - newTime) <= 30; // Kiểm tra chênh lệch ±30 phút
+                    let [slotHour, slotMinute] = slot.timeSlot.split(":").map(Number);
+                    let slotTime = slotHour * 60 + slotMinute;
+                    return Math.abs(slotTime - newTime) <= 30;
                 });
             }
-
 
             // Hiển thị hoặc ẩn nút mở modal
             function updateModalButton() {
@@ -407,73 +391,85 @@
 
             // Hiển thị modal và thông tin chi tiết
             $("#openModalButton").on("click", function() {
-                let modalContent = '';
+                let groupedSlots = {};
+                let earliestGioBatDau = null;
+                let latestGioKetThuc = null;
+                let selectedBanList = [];
 
+                // Lặp qua tất cả các bàn đã chọn
                 Object.keys(selectedSlots).forEach(banId => {
                     if (selectedSlots[banId].length > 0) {
-                        let gioBatDau = selectedSlots[banId].reduce(
-                            (min, slot) => slot.thoiGianDen < min ? slot.thoiGianDen : min,
-                            selectedSlots[banId][0].thoiGianDen
-                        );
+                        selectedSlots[banId].forEach(slot => {
+                            if (!earliestGioBatDau || slot.thoiGianDen <
+                                earliestGioBatDau) {
+                                earliestGioBatDau = slot.thoiGianDen;
+                            }
+                            if (!latestGioKetThuc || slot.thoiGianKetThuc >
+                                latestGioKetThuc) {
+                                latestGioKetThuc = slot.thoiGianKetThuc;
+                            }
+                        });
 
-                        let gioKetThuc = selectedSlots[banId].reduce(
-                            (max, slot) => slot.thoiGianKetThuc > max ? slot.thoiGianKetThuc :
-                            max,
-                            selectedSlots[banId][0].thoiGianKetThuc
-                        );
-
-                        let tenBan = selectedSlots[banId][0].tenBan;
-                        let ngayThangNam = selectedSlots[banId][0].ngayThangNam;
-
-                        function pad(n) {
-                            return n.toString().padStart(2, '0');
-                        }
-
-                        let startTime = new Date(
-                            `${ngayThangNam.getFullYear()}-${pad(ngayThangNam.getMonth() + 1)}-${pad(ngayThangNam.getDate())}T${pad(gioBatDau.getHours())}:${pad(gioBatDau.getMinutes())}:00`
-                        );
-                        let endTime = new Date(
-                            `${ngayThangNam.getFullYear()}-${pad(ngayThangNam.getMonth() + 1)}-${pad(ngayThangNam.getDate())}T${pad(gioKetThuc.getHours())}:${pad(gioKetThuc.getMinutes())}:00`
-                        );
-
-                        // Trừ phút nhưng đảm bảo không bị âm
-                        startTime.setMinutes(startTime.getMinutes() - 1);
-                        endTime.setMinutes(endTime.getMinutes() - 5);
-
-                        let formattedGioBatDau =
-                            `${pad(startTime.getHours())}:${pad(startTime.getMinutes())}`;
-                        let formattedGioKetThuc =
-                            `${pad(endTime.getHours())}:${pad(endTime.getMinutes())}`;
-
-                        let formattedDate = ngayThangNam.toLocaleDateString('vi-VN', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit'
-                        }).split('/').reverse().join('-');
-
-                        let diffMinutes = Math.floor((endTime - startTime) / 60000);
-                        let gioDuKien =
-                            // `${pad(Math.floor(diffMinutes / 60))}:${pad(diffMinutes % 60)}:00`;
-                            `${formattedGioKetThuc}:00`;
-
-                        let thoiGianDen = `${formattedDate} ${formattedGioBatDau}:00`;
-
-                        modalContent += `
-                            <li class="d-flex justify-content-around">
-                                <p><strong>Tên bàn: </strong> ${tenBan}</p>
-                                <p><strong>Ngày: </strong>${formattedDate.split('-').reverse().join('/')} </p>
-                                <p><strong>Thời gian: </strong> ${formattedGioBatDau} → ${formattedGioKetThuc}</p>
-                            
-                                <input type="hidden" name="selectedIds[]" value="${banId}">
-                                <input type="hidden" name="ten_ban" value="${tenBan}">
-                                <input type="hidden" name="thoi_gian_den" value="${thoiGianDen}">
-                                <input type="hidden" name="gio_du_kien" value="${gioDuKien}">
-                                <input type="hidden" name="ngay" value="${formattedDate}">
-                            </li>
-                        `;
+                        selectedBanList.push({
+                            banId: banId,
+                            tenBan: selectedSlots[banId][0].tenBan
+                        });
                     }
+                });
+
+                if (selectedBanList.length === 0) return; // Nếu không có bàn nào thì thoát luôn
+
+                function formatTime(date) {
+                    let pad = n => n.toString().padStart(2, "0");
+                    return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+                }
+
+                let firstBanId = Object.keys(selectedSlots)[0];
+                if (!selectedSlots[firstBanId] || selectedSlots[firstBanId].length === 0) return;
+                let ngayThangNam = selectedSlots[firstBanId][0].ngayThangNam;
+
+                let formattedDate = ngayThangNam.toLocaleDateString("vi-VN", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit"
+                }).split("/").reverse().join("-");
+
+                let formattedGioBatDau = formatTime(earliestGioBatDau);
+                // let formattedGioKetThuc = formatTime(latestGioKetThuc);
+                latestGioKetThuc.setMinutes(latestGioKetThuc.getMinutes() - 1);
+                let formattedGioKetThuc = formatTime(latestGioKetThuc);
 
 
+                let timeKey = `${formattedDate} ${formattedGioBatDau} → ${formattedGioKetThuc}`;
+
+                groupedSlots[timeKey] = {
+                    date: formattedDate,
+                    gioBatDau: formattedGioBatDau,
+                    gioKetThuc: formattedGioKetThuc,
+                    banList: selectedBanList
+                };
+
+                let modalContent = "";
+
+                Object.keys(groupedSlots).forEach(timeKey => {
+                    let slot = groupedSlots[timeKey];
+
+                    modalContent += `
+                        <li class="d-flex justify-content-between align-items-center">
+                            <p><strong>Ngày:</strong> ${slot.date.split("-").reverse().join("/")}</p>
+                            <p><strong>Thời gian:</strong> ${slot.gioBatDau} → ${slot.gioKetThuc}</p>
+                            <p><strong>Bàn:</strong> ${slot.banList.map(ban => ban.tenBan).join(", ")}</p>
+                        </li>
+                        <input type="hidden" name="thoi_gian_den" value="${slot.date} ${slot.gioBatDau}:00">
+                        <input type="hidden" name="gio_du_kien" value="${slot.gioKetThuc}:00">
+                        <input type="hidden" name="ngay" value="${slot.date}">
+                    `;
+
+                    slot.banList.forEach(ban => {
+                        modalContent += `
+                            <input type="hidden" name="selectedIds[]" value="${ban.banId}">
+                        `;
+                    });
 
                 });
 
@@ -483,11 +479,10 @@
 
             // Xử lý sự kiện "Xóa tất cả"
             $("#clearButton").on("click", function() {
-                selectedSlots = [];
-                $(".selectable-slot").removeClass('selected');
+                selectedSlots = {};
+                $(".selectable-slot").removeClass("selected");
                 $("#exampleModal").modal("hide");
             });
-
 
         });
     </script>
@@ -503,12 +498,23 @@
             $button.prop('disabled', true); // Vô hiệu hóa nút khi bắt đầu xử lý
 
             // Lấy dữ liệu từ form
-            let customerName = $('input[name="customer_name"]').val().trim();
-            let customerPhone = $('input[name="customer_phone"]').val().trim();
-            let customerEmail = $('input[name="customer_email"]').val().trim();
-            let numPeople = $('input[name="num_people"]').val().trim();
-            let thoiGianDen = $('input[name="thoi_gian_den"]').val().trim();
-            let gioDuKien = $('input[name="gio_du_kien"]').val().trim();
+            // Hàm lấy giá trị input, kiểm tra null/undefined trước khi trim
+            function getInputValue(name) {
+                let input = $(`input[name="${name}"]`);
+                return input.length ? input.val().trim() : "";
+            }
+
+            // Lấy dữ liệu từ form
+            let customerName = getInputValue("customer_name");
+            let customerPhone = getInputValue("customer_phone");
+            let customerEmail = getInputValue("customer_email");
+            let numPeople = getInputValue("num_people");
+            let thoiGianDen = getInputValue("thoi_gian_den");
+            let gioDuKien = getInputValue("gio_du_kien");
+            let moTa = $('textarea[name="mo_ta"]').val().trim();
+            console.log("Giá trị mô tả:", moTa);
+
+            // Lấy danh sách bàn (mảng)
             let selectedIds = $('input[name="selectedIds[]"]').map(function() {
                 return $(this).val();
             }).get();
@@ -553,6 +559,7 @@
                 thoi_gian_den: thoiGianDen,
                 gio_du_kien: gioDuKien,
                 selectedIds: selectedIds,
+                mo_ta: moTa,
                 _token: '{{ csrf_token() }}'
             };
 
@@ -677,8 +684,8 @@
 
 
         /* .btn-success .btn-danger {
-                    pointer-events: none;
-                } */
+                                                                                                                                                                                pointer-events: none;
+                                                                                                                                                                            } */
 
         .border-left-rounded {
             border-top-left-radius: 10px;

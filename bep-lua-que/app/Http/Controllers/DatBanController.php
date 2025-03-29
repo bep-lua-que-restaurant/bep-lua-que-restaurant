@@ -322,7 +322,7 @@ class DatBanController extends Controller
     {
         // Lấy thông tin đặt bàn dựa trên mã đặt bàn
         $datBans = DatBan::where('ma_dat_ban', $maDatBan)
-            ->with(['khachHang', 'banAn', 'banAn.phongAn']) // Load thêm thông tin khách hàng, bàn ăn và phòng ăn
+            ->with(['khachHang', 'banAn']) // Load thêm thông tin khách hàng, bàn ăn và phòng ăn
             ->get();
 
         // Kiểm tra nếu không tìm thấy đặt bàn
@@ -358,8 +358,8 @@ class DatBanController extends Controller
         }
 
         // Lấy tất cả bàn ăn để hiển thị
-        $banAns = BanAn::whereNull('deleted_at')->paginate(10);
-
+        // $banAns = BanAn::whereNull('deleted_at')->paginate(10);
+        $banAns = BanAn::whereNull('deleted_at')->get();
 
         // Lấy các bàn của đơn đặt hiện tại (bàn đang được chỉnh sửa)
         $datBanCurrent = DatBan::where('ma_dat_ban', $maDatBan)
@@ -473,28 +473,6 @@ class DatBanController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    // public function destroy($maDatBan)
-    // {
-    //     $datBan = DatBan::where('ma_dat_ban', $maDatBan)->first();
-
-    //     if (!$datBan) {
-    //         return redirect()->back()->with('error', 'Không tìm thấy đơn đặt bàn!');
-    //     }
-
-    //     if ($datBan->trang_thai === 'dang_xu_ly') {
-    //         // Cập nhật trạng thái
-    //         DatBan::where('thoi_gian_den', $datBan->thoi_gian_den)
-    //             ->where('so_dien_thoai', $datBan->so_dien_thoai)
-    //             ->where('created_at', $datBan->created_at)
-    //             ->update(['trang_thai' => 'da_huy']);
-
-    //         // event(new DatBanCreated($datBan));
-
-    //         return redirect()->back()->with('success', 'Tất cả đơn đặt bàn đã được hủy thành công!');
-    //     } else {
-    //         return redirect()->back()->with('error', 'Không thể hủy, trạng thái không phải "Đang xử lý".');
-    //     }
-    // }
 
     public function destroy($maDatBan)
     {
