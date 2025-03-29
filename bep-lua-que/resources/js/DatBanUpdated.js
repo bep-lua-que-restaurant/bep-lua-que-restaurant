@@ -9,7 +9,38 @@ window.Echo.channel("datban-channel").listen("DatBanUpdated", (event) => {
     console.log("Sự kiện cập nhật đặt bàn nhận được:", event);
 
     const danhSachBan = event.danh_sach_ban;
+    const maDatBanSet = new Set(danhSachBan.map((item) => item.ma_dat_ban));
 
+    // Reset tất cả các button có ma_dat_ban trùng với event
+    document.querySelectorAll(".selectable-slot").forEach((button) => {
+        const buttonMaDatBan = button.getAttribute("data-ma-dat-ban");
+        if (maDatBanSet.has(buttonMaDatBan)) {
+            button.classList.remove("btn-success", "btn-danger", "btn-warning");
+            button.classList.add("bg-light");
+
+            // 🛑 Kiểm tra nếu tooltip tồn tại trước khi gọi .dispose()
+            const tooltipInstance = bootstrap.Tooltip.getInstance(button);
+            if (tooltipInstance !== null && tooltipInstance !== undefined) {
+                tooltipInstance.dispose(); // Xóa tooltip nếu có
+            }
+
+            // ✅ Xóa thuộc tính data
+            button.removeAttribute("data-ma-dat-ban");
+            button.removeAttribute("data-bs-title");
+            button.removeAttribute("title"); // Xóa luôn title nếu Bootstrap còn giữ
+
+            // Log kiểm tra
+            console.log(`✅ Đã reset button:`, {
+                button,
+                "Class sau khi xóa": button.classList,
+                "data-ma-dat-ban": button.getAttribute("data-ma-dat-ban"),
+                "data-bs-title": button.getAttribute("data-bs-title"),
+                title: button.getAttribute("title"),
+            });
+        }
+    });
+
+    // Kiểm tra và cập nhật lại màu
     danhSachBan.forEach((item) => {
         const banAnId = item.ban_an_id;
         const maDatBan = item.ma_dat_ban;
@@ -29,27 +60,17 @@ window.Echo.channel("datban-channel").listen("DatBanUpdated", (event) => {
 
                 if (
                     timeSlotDate.isSameOrAfter(gioBatDauDate) &&
-                    timeSlotDate.isSameOrBefore(gioDuKienDate) // Cho phép cả ô 13:30
+                    timeSlotDate.isSameOrBefore(gioDuKienDate)
                 ) {
-                    console.log(
-                        `✅ Đổi màu cho slot: ${buttonTimeSlot} (Bàn ${banAnId})`
-                    );
+                    // console.log(
+                    //     `✅ Đổi màu cho slot: ${buttonTimeSlot} (Bàn ${banAnId})`
+                    // );
 
-                    // Xóa các class cũ
-                    button.classList.remove(
-                        "bg-light",
-                        "btn-danger",
-                        "btn-warning"
-                    );
-
-                    // Thêm class mới
+                    button.classList.remove("bg-light");
                     button.classList.add("btn-success");
 
                     // Cập nhật data-ma-dat-ban
-                    button.removeAttribute("data-ma-dat-ban");
                     button.setAttribute("data-ma-dat-ban", maDatBan);
-                } else {
-                    // console.log(`❌ Không đổi màu cho slot: ${buttonTimeSlot}`);
                 }
             }
         });
