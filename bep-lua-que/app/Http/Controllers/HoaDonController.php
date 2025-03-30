@@ -162,6 +162,7 @@ class HoaDonController extends Controller
             ]);
             $hoaDon = HoaDon::with('chiTietHoaDons')->find($hoaDon->id);
             broadcast(new HoaDonAdded($hoaDon))->toOthers();
+            // event(new HoaDonAdded($hoaDon));
         }
         // Cập nhật tổng tiền trong bảng `hoa_don`
         $tongTien = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)->sum('thanh_tien');
@@ -202,7 +203,7 @@ class HoaDonController extends Controller
         $hoaDon = HoaDon::with('chiTietHoaDons')->find($hoaDon->id);
 
         broadcast(new HoaDonUpdated($hoaDon))->toOthers();
-
+        // event(new HoaDonUpdated($hoaDon));
         return response()->json([
             'data' => $hoaDon
         ], 200);

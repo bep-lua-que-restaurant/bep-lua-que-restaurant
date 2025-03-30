@@ -1,4 +1,7 @@
 {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" /> --}}
+<style>
+
+</style>
 <link href="{{ asset('admin/css/swiper-bundle.min.css') }}" rel="stylesheet" />
 <div class="swiper mySwiper">
     <div class="swiper-wrapper">
@@ -106,12 +109,19 @@
                     gia: giaMon
                 },
                 success: function(response) {
-                    showToast("Đã thêm một món vào hóa đơn",
-                        "success"); // Thông báo thành công
                     window.luuIdHoaDon = response.data.id;
                     var maHoaDonElement = document.getElementById("maHoaDon");
                     maHoaDonElement.innerText = response.data.ma_hoa_don;
                     maHoaDonElement.style.color = "#28a745";
+                    // Tìm ID chi tiết hóa đơn tương ứng với món ăn
+                    let timMon = response.data.chi_tiet_hoa_dons.find(item => item
+                        .mon_an_id == monAnId);
+                    if (timMon) {
+                        // Gán ID chi tiết hóa đơn vào nút xóa
+                        $(`tr[data-id-mon="${monAnId}"] .xoa-mon-an`).attr("data-id-xoa",
+                            timMon.id);
+                    }
+
                 },
                 error: function(xhr, status, error) {
                     console.error("Lỗi khi thêm món vào hóa đơn:", xhr);
@@ -126,7 +136,6 @@
                 let tbody = $("#hoa-don-body");
                 let existingRow = $(`tr[data-id-mon="${monAnId}"]`);
 
-               
                 // Xóa dòng "Chưa có món nào trong đơn" nếu có
                 if ($(".empty-invoice").length) {
                     $(".empty-invoice").closest("tr").remove();
@@ -135,6 +144,7 @@
                 if (existingRow.length) {
                     // Nếu món đã có, tăng số lượng và cập nhật tổng giá
                     let soLuongSpan = existingRow.find(".so-luong");
+                    // console.log(soLuongSpan.text());
                     let soLuongMoi = parseInt(soLuongSpan.text()) + 1;
                     soLuongSpan.text(soLuongMoi);
 
@@ -143,31 +153,39 @@
                         style: "currency",
                         currency: "VND",
                     }));
+
+                    existingRow.addClass("table-primary");
+                    setTimeout(() => {
+                        existingRow.removeClass("table-primary");
+                    }, 400);
                 } else {
                     // Nếu món chưa có, thêm mới vào bảng hóa đơn
-                    let row = `
-        <tr data-id-mon="${monAnId}">
-            <td class="small">${tbody.children().length + 1}</td>
-            <td class="small">${tenMon}</td>
-            <td class="text-center">
-                <i class="bi bi-dash-circle text-danger giam-soluong" data-id="${monAnId}" style="cursor: pointer; font-size: 20px;"></i>
-                <span class="so-luong mx-2 small">1</span>
-                <i class="bi bi-plus-circle text-success tang-soluong" data-id="${monAnId}" style="cursor: pointer; font-size: 20px;"></i>
-            </td>
-            <td class="text-end small">
-                ${giaMon.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
-            </td>
-            <td class="text-end small">
-                ${(1 * giaMon).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
-            </td>
-            <td class="text-center">
-                <button class="btn btn-sm btn-outline-danger xoa-mon" data-id="${monAnId}">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </td>
-        </tr>
-        `;
+                    let row = $(`
+            <tr class="table-primary" data-id-mon="${monAnId}">
+                <td class="small">${tbody.children().length + 1}</td>
+                <td class="small">${tenMon}</td>
+                <td class="text-center">
+                    <i class="bi bi-dash-circle text-danger giam-soluong" data-id="${monAnId}" style="cursor: pointer; font-size: 20px;"></i>
+                    <span class="so-luong mx-2 small">1</span>
+                    <i class="bi bi-plus-circle text-success tang-soluong" data-id="${monAnId}" style="cursor: pointer; font-size: 20px;"></i>
+                </td>
+                <td class="text-end small">
+                    ${giaMon.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
+                </td>
+                <td class="text-end small">
+                    ${(1 * giaMon).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
+                </td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-outline-danger xoa-mon-an" data-id="${monAnId}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `);
                     tbody.append(row);
+                    setTimeout(() => {
+                        row.removeClass("table-primary");
+                    }, 400);
                 }
 
                 tinhTongHoaDon(); // Cập nhật tổng hóa đơn
@@ -182,11 +200,65 @@
                 });
 
                 $("#tong-tien").text(
-                    tongTien.toLocaleString("vi-VN", {
-                        style: "currency",
-                        currency: "VND"
-                    })
+                    tongTien.toLocaleString("vi-VN") + " VNĐ"
                 );
+            }
+            let isRequesting = false;
+            $(document).on("click", ".xoa-mon-an", function() {
+                let monAnId = $(this).data("id-xoa");
+                let xoaTr = $(this).closest("tr");
+                deleteMonAn(monAnId, xoaTr);
+            });
+
+            function deleteMonAn(monAnId, xoaTr) {
+                if (isRequesting) return;
+
+                Swal.fire({
+                    title: "Bạn có chắc chắn?",
+                    text: "Món ăn này sẽ bị xóa khỏi hóa đơn!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#6c757d",
+                    confirmButtonText: "Xóa ngay",
+                    cancelButtonText: "Hủy",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        isRequesting = true;
+                        $.ajax({
+                            url: '/hoa-don/delete',
+                            method: "POST",
+                            data: {
+                                mon_an_id: monAnId,
+                                _token: $('meta[name="csrf-token"]').attr("content"),
+                            },
+                            success: function(response) {
+                                isRequesting = false;
+                                // Xóa dòng món ăn khỏi bảng
+                                xoaTr.remove();
+
+                                // Cập nhật tổng tiền
+                                $("#tong-tien").text(
+                                    response.tong_tien.toLocaleString("vi-VN", {
+                                        style: "currency",
+                                        currency: "VND",
+                                    })
+                                );
+
+                                // Hiển thị thông báo thành công
+                                Swal.fire(
+                                    "Đã xóa!",
+                                    "Món ăn đã được xóa khỏi hóa đơn.",
+                                    "success"
+                                );
+                            },
+                            error: function() {
+                                isRequesting = false;
+                                Swal.fire("Lỗi!", "Không thể xóa món ăn.", "error");
+                            },
+                        });
+                    }
+                });
             }
 
 

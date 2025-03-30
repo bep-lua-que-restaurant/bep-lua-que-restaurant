@@ -103,17 +103,17 @@ window.Echo.channel("hoa-don-channel")
         if (data.type === "hoa_don_added") {
             let hoaDonId = data.hoa_don.id;
             loadChiTietHoaDon(hoaDonId);
-            loadHoaDonThanhToan(hoaDonId);
+            // loadHoaDonThanhToan(hoaDonId);
             // console.log("Hóa đơn mới được thêm:", data.hoa_don);
         }
     })
     .listen("HoaDonUpdated", (data) => {
         if (data.type === "hoa_don_updated") {
-            // console.log("Hóa đơn đã được cập nhật:", data.hoa_don);
             let hoaDonId = $("#ten-ban").data("hoaDonId");
             if (hoaDonId && hoaDonId == data.hoa_don.id) {
                 loadChiTietHoaDon(hoaDonId);
-                loadHoaDonThanhToan(hoaDonId);
+                console.log(data)
+                // loadHoaDonThanhToan(hoaDonId);
             }
         }
     });
@@ -353,27 +353,53 @@ $(document).ready(function () {
 });
 
 function deleteMonAn(monAnId) {
-    if (isRequesting) return; // Nếu đang gửi yêu cầu, không gửi lại
+    if (isRequesting) return;
 
-    isRequesting = true;
-    $.ajax({
-        url: apiUrlXoaMon, // Đường dẫn đến action xử lý xóa trong controller của bạn
-        method: "POST",
-        data: {
-            mon_an_id: monAnId,
-            _token: $('meta[name="csrf-token"]').attr("content"), // CSRF token nếu dùng Laravel
-        },
-        success: function (response) {
-            isRequesting = false;
-            // Xóa món ăn khỏi bảng
-            $(`#mon-${monAnId}`).remove(); // Loại bỏ dòng có ID tương ứng
-            $("#tong-tien").text(
-                response.tong_tien.toLocaleString("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                })
-            );
-        },
+    Swal.fire({
+        title: "Bạn có chắc chắn?",
+        text: "Món ăn này sẽ bị xóa khỏi hóa đơn!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Xóa ngay",
+        cancelButtonText: "Hủy",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            isRequesting = true;
+            $.ajax({
+                url: apiUrlXoaMon,
+                method: "POST",
+                data: {
+                    mon_an_id: monAnId,
+                    _token: $('meta[name="csrf-token"]').attr("content"),
+                },
+                success: function (response) {
+                    isRequesting = false;
+                    // Xóa dòng món ăn khỏi bảng
+                    $(`#mon-${monAnId}`).remove();
+
+                    // Cập nhật tổng tiền
+                    $("#tong-tien").text(
+                        response.tong_tien.toLocaleString("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                        })
+                    );
+
+                    // Hiển thị thông báo thành công
+                    Swal.fire(
+                        "Đã xóa!",
+                        "Món ăn đã được xóa khỏi hóa đơn.",
+                        "success"
+                    );
+                },
+                error: function () {
+                    isRequesting = false;
+                    Swal.fire("Lỗi!", "Không thể xóa món ăn.", "error");
+                },
+            });
+        }
     });
 }
 
