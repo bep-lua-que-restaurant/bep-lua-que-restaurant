@@ -56,30 +56,33 @@ $(document).ready(function () {
             },
             success: function (response) {
                 if (response.hoa_don_id) {
-                    // console.log("🔥 Hóa đơn ID:", response.hoa_don_id);
                     $("#ten-ban").data("hoaDonId", response.hoa_don_id);
                     // Gọi API để lấy chi tiết hóa đơn
                     loadChiTietHoaDon(response.hoa_don_id);
-                    loadHoaDonThanhToan(response.hoa_don_id);
+                    
                 } else {
-                    var hoaDonId = null;
-                    loadChiTietHoaDon(hoaDonId);
-                    // console.log("🔥 Bàn này chưa có hóa đơn.");
+                    // var hoaDonId = null;
+                    var maHoaDonElement = document.getElementById("maHoaDon");
+                    // loadChiTietHoaDon(hoaDonId);
                     $("#ten-ban").data("hoaDonId", null);
                     $("#hoa-don-body").html(`
                         <tr>
-    <td colspan="5" class="text-center">
-        <div class="empty-invoice w-100 p-5 border border-2 rounded bg-light">
-            <i class="bi bi-receipt text-muted" style="font-size: 50px;"></i>
-            <div class="mt-2">Chưa có món nào trong đơn</div>
-            <div>🍔 Mời bạn chọn món!</div>
-        </div>
-    </td>
-</tr>
-`);
+                            <td colspan="5" class="text-center">
+                                <div class="empty-invoice w-100 p-5 border border-2 rounded bg-light">
+                                    <i class="bi bi-receipt text-muted" style="font-size: 50px;"></i>
+                                    <div class="mt-2">Chưa có món nào trong đơn</div>
+                                    <div>🍔 Mời bạn chọn món!</div>
+                                </div>
+                            </td>
+                        </tr>
+                    `);
+                    maHoaDonElement.innerText = "Chưa có hóa đơn";
+                    maHoaDonElement.style.color = "red";
 
                     $("#tong-tien").text("0 VNĐ");
                     $(".so-nguoi").text("👥 0");
+
+                    
                 }
             },
             error: function (xhr) {
@@ -328,7 +331,7 @@ $(document).ready(function () {
 window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (data) => {
     let monAnId = data.monAn.id;
     let trangThaiMoi = data.monAn.trang_thai;
-    let monAn = data.monAn.mon_an_id
+    let monAn = data.monAn.mon_an_id;
     // console.log(monAnId,trangThaiMoi,monAn)
     let row = $(`tr[data-id-mon="${monAn}"]`);
     if (row.length) {
