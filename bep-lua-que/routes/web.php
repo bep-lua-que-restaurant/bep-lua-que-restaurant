@@ -45,7 +45,9 @@ use App\Models\DatBan;
 use Carbon\Carbon;
 
 
-
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // // Tất cả roles đều truy cập 
 Route::middleware(['auth'])->group(function () {
     // Nếu là bếp, chuyển hướng ngay đến trang bếp
@@ -101,7 +103,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/luong', [LuongController::class, 'index'])->name('luong.index');
     });
 
-});
+
 Route::get('/', function () {
     return view('admin.dashboard');
 });
@@ -142,10 +144,10 @@ Route::get('export-ca-lam', [CaLamController::class, 'export'])->name('ca-lam.ex
 Route::post('/import-ca-lam', [CaLamController::class, 'importCaLam'])->name('ca-lam.import');
 
 
-Route::resource('nha-cung-cap', \App\Http\Controllers\NhaCungCapController::class);
-Route::post('nha-cung-cap/restore/{id}', [\App\Http\Controllers\NhaCungCapController::class, 'restore'])->name('nha-cung-cap.restore');
+// Route::resource('nha-cung-cap', \App\Http\Controllers\NhaCungCapController::class);
+// Route::post('nha-cung-cap/restore/{id}', [\App\Http\Controllers\NhaCungCapController::class, 'restore'])->name('nha-cung-cap.restore');
 
-Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'export'])->name('nha-cung-cap.export');
+// Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'export'])->name('nha-cung-cap.export');
 
 //Route::post('/import-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha-cung-cap.import');
 
@@ -159,7 +161,7 @@ Route::post('/chat/gui', [ChatController::class, 'guiTinNhan'])->name('chat.gui'
 Route::get('/chat/tin-nhan', [ChatController::class, 'layTinNhan'])->name('chat.layTinNhan');
 
 
-Route::post('/nha_cung_cap/import', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha_cung_cap.import');
+// Route::post('/nha_cung_cap/import', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha_cung_cap.import');
 
 // Phong an
 // Route::resource('phong-an', PhongAnController::class);
@@ -247,9 +249,7 @@ Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
 // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 
 // // Đăng nhập phân quyền
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
 // Route::middleware(['auth'])->group(function () {
 
 //     Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
@@ -427,3 +427,4 @@ Route::get('/get-dat-ban-by-date', function (Request $request) {
 
 
 
+});
