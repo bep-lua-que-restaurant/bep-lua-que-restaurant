@@ -48,4 +48,5 @@
     <button id="prevBtn" class="btn btn-primary btn-sm px-4">⬅ </button>
     <button id="nextBtn" class="btn btn-primary btn-sm px-4"> ➡</button>
 </div>
-<script src="{{ asset('admin/js/listBanAn.js') }}"></script>
+{{-- <script src="{{ asset('admin/js/listBanAn.js') }}"></script> --}}
+<script src="{{ asset('admin/js/copylistban.js') }}"></script>

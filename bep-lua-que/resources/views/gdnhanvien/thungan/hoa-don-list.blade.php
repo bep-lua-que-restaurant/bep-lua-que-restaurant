@@ -158,9 +158,9 @@
                         <th scope="col">Tổng cộng</th>
                     </tr>
                 </thead>
-                <tbody id="hoa-don-thanh-toan-body">
+                {{-- <tbody id="hoa-don-thanh-toan-body">
                     <!-- Dữ liệu hóa đơn sẽ được hiển thị ở đây -->
-                </tbody>
+                </tbody> --}}
             </table>
         </div>
 

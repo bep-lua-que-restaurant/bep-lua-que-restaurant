@@ -632,8 +632,10 @@ class ThuNganController extends Controller
 
         // Cập nhật số lượng món ăn
         $chiTietHoaDon->so_luong += $thayDoi;
+        $chiTietHoaDon->thanh_tien = $chiTietHoaDon->so_luong * $chiTietHoaDon->don_gia;
         $chiTietHoaDon->save();
 
+        $thanhTien = $chiTietHoaDon->thanh_tien;
         // Lấy lại tổng tiền của hóa đơn
         $hoaDonId = $chiTietHoaDon->hoa_don_id;
         $tongTien = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
@@ -641,14 +643,18 @@ class ThuNganController extends Controller
             ->map(fn($item) => $item->so_luong * $item->don_gia)
             ->sum();
 
-        // Cập nhật tổng tiền hóa đơn
-        HoaDon::where('id', $hoaDonId)->update(['tong_tien' => $tongTien]);
+        $hoaDon = HoaDon::find($hoaDonId);
+        $hoaDon->update(['tong_tien' => $tongTien]);
 
+        // 🔥 Phát sự kiện cập nhật hóa đơn
+        $hoaDon->load('chiTietHoaDons'); // Nạp lại dữ liệu chi tiết hóa đơn
+        broadcast(new HoaDonUpdated($hoaDon))->toOthers();
         return response()->json([
             'success' => true,
             'hoa_don_id' => $hoaDonId,
             'tong_tien' => $tongTien,
             'so_luong' => $chiTietHoaDon->so_luong,
+            'thanh_tien' => $thanhTien
         ]);
     }
 
