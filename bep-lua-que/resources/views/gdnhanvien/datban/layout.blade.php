@@ -47,7 +47,6 @@
             <nav class="col-2 bg-light pt-3">
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        {{-- <a class="dropdown-item" href="/"><i class="fas fa-tachometer-alt"></i>dashboard</a> --}}
                         <a href="/" class="btn btn-primary  w-100">Trang chủ</a>
                     </li>
                     <br>
@@ -56,8 +55,7 @@
                     </li>
                     <br>
                     <li class="nav-item">
-                        <a href="{{ route('datban.danhsach') }}" class="btn btn-primary  w-100">Danh sách bàn đã được
-                            đặt</a>
+                        <a href="{{ route('datban.danhsach') }}" class="btn btn-primary  w-100">Danh sách</a>
                     </li>
 
                 </ul>

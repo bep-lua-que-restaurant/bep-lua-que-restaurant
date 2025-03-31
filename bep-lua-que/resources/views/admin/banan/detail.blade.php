@@ -49,7 +49,7 @@
                             </tr>
 
 
-                            <tr class="{{ $phongAn && $phongAn->deleted_at ? 'table-danger' : '' }}">
+                            {{-- <tr class="{{ $phongAn && $phongAn->deleted_at ? 'table-danger' : '' }}">
                                 <th>Vị trí</th>
                                 <td>
                                     @if ($phongAn)
@@ -61,7 +61,7 @@
                                         <span class="text-danger">Không tìm thấy phòng ăn</span>
                                     @endif
                                 </td>
-                            </tr>
+                            </tr> --}}
 
                             <tr class="{{ $banAn->deleted_at ? 'table-danger' : '' }}">
                                 <th>Trạng thái</th>

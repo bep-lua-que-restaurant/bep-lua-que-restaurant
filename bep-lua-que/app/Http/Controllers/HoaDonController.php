@@ -22,20 +22,20 @@ class HoaDonController extends Controller
     public function index(Request $request)
     {
         $query = HoaDon::with(['chiTietHoaDons.monAn'])
-        ->leftJoin('hoa_don_bans', 'hoa_don_bans.hoa_don_id', '=', 'hoa_dons.id')
-        ->leftJoin('ban_ans', 'ban_ans.id', '=', 'hoa_don_bans.ban_an_id')
-        ->leftJoin('dat_bans', function ($join) {
-            $join->on('dat_bans.ban_an_id', '=', 'ban_ans.id')
-                ->whereNotNull('dat_bans.khach_hang_id');
-        })
-        ->leftJoin('khach_hangs', 'khach_hangs.id', '=', 'dat_bans.khach_hang_id')
-        ->select(
-            'hoa_dons.id',
-            'hoa_dons.ma_hoa_don',
-            'hoa_dons.tong_tien',
-            'hoa_dons.phuong_thuc_thanh_toan',
-            'hoa_dons.created_at as ngay_tao',
-            DB::raw('IFNULL(
+            ->leftJoin('hoa_don_bans', 'hoa_don_bans.hoa_don_id', '=', 'hoa_dons.id')
+            ->leftJoin('ban_ans', 'ban_ans.id', '=', 'hoa_don_bans.ban_an_id')
+            ->leftJoin('dat_bans', function ($join) {
+                $join->on('dat_bans.ban_an_id', '=', 'ban_ans.id')
+                    ->whereNotNull('dat_bans.khach_hang_id');
+            })
+            ->leftJoin('khach_hangs', 'khach_hangs.id', '=', 'dat_bans.khach_hang_id')
+            ->select(
+                'hoa_dons.id',
+                'hoa_dons.ma_hoa_don',
+                'hoa_dons.tong_tien',
+                'hoa_dons.phuong_thuc_thanh_toan',
+                'hoa_dons.created_at as ngay_tao',
+                DB::raw('IFNULL(
                 SUBSTRING_INDEX(
                     GROUP_CONCAT(
                         DISTINCT CASE 
@@ -48,7 +48,7 @@ class HoaDonController extends Controller
                     ), 
                 ",", 1), 
             "Không có khách") as ho_ten'),
-            DB::raw('IFNULL(
+                DB::raw('IFNULL(
                 SUBSTRING_INDEX(
                     GROUP_CONCAT(
                         DISTINCT CASE 
@@ -61,20 +61,20 @@ class HoaDonController extends Controller
                     ), 
                 ",", 1), 
             "Không có số") as so_dien_thoai'),
-            DB::raw('IFNULL(GROUP_CONCAT(DISTINCT ban_ans.ten_ban ORDER BY ban_ans.ten_ban ASC SEPARATOR ", "), "Chưa có bàn") as ten_ban')
-        )
-        ->groupBy('hoa_dons.id', 'hoa_dons.ma_hoa_don', 'hoa_dons.tong_tien', 'hoa_dons.phuong_thuc_thanh_toan', 'hoa_dons.created_at')
-        ->orderByDesc('hoa_dons.created_at');
-    
+                DB::raw('IFNULL(GROUP_CONCAT(DISTINCT ban_ans.ten_ban ORDER BY ban_ans.ten_ban ASC SEPARATOR ", "), "Chưa có bàn") as ten_ban')
+            )
+            ->groupBy('hoa_dons.id', 'hoa_dons.ma_hoa_don', 'hoa_dons.tong_tien', 'hoa_dons.phuong_thuc_thanh_toan', 'hoa_dons.created_at')
+            ->orderByDesc('hoa_dons.created_at');
+
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('hoa_dons.ma_hoa_don', 'like', "%{$search}%")
-                  ->orWhereRaw("IFNULL(khach_hangs.ho_ten, '') LIKE ?", ["%{$search}%"])
-                  ->orWhereRaw("IFNULL(khach_hangs.so_dien_thoai, '') LIKE ?", ["%{$search}%"]);
+                    ->orWhereRaw("IFNULL(khach_hangs.ho_ten, '') LIKE ?", ["%{$search}%"])
+                    ->orWhereRaw("IFNULL(khach_hangs.so_dien_thoai, '') LIKE ?", ["%{$search}%"]);
             });
         }
-        
+
         $hoa_don = $query->paginate(10);
         // dd($hoa_don);`
         if ($request->ajax()) {
@@ -86,7 +86,7 @@ class HoaDonController extends Controller
         return view('admin.hoadon.index', compact('hoa_don'));
     }
 
-    
+
 
 
 
@@ -161,7 +161,8 @@ class HoaDonController extends Controller
                 'trang_thai' => 'cho_xac_nhan'
             ]);
             $hoaDon = HoaDon::with('chiTietHoaDons')->find($hoaDon->id);
-            event(new HoaDonAdded($hoaDon));
+            broadcast(new HoaDonAdded($hoaDon))->toOthers();
+            // event(new HoaDonAdded($hoaDon));
         }
         // Cập nhật tổng tiền trong bảng `hoa_don`
         $tongTien = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)->sum('thanh_tien');
@@ -201,8 +202,8 @@ class HoaDonController extends Controller
         // Nạp luôn chi tiết hóa đơn để gửi đầy đủ dữ liệu
         $hoaDon = HoaDon::with('chiTietHoaDons')->find($hoaDon->id);
 
-        event(new HoaDonUpdated($hoaDon));
-
+        broadcast(new HoaDonUpdated($hoaDon))->toOthers();
+        // event(new HoaDonUpdated($hoaDon));
         return response()->json([
             'data' => $hoaDon
         ], 200);
@@ -212,57 +213,57 @@ class HoaDonController extends Controller
     public function show($id)
     {
         $hoaDon = HoaDon::with(['chiTietHoaDons.monAn', 'banAns'])
-        ->leftJoin('hoa_don_bans', 'hoa_don_bans.hoa_don_id', '=', 'hoa_dons.id')
-        ->leftJoin('ban_ans', 'ban_ans.id', '=', 'hoa_don_bans.ban_an_id')
-        ->leftJoin('dat_bans', function ($join) {
-            $join->on('dat_bans.ban_an_id', '=', 'ban_ans.id')
-                 ->whereNotNull('dat_bans.khach_hang_id'); 
-        })
-        ->leftJoin('khach_hangs', 'khach_hangs.id', '=', 'dat_bans.khach_hang_id')
-        ->select(
-            'hoa_dons.*',
-            'khach_hangs.ho_ten as ten_khach_hang',
-            'khach_hangs.so_dien_thoai'
-        )
-        ->where('hoa_dons.id', $id)
-        ->firstOrFail();
+            ->leftJoin('hoa_don_bans', 'hoa_don_bans.hoa_don_id', '=', 'hoa_dons.id')
+            ->leftJoin('ban_ans', 'ban_ans.id', '=', 'hoa_don_bans.ban_an_id')
+            ->leftJoin('dat_bans', function ($join) {
+                $join->on('dat_bans.ban_an_id', '=', 'ban_ans.id')
+                    ->whereNotNull('dat_bans.khach_hang_id');
+            })
+            ->leftJoin('khach_hangs', 'khach_hangs.id', '=', 'dat_bans.khach_hang_id')
+            ->select(
+                'hoa_dons.*',
+                'khach_hangs.ho_ten as ten_khach_hang',
+                'khach_hangs.so_dien_thoai'
+            )
+            ->where('hoa_dons.id', $id)
+            ->firstOrFail();
 
         return view('admin.hoadon.show', compact('hoaDon'));
     }
     //in hóa đơn
-//     public function printInvoice($id)
-// {
-//     $hoaDon = HoaDon::with(['banAns']) // Chỉ lấy thông tin hóa đơn, tránh dữ liệu lặp
-//     ->leftJoin('hoa_don_bans', 'hoa_don_bans.hoa_don_id', '=', 'hoa_dons.id')
-//     ->leftJoin('ban_ans', 'ban_ans.id', '=', 'hoa_don_bans.ban_an_id')
-//     ->leftJoin('dat_bans', function ($join) {
-//         $join->on('dat_bans.ban_an_id', '=', 'ban_ans.id')
-//              ->whereNotNull('dat_bans.khach_hang_id'); 
-//     })
-//     ->leftJoin('khach_hangs', 'khach_hangs.id', '=', 'dat_bans.khach_hang_id')
-//     ->select(
-//         'hoa_dons.*',
-//         'khach_hangs.ho_ten as ten_khach_hang',
-//         'khach_hangs.so_dien_thoai'
-//     )
-//     ->where('hoa_dons.id', $id)
-//     ->firstOrFail(); // Lấy một bản ghi hóa đơn duy nhất
-//     $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $id)
-//     ->join('mon_ans', 'mon_ans.id', '=', 'chi_tiet_hoa_dons.mon_an_id')
-//     ->select(
-//         'mon_ans.ten as ten_mon',
-//         'chi_tiet_hoa_dons.so_luong',
-//         'chi_tiet_hoa_dons.don_gia',
-//         'mon_ans.gia' // Lấy thêm giá bán từ bảng mon_ans
-//     )
-//     ->get(); // Lấy danh sách món ăn
+    //     public function printInvoice($id)
+    // {
+    //     $hoaDon = HoaDon::with(['banAns']) // Chỉ lấy thông tin hóa đơn, tránh dữ liệu lặp
+    //     ->leftJoin('hoa_don_bans', 'hoa_don_bans.hoa_don_id', '=', 'hoa_dons.id')
+    //     ->leftJoin('ban_ans', 'ban_ans.id', '=', 'hoa_don_bans.ban_an_id')
+    //     ->leftJoin('dat_bans', function ($join) {
+    //         $join->on('dat_bans.ban_an_id', '=', 'ban_ans.id')
+    //              ->whereNotNull('dat_bans.khach_hang_id'); 
+    //     })
+    //     ->leftJoin('khach_hangs', 'khach_hangs.id', '=', 'dat_bans.khach_hang_id')
+    //     ->select(
+    //         'hoa_dons.*',
+    //         'khach_hangs.ho_ten as ten_khach_hang',
+    //         'khach_hangs.so_dien_thoai'
+    //     )
+    //     ->where('hoa_dons.id', $id)
+    //     ->firstOrFail(); // Lấy một bản ghi hóa đơn duy nhất
+    //     $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $id)
+    //     ->join('mon_ans', 'mon_ans.id', '=', 'chi_tiet_hoa_dons.mon_an_id')
+    //     ->select(
+    //         'mon_ans.ten as ten_mon',
+    //         'chi_tiet_hoa_dons.so_luong',
+    //         'chi_tiet_hoa_dons.don_gia',
+    //         'mon_ans.gia' // Lấy thêm giá bán từ bảng mon_ans
+    //     )
+    //     ->get(); // Lấy danh sách món ăn
 
 
 
-//     $pdf = Pdf::loadView('admin.hoadon.pdf', compact('hoaDon', 'chiTietHoaDon'));
+    //     $pdf = Pdf::loadView('admin.hoadon.pdf', compact('hoaDon', 'chiTietHoaDon'));
 
-//     return $pdf->stream('hoa_don_' . $hoaDon->id . '.pdf');
-    
-// }
+    //     return $pdf->stream('hoa_don_' . $hoaDon->id . '.pdf');
+
+    // }
 
 }

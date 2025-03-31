@@ -14,22 +14,15 @@
         <p><strong>Mô tả: </strong>{{ $datBan->mo_ta ?? 'Không có mô tả' }}</p>
 
         <h4>Bàn đã đặt:</h4>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    {{-- <th>Phòng ăn</th> --}}
-                    <th>Tên bàn</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($datBans as $datBanItem)
-                    <tr>
-                        {{-- <td>{{ optional($datBanItem->banAn->phongAn)->ten_phong_an ?? 'Không xác định' }}</td> --}}
-                        <td>{{ optional($datBanItem->banAn)->ten_ban ?? 'Không xác định' }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+
+        <div class="m-3">
+            @foreach ($datBans as $datBanItem)
+                {{-- <td>{{ optional($datBanItem->banAn->phongAn)->ten_phong_an ?? 'Không xác định' }}</td> --}}
+                <div class="btn sm border border-primary">{{ optional($datBanItem->banAn)->ten_ban ?? 'Không xác định' }}
+                </div>
+            @endforeach
+        </div>
+
     </div>
     <a class="btn btn-primary" href="{{ route('datban.danhsach') }}">Quay lại</a>
 @endsection

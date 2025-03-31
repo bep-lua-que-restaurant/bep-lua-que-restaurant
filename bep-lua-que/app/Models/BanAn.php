@@ -13,12 +13,15 @@ class BanAn extends Model
     protected $fillable = ['ten_ban', 'so_ghe', 'mo_ta', 'vi_tri', 'trang_thai'];
 
 
+    protected $attributes = [
+        'so_ghe' => 4,
+    ];
 
     // BanAn model
-    public function phongAn()
-    {
-        return $this->belongsTo(PhongAn::class, 'vi_tri');  // 'vi_tri' là khóa ngoại trỏ đến id trong PhongAn
-    }
+    // public function phongAn()
+    // {
+    //     return $this->belongsTo(PhongAn::class, 'vi_tri');  // 'vi_tri' là khóa ngoại trỏ đến id trong PhongAn
+    // }
     public function datBans()
     {
         return $this->hasMany(DatBan::class, 'ban_an_id');
@@ -32,8 +35,7 @@ class BanAn extends Model
             ->withTimestamps();
     }
     public function scopeTrangThaiBan($query, $tenBan)
-{
-    return $query->where('ten_ban', $tenBan)->first();
-}
-
+    {
+        return $query->where('ten_ban', $tenBan)->first();
+    }
 }

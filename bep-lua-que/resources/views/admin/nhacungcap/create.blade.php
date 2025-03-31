@@ -14,7 +14,7 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
                     <li class="breadcrumb-item active"><a href="javascript:void(0)">Thêm mới nhà cung cấp</a></li>
                 </ol>
             </div>
@@ -39,7 +39,7 @@
                             <div class="form-group">
                                 <label for="name">Địa chỉ</label>
                                 <input type="text" id="dia_chi" name="dia_chi" class="form-control"
-                                       placeholder="Nhập địa chỉ">
+                                    placeholder="Nhập địa chỉ">
                                 @if ($errors->has('dia_chi'))
                                     <small class="text-danger">*{{ $errors->first('dia_chi') }}</small>
                                 @endif
@@ -48,7 +48,7 @@
                             <div class="form-group">
                                 <label for="name">Số điện thoại</label>
                                 <input type="tel" id="so_dien_thoai" name="so_dien_thoai" class="form-control"
-                                       placeholder="Nhập số điện thoại">
+                                    placeholder="Nhập số điện thoại">
                                 @if ($errors->has('so_dien_thoai'))
                                     <small class="text-danger">*{{ $errors->first('so_dien_thoai') }}</small>
                                 @endif
@@ -57,7 +57,7 @@
                             <div class="form-group">
                                 <label for="name">Email</label>
                                 <input type="email" id="email" name="email" class="form-control"
-                                       placeholder="Nhập email">
+                                    placeholder="Nhập email">
                                 @if ($errors->has('email'))
                                     <small class="text-danger">*{{ $errors->first('email') }}</small>
                                 @endif

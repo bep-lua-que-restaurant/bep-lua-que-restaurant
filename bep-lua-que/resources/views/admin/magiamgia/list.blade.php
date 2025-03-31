@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-    Mã giảm 
+    Mã giảm
 @endsection
 
 @section('content')
@@ -14,7 +14,7 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
                     <li class="breadcrumb-item active"><a href="javascript:void(0)">MaGiaGia</a></li>
                 </ol>
             </div>
@@ -94,8 +94,8 @@
                         aria-label="Close"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
-                     {{-- ///Form nhập file --> --}}
-                <form action="{{ route('ma-giam-gia.import') }}" method="POST" enctype="multipart/form-data"
+                    {{-- ///Form nhập file --> --}}
+                    <form action="{{ route('ma-giam-gia.import') }}" method="POST" enctype="multipart/form-data"
                         id="importFileForm">
                         @csrf
                         <div class="mb-3">

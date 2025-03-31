@@ -1,0 +1,47 @@
+[33mfedc140[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdoanvanquan[m[33m)[m HEAD@{0}: rebase (finish): returning to refs/heads/doanvanquan
+[33mfedc140[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdoanvanquan[m[33m)[m HEAD@{1}: rebase (pick): Lưu thay đổi trước khi rebase
+[33mbac6439[m[33m ([m[1;31morigin/quanpvmph46994[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{2}: rebase (start): checkout origin/main
+[33m350dfcd[m HEAD@{3}: commit: Lưu thay đổi trước khi rebase
+[33m4a18b51[m[33m ([m[1;31morigin/doanvanquan[m[33m)[m HEAD@{4}: pull: Fast-forward
+[33m8bbd706[m HEAD@{5}: checkout: moving from doanvanquan to doanvanquan
+[33m8bbd706[m HEAD@{6}: commit: Cập nhật chức năng đặt bàn và hoàn thiện realtime ở giao diện đặt bàn
+[33m8444768[m HEAD@{7}: commit: cập nhật tính năng đặt bàn
+[33m05ac4ce[m HEAD@{8}: merge origin/main: Fast-forward
+[33mfd167f6[m HEAD@{9}: checkout: moving from doanvanquan to doanvanquan
+[33mfd167f6[m HEAD@{10}: checkout: moving from doanvanquan to doanvanquan
+[33mfd167f6[m HEAD@{11}: commit: Cập nhật giao diện và sửa lỗi đặt bàn
+[33m45c3c2a[m HEAD@{12}: checkout: moving from doanvanquan to doanvanquan
+[33m45c3c2a[m HEAD@{13}: commit: Cập nhật các phần fix bug đặt bàn
+[33m18ca68e[m HEAD@{14}: commit: cap nhap gui email thong bao
+[33m593fd3b[m HEAD@{15}: pull origin main: Fast-forward
+[33mfb295bf[m HEAD@{16}: commit: cập nhập giao diện chức năng của đặt bàn
+[33mf4ee293[m[33m ([m[1;32mmain[m[33m)[m HEAD@{17}: merge main: Fast-forward
+[33m7c88166[m HEAD@{18}: checkout: moving from main to doanvanquan
+[33mf4ee293[m[33m ([m[1;32mmain[m[33m)[m HEAD@{19}: commit (merge): Merge changes from origin/main and resolved conflicts
+[33m389ae11[m HEAD@{20}: commit: Resolved conflicts and committed changes in detail.blade.php
+[33m8fd33a9[m HEAD@{21}: pull origin main: updating HEAD
+[33m8fd33a9[m HEAD@{22}: commit (merge): Resolved merge conflicts in composer.lock and routes/web.php
+[33m5b83dd7[m HEAD@{23}: commit (merge): Giải quyết xung đột trong composer.lock và routes/web.php
+[33m7c88166[m HEAD@{24}: merge doanvanquan: Fast-forward
+[33m86496d2[m HEAD@{25}: checkout: moving from doanvanquan to main
+[33m7c88166[m HEAD@{26}: commit: thay doi lai realtime và giao diện
+[33m86496d2[m HEAD@{27}: merge main: Fast-forward
+[33m4b78e5f[m HEAD@{28}: pull origin doanvanquan: Fast-forward
+[33m2b275b7[m HEAD@{29}: checkout: moving from main to doanvanquan
+[33m86496d2[m HEAD@{30}: pull origin main: Fast-forward
+[33m2494993[m HEAD@{31}: checkout: moving from doanvanquan to main
+[33m2b275b7[m HEAD@{32}: commit: Chức năng cơ bản phần đặt bàn
+[33m6c18d3d[m HEAD@{33}: checkout: moving from doanvanquan to doanvanquan
+[33m6c18d3d[m HEAD@{34}: commit: Resolve merge conflict in routes/web.php
+[33m2494993[m HEAD@{35}: merge main: Fast-forward
+[33mfca09dc[m HEAD@{36}: checkout: moving from main to doanvanquan
+[33m2494993[m HEAD@{37}: pull origin main: Fast-forward
+[33mbafa4ce[m HEAD@{38}: checkout: moving from doanvanquan to main
+[33mfca09dc[m HEAD@{39}: reset: moving to HEAD
+[33mfca09dc[m HEAD@{40}: commit (merge): logic dat ban le tan
+[33mabf1b43[m HEAD@{41}: commit: Chỉnh sửa lại Phòng, Bàn, Realtime Lễ tân đặt bànbàn
+[33m1a34593[m HEAD@{42}: commit: crud phòng bàn - bàn ăn
+[33mbafa4ce[m HEAD@{43}: pull origin main: Fast-forward
+[33me8bb459[m HEAD@{44}: checkout: moving from main to doanvanquan
+[33mbafa4ce[m HEAD@{45}: pull origin main: Fast-forward
+[33me8bb459[m HEAD@{46}: clone: from https://github.com/bep-lua-que-restaurant/bep-lua-que-restaurant.git

@@ -102,12 +102,6 @@
 
         </div>
 
-        <div class="row">
-            <div class="col-12 text-center">
-                {{ $banAns->links('pagination::bootstrap-5') }}
-            </div>
-        </div>
-
         <!-- Modal hiển thị danh sách đã chọn -->
         <div id="bookingModal" class="modal fade" tabindex="-1">
 
@@ -170,14 +164,7 @@
                                 <h6 class="fw-bold">Danh sách bàn đã chọn</h6>
                                 <div class="table-responsive"> <!-- Thêm div này để bảng có thể co giãn tốt hơn -->
                                     <table class="table table-bordered table-striped w-100">
-                                        <thead class="table-dark">
-                                            <tr>
-                                                <th>Bàn</th>
-                                                <th>Giờ bắt đầu</th>
-                                                <th>Giờ kết thúc</th>
-                                                <th>Ngày</th>
-                                            </tr>
-                                        </thead>
+
                                         <tbody id="selectedSlots"></tbody>
                                     </table>
                                 </div>
@@ -319,7 +306,6 @@
                 updateModal();
 
 
-
                 function updateModal() {
                     const selectedSlotsList = document.getElementById("selectedSlots");
                     selectedSlotsList.innerHTML = "";
@@ -332,91 +318,105 @@
                     openModalBtn.style.display = "block";
 
                     const groupedSlots = {};
+                    let allBanAnIds = [];
+                    let allNgayDen = new Set();
+                    let earliestTime = null;
+                    let latestTime = null;
+
                     selectedSlots.forEach((slot) => {
                         if (!groupedSlots[slot.banId]) {
                             groupedSlots[slot.banId] = {
                                 tenBan: slot.tenBan,
-                                times: [],
-                                date: slot.date,
                             };
                         }
+                        groupedSlots[slot.banId].date = slot.date;
+                        groupedSlots[slot.banId].times = groupedSlots[slot.banId].times || [];
                         groupedSlots[slot.banId].times.push(slot.timeSlot);
+                        allNgayDen.add(slot.date);
                     });
-
-                    let allBanAnIds = [];
-                    let allNgayDen = [];
-                    let earliestTime = null;
-                    let latestTime = null;
 
                     Object.entries(groupedSlots).forEach(([banId, group]) => {
-                        // Sắp xếp thời gian theo thứ tự tăng dần
+                        // 🟢 Sắp xếp thời gian theo thứ tự tăng dần
                         group.times.sort();
 
-                        const startTime = group.times[0]; // Giờ bắt đầu
-                        const endTime = group.times[group.times.length - 1]; // Giờ kết thúc
+                        const startTime = group.times[0]; // Giờ bắt đầu nhỏ nhất
+                        const endTime = group.times[group.times.length - 1]; // Giờ kết thúc lớn nhất
 
-                        // Format thời gian theo định dạng HH:mm:ss
-                        const formattedStartTime = startTime + ':00';
-
-                        // Tính giờ kết thúc + 25 phút
-                        const [hour, minute] = endTime.split(':').map(Number);
-                        let date = new Date();
-                        date.setHours(hour);
-                        date.setMinutes(minute + 25); // +25 phút
-
-                        // Format lại giờ kết thúc sau khi cộng thêm
-                        const formattedEndTime =
-                            `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:00`;
-
-                        console.log("Start Time:", formattedStartTime);
-                        console.log("End Time:", formattedEndTime);
-
-                        // Thêm hàng vào bảng danh sách đã chọn
-                        const row = document.createElement("tr");
-                        row.innerHTML = `
-        <td>${group.tenBan}</td>
-        <td>${formattedStartTime}</td>
-        <td>${formattedEndTime}</td>
-        <td>${group.date}</td>
-    `;
-                        selectedSlotsList.appendChild(row);
-
-                        // Lưu ID bàn ăn vào danh sách
-                        allBanAnIds.push(banId);
-                        allNgayDen.push(group.date);
-
-                        // Tìm thời gian sớm nhất và muộn nhất
+                        // 🟢 Cập nhật giờ bắt đầu sớm nhất và muộn nhất
                         if (!earliestTime || startTime < earliestTime) earliestTime = startTime;
                         if (!latestTime || endTime > latestTime) latestTime = endTime;
+
+                        // 🟢 Lưu ID bàn ăn vào danh sách
+                        allBanAnIds.push(banId);
                     });
 
-
-                    // ✅ Gán giá trị cho input ẩn
-                    document.getElementById("banAnIds").value = allBanAnIds.join(",");
-
-                    // ✅ Nếu có nhiều ngày đến khác nhau → Lấy ngày đầu tiên
-                    const uniqueDates = [...new Set(allNgayDen)];
+                    // 🟢 Nếu có nhiều ngày → Không hợp lệ
+                    const uniqueDates = [...allNgayDen];
                     if (uniqueDates.length > 1) {
                         alert("Không thể chọn các khung giờ từ nhiều ngày khác nhau.");
                         return;
                     }
+                    const selectedDate = uniqueDates[0];
 
-                    // ✅ Gộp `ngay_den` và `thoi_gian_den` thành `thoiGianDen`
-                    if (earliestTime && uniqueDates.length === 1) {
-                        const thoiGianDen = `${uniqueDates[0]} ${earliestTime}:00`;
-                        document.getElementById("thoiGianDen").value = thoiGianDen;
-                    }
+                    // 🟢 Format giờ kết thúc + 25 phút
+                    const [hour, minute] = latestTime.split(':').map(Number);
+                    let dateObj = new Date();
+                    dateObj.setHours(hour);
+                    dateObj.setMinutes(minute + 25);
+                    const formattedEndTime =
+                        `${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}:00`;
 
-                    // ✅ Đổi `gioDuKien` thành thời gian kết thúc
-                    if (latestTime) {
-                        document.getElementById("gioDuKien").value = latestTime + ':00';
-                    }
+                    // 🟢 Thêm dòng ngày & thời gian
+                    // 🟢 Tạo div chính để chứa ngày & thời gian và danh sách bàn ăn
+                    // 🟢 Tạo div chính chứa tất cả (Dùng `d-flex` + `flex-wrap` để tối ưu hiển thị)
+                    const mainRow = document.createElement("div");
+                    mainRow.classList.add("d-flex", "flex-wrap", "py-2", "gap-2");
 
+                    // 🟢 Div chứa ngày & thời gian (Luôn nằm trên cùng)
+                    const timeInfo = document.createElement("div");
+                    timeInfo.classList.add("fw-bold", "w-100"); // Đảm bảo full width
+                    timeInfo.innerHTML = `Ngày: ${selectedDate} | Giờ: ${earliestTime} → ${formattedEndTime}`;
 
+                    // 🟢 Div chứa danh sách bàn ăn (Sẽ wrap xuống nếu quá dài)
+                    const banList = document.createElement("div");
+                    banList.classList.add("d-flex", "flex-wrap", "gap-2");
 
+                    // 🟢 Dùng Set để tránh trùng bàn ăn
+                    const displayedBanIds = new Set();
 
+                    Object.entries(groupedSlots).forEach(([banId, group]) => {
+                        if (!displayedBanIds.has(banId)) {
+                            displayedBanIds.add(banId);
 
+                            // 🟢 Badge hiển thị tên bàn
+                            const banItem = document.createElement("span");
+                            banItem.classList.add("badge", "bg-primary", "text-white", "px-3", "py-2");
+                            banItem.innerText = group.tenBan;
+
+                            banList.appendChild(banItem);
+
+                            // 🟢 Tạo input ẩn cho từng bàn
+                            const hiddenInput = document.createElement("input");
+                            hiddenInput.type = "hidden";
+                            hiddenInput.name = "selectedIds[]";
+                            hiddenInput.value = banId;
+                            selectedSlotsList.appendChild(hiddenInput);
+                        }
+                    });
+
+                    // 🟢 Gộp tất cả vào div chính
+                    mainRow.appendChild(timeInfo);
+                    mainRow.appendChild(banList);
+
+                    // 🟢 Thêm vào danh sách hiển thị
+                    selectedSlotsList.appendChild(mainRow);
+
+                    // 🟢 Gán giá trị cho input ẩn
+                    document.getElementById("banAnIds").value = allBanAnIds.join(",");
+                    document.getElementById("thoiGianDen").value = `${selectedDate} ${earliestTime}:00`;
+                    document.getElementById("gioDuKien").value = formattedEndTime;
                 }
+
 
                 // Mở modal khi click nút xem danh sách
                 openModalBtn.addEventListener("click", function() {

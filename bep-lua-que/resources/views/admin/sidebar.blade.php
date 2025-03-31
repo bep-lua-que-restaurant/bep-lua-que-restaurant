@@ -9,7 +9,7 @@
                 </a>
                 <ul aria-expanded="false">
                     <li><a href="{{ route('thongke.thongkedoanhso') }}">Thống kê doanh số</a></li>
-                    <li><a href="{{ route('thongke.thongkehoadon') }}">Thống kê số lượng hóa đơn</a></li>
+
                     <li><a href="{{ route('thongke.topdoanhthu') }}">Thống kê top doanh thu</a></li>
 
                     <li><a href="{{ route('thongke.thongkesoluongkhach') }}">Thống kê số lượng khách hàng</a></li>
@@ -229,6 +229,7 @@
                         <span class="nav-text">Nhân viên</span>
                     </a>
                     <ul aria-expanded="false">
+                        <li><a href="{{ route('chuc-vu.index') }}">Chức vụ</a></li>
                         <li><a href="{{ route('nhan-vien.index') }}">Nhân viên</a></li>
                         <li><a href="{{ route('ca-lam.index') }}">Ca làm</a></li>
                         <li><a href="{{ route('ca-lam-nhan-vien.index') }}">Quản lý ca làm</a></li>

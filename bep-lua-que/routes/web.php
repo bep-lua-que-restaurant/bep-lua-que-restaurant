@@ -5,6 +5,7 @@ use App\Http\Controllers\CaLamNhanVienController;
 
 use App\Http\Controllers\ChatController;
 
+use App\Http\Controllers\ChucVuController;
 use App\Http\Controllers\DanhMucMonAnController;
 use App\Http\Controllers\ComBoController;
 use App\Http\Controllers\DichVuController;
@@ -44,7 +45,9 @@ use App\Models\DatBan;
 use Carbon\Carbon;
 
 
-
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // // Tất cả roles đều truy cập 
 Route::middleware(['auth'])->group(function () {
     // Nếu là bếp, chuyển hướng ngay đến trang bếp
@@ -100,7 +103,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/luong', [LuongController::class, 'index'])->name('luong.index');
     });
 
-});
+
 Route::get('/', function () {
     return view('admin.dashboard');
 });
@@ -129,7 +132,11 @@ Route::resource('dich-vu', DichVuController::class);
 Route::post('dich-vu/restore/{id}', [DichVuController::class, 'restore'])->name('dich-vu.restore');
 Route::get('export-dich-vu', [DichVuController::class, 'export'])->name('dich-vu.export');
 Route::post('/import-dich-vu', [DichVuController::class, 'importDichVu'])->name('dich-vu.import');
-
+//Chức vụ
+Route::resource('chuc-vu', ChucVuController::class);
+Route::post('chuc-vu/restore/{id}', [ChucVuController::class, 'restore'])->name('chuc-vu.restore');
+Route::get('export-chuc-vu', [ChucVuController::class, 'export'])->name('chuc-vu.export');
+Route::post('/import-chuc-vu', [ChucVuController::class, 'importChucVu'])->name('chuc-vu.import');
 // Ca làm
 Route::resource('ca-lam', CaLamController::class);
 Route::post('ca-lam/restore/{id}', [CaLamController::class, 'restore'])->name('ca-lam.restore');
@@ -137,10 +144,10 @@ Route::get('export-ca-lam', [CaLamController::class, 'export'])->name('ca-lam.ex
 Route::post('/import-ca-lam', [CaLamController::class, 'importCaLam'])->name('ca-lam.import');
 
 
-Route::resource('nha-cung-cap', \App\Http\Controllers\NhaCungCapController::class);
-Route::post('nha-cung-cap/restore/{id}', [\App\Http\Controllers\NhaCungCapController::class, 'restore'])->name('nha-cung-cap.restore');
+// Route::resource('nha-cung-cap', \App\Http\Controllers\NhaCungCapController::class);
+// Route::post('nha-cung-cap/restore/{id}', [\App\Http\Controllers\NhaCungCapController::class, 'restore'])->name('nha-cung-cap.restore');
 
-Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'export'])->name('nha-cung-cap.export');
+// Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'export'])->name('nha-cung-cap.export');
 
 //Route::post('/import-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha-cung-cap.import');
 
@@ -154,7 +161,7 @@ Route::post('/chat/gui', [ChatController::class, 'guiTinNhan'])->name('chat.gui'
 Route::get('/chat/tin-nhan', [ChatController::class, 'layTinNhan'])->name('chat.layTinNhan');
 
 
-Route::post('/nha_cung_cap/import', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha_cung_cap.import');
+// Route::post('/nha_cung_cap/import', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha_cung_cap.import');
 
 // Phong an
 // Route::resource('phong-an', PhongAnController::class);
@@ -242,9 +249,7 @@ Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
 // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 
 // // Đăng nhập phân quyền
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
 // Route::middleware(['auth'])->group(function () {
 
 //     Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
@@ -327,17 +332,14 @@ Route::post('/hoa-don/update-quantity', [ThuNganController::class, 'updateQuanti
 Route::post('/hoa-don/delete', [ThuNganController::class, 'deleteMonAn'])->name('thungan.deleteMonAn');
 Route::get('/hoa-don', [HoaDonController::class, 'index'])->name('hoa-don.index');
 Route::get('/hoa-don/{id}', [HoaDonController::class, 'show'])->name('hoa-don.show');
-//search hóa đơn
-
-
-
 Route::get('/hoa-don/{id}/in', [HoaDonController::class, 'printInvoice'])->name('hoa-don.print');
-
 Route::get('/thu-ngan/get-orders',[ThuNganController::class, 'getOrders'])->name('thungan.getOrders');
 Route::get('/thu-ngan/hoa-don-info',[ThuNganController::class, 'thongTinHoaDon'])->name('thungan.thongTinHoaDon');
 Route::post('thu-ngan-save-so-nguoi',[ThuNganController::class,'saveSoNguoi'])->name('thungan.saveSoNguoi');
 Route::get('/thu-ngan-thong-tin-don',[TachBanController::class,'getDon'])->name('thungan.getDon');
 Route::post('/thu-ngan-tach-mon',[TachBanController::class,'tachDon'])->name('thungan.tachDon');
+Route::post('/thu-ngan-xoa-hoa-don',[TachBanController::class,'xoaHoaDonGoc'])->name('thungan.xoaHoaDon');
+
 //Chấm công
 Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
 Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('chamcong.store');
@@ -425,3 +427,4 @@ Route::get('/get-dat-ban-by-date', function (Request $request) {
 
 
 
+});

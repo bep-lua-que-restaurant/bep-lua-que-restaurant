@@ -14,7 +14,7 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
                     <li class="breadcrumb-item active"><a href="javascript:void(0)">Chi tiết Mã giảm </a></li>
                 </ol>
             </div>
@@ -32,8 +32,10 @@
                                 <p><strong>Mã:</strong> {{ $maGiamGia->code }}</p>
                                 <p><strong>Loại:</strong> {{ $maGiamGia->type }}</p>
                                 <p><strong>Giá Trị:</strong> {{ $maGiamGia->value }}</p>
-                                <p><strong>Đơn Hàng Tối Thiểu:</strong> {{ $maGiamGia->min_order_value ?? 'Không yêu cầu' }}</p>
-                                <p><strong>Hiệu Lực:</strong> {{ $maGiamGia->start_date }} đến {{ $maGiamGia->end_date }}</p>
+                                <p><strong>Đơn Hàng Tối Thiểu:</strong> {{ $maGiamGia->min_order_value ?? 'Không yêu cầu' }}
+                                </p>
+                                <p><strong>Hiệu Lực:</strong> {{ $maGiamGia->start_date }} đến {{ $maGiamGia->end_date }}
+                                </p>
                                 <p><strong>Số Lượt Sử Dụng:</strong> {{ $maGiamGia->used }} /
                                     {{ $maGiamGia->usage_limit == 0 ? 'Không giới hạn' : $maGiamGia->usage_limit }}</p>
                                 <a href="{{ route('ma-giam-gia.edit', $maGiamGia->id) }}" class="btn btn-custom">Sửa</a>

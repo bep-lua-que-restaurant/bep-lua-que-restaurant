@@ -1,4 +1,6 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<!-- CDN SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
     .select2-results__option {
@@ -30,29 +32,55 @@
         gap: 5px;
         /* Tạo khoảng cách giữa các nút */
     }
+
+    .table-responsive {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        position: relative;
+    }
+
+    .table thead,
+    .table tfoot {
+        position: sticky;
+        background-color: #fff;
+        /* Giữ nền trắng khi cuộn */
+        z-index: 10;
+    }
+
+    .table thead {
+        top: 0;
+    }
+
+    .table tfoot {
+        bottom: 0;
+    }
 </style>
-<table class="table table-bordered table-sm">
-    <thead class="table-light">
-        <tr>
-            <th>#</th>
-            <th>Sản phẩm</th>
-            <th class="text-center">SL</th>
-            <th class="text-end">Giá</th>
-            <th class="text-end">Tổng</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody id="hoa-don-body">
-        <!-- Dữ liệu hóa đơn sẽ được hiển thị ở đây -->
-    </tbody>
-    <tfoot id="tfoot-hoaDon">
-        <tr>
-            <td colspan="6" class="text-start text-muted" style="font-size: 14px; font-weight: 400;">
-                Mã hóa đơn: <span id="maHoaDon"></span>
-            </td>
-        </tr>
-    </tfoot>
-</table>
+<div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6;">
+    <table class="table table-bordered table-sm">
+        <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Sản phẩm</th>
+                <th class="text-center">SL</th>
+                <th class="text-end">Giá</th>
+                <th class="text-end">Tổng</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="hoa-don-body">
+            <!-- Dữ liệu hóa đơn sẽ được thêm vào đây -->
+        </tbody>
+        <tfoot id="tfoot-hoaDon">
+            <tr>
+                <td colspan="6" class="text-start text-muted" style="font-size: 14px; font-weight: 400;">
+                    Mã hóa đơn: <span id="maHoaDon"></span>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
 <div class="d-flex justify-content-end align-items-center mt-3">
     <span class="text-muted mx-4">Tổng tiền:</span>
     <span class="fs-4 fw-bold text-success" id="tong-tien">0</span>
@@ -136,10 +164,10 @@
             </table>
         </div>
 
-        <div class="mb-3">
+        {{-- <div class="mb-3">
             <label for="discountCode" class="form-label">Mã giảm giá</label>
             <input type="text" class="form-control" id="discountCode" placeholder="Nhập mã giảm giá">
-        </div>
+        </div> --}}
 
         <!-- Đặt Khách cần trả và Phương thức thanh toán nằm ngang -->
         <div class="d-flex mb-3 align-items-stretch">
