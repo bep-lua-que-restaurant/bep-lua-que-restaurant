@@ -7,7 +7,9 @@ use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
 use App\Events\DatBanCreated;
+use App\Events\DatBanDeleted;
 use App\Listeners\GuiEmailDatBan;
+use App\Listeners\HandleDatBanDeleted;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -21,6 +23,9 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         DatBanCreated::class => [
             GuiEmailDatBan::class,
+        ],
+        DatBanDeleted::class => [
+            HandleDatBanDeleted::class,
         ],
     ];
 

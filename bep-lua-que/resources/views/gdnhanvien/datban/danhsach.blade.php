@@ -44,7 +44,7 @@
 
                     <tbody>
                         @foreach ($banhSachDatban as $datban)
-                            <tr class="text-center">
+                            <tr class="text-center" data-id="{{ $datban->ma_dat_ban }}">
                                 <td>{{ \Carbon\Carbon::parse($datban->thoi_gian_den)->format('d/m/Y H:i') }}</td>
                                 <td>{{ $datban->ho_ten }}</td>
                                 <td>{{ $datban->so_dien_thoai }}</td>
@@ -131,13 +131,14 @@
             selectStatus.addEventListener("change", filterTable);
         });
     </script>
-    <script>
+    {{-- <script>
         setInterval(() => {
             fetch('/api/update-datban')
                 .then(response => response.json())
                 .then(data => console.log(data.message));
         }, 60000); // 60000ms = 1 phút
-    </script>
-    @vite('resources/js/datban.js')
+    </script> --}}
+    @vite('resources/js/danhsach.js')
+
     {{ $banhSachDatban->links('pagination::bootstrap-5') }}
 @endsection

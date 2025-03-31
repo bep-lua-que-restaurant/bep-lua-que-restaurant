@@ -1,7 +1,7 @@
 import "./bootstrap";
 import "./thungan.js"; // Đảm bảo thungan.js thực sự có trong thư mục resources/js
 import "./datban.js";
-import "./DatBanUpdated.js";
+import "./danhsach.js";
 document.addEventListener("DOMContentLoaded", () => {
     console.log("🚀 Ứng dụng đã tải xong!");
 

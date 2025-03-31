@@ -34,6 +34,7 @@ class DatBanCreated implements ShouldBroadcast
             'danh_sach_ban' => collect($this->danhSachBanDat)->map(function ($datBan) {
                 return [
                     'ban_an_id' => $datBan->ban_an_id,
+                    'ten_ban' => $datBan->ten_ban,
                     'thoi_gian_den' => $datBan->thoi_gian_den,
                     'gio_du_kien' => $datBan->gio_du_kien,
                     'so_nguoi' => $datBan->so_nguoi,
@@ -45,7 +46,7 @@ class DatBanCreated implements ShouldBroadcast
             }),
             'customer' => [
                 'id' => $this->customer->id,
-                'ten' => $this->customer->ten,
+                'ho_ten' => $this->customer->ho_ten,
                 'so_dien_thoai' => $this->customer->so_dien_thoai,
                 'email' => $this->customer->email ?? null,
             ]
