@@ -13,7 +13,7 @@ class ChatController extends Controller
 {
     public function index()
     {
-        return view('admin.chatbox');
+        return view  ('admin.chatbox');
     }
 
     public function guiTinNhan(Request $request)
@@ -84,7 +84,7 @@ class ChatController extends Controller
         }
 
         // ==== MÓN ĂN YÊU THÍCH ====
-        if (preg_match('/(món yêu thích|món bán chạy|món nhiều)/u', $noiDung)) {
+        if (preg_match('/(món ăn yêu thích|món bán chạy|món nhiều)/u', $noiDung)) {
             $monAnYeuThich = MonAn::getMonAnYeuThich(); // Gọi model đã viết
 
             if ($monAnYeuThich->isEmpty()) {
@@ -92,7 +92,7 @@ class ChatController extends Controller
             } else {
                 $phanHoi = "Top món ăn được đặt nhiều nhất:\n";
                 foreach ($monAnYeuThich as $mon) {
-                    $phanHoi .= "- " . $mon->ten_mon_an . " (Đã đặt: " . $mon->tong_so_luong . " lần)\n";
+                    $phanHoi .= "- " . $mon->ten . " (Đã đặt: " . $mon->tong_so_luong . " lần)\n";
                 }
             }
         }
