@@ -20,6 +20,7 @@ use App\Models\NguyenLieu;
 use App\Models\NguyenLieuMonAn;
 use PhpParser\Node\Expr\FuncCall;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class ThuNganController extends Controller
@@ -427,23 +428,36 @@ class ThuNganController extends Controller
 
     public function addCustomer(Request $request)
     {
-        // Lưu khách hàng vào database
-        $khachHang = KhachHang::create([
-            'ho_ten'       => $request->input('name'),
-            'email'        => $request->input('email'),
-            'dia_chi'      => $request->input('address'),
-            'so_dien_thoai' => $request->input('phone'),
-            'can_cuoc'     => $request->input('cccd'),
-        ]);
+        try {
+            DB::beginTransaction(); // Bắt đầu transaction
 
-        // Trả về phản hồi JSON
-        return response()->json([
-            'success'      => true,
-            'message'      => 'Thêm khách hàng thành công!',
-            'customer_id'  => $khachHang->id,
-            'customer_name' => $khachHang->ho_ten
-        ]);
+            // Lưu khách hàng vào database
+            $khachHang = KhachHang::create([
+                'ho_ten'       =>  $request->input('name'),
+                'email'        =>   $request->input('email'),
+                'dia_chi'      =>   $request->input('address'),
+                'so_dien_thoai' =>  $request->input('phone'),
+            ]);
+
+            DB::commit(); // Xác nhận transaction
+
+            // Trả về phản hồi JSON
+            return response()->json([
+                'success'       => true,
+                'message'       => 'Thêm khách hàng thành công!',
+                'customer_id'   => $khachHang->id,
+                'customer_name' => $khachHang->ho_ten
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack(); // Hoàn tác transaction nếu có lỗi
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi thêm khách hàng: ' . $e->getMessage()
+            ], 500);
+        }
     }
+
 
     private function generateMaHoaDon()
     {
