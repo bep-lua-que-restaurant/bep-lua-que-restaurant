@@ -545,7 +545,7 @@
 
             // Nếu có lỗi, hiển thị thông báo và kích hoạt lại nút
             if (errors.length > 0) {
-                alert("Lỗi:\n" + errors.join("\n"));
+                alert("\n" + errors.join("\n"));
                 $button.prop('disabled', false); // Kích hoạt lại nút nếu có lỗi
                 return;
             }
@@ -594,7 +594,6 @@
         });
     </script>
 
-    @vite('resources/js/DatBanUpdated.js')
     @vite('resources/js/datban.js')
 
 
@@ -684,8 +683,8 @@
 
 
         /* .btn-success .btn-danger {
-                                                                                                                                                                                pointer-events: none;
-                                                                                                                                                                            } */
+                                                                                                                                                                                                    pointer-events: none;
+                                                                                                                                                                                                } */
 
         .border-left-rounded {
             border-top-left-radius: 10px;

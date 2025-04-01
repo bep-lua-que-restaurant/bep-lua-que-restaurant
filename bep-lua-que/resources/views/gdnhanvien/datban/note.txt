@@ -4,27 +4,6 @@ php artisan schedule:work
 
 php artisan queue:work
 
- notepad storage/logs/laravel.log
-
-Loại bàn cùng 1 dòng ( vi_tri)-> thời gian vào + số người + bàn  
-
-Chỉ nhận số người 
-
-thêm vào |hóa đơn  
-         |hóa đơn bàn
 
 
-         03/03/2025 21:00	đoàn văn quân	0388940846	8	bàn 1, bàn 2
-
-ALTER TABLE dat_bans ALTER COLUMN trang_thai SET DEFAULT 'dang_xu_ly';
-
-         http://127.0.0.1:8000/datban/ngay
-
-
-
-         Thay đổi cách chọn bàn làm việc khi đến thời điểm
-
-         notepad storage/logs/laravel.log
-echo "" > storage/logs/laravel.log
-
-
+php artisan queue:work --queue=high,low
