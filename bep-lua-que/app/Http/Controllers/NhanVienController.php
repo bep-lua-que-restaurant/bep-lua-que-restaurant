@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\StoreNhanVienRequest;
 use App\Http\Requests\UpdateNhanVienRequest;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class NhanVienController extends Controller
@@ -30,6 +31,8 @@ class NhanVienController extends Controller
     public function store(Request $request)
     {
 //        dd($request->all());
+// dd($request->file('hinh_anh')); // Debug file ảnh
+
 
         $request->validate([
             'ho_ten' => 'required|string|max:255',
@@ -42,7 +45,7 @@ class NhanVienController extends Controller
             'ngay_vao_lam' => 'nullable|date',
             'dia_chi' => 'nullable|string|max:255',
             'hinh_thuc_luong' => 'required|in:thang,ca,gio',
-            'muc_luong' => 'required|numeric|min:0',
+            'muc_luong' => 'required|numeric|min:0', 'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
 
@@ -51,7 +54,10 @@ class NhanVienController extends Controller
         $lastNhanVien = NhanVien::orderBy('id', 'desc')->first();
         $nextId = $lastNhanVien ? ((int)substr($lastNhanVien->ma_nhan_vien, 2)) + 1 : 1;
         $maNhanVien = 'NV' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+        //hình ảnh
+        $hinhAnhPath = $request->file('hinh_anh')->store('hinh_anh', 'public');
 
+        
         // Tạo nhân viên
         $nhanVien = NhanVien::create([
             'ma_nhan_vien' => $maNhanVien,
@@ -63,7 +69,7 @@ class NhanVienController extends Controller
             'ngay_sinh' => $request->ngay_sinh,
             'ngay_vao_lam' => $request->ngay_vao_lam,
             'dia_chi' => $request->dia_chi,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($request->password),'hinh_anh' => $hinhAnhPath, // Lưu đường dẫn ảnh vào DB
         ]);
 
         $nhanVien->luong()->create([
@@ -103,6 +109,7 @@ class NhanVienController extends Controller
             'dia_chi' => 'nullable|string|max:255',
             'hinh_thuc_luong' => 'required|in:thang,ca,gio',
             'muc_luong' => 'required|numeric|min:0',
+            'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048', // Kiểm tra ảnh
         ]);
 
         $nhanVien = NhanVien::findOrFail($id);
@@ -122,6 +129,18 @@ class NhanVienController extends Controller
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }
+        //hình ảnh 
+        // Xử lý ảnh nếu có
+    if ($request->hasFile('hinh_anh')) {
+        // Xóa ảnh cũ nếu có (nếu bạn muốn xóa ảnh cũ trước khi cập nhật)
+        if ($nhanVien->hinh_anh) {
+            Storage::delete('public/' . $nhanVien->hinh_anh);
+        }
+
+        // Lưu ảnh mới và lấy đường dẫn
+        $hinhAnhPath = $request->file('hinh_anh')->store('hinh_anh', 'public');
+        $data['hinh_anh'] = $hinhAnhPath;
+    }
 
         // Cập nhật thông tin nhân viên
         $nhanVien->update($data);
