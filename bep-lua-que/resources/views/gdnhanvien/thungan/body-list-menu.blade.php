@@ -220,8 +220,12 @@
             // Hàm cập nhật số lượng món ăn
             function updateSoLuong(nutDuocClick, monAnId, thayDoi) {
                 let dongChuaNo = nutDuocClick.closest("tr");
+
                 let nutXoa = dongChuaNo.find(".xoa-mon-an"); // Tìm nút xóa trong hàng đó
                 let monUpdate = nutXoa.data("id-xoa"); // Lấy giá trị data-id-xoa
+                if (monUpdate == undefined) {
+                    monUpdate = dongChuaNo.attr("id").replace("mon-", "");;
+                }
 
                 let soLuongSpan = dongChuaNo.find(".so-luong").first();
                 let soLuong = parseInt(soLuongSpan.text()) + thayDoi;

@@ -43,6 +43,7 @@ $(document).ready(function () {
     $(".ban").on("click", function () {
         var banId = $(this).data("id"); // Lấy ID bàn
         var tenBan = $(this).find(".card-title").text(); // Lấy tên bàn
+        let nutHoaDon = document.querySelector(".nut-hoa-don");
         // Lưu ID bàn vào dataset để sử dụng khi thêm món
         $("#ten-ban").data("currentBan", banId);
         $("#ten-ban").text(tenBan);
@@ -57,10 +58,12 @@ $(document).ready(function () {
             success: function (response) {
                 if (response.hoa_don_id) {
                     $("#ten-ban").data("hoaDonId", response.hoa_don_id);
+                    nutHoaDon.style.display = "block"; 
                     // Gọi API để lấy chi tiết hóa đơn
                     loadChiTietHoaDon(response.hoa_don_id);
                 } else {
                     // var hoaDonId = null;
+                    nutHoaDon.style.display = "none";
                     var maHoaDonElement = document.getElementById("maHoaDon");
                     // loadChiTietHoaDon(hoaDonId);
                     $("#ten-ban").data("hoaDonId", null);
@@ -104,7 +107,6 @@ $(document).ready(function () {
             success: function (response) {
                 maHoaDonElement.innerText = response.maHoaDon;
                 maHoaDonElement.style.color = "#28a745";
-
                 let hoaDonBody = $("#hoa-don-body");
                 hoaDonBody.empty();
                 let offcanvasBody = $(".offcanvas-body tbody"); // Lấy phần bảng trong offcanvas
@@ -231,7 +233,7 @@ $(document).ready(function () {
                             thay_doi: thayDoi,
                             _token: $('meta[name="csrf-token"]').attr(
                                 "content"
-                            ), 
+                            ),
                         },
                         success: function (response) {
                             // Cập nhật tổng tiền
