@@ -84,7 +84,7 @@ class ChatController extends Controller
         }
 
         // ==== MÓN ĂN YÊU THÍCH ====
-        if (preg_match('/(món ăn yêu thích|món bán chạy|món nhiều)/u', $noiDung)) {
+        if (preg_match('/(món ăn yêu thích|món yêu thích|món bán chạy|món nhiều)/u', $noiDung)) {
             $monAnYeuThich = MonAn::getMonAnYeuThich(); // Gọi model đã viết
 
             if ($monAnYeuThich->isEmpty()) {

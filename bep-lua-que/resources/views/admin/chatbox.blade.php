@@ -146,7 +146,7 @@
         </header>
         <div id="messages"></div>
         <div class="chat-suggestions">
-            <span class="suggestion" onclick="setMessage('Trạng thái bàn 1')">🪑 Bàn 1</span>
+            <span class="suggestion" onclick="setMessage('Trạng thái bàn 1')">🪑 Trạng thái bàn 1</span>
             <span class="suggestion" onclick="setMessage('Doanh thu tổng')">📊 Doanh thu tổng</span>
             <span class="suggestion" onclick="setMessage('Doanh thu ngày 12-03-2025')">📅 Doanh thu ngày 12-03</span>
             <span class="suggestion" onclick="setMessage('Doanh thu từ 01-03-2025 đến 10-03-2025')">📆 Doanh thu từ
