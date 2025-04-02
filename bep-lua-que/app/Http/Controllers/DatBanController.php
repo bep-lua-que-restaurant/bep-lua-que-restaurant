@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\BanAnUpdated;
 use App\Events\DatBanCreated;
+use App\Events\DatBanDeleted;
 use App\Events\DatBanUpdated;
 use App\Http\Requests\StoreDatBanRequest;
 use App\Models\DatBan;
@@ -266,6 +267,7 @@ class DatBanController extends Controller
 
             // Khởi tạo danh sách đặt bàn
             $danhSachBanDat = [];
+            $tenBanList[] = [];
             $banAnIds = $request->selectedIds;
 
             // Lấy danh sách bàn ăn cần cập nhật
@@ -274,6 +276,7 @@ class DatBanController extends Controller
             foreach ($banAnIds as $banAnId) {
                 $datBan = DatBan::create([
                     'khach_hang_id' => $customer->id,
+                    'ho_ten' => $customer->ho_ten,
                     'so_dien_thoai' => $customer->so_dien_thoai,
                     'thoi_gian_den' => $request->thoi_gian_den,
                     'gio_du_kien'   => $request->gio_du_kien,
@@ -285,15 +288,26 @@ class DatBanController extends Controller
                 ]);
 
                 $danhSachBanDat[] = $datBan;
-
+                $tenBanList[] = $banAnList[$banAnId]->ten_ban ?? 'Không xác định';
                 // Cập nhật trạng thái bàn ăn
                 if (isset($banAnList[$banAnId])) {
                     $banAnList[$banAnId]->update(['trang_thai' => 'da_dat_truoc']);
                 }
             }
 
+            // Sau khi kết thúc vòng lặp, thêm tên bàn vào từng đặt bàn
+            foreach ($danhSachBanDat as $key => $datBan) {
+                $banAnId = $datBan->ban_an_id;
+
+                // Lấy tên bàn dựa vào ban_an_id
+                $tenBan = isset($banAnList[$banAnId]) ? $banAnList[$banAnId]->ten_ban : 'Không xác định';
+
+                // Gán lại giá trị mới vào danh sách đặt bàn
+                $danhSachBanDat[$key] = (object) array_merge($datBan->toArray(), ['ten_ban' => $tenBan]);
+            }
+
+
             // Sau khi xử lý hết các bàn đặt
-            // event(new DatBanCreated($danhSachBanDat));
             event(new DatBanCreated($danhSachBanDat, $customer));
 
 
@@ -353,6 +367,8 @@ class DatBanController extends Controller
         // Lấy thông tin đặt bàn chính
         $datBan = DatBan::with('khachHang')->where('ma_dat_ban', $maDatBan)->first();
 
+        $customer = KhachHang::find($datBan->khach_hang_id);
+
         if (!$datBan) {
             return redirect()->route('dat-ban.index')->with('error', 'Không tìm thấy đặt bàn!');
         }
@@ -364,17 +380,14 @@ class DatBanController extends Controller
         // Lấy các bàn của đơn đặt hiện tại (bàn đang được chỉnh sửa)
         $datBanCurrent = DatBan::where('ma_dat_ban', $maDatBan)
             ->get();
-        // dd($datBanCurrent->toArray());
 
         // Lấy tất cả các đơn đặt bàn, trừ ma_dat_ban hiện tại
         $datBansOther = DatBan::where('ma_dat_ban', '!=', $maDatBan)
             ->whereIn('trang_thai', ['dang_xu_ly', 'xac_nhan'])
             ->get();
 
-        // dd($datBansOther->toArray());
-
         // Truyền dữ liệu vào view
-        return view('gdnhanvien.datban.edit', compact('datBan', 'banAns', 'datBanCurrent', 'datBansOther', 'maDatBan'));
+        return view('gdnhanvien.datban.edit', compact('datBan', 'banAns', 'datBanCurrent', 'datBansOther', 'maDatBan', 'customer'));
     }
 
     /**
@@ -399,8 +412,10 @@ class DatBanController extends Controller
         DB::beginTransaction(); // Bắt đầu transaction
 
         try {
+
             // Xóa đơn đặt bàn cũ
             DatBan::where('ma_dat_ban', $maDatBan)->forceDelete();
+            event(new DatBanDeleted(maDatBan: $maDatBan));
 
             // Xử lý thời gian đúng định dạng
             $thoiGianDen = Carbon::parse($request->thoi_gian_den)->format('Y-m-d H:i:s');
@@ -432,8 +447,28 @@ class DatBanController extends Controller
                 $danhSachBanDat[] = $datBan;
             }
 
-            // Phát sự kiện cập nhật đặt bàn
-            event(new DatBanUpdated($danhSachBanDat));
+
+            // Sau khi kết thúc vòng lặp, thêm tên bàn vào từng đặt bàn
+            foreach ($danhSachBanDat as $key => $datBan) {
+                $banAnId = $datBan->ban_an_id;
+
+                // Lấy tên bàn dựa vào ban_an_id
+                $tenBan = isset($banAnList[$banAnId]) ? $banAnList[$banAnId]->ten_ban : 'Không xác định';
+
+                // Gán lại giá trị mới vào danh sách đặt bàn
+                $danhSachBanDat[$key] = (object) array_merge($datBan->toArray(), ['ten_ban' => $tenBan]);
+            }
+
+
+            // Tạo object chứa đầy đủ thông tin để gửi qua sự kiện
+            $customer = [
+                'ho_ten'        => $request->ho_ten,
+                'so_dien_thoai' => $request->so_dien_thoai,
+                'khach_hang_id' => $request->khach_hang_id
+            ];
+
+
+            event(new DatBanUpdated($danhSachBanDat, $customer)); // ✅ Phát sự kiện với đủ dữ 
 
             // Tạo hóa đơn mới
             $maHoaDon = $this->generateMaHoaDon();
@@ -482,18 +517,26 @@ class DatBanController extends Controller
             return redirect()->back()->with('error', 'Không tìm thấy đơn đặt bàn!');
         }
 
-        // Lấy danh sách bàn ăn liên quan và cập nhật trạng thái
-        $banAnList = BanAn::whereIn('id', DatBan::where('ma_dat_ban', $maDatBan)->pluck('ban_an_id'))->get();
+        // Lấy danh sách bàn ăn liên quan
+        $banAnIds = DatBan::where('ma_dat_ban', $maDatBan)->pluck('ban_an_id');
+        $banAnList = BanAn::whereIn('id', $banAnIds)->get();
 
+        // Cập nhật trạng thái bàn ăn & phát sự kiện
         foreach ($banAnList as $banAn) {
-            $banAn->update(['trang_thai' => 'trong']);
-            event(new BanAnUpdated($banAn));
+            if ($banAn->trang_thai !== 'trong') {
+                $banAn->update(['trang_thai' => 'trong']);
+                event(new BanAnUpdated($banAn)); // Phát sự kiện cập nhật bàn ăn
+            }
         }
 
         // Cập nhật trạng thái đơn đặt bàn thành 'da_huy'
         DatBan::where('ma_dat_ban', $maDatBan)
             ->where('trang_thai', 'dang_xu_ly')
             ->update(['trang_thai' => 'da_huy']);
+
+        // 🛑 Đảm bảo sự kiện được phát ra
+        event(new DatBanDeleted(maDatBan: $maDatBan));
+        // \Log::info("🚀 Sự kiện DatBanDeleted đã được phát", ['ma_dat_ban' => $maDatBan]);
 
         return redirect()->back()->with('success', 'Tất cả đơn đặt bàn đã được hủy thành công!');
     }

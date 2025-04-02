@@ -108,16 +108,10 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content p-3">
                     <form method="POST" action="{{ route('dat-ban.update', ['maDatBan' => $datBan->ma_dat_ban]) }}">
-
-
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="_method" value="PUT">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
-
-
-
-
 
                         <!-- Header -->
                         <div class="modal-header bg-primary text-white">
@@ -177,6 +171,8 @@
                         <input type="hidden" name="thoi_gian_den" id="thoiGianDen">
                         <input type="hidden" name="gio_du_kien" id="gioDuKien">
                         <input type="hidden" name="khach_hang_id" value="{{ $datBan->khach_hang_id }}">
+                        <input type="hidden" name="ho_ten" value="{{ $customer->ho_ten }}">
+                        <input type="hidden" name="so_dien_thoai" value="{{ $customer->so_dien_thoai }}">
                         <input type="hidden" name="ma_dat_ban" id="maDatBan" value="{{ $datBan->ma_dat_ban }}">
 
                         <!-- Footer -->

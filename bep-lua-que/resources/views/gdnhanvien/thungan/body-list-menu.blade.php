@@ -90,6 +90,7 @@
             var banId = $('#ten-ban').data('currentBan'); // Lấy ID bàn hiện tại
             var monAnId = card.data('banan-id'); // Lấy ID món ăn
             var giaMon = parseInt(card.find('.card-text').text().replace(/[^0-9]/g, "")); // Lấy giá món
+            let nutHoaDon = document.querySelector(".nut-hoa-don");
             // Kiểm tra nếu chưa chọn bàn
             if (!banId) {
                 showToast("🚨 Vui lòng chọn bàn trước khi thêm món", "warning");
@@ -113,6 +114,7 @@
                     var maHoaDonElement = document.getElementById("maHoaDon");
                     maHoaDonElement.innerText = response.data.ma_hoa_don;
                     maHoaDonElement.style.color = "#28a745";
+                    nutHoaDon.style.display = "block";
                     // Tìm ID chi tiết hóa đơn tương ứng với món ăn
                     let timMon = response.data.chi_tiet_hoa_dons.find(item => item
                         .mon_an_id == monAnId);
@@ -143,8 +145,8 @@
 
                 if (existingRow.length) {
                     // Nếu món đã có, tăng số lượng và cập nhật tổng giá
-                    let soLuongSpan = existingRow.find(".so-luong");
-                    // console.log(soLuongSpan.text());
+                    let soLuongSpan = existingRow.find(".so-luong").first();
+
                     let soLuongMoi = parseInt(soLuongSpan.text()) + 1;
                     soLuongSpan.text(soLuongMoi);
 
@@ -169,10 +171,10 @@
                     <span class="so-luong mx-2 small">1</span>
                     <i class="bi bi-plus-circle text-success tang-soluong" data-id="${monAnId}" style="cursor: pointer; font-size: 20px;"></i>
                 </td>
-                <td class="text-end small">
+                <td class="text-end small don-gia">
                     ${giaMon.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
                 </td>
-                <td class="text-end small">
+                <td class="text-end small thanh-tien">
                     ${(1 * giaMon).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
                 </td>
                 <td class="text-center">
@@ -209,6 +211,82 @@
                 let xoaTr = $(this).closest("tr");
                 deleteMonAn(monAnId, xoaTr);
             });
+
+            $(".tang-soluong, .giam-soluong").off("click").on("click", function() {
+                let monAnId = $(this).data("id");
+                let thayDoi = $(this).hasClass('tang-soluong') ? 1 : -1;
+                updateSoLuong($(this), monAnId, thayDoi);
+            });
+
+
+            // Hàm cập nhật số lượng món ăn
+            function updateSoLuong(nutDuocClick, monAnId, thayDoi) {
+                let dongChuaNo = nutDuocClick.closest("tr");
+
+                let nutXoa = dongChuaNo.find(".xoa-mon-an"); // Tìm nút xóa trong hàng đó
+                let monUpdate = nutXoa.data("id-xoa"); // Lấy giá trị data-id-xoa
+                if (monUpdate == undefined) {
+                    monUpdate = dongChuaNo.attr("id").replace("mon-", "");;
+                }
+
+                let soLuongSpan = dongChuaNo.find(".so-luong").first();
+                let soLuong = parseInt(soLuongSpan.text()) + thayDoi;
+                if (soLuong < 1) {
+                    soLuong = 1; // Đảm bảo số lượng không nhỏ hơn 1
+                }
+                soLuongSpan.text(soLuong);
+                let thanhTien = dongChuaNo.find(".thanh-tien").first();
+                $.ajax({
+                    url: "/hoa-don/update-quantity",
+                    method: "POST",
+                    data: {
+                        mon_an_id: monUpdate,
+                        thay_doi: thayDoi,
+                        _token: $('meta[name="csrf-token"]').attr(
+                            "content"), // Nếu dùng Laravel
+                    },
+                    success: function(response) {
+                        // Cập nhật tổng tiền
+
+                        let formattedThanhTien = Number(
+                            response.thanh_tien
+                        ).toLocaleString("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                        });
+
+                        thanhTien.text(formattedThanhTien);
+
+                        let tongTien = 0;
+                        $("#hoa-don-body tr").each(function() {
+                            let tongTienMon = $(this)
+                                .find("td.text-end:last")
+                                .text()
+                                .replace(/[^0-9]/g, "");
+                            tongTien += parseInt(tongTienMon);
+                        });
+                        $("#tong-tien").text(
+                            tongTien.toLocaleString("vi-VN") + " VNĐ"
+                        );
+                    },
+                    error: function(xhr) {
+                        console.error("❌ Lỗi khi cập nhật số lượng:", xhr.responseText);
+                    },
+                });
+            }
+
+            function tinhTongHoaDon() {
+                let tongTien = 0;
+                $("#hoa-don-body tr").each(function() {
+                    let tongTienMon = $(this).find("td.text-end:last").text().replace(/[^0-9]/g,
+                        "");
+                    tongTien += parseInt(tongTienMon);
+                });
+
+                $("#tong-tien").text(
+                    tongTien.toLocaleString("vi-VN") + " VNĐ"
+                );
+            }
 
             function deleteMonAn(monAnId, xoaTr) {
                 if (isRequesting) return;

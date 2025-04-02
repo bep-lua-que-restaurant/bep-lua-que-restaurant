@@ -112,7 +112,7 @@ window.Echo.channel("hoa-don-channel")
             let hoaDonId = $("#ten-ban").data("hoaDonId");
             if (hoaDonId && hoaDonId == data.hoa_don.id) {
                 loadChiTietHoaDon(hoaDonId);
-                console.log(data)
+
                 // loadHoaDonThanhToan(hoaDonId);
             }
         }
@@ -166,14 +166,14 @@ function loadChiTietHoaDon(hoaDonId) {
     }"></i>
 </td>
 
-    <td class="text-end small">
+    <td class="text-end small don-gia">
         ${parseFloat(item.don_gia).toLocaleString("vi-VN", {
             style: "currency",
             currency: "VND",
         })}
     </td>
 
-    <td class="text-end small">
+    <td class="text-end small thanh-tien">
         ${(item.so_luong * item.don_gia).toLocaleString("vi-VN", {
             style: "currency",
             currency: "VND",
@@ -228,116 +228,63 @@ function loadChiTietHoaDon(hoaDonId) {
                 let monAnId = $(this).data("id");
                 updateSoLuong(monAnId, -1);
             });
-        },
-        error: function (xhr) {
-            console.error("🔥 Lỗi khi tải chi tiết hóa đơn:", xhr.responseText);
-        },
-    });
-}
 
-function loadHoaDonThanhToan(hoaDonId) {
-    $.ajax({
-        url: "/hoa-don/get-details",
-        method: "GET",
-        data: { hoa_don_id: hoaDonId },
-        success: function (response) {
-            let hoaDonThanhToan = $("#hoa-don-thanh-toan-body");
-            let offcanvasBody = $(".offcanvas-body tbody"); // Lấy phần bảng trong offcanvas
+            // Hàm cập nhật số lượng món ăn
+            function updateSoLuong(monAnId, thayDoi) {
+                let dongChuaNo = $("i[data-id='" + monAnId + "']").closest(
+                    "tr"
+                ); // Tìm dòng chứa món ăn
+                let soLuongSpan = dongChuaNo.find(".so-luong").first(); // Tìm thẻ <span> số lượng
+                let soLuongHienTai = parseInt(soLuongSpan.text().trim()) || 0;
+                // Tính toán số lượng mới
+                let soLuongMoi = soLuongHienTai + thayDoi;
+                if (soLuongMoi < 1) soLuongMoi = 1; // Đảm bảo số lượng không nhỏ hơn 1
+                // Cập nhật số lượng mới trong <span>
+                soLuongSpan.text(soLuongMoi);
+                let thanhTien = dongChuaNo.find(".thanh-tien").first();
+                $.ajax({
+                    url: "/hoa-don/update-quantity",
+                    method: "POST",
+                    data: {
+                        mon_an_id: monAnId,
+                        thay_doi: thayDoi,
+                        _token: $('meta[name="csrf-token"]').attr("content"), // Nếu dùng Laravel
+                    },
+                    success: function (response) {
+                        // Cập nhật tổng tiền
 
-            hoaDonThanhToan.empty();
-            offcanvasBody.empty();
+                        let formattedThanhTien = Number(
+                            response.thanh_tien
+                        ).toLocaleString("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                        });
 
-            var soNguoi = response.so_nguoi;
-            let tongTien = 0;
-            let rows = [];
+                        thanhTien.text(formattedThanhTien);
 
-            if (response.chi_tiet_hoa_don.length > 0) {
-                let index = 1;
-                response.chi_tiet_hoa_don.forEach((item) => {
-                    let row = `
-                        <tr id="mon-${item.id}">
-                            <td class="small">${index}</td>
-                            <td class="small">
-                                <span class="${
-                                    item.trang_thai === "cho_che_bien"
-                                        ? "text-danger"
-                                        : item.trang_thai === "dang_nau"
-                                        ? "text-warning"
-                                        : item.trang_thai === "hoan_thanh"
-                                        ? "text-success"
-                                        : ""
-                                }">
-                                    ${item.tenMon}
-                                </span>
-                            </td>
-                            <td class="text-start">
-                                <span class="so-luong mx-2 small">${
-                                    item.so_luong
-                                }</span>
-                            </td>
-                            <td class="text-start small">
-                                ${parseFloat(item.don_gia).toLocaleString(
-                                    "vi-VN",
-                                    { style: "currency", currency: "VND" }
-                                )}
-                            </td>
-                            <td class="text-start small">
-                                ${(item.so_luong * item.don_gia).toLocaleString(
-                                    "vi-VN",
-                                    { style: "currency", currency: "VND" }
-                                )}
-                            </td>
-                        </tr>
-                    `;
-                    rows.push(row);
-                    tongTien += item.so_luong * item.don_gia;
-                    index++;
+                        let tongTien = 0;
+                        $("#hoa-don-body tr").each(function () {
+                            let tongTienMon = $(this)
+                                .find("td.text-end:last")
+                                .text()
+                                .replace(/[^0-9]/g, "");
+                            tongTien += parseInt(tongTienMon);
+                        });
+                        $("#tong-tien").text(
+                            tongTien.toLocaleString("vi-VN") + " VNĐ"
+                        );
+                    },
+                    error: function (xhr) {
+                        console.error(
+                            "❌ Lỗi khi cập nhật số lượng:",
+                            xhr.responseText
+                        );
+                    },
                 });
-
-                // Cập nhật bảng bằng cách dùng .html() thay vì .append()
-                hoaDonThanhToan.html(rows.join(""));
-                offcanvasBody.html(rows.join(""));
-            } else {
-                let emptyRow =
-                    '<tr><td colspan="4" class="thong-bao-rong text-center">Chưa có món nào</td></tr>';
-                hoaDonThanhToan.html(emptyRow);
-                offcanvasBody.html(emptyRow);
-            }
-
-            if (response.ma_hoa_don) {
-                $("#ma_hoa_don").text(response.ma_hoa_don);
-            }
-
-            $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
-            $(".so-nguoi").text(`👥 ${soNguoi}`);
-            $("#totalAmount").val(tongTien.toLocaleString() + " VND");
-
-            if (response.ten_ban) {
-                $("#tableInfo").text(`Bàn ${response.ten_ban}`);
             }
         },
         error: function (xhr) {
             console.error("🔥 Lỗi khi tải chi tiết hóa đơn:", xhr.responseText);
-        },
-    });
-}
-
-// Hàm cập nhật số lượng món ăn
-function updateSoLuong(monAnId, thayDoi) {
-    $.ajax({
-        url: "/hoa-don/update-quantity",
-        method: "POST",
-        data: {
-            mon_an_id: monAnId,
-            thay_doi: thayDoi,
-            _token: $('meta[name="csrf-token"]').attr("content"), // Nếu dùng Laravel
-        },
-        success: function (response) {
-            loadChiTietHoaDon(response.hoa_don_id); // Load lại chi tiết hóa đơn sau khi cập nhật
-            loadHoaDonThanhToan(response.hoa_don_id);
-        },
-        error: function (xhr) {
-            console.error("❌ Lỗi khi cập nhật số lượng:", xhr.responseText);
         },
     });
 }

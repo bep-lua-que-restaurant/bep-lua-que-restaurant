@@ -55,6 +55,15 @@
     .table tfoot {
         bottom: 0;
     }
+
+    .is-invalid {
+        border: 1px solid red;
+    }
+
+    .error-message {
+        font-size: 12px;
+        margin-top: 5px;
+    }
 </style>
 <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6;">
     <table class="table table-bordered table-sm">
@@ -100,7 +109,7 @@
 
 <div class="d-flex justify-content-between align-items-center mt-3">
     <!-- Nút bấm -->
-    <div>
+    <div class="nut-hoa-don">
         <button class="btn btn-success btn-sm px-4" type="button" data-bs-toggle="offcanvas"
             data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" id="thanhToan-btn">Thanh toán</button>
         <button class="btn-thong-bao btn btn-primary btn-sm px-4">Thông báo</button>
@@ -158,9 +167,9 @@
                         <th scope="col">Tổng cộng</th>
                     </tr>
                 </thead>
-                <tbody id="hoa-don-thanh-toan-body">
+                <thead id="hoa-don-thanh-toan-body">
                     <!-- Dữ liệu hóa đơn sẽ được hiển thị ở đây -->
-                </tbody>
+                </thead>
             </table>
         </div>
 
@@ -223,7 +232,7 @@
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label">Họ và tên</label>
+                    <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="customerNameInput">
                 </div>
                 <div class="mb-3">
@@ -238,10 +247,8 @@
                     <label class="form-label">Số điện thoại</label>
                     <input type="text" class="form-control" id="customerPhone">
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Căn cước công dân</label>
-                    <input type="text" class="form-control" id="customerCCCD">
-                </div>
+                <!-- Ghi chú bắt buộc -->
+                <p class="text-muted">Chú ý: Các trường có dấu <span class="text-danger">*</span> là bắt buộc.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
@@ -250,6 +257,7 @@
         </div>
     </div>
 </div>
+
 
 {{-- modal nhập số khách --}}
 <div class="modal fade" id="modalSoNguoi" tabindex="-1" aria-labelledby="modalSoNguoiLabel" aria-hidden="true">
@@ -446,63 +454,88 @@
     }
 
     $(document).ready(function() {
-        // Khi chọn "Thêm mới khách", hiển thị modal
         $("#customerSelect").change(function() {
             if ($(this).val() === "new") {
                 $("#addCustomerModal").modal("show");
             }
         });
 
-        // Khi nhấn lưu khách hàng mới
         $("#saveCustomerBtn").click(function() {
-            var name = $("#customerNameInput").val();
-            var email = $("#customerEmail").val();
-            var address = $("#customerAddress").val();
-            var phone = $("#customerPhone").val();
-            var cccd = $("#customerCCCD").val();
+            var name = $("#customerNameInput").val().trim();
+            var email = $("#customerEmail").val().trim() || "Chưa cập nhật";
+            var address = $("#customerAddress").val().trim() || "Chưa cập nhật";
+            var phone = $("#customerPhone").val().trim() || "Chưa cập nhật";
+            var isValid = true;
 
-            console.log({
-                name: name,
-                email: email,
-                address: address,
-                phone: phone,
-                cccd: cccd
-            });
+            // Xóa thông báo lỗi cũ
+            $(".error-message").remove();
+            $(".is-invalid").removeClass("is-invalid");
+
+            // Kiểm tra họ tên (bắt buộc)
+            if (!name) {
+                isValid = false;
+                $("#customerNameInput").addClass("is-invalid")
+                    .after(
+                        '<div class="error-message text-danger">Họ và tên không được để trống!</div>');
+            }
+
+            // Kiểm tra email hợp lệ (nếu không phải "Chưa cập nhật")
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (email !== "Chưa cập nhật" && !emailRegex.test(email)) {
+                isValid = false;
+                $("#customerEmail").addClass("is-invalid")
+                    .after('<div class="error-message text-danger">Email không hợp lệ!</div>');
+            }
+
+            // Kiểm tra số điện thoại hợp lệ (nếu không phải "Chưa cập nhật")
+            var phoneRegex = /^[0-9]{10,15}$/;
+            if (phone !== "Chưa cập nhật" && !phoneRegex.test(phone)) {
+                isValid = false;
+                $("#customerPhone").addClass("is-invalid")
+                    .after(
+                        '<div class="error-message text-danger">Số điện thoại phải có từ 10 đến 15 chữ số!</div>'
+                    );
+            }
+
+            if (!isValid) return; // Nếu có lỗi thì dừng lại
+
             $.ajax({
                 url: "/add-customer",
                 type: "POST",
-                data: {
+                contentType: "application/json",
+                data: JSON.stringify({
                     name: name,
                     email: email,
                     address: address,
-                    phone: phone,
-                    cccd: cccd,
-                    _token: $('meta[name="csrf-token"]').attr('content')
+                    phone: phone
+                }),
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                 },
                 success: function(response) {
                     if (response.success) {
-
-                        // console.log("Khách hàng mới có ID:", response.customer_id);
-                        // Thêm khách mới vào select
-                        $("#customerSelect").append(
-                            `<option value="${response.customer_id}" selected>${name}</option>`
-                        );
-                        $("#addCustomerModal").modal("hide"); // Đóng modal
+                        $("#customerSelect option[value='new']").remove();
+                        let newOption =
+                            `<option value="${response.customer_id}" selected>${name}</option>`;
+                        $("#customerSelect").append(newOption).val(response.customer_id);
+                        $("#addCustomerModal").modal("hide");
+                        $("#customerNameInput, #customerEmail, #customerAddress, #customerPhone")
+                            .val("");
                     } else {
                         alert("Lỗi: " + response.message);
                     }
                 },
-                error: function() {
-                    alert("Có lỗi xảy ra, vui lòng thử lại!");
+                error: function(xhr) {
+                    console.log(xhr.responseJSON);
+                    alert("Có lỗi xảy ra: " + (xhr.responseJSON?.message ||
+                        "Vui lòng thử lại!"));
                 }
             });
         });
     });
 
-    $("#customerSelect").change(function() {
-        var selectedCustomerId = $(this).val();
-        console.log("Khách hàng được chọn có ID:", selectedCustomerId);
-    });
+
+
 
     $('#btnThanhToan').on('click', function() {
         var banId = $('#ten-ban').data('currentBan');

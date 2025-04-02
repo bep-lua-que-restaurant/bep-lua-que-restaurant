@@ -6,98 +6,110 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
-// Lắng nghe sự kiện từ Laravel Echo
+// 📢 Lắng nghe sự kiện cập nhật trạng thái bàn ăn
 window.Echo.channel("banan-channel").listen("BanAnUpdated", (data) => {
-    // Cập nhật trạng thái bàn
+    console.log("🔄 Cập nhật trạng thái bàn ăn:", data);
     updateBanStatus(data);
-
-    // Kiểm tra và xóa class btn-success nếu cần
-    removeSuccessClass(data);
-    removeWarningClass(data);
 });
 
-// Hàm cập nhật trạng thái bàn
+// 📌 Hàm cập nhật trạng thái bàn ăn
 function updateBanStatus(data) {
     document.querySelectorAll(".text-center").forEach((button) => {
         if (button.getAttribute("data-ban-id") == data.id) {
+            button.classList.remove("bg-info"); // Xóa trạng thái cũ
+
             if (data.trang_thai === "co_khach") {
                 button.classList.add("bg-info");
-            } else if (data.trang_thai === "trong") {
-                button.classList.remove("bg-info");
             }
         }
     });
+
+    // Nếu bàn trống, kiểm tra & reset các slot
+    if (data.trang_thai === "trong") {
+        document.querySelectorAll(".selectable-slot").forEach((button) => {
+            if (button.getAttribute("data-ban-id") == data.id) {
+                resetButton(button);
+            }
+        });
+    }
 }
 
-// Hàm kiểm tra và xóa class btn-success
-function removeSuccessClass(data) {
-    document.querySelectorAll(".selectable-slot").forEach((button) => {
-        if (
-            button.getAttribute("data-ban-id") == data.id &&
-            button.classList.contains("btn-success")
-        ) {
-            button.classList.remove("btn-success");
-        }
-    });
-}
-
-function removeWarningClass(data) {
-    document.querySelectorAll(".selectable-slot").forEach((button) => {
-        if (
-            button.getAttribute("data-ban-id") == data.id &&
-            button.classList.contains("btn-warning")
-        ) {
-            button.classList.remove("btn-warning");
-        }
-    });
-}
-
-// Lắng nghe sự kiện đặt bàn
-window.Echo.channel("datban-channel").listen("DatBanCreated", (event) => {
-    const danhSachBan = event.danh_sach_ban;
-
-    const banAnId = [];
-    const maDatBan = [];
-    const date = [];
-    const gioBatDau = [];
-    const gioDuKien = [];
-
-    danhSachBan.forEach((item) => {
-        const thoiGianDen = dayjs(item.thoi_gian_den);
-        const thoiGianDenFormat = thoiGianDen.format("YYYY-MM-DD");
-        const gioBatDauFormat = thoiGianDen.format("HH:mm");
-        const gioDuKienFormat = dayjs(
-            `${thoiGianDenFormat} ${item.gio_du_kien}`
-        ).format("HH:mm");
-
-        banAnId.push(item.ban_an_id);
-        maDatBan.push(item.ma_dat_ban);
-        date.push(thoiGianDenFormat);
-        gioBatDau.push(gioBatDauFormat);
-        gioDuKien.push(gioDuKienFormat);
+// 📢 Lắng nghe các sự kiện đặt bàn
+window.Echo.channel("datban-channel")
+    .listen("DatBanCreated", (event) => {
+        console.log("🆕 Sự kiện đặt bàn mới:", event);
+        event.danh_sach_ban.forEach((item) => {
+            updateButtonState(item);
+        });
+    })
+    .listen("DatBanUpdated", (event) => {
+        console.log("🔄 Sự kiện cập nhật đặt bàn:", event);
+        event.danh_sach_ban.forEach((item) => {
+            updateButtonState(item);
+        });
+    })
+    .listen("DatBanDeleted", (event) => {
+        console.log("🗑 Sự kiện xóa đặt bàn nhận được:", event);
+        const maDatBan = event.maDatBan;
+        document.querySelectorAll(".selectable-slot").forEach((button) => {
+            if (button.getAttribute("data-ma-dat-ban") === maDatBan) {
+                resetButton(button);
+            }
+        });
     });
 
+// 📌 Hàm cập nhật trạng thái button đặt bàn
+function updateButtonState(item) {
+    const banAnId = item.ban_an_id;
+    const maDatBan = item.ma_dat_ban;
+    const date = dayjs(item.thoi_gian_den).format("YYYY-MM-DD");
+    const gioBatDau = dayjs(item.thoi_gian_den).format("HH:mm");
+    const gioDuKien = dayjs(`${date} ${item.gio_du_kien}`).format("HH:mm");
+
     document.querySelectorAll(".selectable-slot").forEach((button) => {
-        const banIdButton = button.getAttribute("data-ban-id");
-        const timeSlotButton = button.getAttribute("data-time-slot");
-        const dateButton = button.getAttribute("data-date");
+        const buttonBanId = button.getAttribute("data-ban-id");
+        const buttonDate = button.getAttribute("data-date");
+        const buttonTimeSlot = button.getAttribute("data-time-slot");
 
-        for (let i = 0; i < maDatBan.length; i++) {
-            if (banIdButton == banAnId[i] && dateButton == date[i]) {
-                const timeSlotDate = dayjs(`${dateButton} ${timeSlotButton}`);
-                const gioBatDauDate = dayjs(`${dateButton} ${gioBatDau[i]}`);
-                const gioDuKienDate = dayjs(`${dateButton} ${gioDuKien[i]}`);
+        if (buttonBanId == banAnId && buttonDate == date) {
+            const timeSlotDate = dayjs(`${date} ${buttonTimeSlot}`);
+            const gioBatDauDate = dayjs(`${date} ${gioBatDau}`);
+            const gioDuKienDate = dayjs(`${date} ${gioDuKien}`);
 
-                if (
-                    timeSlotDate.isSameOrAfter(gioBatDauDate) &&
-                    timeSlotDate.isSameOrBefore(gioDuKienDate)
-                ) {
-                    button.classList.remove("bg-light", "btn-info");
-                    button.classList.add("btn-danger"); // Chuyển thành btn-success nếu cần
-                    button.setAttribute("data-ma-dat-ban", maDatBan[i]);
-                    break;
+            if (
+                timeSlotDate.isSameOrAfter(gioBatDauDate) &&
+                timeSlotDate.isSameOrBefore(gioDuKienDate)
+            ) {
+                button.classList.remove(
+                    "bg-light",
+                    "btn-danger",
+                    "btn-success"
+                );
+
+                // Xác định trạng thái của đơn đặt bàn
+                if (item.trang_thai === "dang_xu_ly") {
+                    button.classList.add("btn-danger"); // Đơn mới tạo
+                } else if (item.trang_thai === "xac_nhan") {
+                    button.classList.add("btn-success"); // Đơn đã xác nhận
                 }
+
+                // Cập nhật data-ma-dat-ban
+                button.setAttribute("data-ma-dat-ban", maDatBan);
             }
         }
     });
-});
+}
+
+// 📌 Hàm reset trạng thái button
+function resetButton(button) {
+    button.classList.remove(
+        "btn-success",
+        "btn-danger",
+        "btn-warning",
+        "bg-info"
+    );
+    button.classList.add("bg-light");
+    button.removeAttribute("data-ma-dat-ban");
+    button.removeAttribute("data-bs-title");
+    button.removeAttribute("title");
+}
