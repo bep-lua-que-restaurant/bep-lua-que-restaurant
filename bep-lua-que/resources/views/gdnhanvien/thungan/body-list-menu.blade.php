@@ -90,6 +90,7 @@
             var banId = $('#ten-ban').data('currentBan'); // Lấy ID bàn hiện tại
             var monAnId = card.data('banan-id'); // Lấy ID món ăn
             var giaMon = parseInt(card.find('.card-text').text().replace(/[^0-9]/g, "")); // Lấy giá món
+            let nutHoaDon = document.querySelector(".nut-hoa-don");
             // Kiểm tra nếu chưa chọn bàn
             if (!banId) {
                 showToast("🚨 Vui lòng chọn bàn trước khi thêm món", "warning");
@@ -113,6 +114,7 @@
                     var maHoaDonElement = document.getElementById("maHoaDon");
                     maHoaDonElement.innerText = response.data.ma_hoa_don;
                     maHoaDonElement.style.color = "#28a745";
+                    nutHoaDon.style.display = "block";
                     // Tìm ID chi tiết hóa đơn tương ứng với món ăn
                     let timMon = response.data.chi_tiet_hoa_dons.find(item => item
                         .mon_an_id == monAnId);
