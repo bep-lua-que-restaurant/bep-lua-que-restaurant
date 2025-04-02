@@ -58,9 +58,13 @@ $(document).ready(function () {
             success: function (response) {
                 if (response.hoa_don_id) {
                     $("#ten-ban").data("hoaDonId", response.hoa_don_id);
-                    nutHoaDon.style.display = "block"; 
+                    nutHoaDon.style.display = "block";
+                    let nutThanhToan = document.querySelector("#thanhToan-btn");
                     // Gọi API để lấy chi tiết hóa đơn
                     loadChiTietHoaDon(response.hoa_don_id);
+                    nutThanhToan.onclick = function () {
+                        loadHoaDonThanhToan(response.hoa_don_id);
+                    };
                 } else {
                     // var hoaDonId = null;
                     nutHoaDon.style.display = "none";
@@ -286,10 +290,8 @@ $(document).ready(function () {
             },
             success: function (response) {
                 let hoaDonThanhToan = $("#hoa-don-thanh-toan-body");
-                let offcanvasBody = $(".offcanvas-body tbody"); // Lấy phần bảng trong offcanvas
 
                 hoaDonThanhToan.empty();
-                offcanvasBody.empty();
 
                 var soNguoi = response.so_nguoi;
                 let tongTien = 0;
@@ -340,12 +342,10 @@ $(document).ready(function () {
 
                     // Cập nhật bảng bằng cách dùng .html() thay vì .append()
                     hoaDonThanhToan.html(rows.join(""));
-                    offcanvasBody.html(rows.join(""));
                 } else {
                     let emptyRow =
                         '<tr><td colspan="5" class="text-center">Chưa có món nào</td></tr>';
                     hoaDonThanhToan.html(emptyRow);
-                    offcanvasBody.html(emptyRow);
                 }
 
                 $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");

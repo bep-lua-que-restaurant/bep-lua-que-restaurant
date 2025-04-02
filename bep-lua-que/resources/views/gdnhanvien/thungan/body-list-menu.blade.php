@@ -146,7 +146,7 @@
                 if (existingRow.length) {
                     // Nếu món đã có, tăng số lượng và cập nhật tổng giá
                     let soLuongSpan = existingRow.find(".so-luong").first();
-                    console.log(soLuongSpan.text());
+
                     let soLuongMoi = parseInt(soLuongSpan.text()) + 1;
                     soLuongSpan.text(soLuongMoi);
 
