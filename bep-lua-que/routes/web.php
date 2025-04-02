@@ -128,10 +128,10 @@ Route::get('export-com-bo', [ComBoController::class, 'export'])->name('com-bo.ex
 Route::post('/import-com-bo', [ComBoController::class, 'importComBo'])->name('com-bo.import');
 
 //Dịch vụ
-Route::resource('dich-vu', DichVuController::class);
-Route::post('dich-vu/restore/{id}', [DichVuController::class, 'restore'])->name('dich-vu.restore');
-Route::get('export-dich-vu', [DichVuController::class, 'export'])->name('dich-vu.export');
-Route::post('/import-dich-vu', [DichVuController::class, 'importDichVu'])->name('dich-vu.import');
+// Route::resource('dich-vu', DichVuController::class);
+// Route::post('dich-vu/restore/{id}', [DichVuController::class, 'restore'])->name('dich-vu.restore');
+// Route::get('export-dich-vu', [DichVuController::class, 'export'])->name('dich-vu.export');
+// Route::post('/import-dich-vu', [DichVuController::class, 'importDichVu'])->name('dich-vu.import');
 //Chức vụ
 Route::resource('chuc-vu', ChucVuController::class);
 Route::post('chuc-vu/restore/{id}', [ChucVuController::class, 'restore'])->name('chuc-vu.restore');
