@@ -167,9 +167,9 @@
                         <th scope="col">Tổng cộng</th>
                     </tr>
                 </thead>
-                {{-- <tbody id="hoa-don-thanh-toan-body">
+                <thead id="hoa-don-thanh-toan-body">
                     <!-- Dữ liệu hóa đơn sẽ được hiển thị ở đây -->
-                </tbody> --}}
+                </thead>
             </table>
         </div>
 
