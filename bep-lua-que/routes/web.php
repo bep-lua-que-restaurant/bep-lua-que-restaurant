@@ -122,6 +122,7 @@ Route::post('danh-muc-mon-an/restore/{id}', [DanhMucMonAnController::class, 'res
 Route::get('export-danh-muc-mon-an', [DanhMucMonAnController::class, 'export'])->name('danh-muc-mon-an.export');
 Route::post('/import-danh-muc-mon-an', [DanhMucMonAnController::class, 'importDanhMucMonAn'])->name('danh-muc-mon-an.import');
 
+
 Route::resource('com-bo', ComBoController::class);
 Route::post('com-bo/restore/{id}', [ComBoController::class, 'restore'])->name('com-bo.restore');
 Route::get('export-com-bo', [ComBoController::class, 'export'])->name('com-bo.export');

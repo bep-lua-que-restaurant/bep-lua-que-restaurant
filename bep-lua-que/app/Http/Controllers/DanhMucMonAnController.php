@@ -10,42 +10,53 @@ use App\Exports\DanhMucMonAnExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\DanhMucMonAnImport;
 use Illuminate\Support\Facades\Storage;
+use Yajra\DataTables\Facades\DataTables;
 
 class DanhMucMonAnController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request  $request)
+    public function index(Request $request)
     {
-        $query = DanhMucMonAn::query();
-
-        if ($request->has('ten') && $request->ten != '') {
-            $query->where('ten', 'like', '%' . $request->ten . '%');
-        }
-
-        if ($request->has('statusFilter') && $request->statusFilter != '') {
-            if ($request->statusFilter == 'Đang kinh doanh') {
-                $query->whereNull('deleted_at');
-            } elseif ($request->statusFilter == 'Ngừng kinh doanh') {
-                $query->whereNotNull('deleted_at');
-            }
-        }
-
-        $data = $query->withTrashed()->latest('id')->paginate(15);
-
-        // Xử lý trả về khi yêu cầu là Ajax
         if ($request->ajax()) {
-            return response()->json([
-                'html' => view('admin.danhmuc.body-list', compact('data'))->render(),
-            ]);
+            $query = DanhMucMonAn::query()->withTrashed();
+    
+            return DataTables::of($query)
+                ->addIndexColumn() // Thêm cột số thứ tự
+                ->addColumn('trang_thai', function ($row) {
+                    if ($row->deleted_at != null) {
+                        return '<div class="d-flex align-items-center"><i class="fa fa-circle text-danger mr-1"></i> Đã ngừng kinh doanh</div>';
+                    } else {
+                        return '<div class="d-flex align-items-center"><i class="fa fa-circle text-success mr-1"></i> Đang kinh doanh</div>';
+                    }
+                })
+                ->addColumn('action', function ($row) {
+                    $html = '<div class="d-flex align-items-center">';
+                    $html .= '<a href="' . route('danh-muc-mon-an.show', $row->id) . '" class="btn btn-info btn-sm p-2 m-2"><i class="fa fa-eye"></i></a>';
+                    $html .= '<a href="' . route('danh-muc-mon-an.edit', $row->id) . '" class="btn btn-warning btn-sm p-2 m-2"><i class="fa fa-edit"></i></a>';
+    
+                    if ($row->deleted_at) {
+                        $html .= '<form action="' . route('danh-muc-mon-an.restore', $row->id) . '" method="POST" style="display:inline;">'
+                            . csrf_field() .
+                            '<button type="submit" class="btn btn-success btn-sm p-2 m-2" title="Khôi phục"><i class="fa fa-recycle"></i></button>'
+                            . '</form>';
+                    } else {
+                        $html .= '<form action="' . route('danh-muc-mon-an.destroy', $row->id) . '" method="POST" style="display:inline;">'
+                            . csrf_field() . method_field('DELETE') .
+                            '<button type="submit" class="btn btn-danger btn-sm p-2 m-2" title="Xóa"><i class="fa fa-trash"></i></button>'
+                            . '</form>';
+                    }
+                    $html .= '</div>';
+                    return $html;
+                })
+                ->rawColumns(['trang_thai', 'action']) // Chỉ giữ lại các cột có HTML
+                ->make(true);
         }
-
+    
         return view('admin.danhmuc.list', [
-            'data' => $data,
-            'route' => route('danh-muc-mon-an.index'), // URL route cho AJAX
-            'tableId' => 'list-container', // ID của bảng
-            'searchInputId' => 'search-name', // ID của ô tìm kiếm
+            'route' => route('danh-muc-mon-an.index'),
+            'tableId' => 'list-container',
         ]);
     }
 
@@ -122,7 +133,7 @@ class DanhMucMonAnController extends Controller
     {
         $danhMucMonAn->delete();
 
-        return redirect()->route('danh-muc-mon-an.index')->with('success', 'Xóa danh mục thành công!');
+        return redirect()->route('danh-muc-mon-an.index');
     }
 
     public function restore($id)
@@ -130,7 +141,7 @@ class DanhMucMonAnController extends Controller
         $danhMucMonAn = DanhMucMonAn::withTrashed()->findOrFail($id);
         $danhMucMonAn->restore();
 
-        return redirect()->route('danh-muc-mon-an.index')->with('success', 'Khôi phục danh mục thành công!');
+        return redirect()->route('danh-muc-mon-an.index');
     }
 
     public function export()
@@ -149,4 +160,6 @@ class DanhMucMonAnController extends Controller
 
         return back()->with('success', 'Nhập dữ liệu thành công!');
     }
+
+    
 }
