@@ -685,7 +685,6 @@
         }
     });
 
-
     // thông báo toast
     function showToast(message, type) {
         var toastEl = $("#toastMessage");
