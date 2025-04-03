@@ -10,7 +10,7 @@ class BanAn extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['ten_ban', 'so_ghe', 'mo_ta', 'vi_tri', 'trang_thai'];
+    protected $fillable = ['ten_ban', 'so_ghe', 'mo_ta', 'trang_thai'];
 
 
     protected $attributes = [
