@@ -19,10 +19,7 @@
                 </ol>
             </div>
         </div>
-        <!-- row -->
-        <div class="row">
-            @include('admin.filter')
-        </div>
+
 
         <div class="row">
             <div class="col-lg-12">
@@ -50,27 +47,18 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-responsive-md">
+                            
+                            <table class="table table-responsive-md" id="{{ $tableId }}">
                                 <thead>
                                     <tr>
-                                        <th style="width:50px;">
-                                            <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
-                                                <input type="checkbox" class="custom-control-input" id="checkAll"
-                                                    required="">
-                                                <label class="custom-control-label" for="checkAll"></label>
-                                            </div>
-                                        </th>
-                                        <th><strong>ID.</strong></th>
-                                        <th><strong>Tên </strong></th>
-
+ 
+                                        <th><strong>ID</strong></th>
+                                        <th><strong>Tên</strong></th>
                                         <th><strong>Trạng thái</strong></th>
                                         <th><strong>Hành động</strong></th>
                                     </tr>
                                 </thead>
-                                <tbody id="{{ $tableId }}">
-                                    @include('admin.danhmuc.body-list')
-                                </tbody>
-
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
@@ -107,8 +95,106 @@
             </div>
         </div>
     </div>
+    <!-- Script -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function() {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+    
+            var table = $('#{{ $tableId }}').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: '{{ $route }}',
+                columns: [
+                   
+                    { data: 'id', name: 'id' },
+                    { data: 'ten', name: 'ten' },
+                    { data: 'trang_thai', name: 'deleted_at' },
+                    { data: 'action', name: 'action', orderable: false, searchable: false }
+                ],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json' // Ngôn ngữ tiếng Việt
+                },
+                // Tùy chỉnh phân trang
+                pagingType: 'full_numbers', // Hiển thị đầy đủ: First, Previous, số trang, Next, Last
+                renderer: 'bootstrap', // Dùng kiểu Bootstrap cho phân trang
+                lengthMenu: [5, 10, 25, 50], // Tùy chọn số dòng mỗi trang
+                pageLength: 10 // Số dòng mặc định mỗi trang
+            });
+    
+            // Checkbox "Chọn tất cả"
+            $('#checkAll').on('click', function() {
+                $('input[name="ids[]"]').prop('checked', this.checked);
+            });
+    
+            // Xử lý submit form với SweetAlert2
+            $(document).on('submit', 'form', function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var isDelete = form.find('button[title="Xóa"]').length > 0;
+    
+                Swal.fire({
+                    title: isDelete ? 'Bạn muốn ngừng kinh doanh mục này chứ?' : 'Bạn có chắc muốn khôi phục mục này không?',
+                    text: "Hành động này có thể thay đổi trạng thái của danh mục!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Xác nhận',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: form.attr('action'),
+                            method: form.attr('method'),
+                            data: form.serialize(),
+                            success: function(response) {
+                                Swal.fire(
+                                    'Thành công!',
+                                    isDelete ? 'Danh mục đã được ngừng kinh doanh.' : 'Danh mục đã được khôi phục.',
+                                    'success'
+                                );
+                                table.ajax.reload();
+                            },
+                            error: function(xhr) {
+                                Swal.fire(
+                                    'Lỗi!',
+                                    'Có lỗi xảy ra, vui lòng thử lại!',
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+    
+    <!-- Thêm CSS tùy chỉnh cho phân trang -->
+    <style>
+        .dataTables_paginate .pagination {
+            justify-content: center; /* Căn giữa phân trang */
+        }
+        .dataTables_paginate .page-item.active .page-link {
+            background-color: #007bff; /* Màu xanh cho trang hiện tại */
+            border-color: #007bff;
+            color: white;
+        }
+        .dataTables_paginate .page-link {
+            color: #007bff; /* Màu chữ nút phân trang */
+            border-radius: 5px;
+            margin: 0 5px;
+        }
+        .dataTables_paginate .page-link:hover {
+            background-color: #e9ecef; /* Hiệu ứng hover */
+        }
+    </style>
 
-    @include('admin.search-srcip')
-    <!-- Hiển thị phân trang -->
-    {{ $data->links('pagination::bootstrap-5') }}
 @endsection

@@ -33,6 +33,9 @@
 
 
                         <div class="btn-group">
+                            <a href="{{ route('ban-an.themNhanh') }}" class="btn btn-sm btn-primary">
+                                <i class="fa fa-plus"></i> Thêm nhanh
+                            </a>
                             <!-- Nút Thêm mới -->
                             <a href="{{ route('ban-an.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm mới
