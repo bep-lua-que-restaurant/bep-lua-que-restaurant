@@ -17,7 +17,7 @@ export default defineConfig({
                 "resources/js/public.js",
                 "resources/js/thungan.js",
                 "resources/js/datban.js",
-                "resources/js/DatBanUpdated.js",
+                "resources/js/danhsach.js",
             ],
             refresh: true,
         }),

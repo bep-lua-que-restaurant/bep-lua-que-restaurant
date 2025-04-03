@@ -10,16 +10,19 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use App\Models\DatBan;
+use App\Models\KhachHang;
 
 class DatBanUpdated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $danhSachBan;
+    public $customer; // ✨ Thêm biến customer
 
-    public function __construct($danhSachBan)
+    public function __construct($danhSachBan, $customer)
     {
         $this->danhSachBan = $danhSachBan;
+        $this->customer = $customer; // ✅ Gán giá trị customer
     }
 
     public function broadcastOn()
@@ -30,7 +33,8 @@ class DatBanUpdated implements ShouldBroadcast
     public function broadcastWith()
     {
         return [
-            'danh_sach_ban' => $this->danhSachBan
+            'danh_sach_ban' => $this->danhSachBan,
+            'customer' => $this->customer // 🔥 Đưa customer vào payload
         ];
     }
 }

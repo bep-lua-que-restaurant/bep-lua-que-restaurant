@@ -17,9 +17,9 @@ class DanhMucMonAnFactory extends Factory
     public function definition(): array
     {
         return [
-            'ten' => $this->faker->name,
-            'mo_ta' => $this->faker->text,
-            'hinh_anh' => $this->faker->imageUrl(),
+            'ten' => 'Danh mục ' . strtoupper($this->faker->unique()->lexify('????') . $this->faker->numerify('###')), // 4 chữ cái + 3 số
+            'mo_ta' => $this->faker->sentence, // Mô tả ngắn gọn
+            'hinh_anh' => null, // Không cần ảnh
         ];
     }
 }

@@ -12,9 +12,10 @@ class ChiTietHoaDon extends Model
 
     protected $fillable = ['hoa_don_id', 'mon_an_id', 'so_luong', 'don_gia', 'thanh_tien', 'trang_thai'];
 
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
     public function monAn()
     {
-        return $this->belongsTo(MonAn::class, 'mon_an_id','id');
+        return $this->belongsTo(MonAn::class, 'mon_an_id', 'id');
     }
 
     public function hoaDon()

@@ -14,7 +14,7 @@ class DanhMucMonAnSeeder extends Seeder
     public function run(): void
     {
         DanhMucMonAn::factory()
-            ->count(10)
+            ->count(500)
             ->create();
     }
 }

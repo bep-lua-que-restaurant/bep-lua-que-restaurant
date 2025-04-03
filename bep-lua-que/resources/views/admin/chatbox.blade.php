@@ -138,24 +138,26 @@
 </head>
 
 <body>
-
     <div id="chatIcon">💬</div>
-
     <div id="chatbox" style="display: none;">
         <header>
             Chat hỗ trợ
             <button id="closeChat">&times;</button>
         </header>
         <div id="messages"></div>
-
         <div class="chat-suggestions">
-            <span class="suggestion" onclick="setMessage('Trạng thái bàn 1')">🪑 Bàn 1</span>
+            <span class="suggestion" onclick="setMessage('Trạng thái bàn 1')">🪑 Trạng thái bàn 1</span>
             <span class="suggestion" onclick="setMessage('Doanh thu tổng')">📊 Doanh thu tổng</span>
             <span class="suggestion" onclick="setMessage('Doanh thu ngày 12-03-2025')">📅 Doanh thu ngày 12-03</span>
-            <span class="suggestion" onclick="setMessage('Doanh thu từ 01-03-2025 đến 10-03-2025')">📆 Doanh thu từ ngày 01-03 đến 10-03</span>
+            <span class="suggestion" onclick="setMessage('Doanh thu từ 01-03-2025 đến 10-03-2025')">📆 Doanh thu từ
+                01-03 đến 10-03</span>
             <span class="suggestion" onclick="setMessage('Món ăn yêu thích')">🍽️ Món yêu thích</span>
-        </div>
 
+        </div>
+        <button id="toggleSuggestions"
+            style="display: none; margin: 5px; padding: 5px 10px; border: none;
+             background: #007bff; color: white; border-radius: 5px; cursor: pointer;">Hiện
+            gợi ý</button>
         <div class="chat-input">
             <textarea id="messageInput" placeholder="Nhập tin nhắn..." oninput="autoResize(this)"></textarea>
             <button id="sendBtn">Gửi</button>
@@ -167,13 +169,63 @@
             $("#chatIcon").click(function() {
                 $("#chatbox").fadeToggle();
             });
-
             $("#closeChat").click(function() {
                 $("#chatbox").fadeOut();
             });
+            $("#sendBtn").click(function() {
+                sendMessage();
+            });
+            $("#messageInput").keypress(function(event) {
+                if (event.which == 13 && !event.shiftKey) {
+                    event.preventDefault();
+                    sendMessage();
+                }
+            });
+        });
+
+        function sendMessage() {
+            let message = $("#messageInput").val().trim();
+            if (message === "") return;
+
+            $("#messages").append(`<div class="message user">${message}</div>`);
+            $("#messageInput").val("");
+
+            $.ajax({
+                url: "{{ route('chat.gui') }}",
+                type: "POST",
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                data: {
+                    nguoi_dung_id: 1, // Thay thế bằng user ID thực tế
+                    noi_dung: message
+                },
+                success: function(response) {
+                    $("#messages").append(`<div class="message bot">${response.phan_hoi}</div>`);
+                    $("#messages").scrollTop($("#messages")[0].scrollHeight);
+                },
+                error: function() {
+                    $("#messages").append(`<div class="message bot">❌ Lỗi khi gửi tin nhắn</div>`);
+                }
+            });
+        }
+
+        // function setMessage(text) {
+        //     $("#messageInput").val(text);
+        //     sendMessage();
+        // }
+        function setMessage(text) {
+            $("#messageInput").val(text);
+            sendMessage();
+            $(".chat-suggestions").hide(); // Ẩn gợi ý sau khi chọn
+            $("#toggleSuggestions").show(); // Hiện nút "Hiện gợi ý"
+        }
+
+        $("#toggleSuggestions").click(function() {
+            $(".chat-suggestions").show(); // Hiện lại danh sách gợi ý
+            $(this).hide(); // Ẩn nút "Hiện gợi ý"
         });
     </script>
-
 </body>
 
 </html>

@@ -200,4 +200,36 @@ class BanAnController extends Controller
 
         return back()->with('success', 'Nhập dữ liệu thành công!');
     }
+
+    public function them()
+    {
+        return view('admin.banan.themNhanh');
+    }
+
+    public function storeQuick(Request $request)
+    {
+        $request->validate([
+            'so_luong' => 'required|integer|min:1',
+            'prefix' => 'required|string|max:50',
+        ]);
+
+        $soLuong = $request->input('so_luong');
+        $prefix = $request->input('prefix');
+        $maxCount = BanAn::count();
+
+        for ($i = 1; $i <= $soLuong; $i++) {
+            $number = $maxCount + $i;
+            $banAn = BanAn::create([
+                'ten_ban' => $prefix . ' ' . $number, // Có khoảng trống như yêu cầu
+                'so_ghe' => 4,
+                'trang_thai' => 'trống',
+                // 'ma' => 'MA' . str_pad($number, 4, '0', STR_PAD_LEFT), // Nếu cần cột ma
+            ]);
+
+            // Gửi sự kiện real-time cho từng bàn được tạo
+            broadcast(new BanAnUpdated($banAn))->toOthers();
+        }
+
+        return redirect()->route('ban-an.index')->with('success', "Đã thêm $soLuong bàn ăn thành công!");
+    }
 }

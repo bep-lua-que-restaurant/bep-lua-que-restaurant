@@ -118,7 +118,7 @@
                                         <div class="status-buttons">
                                             <button class="btn btn-warning btn-sm status-btn"
                                                 onclick="updateStatus({{ $mon->id }}, 'dang_nau')">
-                                                Đang nấu
+                                                Nấu
                                             </button>
                                         </div>
                                     </div>
@@ -179,7 +179,7 @@
                                 <div class="status-buttons">
                                     <button class="btn btn-success btn-sm status-btn"
                                         onclick="updateStatus({{ $mon->id }}, 'hoan_thanh')">
-                                        Hoàn thành
+                                        Lên món
                                     </button>
                                 </div>
                             </div>
@@ -288,7 +288,7 @@
             // Cập nhật lại nút bấm
             let buttonContainer = dishElement.querySelector(".status-buttons");
             buttonContainer.innerHTML = `
-        <button class="btn btn-success btn-sm status-btn" onclick="updateStatus(${id}, 'hoan_thanh')">Hoàn thành</button>
+        <button class="btn btn-success btn-sm status-btn" onclick="updateStatus(${id}, 'hoan_thanh')">Lên món</button>
     `;
         }
 
@@ -365,7 +365,7 @@
         <div class="status-buttons">
             <button class="btn btn-warning btn-sm status-btn"
                 onclick="updateStatus(${monAn.id}, 'dang_nau')">
-                Đang nấu
+                 Nấu
             </button>
         </div>
     `;
@@ -434,7 +434,7 @@
             <div class="status-buttons">
                 <button class="btn btn-warning btn-sm status-btn"
                     onclick="updateStatusTheoMon('${monAn.id}', 'dang_nau')">
-                    Đang nấu
+                    Nấu
                 </button>
             </div>
         `;
