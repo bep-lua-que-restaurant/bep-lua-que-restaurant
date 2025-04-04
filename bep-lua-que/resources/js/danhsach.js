@@ -37,15 +37,19 @@ function addDatBanToTable(event) {
     newRow.classList.add("text-center");
 
     newRow.innerHTML = `
-        <td>${formatDateTime(
+        <td class="align-middle">${formatDateTime(
             danh_sach_ban[0]?.thoi_gian_den || "Không rõ"
         )}</td>
-        <td>${customer?.ho_ten || "Không rõ"}</td>
-        <td>${customer?.so_dien_thoai || "Không rõ"}</td>
-        <td>${danh_sach_ban[0]?.so_nguoi || "Không rõ"}</td>
-        <td>${renderBanList(danh_sach_ban)}</td>
-        <td>${renderStatusBadge(danh_sach_ban[0]?.trang_thai)}</td>
-        <td id="action-buttons-${
+        <td class="align-middle" >${customer?.ho_ten || "Không rõ"}</td>
+        <td class="align-middle" >${customer?.so_dien_thoai || "Không rõ"}</td>
+        <td class="align-middle" >${
+            danh_sach_ban[0]?.so_nguoi || "Không rõ"
+        }</td>
+        <td class="align-middle" >${renderBanList(danh_sach_ban)}</td>
+        <td class="align-middle" >${renderStatusBadge(
+            danh_sach_ban[0]?.trang_thai
+        )}</td>
+        <td class="align-middle"  id="action-buttons-${
             danh_sach_ban[0].datban_id
         }">${renderActionButtons(danh_sach_ban[0])}</td>
     `;
@@ -87,13 +91,17 @@ function updateDatBanRow(event) {
     }
 
     row.innerHTML = `
-    <td>${formatDateTime(danh_sach_ban[0]?.thoi_gian_den || "Không rõ")}</td>
-    <td>${customer?.ho_ten || "Không rõ"}</td>
-    <td>${customer?.so_dien_thoai || "Không rõ"}</td>
-    <td>${danh_sach_ban[0]?.so_nguoi || "Không rõ"}</td>
-    <td>${renderBanList(danh_sach_ban)}</td>
-    <td>${renderStatusBadge(danh_sach_ban[0]?.trang_thai)}</td>
-    <td id="action-buttons-${maDatBan}">${renderActionButtons(
+    <td class="align-middle" >${formatDateTime(
+        danh_sach_ban[0]?.thoi_gian_den || "Không rõ"
+    )}</td>
+    <td class="align-middle" >${customer?.ho_ten || "Không rõ"}</td>
+    <td class="align-middle" >${customer?.so_dien_thoai || "Không rõ"}</td>
+    <td class="align-middle" >${danh_sach_ban[0]?.so_nguoi || "Không rõ"}</td>
+    <td class="align-middle" >${renderBanList(danh_sach_ban)}</td>
+    <td class="align-middle" >${renderStatusBadge(
+        danh_sach_ban[0]?.trang_thai
+    )}</td>
+    <td class="align-middle"  id="action-buttons-${maDatBan}">${renderActionButtons(
         danh_sach_ban[0]
     )}</td>
 `;
