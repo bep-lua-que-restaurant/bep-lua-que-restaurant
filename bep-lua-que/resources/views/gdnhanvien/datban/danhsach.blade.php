@@ -89,9 +89,11 @@
                                             style="display: inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm" title="Hủy đặt">
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Hủy đặt"
+                                                onclick="return confirm('Bạn có chắc chắn muốn hủy đặt bàn này không?');">
                                                 <i class="fas fa-times"></i>
                                             </button>
+
                                         </form>
 
                                         <!-- Nút Xác nhận: chỉ khi đúng ngày -->
