@@ -44,7 +44,7 @@
         </div>
         <div class="row">
             <!-- Sidebar -->
-            <nav class="col-2 bg-light pt-3">
+            {{-- <nav class="col-2 bg-light pt-3">
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a href="/" class="btn btn-primary  w-100">Trang chủ</a>
@@ -59,7 +59,27 @@
                     </li>
 
                 </ul>
+            </nav> --}}
+
+
+            <nav class="col-2 bg-light pt-3 vh-100 d-flex flex-column align-items-start p-3 border-end shadow-sm">
+                <ul class="nav flex-column w-100 gap-2">
+                    <li class="nav-item">
+                        <a href="/" class="btn btn-primary w-100 text-start">🏠 Trang chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('dat-ban.index') }}" class="btn btn-primary w-100 text-start">📅 Đặt bàn</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('datban.danhsach') }}" class="btn btn-primary w-100 text-start">📋 Danh
+                            sách</a>
+                    </li>
+                </ul>
             </nav>
+
+
+
+
             <!-- Main Content -->
             <main class="col-10">
                 @yield('content')
