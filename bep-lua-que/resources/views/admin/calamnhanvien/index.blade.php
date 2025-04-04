@@ -31,14 +31,14 @@
                 </div>
                 <div class="col-md-3 d-flex gap-2">
                     <button type="submit" class="btn btn-primary">🔎 Lọc</button>
-                    <a href="{{ route('ca-lam-nhan-vien.index') }}" class="btn btn-secondary">🔄Quay lại </a>
+                    <a href="{{ route('ca-lam-nhan-vien.export') }}" class="btn btn-outline-primary">📤 Xuất file</a>
                 </div>
             </form>
 
             <div class="d-flex justify-content-between mb-3">
                 <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addShiftModal">➕ Thêm Ca
                     Làm</button>
-                <a href="{{ route('ca-lam-nhan-vien.export') }}" class="btn btn-outline-primary">📤 Xuất file</a>
+                {{-- <a href="{{ route('ca-lam-nhan-vien.export') }}" class="btn btn-outline-primary">📤 Xuất file</a> --}}
             </div>
 
             <!-- Bảng Lịch Làm Việc -->
