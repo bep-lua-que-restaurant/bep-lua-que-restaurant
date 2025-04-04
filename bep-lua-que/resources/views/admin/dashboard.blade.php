@@ -12,26 +12,26 @@
                 <div class="row">
                     <div class="col-md-4 text-center">
                         <h5>Đơn đã xong hôm nay</h5>
-                        <p id="totalRevenueToday" class="text-danger" style="font-size: 24px; font-weight: bold;">
-                            {{ number_format($totalRevenueToday, 0, ',', '.') }} VND</p>
+                        <p id="tongTienHomNay" class="text-danger" style="font-size: 24px; font-weight: bold;">
+                            {{ number_format($tongTienHomNay, 0, ',', '.') }} VND</p>
                         <small class="text-muted">Hôm qua: <span
-                                id="totalRevenueYesterday">{{ number_format($totalRevenueYesterday, 0, ',', '.') }}
+                                id="tongTienHomQua">{{ number_format($tongTienHomQua, 0, ',', '.') }}
                                 VND</span></small>
                     </div>
                     <div class="col-md-4 text-center">
                         <h5>Đơn đang phục vụ</h5>
-                        <p id="OderToday" class="text-danger" style="font-size: 24px; font-weight: bold;">
-                            {{ $ordersServingToday }}
+                        <p id="donDangPhucVuHomNay" class="text-danger" style="font-size: 24px; font-weight: bold;">
+                            {{ $donDangPhucVuHomNay }}
                         </p>
                         <small class="text-muted">Hôm qua: <span
-                                id="OderYesterday">{{ $ordersCompletedYesterday }}</span></small>
+                                id="donPhucVuHomQua">{{ $donPhucVuHomQua }}</span></small>
                     </div>
                     <div class="col-md-4 text-center">
                         <h5>Khách hàng hôm nay</h5>
-                        <p id="customersToday" class="text-danger" style="font-size: 24px; font-weight: bold;">
-                            {{ $customersToday }}</p>
+                        <p id="soLuongKhachHomNay" class="text-danger" style="font-size: 24px; font-weight: bold;">
+                            {{ $soLuongKhachHomNay }}</p>
                         <small class="text-muted">Hôm qua: <span
-                                id="customersYesterday">{{ $customersYesterday }}</span></small>
+                                id="soLuongKhachHomQua">{{ $soLuongKhachHomQua }}</span></small>
                     </div>
                 </div>
             </div>
@@ -43,7 +43,7 @@
 
                 <h5 class="text-primary fw-bold">
                     <i class="bi bi-info-circle"></i>
-                    <span id="totalSales">{{ number_format(array_sum($data), 0, ',', '.') }} VND</span>
+                    <span id="tongDoanhSo">{{ number_format(array_sum($data), 0, ',', '.') }} VND</span>
                 </h5>
 
                 <!-- Biểu đồ -->
@@ -99,13 +99,13 @@
                     method: 'GET',
                     cache: true, // Lưu cache để tối ưu tốc độ
                     success: function(response) {
-                        $('#totalRevenueToday').text(response.totalRevenueToday);
-                        $('#totalRevenueYesterday').text(response.totalRevenueYesterday);
-                        $('#customersToday').text(response.customersToday);
-                        $('#customersYesterday').text(response.customersYesterday);
-                        $('#totalSales').text(response.totalRevenueToday);
-                        $('#OderToday').text(response.ordersServingToday);
-                        $('#OderYesterday').text(response.ordersCompletedYesterday);
+                        $('#tongTienHomNay').text(response.tongTienHomNay);
+                        $('#tongTienHomQua').text(response.tongTienHomQua);
+                        $('#soLuongKhachHomNay').text(response.soLuongKhachHomNay);
+                        $('#soLuongKhachHomQua').text(response.soLuongKhachHomQua);
+                        $('#tongDoanhSo').text(response.tongTienHomNay);
+                        $('#donDangPhucVuHomNay').text(response.donDangPhucVuHomNay);
+                        $('#donPhucVuHomQua').text(response.donPhucVuHomQua);
 
                         updateChart(response.labels, response.data);
                     }
