@@ -13,10 +13,14 @@
                         {{ $chartType == 'gioBanChay' ? 'TOP DOANH THU CAO NHẤT' : 'TOP DOANH THU ÍT NHẤT' }}
                     </span>
                     <span id="timeRange">
-                        @if ($filterType == 'year') TRONG NĂM
-                        @elseif ($filterType == 'month') TRONG THÁNG
-                        @elseif ($filterType == 'week') TRONG TUẦN
-                        @else TRONG NGÀY
+                        @if ($filterType == 'year')
+                            TRONG NĂM
+                        @elseif ($filterType == 'month')
+                            TRONG THÁNG
+                        @elseif ($filterType == 'week')
+                            TRONG TUẦN
+                        @else
+                            TRONG NGÀY
                         @endif
                     </span>
                 </h5>
@@ -41,9 +45,11 @@
 
                         <div class="boLocTuyChinh">
                             <label for="startDate"><strong>Từ:</strong></label>
-                            <input type="date" name="fromDate" id="startDate" style="padding: 8px 12px; border-radius: 5px; border: 1px solid #ccc;">
+                            <input type="date" name="fromDate" id="startDate"
+                                style="padding: 8px 12px; border-radius: 5px; border: 1px solid #ccc;">
                             <label for="endDate"><strong>Đến:</strong></label>
-                            <input type="date" name="toDate" id="endDate" style="padding: 8px 12px; border-radius: 5px; border: 1px solid #ccc;">
+                            <input type="date" name="toDate" id="endDate"
+                                style="padding: 8px 12px; border-radius: 5px; border: 1px solid #ccc;">
                             <button type="button" class="btn btn-primary" id="btnFilter">Lọc</button>
                         </div>
                     </div>
@@ -59,7 +65,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             let chart;
             let isCustomFilterApplied = false; // Biến kiểm tra xem có đang dùng bộ lọc tùy chỉnh không
 
@@ -89,7 +95,9 @@
                                     text: 'Thời gian (Giờ)'
                                 }
                             },
-                            y: { beginAtZero: true }
+                            y: {
+                                beginAtZero: true
+                            }
                         }
                     }
                 });
@@ -110,7 +118,7 @@
                     let filterType = $('#filterType').val();
                     let timeText = filterType === 'year' ? 'TRONG NĂM' :
                         filterType === 'month' ? 'TRONG THÁNG' :
-                            filterType === 'week' ? 'TRONG TUẦN' : 'TRONG NGÀY';
+                        filterType === 'week' ? 'TRONG TUẦN' : 'TRONG NGÀY';
                     $('#timeRange').text(timeText);
                 }
 
@@ -122,44 +130,54 @@
                     url: "/thong-ke-top-doanh-thu",
                     type: "GET",
                     data: params,
-                    success: function (response) {
+                    success: function(response) {
                         updateChart(response.labels, response.data);
                     },
-                    error: function () {
+                    error: function() {
                         alert('Lỗi tải dữ liệu, vui lòng thử lại.');
                     }
                 });
             }
 
             // Xử lý khi thay đổi bộ lọc năm/tháng/tuần/ngày
-            $('#filterType').on('change', function () {
+            $('#filterType').on('change', function() {
                 isCustomFilterApplied = false; // Khi đổi filterType thì bỏ qua lọc tùy chỉnh
                 let filterType = $('#filterType').val();
                 let chartType = $('#chartType').val();
                 updateTitle(); // Cập nhật tiêu đề theo filterType
-                fetchData({ filterType, chartType });
+                fetchData({
+                    filterType,
+                    chartType
+                });
             });
 
             // Xử lý khi thay đổi chartType
-            $('#chartType').on('change', function () {
+            $('#chartType').on('change', function() {
                 let chartType = $('#chartType').val();
 
                 if (isCustomFilterApplied) {
                     // Nếu đang dùng bộ lọc tùy chỉnh thì lấy dữ liệu theo ngày tháng đã chọn
                     let fromDate = $('#startDate').val();
                     let toDate = $('#endDate').val();
-                    fetchData({ fromDate, toDate, chartType });
+                    fetchData({
+                        fromDate,
+                        toDate,
+                        chartType
+                    });
                     updateTitle(fromDate, toDate);
                 } else {
                     // Nếu không có bộ lọc tùy chỉnh, lọc theo filterType
                     let filterType = $('#filterType').val();
-                    fetchData({ filterType, chartType });
+                    fetchData({
+                        filterType,
+                        chartType
+                    });
                     updateTitle();
                 }
             });
 
             // Xử lý khi nhấn nút "Lọc" theo ngày tùy chỉnh
-            $('#btnFilter').on('click', function () {
+            $('#btnFilter').on('click', function() {
                 let fromDate = $('#startDate').val();
                 let toDate = $('#endDate').val();
                 let chartType = $('#chartType').val();
@@ -208,7 +226,11 @@
 
                 isCustomFilterApplied = true; // Đánh dấu là đang dùng lọc tùy chỉnh
                 updateTitle(fromDate, toDate); // Cập nhật tiêu đề theo ngày tháng
-                fetchData({ fromDate, toDate, chartType });
+                fetchData({
+                    fromDate,
+                    toDate,
+                    chartType
+                });
             });
 
             // Cập nhật tiêu đề ban đầu theo dữ liệu từ server
