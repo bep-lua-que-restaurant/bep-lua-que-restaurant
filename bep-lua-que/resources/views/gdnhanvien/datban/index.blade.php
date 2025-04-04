@@ -329,7 +329,7 @@
 
                                     const datBan = response.datBans.find(d => {
                                         if (d.ban_an_id !== ban.id)
-                                    return false;
+                                            return false;
                                         const thoiGianDen = new Date(d
                                             .thoi_gian_den);
                                         const [hours, minutes] = d.gio_du_kien
@@ -372,7 +372,7 @@
                     error: function() {
                         $("#ngay-tabs").html(
                             '<tr><td colspan="30" class="text-center text-danger">Lỗi tải dữ liệu</td></tr>'
-                            );
+                        );
                     }
                 });
             }
@@ -402,7 +402,7 @@
                                 tooltip.show();
                                 setTimeout(() => {
                                     tooltip.dispose();
-                                }, 2000);
+                                }, 1500);
                             })
                             .catch(error => console.error("Lỗi khi lấy dữ liệu đặt bàn:", error));
                     }
@@ -806,8 +806,8 @@
 
 
         /* .btn-success .btn-danger {
-                                                                                                                                                                                                                pointer-events: none;
-                                                                                                                                                                                                            } */
+                                                                                                                                                                                                                        pointer-events: none;
+                                                                                                                                                                                                                    } */
 
         .border-left-rounded {
             border-top-left-radius: 10px;

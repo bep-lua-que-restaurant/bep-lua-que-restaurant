@@ -558,6 +558,6 @@ class DatBanController extends Controller
         event(new DatBanDeleted(maDatBan: $maDatBan));
         // \Log::info("🚀 Sự kiện DatBanDeleted đã được phát", ['ma_dat_ban' => $maDatBan]);
 
-        return redirect()->back()->with('success', 'Tất cả đơn đặt bàn đã được hủy thành công!');
+        return redirect()->back()->with('success', 'Đơn đặt bàn đã được hủy thành công!');
     }
 }
