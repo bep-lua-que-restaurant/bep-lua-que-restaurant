@@ -67,7 +67,8 @@ class DatBanController extends Controller
         // Lấy danh sách bàn (PHÂN TRANG 10 bàn/trang)
         $banPhong = BanAn::whereNull('deleted_at')
             ->orderBy('id')
-            ->paginate(10); // Sử dụng phân trang
+            ->get(); // Lấy toàn bộ bàn ăn
+        // ->paginate(10); // Sử dụng phân trang
 
         // Lấy danh sách đặt bàn theo ngày, loại bỏ trạng thái 'da_huy' và 'da_thanh_toan'
         $datBans = DatBan::whereDate('thoi_gian_den', $date)
