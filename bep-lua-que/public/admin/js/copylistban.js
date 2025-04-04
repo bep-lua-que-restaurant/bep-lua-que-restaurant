@@ -59,12 +59,8 @@ $(document).ready(function () {
                 if (response.hoa_don_id) {
                     $("#ten-ban").data("hoaDonId", response.hoa_don_id);
                     nutHoaDon.style.display = "block";
-                    let nutThanhToan = document.querySelector("#thanhToan-btn");
                     // Gọi API để lấy chi tiết hóa đơn
                     loadChiTietHoaDon(response.hoa_don_id);
-                    nutThanhToan.onclick = function () {
-                        loadHoaDonThanhToan(response.hoa_don_id);
-                    };
                 } else {
                     // var hoaDonId = null;
                     nutHoaDon.style.display = "none";
@@ -115,7 +111,7 @@ $(document).ready(function () {
                 hoaDonBody.empty();
                 let offcanvasBody = $(".offcanvas-body tbody"); // Lấy phần bảng trong offcanvas
                 offcanvasBody.empty(); // Xóa nội dung cũ
-                var soNguoi = response.so_nguoi;
+                var soNguoi = response.so_nguoi || 0;
                 let tongTien = 0;
                 if (response.chi_tiet_hoa_don.length > 0) {
                     let index = 1;
@@ -281,14 +277,22 @@ $(document).ready(function () {
         });
     }
 
-    function loadHoaDonThanhToan(hoaDonId) {
+    let nutThanhToan = document.querySelector("#thanhToan-btn");
+    nutThanhToan.onclick = function () {
+        let maHoaDonElement = document.getElementById("maHoaDon");
+        let maHoaDon =maHoaDonElement.textContent;
+        loadHoaDonThanhToan(maHoaDon);
+    };
+
+    function loadHoaDonThanhToan(maHoaDon) {
         $.ajax({
-            url: "/hoa-don/get-details",
+            url: "thu-ngan/hoa-don-thanh-toan",
             method: "GET",
             data: {
-                hoa_don_id: hoaDonId,
+                maHoaDon: maHoaDon,
             },
             success: function (response) {
+                console.log(response);
                 let hoaDonThanhToan = $("#hoa-don-thanh-toan-body");
 
                 hoaDonThanhToan.empty();

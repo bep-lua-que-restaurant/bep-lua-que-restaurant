@@ -144,7 +144,9 @@ $(document).ready(function () {
             success: function (res) {
                 if (res.xac_nhan_xoa) {
                     // Nếu hóa đơn gốc trống, hỏi xác nhận xóa
-                    if (confirm("Hóa đơn này đã trống, bạn có muốn xóa không?")) {
+                    if (
+                        confirm("Hóa đơn này đã trống, bạn có muốn xóa không?")
+                    ) {
                         $.ajax({
                             url: "/thu-ngan-xoa-hoa-don",
                             method: "POST",
@@ -171,6 +173,8 @@ $(document).ready(function () {
                 } else {
                     showToast("Đã tách bàn và tạo hóa đơn mới!", "success");
                 }
+
+                location.reload(); // Tải lại trang sau khi tách bàn
             },
             error: function (err) {
                 console.log(err.responseJSON);
