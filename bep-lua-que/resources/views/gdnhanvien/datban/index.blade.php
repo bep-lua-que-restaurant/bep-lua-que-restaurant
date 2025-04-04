@@ -59,7 +59,7 @@
                             {{-- <input type="text" class="form-control" id="searchCustomer" placeholder="Tìm kiếm..."> --}}
 
                             <input type="text" class="form-control" id="searchCustomer"
-                                placeholder="Nhập tên hoặc số điện thoại">
+                                placeholder="Tìm kiếm theo họ tên hoặc số điện thoại">
                             <ul id="customerList" class="list-group mt-2" style="display: none;"></ul>
                         </div>
 
@@ -683,8 +683,8 @@
 
 
         /* .btn-success .btn-danger {
-                                                                                                                                                                                                    pointer-events: none;
-                                                                                                                                                                                                } */
+                                                                                                                                                                                                        pointer-events: none;
+                                                                                                                                                                                                    } */
 
         .border-left-rounded {
             border-top-left-radius: 10px;

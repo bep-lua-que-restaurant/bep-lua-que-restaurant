@@ -36,7 +36,7 @@ class ThongKeSoLuongKhachController extends Controller
                 }
                 $rawData = DatBan::selectRaw('DATE(thoi_gian_den) as date, SUM(so_nguoi) as total_customers')
                     ->whereBetween('thoi_gian_den', [$from, $to])
-                    ->where('trang_thai', 'xac_nhan') //Chỉ tính trạng thái "xac_nhan"
+                    ->where('trang_thai', 'da_thanh_toan') //Chỉ tính trạng thái "da_thanh_toan"
                     ->groupBy('date')
                     ->orderBy('date')
                     ->pluck('total_customers', 'date')
@@ -51,7 +51,7 @@ class ThongKeSoLuongKhachController extends Controller
                 }
                 $rawData = DatBan::selectRaw('DATE_FORMAT(thoi_gian_den, "%Y-%m") as month, SUM(so_nguoi) as total_customers')
                     ->whereBetween('thoi_gian_den', [$from, $to])
-                    ->where('trang_thai', 'xac_nhan') //Chỉ tính trạng thái "xac_nhan"
+                    ->where('trang_thai', 'da_thanh_toan') //Chỉ tính trạng thái "da_thanh_toan"
                     ->groupBy('month')
                     ->orderBy('month')
                     ->pluck('total_customers', 'month')
@@ -63,7 +63,7 @@ class ThongKeSoLuongKhachController extends Controller
                 $labels = range($from->year, $to->year);
                 $rawData = DatBan::selectRaw('YEAR(thoi_gian_den) as year, SUM(so_nguoi) as total_customers')
                     ->whereBetween('thoi_gian_den', [$from, $to])
-                    ->where('trang_thai', 'xac_nhan') //Chỉ tính trạng thái "xac_nhan"
+                    ->where('trang_thai', 'da_thanh_toan') //Chỉ tính trạng thái "da_thanh_toan"
                     ->groupBy('year')
                     ->orderBy('year')
                     ->pluck('total_customers', 'year')
@@ -78,7 +78,7 @@ class ThongKeSoLuongKhachController extends Controller
                 $labels = array_map(fn($m) => "Tháng $m", range(1, 12));
                 $rawData = DatBan::selectRaw('MONTH(thoi_gian_den) as month, SUM(so_nguoi) as total_customers')
                     ->whereYear('thoi_gian_den', $year)
-                    ->where('trang_thai', 'xac_nhan') //Chỉ tính trạng thái "xac_nhan"
+                    ->where('trang_thai', 'da_thanh_toan') //Chỉ tính trạng thái "da_thanh_toan"
                     ->groupBy('month')
                     ->orderBy('month')
                     ->pluck('total_customers', 'month')
@@ -94,7 +94,7 @@ class ThongKeSoLuongKhachController extends Controller
                 $rawData = DatBan::selectRaw('DAY(thoi_gian_den) as day, SUM(so_nguoi) as total_customers')
                     ->whereYear('thoi_gian_den', $year)
                     ->whereMonth('thoi_gian_den', $month)
-                    ->where('trang_thai', 'xac_nhan') //Chỉ tính trạng thái "xac_nhan"
+                    ->where('trang_thai', 'da_thanh_toan') //Chỉ tính trạng thái "da_thanh_toan"
                     ->groupBy('day')
                     ->orderBy('day')
                     ->pluck('total_customers', 'day')
@@ -111,7 +111,7 @@ class ThongKeSoLuongKhachController extends Controller
                 }
                 $rawData = DatBan::selectRaw('DATE(thoi_gian_den) as date, SUM(so_nguoi) as total_customers')
                     ->whereBetween('thoi_gian_den', [$startOfWeek, $endOfWeek])
-                    ->where('trang_thai', 'xac_nhan') //Chỉ tính trạng thái "xac_nhan"
+                    ->where('trang_thai', 'da_thanh_toan') //Chỉ tính trạng thái "da_thanh_toan"
                     ->groupBy('date')
                     ->orderBy('date')
                     ->pluck('total_customers', 'date')
@@ -124,7 +124,7 @@ class ThongKeSoLuongKhachController extends Controller
                 $labels = array_map(fn($h) => "$h:00", range(0, 23));
                 $rawData = DatBan::selectRaw('HOUR(thoi_gian_den) as hour, SUM(so_nguoi) as total_customers')
                     ->whereDate('thoi_gian_den', $date)
-                    ->where('trang_thai', 'xac_nhan') //Chỉ tính trạng thái "xac_nhan"
+                    ->where('trang_thai', 'da_thanh_toan') //Chỉ tính trạng thái "da_thanh_toan"
                     ->groupBy('hour')
                     ->orderBy('hour')
                     ->pluck('total_customers', 'hour')

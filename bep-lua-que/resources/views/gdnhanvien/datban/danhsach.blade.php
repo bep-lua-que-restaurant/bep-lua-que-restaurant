@@ -45,10 +45,13 @@
                     <tbody>
                         @foreach ($banhSachDatban as $datban)
                             <tr class="text-center" data-id="{{ $datban->ma_dat_ban }}">
-                                <td>{{ \Carbon\Carbon::parse($datban->thoi_gian_den)->format('d/m/Y H:i') }}</td>
-                                <td>{{ $datban->ho_ten }}</td>
-                                <td>{{ $datban->so_dien_thoai }}</td>
-                                <td>{{ $datban->so_nguoi }}</td>
+                                <td class="align-middle">
+                                    {{ \Carbon\Carbon::parse($datban->thoi_gian_den)->format('d/m/Y H:i') }}</td>
+                                <td class="align-middle">{{ $datban->ho_ten }}</td>
+                                <td class="align-middle">{{ $datban->so_dien_thoai }}</td>
+                                {{-- <td>{{ $datban->so_nguoi }}</td> --}}
+                                <td class="align-middle">{{ $datban->so_nguoi }}</td>
+
                                 <td>
                                     {{-- Hiển thị danh sách bàn gọn hơn --}}
                                     <ul class="list-unstyled mb-0">
@@ -57,7 +60,7 @@
                                         @endforeach
                                     </ul>
                                 </td>
-                                <td>
+                                <td class="align-middle">
                                     @if ($datban->trang_thai == 'xac_nhan')
                                         <span class="badge bg-success trang_thai" data-value="{{ $datban->trang_thai }}">
                                             Đã nhận bàn</span>
@@ -72,27 +75,38 @@
                                             Đã hủy</span>
                                     @endif
                                 </td>
-                                <td
+                                <td class="align-middle"
                                     class="{{ $datban->trang_thai === 'dang_xu_ly' ? 'd-flex justify-content-center gap-2' : '' }}">
                                     <a href="{{ route('dat-ban.show', $datban->ma_dat_ban) }}"
                                         class="btn btn-primary btn-sm">
                                         <i class="fas fa-eye"></i> <!-- Icon "Xem" -->
                                     </a>
 
+
                                     @if ($datban->trang_thai === 'dang_xu_ly')
-                                        <form action="{{ route('dat-ban.destroy', $datban->ma_dat_ban) }}" method="post">
+                                        <!-- Nút Hủy luôn hiển thị -->
+                                        <form action="{{ route('dat-ban.destroy', $datban->ma_dat_ban) }}" method="post"
+                                            style="display: inline;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-danger btn-sm" title="Hủy đặt">
-                                                <i class="fas fa-times"></i> <!-- Icon "Hủy đặt" -->
+                                                <i class="fas fa-times"></i>
                                             </button>
                                         </form>
 
-                                        <a href="{{ route('dat-ban.edit', $datban->ma_dat_ban) }}"
-                                            class="btn btn-success  btn-sm">
-                                            <i class="fas fa-check"></i> <!-- Icon "Xác nhận" -->
-                                        </a>
+                                        <!-- Nút Xác nhận: chỉ khi đúng ngày -->
+                                        @if (
+                                            ($datban->thoi_gian_den instanceof \Carbon\Carbon
+                                                ? $datban->thoi_gian_den
+                                                : \Carbon\Carbon::parse($datban->thoi_gian_den)
+                                            )->isSameDay($today))
+                                            <a href="{{ route('dat-ban.edit', $datban->ma_dat_ban) }}"
+                                                class="btn btn-success btn-sm">
+                                                <i class="fas fa-check"></i> <!-- Icon "Xác nhận" -->
+                                            </a>
+                                        @endif
                                     @endif
+
                                 </td>
 
                             </tr>
@@ -131,13 +145,13 @@
             selectStatus.addEventListener("change", filterTable);
         });
     </script>
-    {{-- <script>
+    <script>
         setInterval(() => {
             fetch('/api/update-datban')
                 .then(response => response.json())
                 .then(data => console.log(data.message));
         }, 60000); // 60000ms = 1 phút
-    </script> --}}
+    </script>
     @vite('resources/js/danhsach.js')
 
     {{ $banhSachDatban->links('pagination::bootstrap-5') }}

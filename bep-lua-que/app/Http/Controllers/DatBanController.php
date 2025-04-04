@@ -86,6 +86,8 @@ class DatBanController extends Controller
 
     public function DanhSach()
     {
+        $today = Carbon::today()->toDateString();
+
         $banhSachDatban = DatBan::select(
             'dat_bans.ma_dat_ban',
             'dat_bans.thoi_gian_den',
@@ -99,11 +101,26 @@ class DatBanController extends Controller
         )
             ->join('khach_hangs', 'dat_bans.khach_hang_id', '=', 'khach_hangs.id')
             ->join('ban_ans', 'dat_bans.ban_an_id', '=', 'ban_ans.id')
-            ->groupBy('dat_bans.ma_dat_ban', 'dat_bans.thoi_gian_den', 'khach_hangs.id', 'khach_hangs.ho_ten', 'khach_hangs.so_dien_thoai', 'dat_bans.so_nguoi', 'dat_bans.trang_thai', 'dat_bans.mo_ta')
-            ->orderBy('dat_bans.thoi_gian_den', 'desc')
+            ->groupBy(
+                'dat_bans.ma_dat_ban',
+                'dat_bans.thoi_gian_den',
+                'khach_hangs.id',
+                'khach_hangs.ho_ten',
+                'khach_hangs.so_dien_thoai',
+                'dat_bans.so_nguoi',
+                'dat_bans.trang_thai',
+                'dat_bans.mo_ta'
+            )
+            ->orderByRaw("
+    CASE 
+        WHEN dat_bans.trang_thai = 'dang_xu_ly' AND DATE(dat_bans.thoi_gian_den) = ? THEN 0 
+        ELSE 1 
+    END,
+    dat_bans.thoi_gian_den DESC
+", [$today])
             ->paginate(10);
 
-        return view('gdnhanvien.datban.danhsach', compact('banhSachDatban'));
+        return view('gdnhanvien.datban.danhsach', compact('banhSachDatban', 'today'));
     }
 
 
@@ -498,7 +515,9 @@ class DatBanController extends Controller
 
             DB::commit(); // Xác nhận transaction
 
-            return redirect()->back()->with('success', 'Cập nhật thành công! Hóa đơn đã được tạo.');
+            // return redirect()->back()->with('success', 'Cập nhật thành công! Hóa đơn đã được tạo.');
+            $today = \Carbon\Carbon::today();
+            return view('gdnhanvien.datban.index', compact('today'));
         } catch (\Exception $e) {
             DB::rollBack(); // Hoàn tác nếu lỗi xảy ra
             return redirect()->back()->with('error', 'Cập nhật thất bại: ' . $e->getMessage());
