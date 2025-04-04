@@ -9,7 +9,7 @@
         <div class="row page-titles mx-0">
             <div class="col-sm-6 p-md-0">
                 <div class="welcome-text">
-                    <h4>Hi, welcome back!</h4>
+                    <h4>Chào mừng đến Bếp lửa quê !</h4>
                 </div>
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
@@ -47,11 +47,11 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            
+
                             <table class="table table-responsive-md" id="{{ $tableId }}">
                                 <thead>
                                     <tr>
- 
+
                                         <th><strong>ID</strong></th>
                                         <th><strong>Tên</strong></th>
                                         <th><strong>Trạng thái</strong></th>
@@ -107,17 +107,31 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
-    
+
             var table = $('#{{ $tableId }}').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: '{{ $route }}',
                 columns: [
-                   
-                    { data: 'id', name: 'id' },
-                    { data: 'ten', name: 'ten' },
-                    { data: 'trang_thai', name: 'deleted_at' },
-                    { data: 'action', name: 'action', orderable: false, searchable: false }
+
+                    {
+                        data: 'id',
+                        name: 'id'
+                    },
+                    {
+                        data: 'ten',
+                        name: 'ten'
+                    },
+                    {
+                        data: 'trang_thai',
+                        name: 'deleted_at'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
+                    }
                 ],
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json' // Ngôn ngữ tiếng Việt
@@ -128,20 +142,21 @@
                 lengthMenu: [5, 10, 25, 50], // Tùy chọn số dòng mỗi trang
                 pageLength: 10 // Số dòng mặc định mỗi trang
             });
-    
+
             // Checkbox "Chọn tất cả"
             $('#checkAll').on('click', function() {
                 $('input[name="ids[]"]').prop('checked', this.checked);
             });
-    
+
             // Xử lý submit form với SweetAlert2
             $(document).on('submit', 'form', function(e) {
                 e.preventDefault();
                 var form = $(this);
                 var isDelete = form.find('button[title="Xóa"]').length > 0;
-    
+
                 Swal.fire({
-                    title: isDelete ? 'Bạn muốn ngừng kinh doanh mục này chứ?' : 'Bạn có chắc muốn khôi phục mục này không?',
+                    title: isDelete ? 'Bạn muốn ngừng kinh doanh mục này chứ?' :
+                        'Bạn có chắc muốn khôi phục mục này không?',
                     text: "Hành động này có thể thay đổi trạng thái của danh mục!",
                     icon: 'warning',
                     showCancelButton: true,
@@ -158,7 +173,9 @@
                             success: function(response) {
                                 Swal.fire(
                                     'Thành công!',
-                                    isDelete ? 'Danh mục đã được ngừng kinh doanh.' : 'Danh mục đã được khôi phục.',
+                                    isDelete ?
+                                    'Danh mục đã được ngừng kinh doanh.' :
+                                    'Danh mục đã được khôi phục.',
                                     'success'
                                 );
                                 table.ajax.reload();
@@ -176,25 +193,31 @@
             });
         });
     </script>
-    
+
     <!-- Thêm CSS tùy chỉnh cho phân trang -->
     <style>
         .dataTables_paginate .pagination {
-            justify-content: center; /* Căn giữa phân trang */
+            justify-content: center;
+            /* Căn giữa phân trang */
         }
+
         .dataTables_paginate .page-item.active .page-link {
-            background-color: #007bff; /* Màu xanh cho trang hiện tại */
+            background-color: #007bff;
+            /* Màu xanh cho trang hiện tại */
             border-color: #007bff;
             color: white;
         }
+
         .dataTables_paginate .page-link {
-            color: #007bff; /* Màu chữ nút phân trang */
+            color: #007bff;
+            /* Màu chữ nút phân trang */
             border-radius: 5px;
             margin: 0 5px;
         }
+
         .dataTables_paginate .page-link:hover {
-            background-color: #e9ecef; /* Hiệu ứng hover */
+            background-color: #e9ecef;
+            /* Hiệu ứng hover */
         }
     </style>
-
 @endsection
