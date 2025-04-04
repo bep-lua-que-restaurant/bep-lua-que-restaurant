@@ -808,4 +808,34 @@ class ThuNganController extends Controller
             'soNguoi' => $soNguoi,
         ]);
     }
+
+    public function getHoaDonThanhToan(Request $request)
+    {
+        $maHoaDon = $request->input('maHoaDon');
+        $hoaDon = HoaDon::where('ma_hoa_don', $maHoaDon)->first();
+
+        if (!$hoaDon) {
+            return response()->json(['error' => 'Không tìm thấy hóa đơn'], 404);
+        }
+
+        // lấy ra chi tiết hóa đơn
+        $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)
+            ->with(['monAn:id,ten,gia'])
+            ->get()
+            ->map(function ($chiTiet) {
+                return [
+                    'id' => $chiTiet->id,
+                    'mon_an_id' => $chiTiet->monAn->id,
+                    'tenMon' => $chiTiet->monAn->ten,
+                    'don_gia' => $chiTiet->monAn->gia,
+                    'trang_thai' => $chiTiet->trang_thai,
+                    'so_luong' => $chiTiet->so_luong,
+                    'thanh_tien' => $chiTiet->thanh_tien,
+                ];
+            });
+        return response()->json([
+            'data' => $maHoaDon,
+            'chi_tiet_hoa_don' => $chiTietHoaDon,
+        ]);
+    }
 }
