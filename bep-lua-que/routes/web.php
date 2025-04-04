@@ -36,6 +36,8 @@ use App\Http\Controllers\PhieuNhapKhoController;
 use App\Http\Controllers\MaGiamGiaController;
 use App\Http\Controllers\TachBanController;
 use App\Http\Controllers\XinNghiController;
+use App\Http\Controllers\ThongKeSoBanController;
+
 use Illuminate\Support\Facades\Log;
 
 
@@ -388,6 +390,8 @@ Route::middleware(['auth'])->group(function () {
         Log::info('Test ghi log Laravel');
         return 'Đã ghi log!';
     });
+    // Thống kê số lượng bàn
+    Route::get('/thong-ke-so-ban', [ThongKeSoBanController::class, 'index'])->name('thongke.thongkesoban');
 
     Route::get('/get-dat-ban-by-date', function (Request $request) {
         $date = $request->input('date', Carbon::now('Asia/Ho_Chi_Minh')->toDateString());

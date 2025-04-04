@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 @section('content')
     <div class="container py-4">
         <div class="card shadow-sm p-4">
@@ -31,7 +31,7 @@
                 </div>
                 <div class="col-md-3 d-flex gap-2">
                     <button type="submit" class="btn btn-primary">🔎 Lọc</button>
-                    <a href="{{ route('ca-lam-nhan-vien.index') }}" class="btn btn-secondary">🔄 Reset</a>
+                    <a href="{{ route('ca-lam-nhan-vien.index') }}" class="btn btn-secondary">🔄Quay lại </a>
                 </div>
             </form>
 
@@ -63,11 +63,16 @@
                                     <td>{{ $caLamNhanVien->ngay_lam }}</td>
                                     <td>{{ optional($caLamNhanVien->nhanVien)->ho_ten ?? 'Không có nhân viên' }}</td>
                                     <td>
-                                        <span
-                                            class='badge bg-{{ trim($caLamNhanVien->trang_thai) === 'Chờ duyệt' ? 'warning' : 'success' }}'>
-                                            {{ $caLamNhanVien->trang_thai }}
-                                        </span>
-  
+                                        @if(trim($caLamNhanVien->trang_thai) === 'Hoạt động')
+                                        <span class="text-danger">
+                                            <i class="fas fa-times-circle"></i> <!-- Icon dấu X đỏ -->
+                                        </span>>
+                                        @else
+                                           
+                                            <span class="text-success">
+                                                <i class="fas fa-check-circle"></i> <!-- Icon dấu tích xanh -->
+                                            </span>
+                                        @endif
                                     </td>
                                     <td>
                                         <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
