@@ -112,7 +112,7 @@
     function confirmChamCong(event, caLamNhanVienId, nhanVien) {
         event.preventDefault();
         let message =
-            `Xác nhận chấm công cho:\n\n👤 Nhân viên: ${nhanVien}\n🆔 ID: ${caLamNhanVienId}\n\nBạn có chắc không?`;
+            `Xác nhận chấm công cho:\n\n👤 Nhân viên: ${nhanVien}\n\n\nBạn có chắc không?`;
 
         if (confirm(message)) {
             event.target.submit();

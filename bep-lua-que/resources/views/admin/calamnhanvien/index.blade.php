@@ -59,16 +59,16 @@
                                 <tr>
                                     <td>{{ optional($caLamNhanVien->caLam)->ten_ca ?? 'Chưa có ca' }}
                                         ({{ optional($caLamNhanVien->caLam)->gio_bat_dau ?? '--:--' }} -
-                                        {{ optional($caLamNhanVien->caLam)->gio_ket_thuc ?? '--:--' }})</td>
+                                        {{ optional($caLamNhanVien->caLam)->gio_ket_thuc ?? '--:--' }})
+                                    </td>
                                     <td>{{ $caLamNhanVien->ngay_lam }}</td>
                                     <td>{{ optional($caLamNhanVien->nhanVien)->ho_ten ?? 'Không có nhân viên' }}</td>
                                     <td>
-                                        @if(trim($caLamNhanVien->trang_thai) === 'Hoạt động')
-                                        <span class="text-danger">
-                                            <i class="fas fa-times-circle"></i> <!-- Icon dấu X đỏ -->
-                                        </span>>
+                                        @if (trim($caLamNhanVien->trang_thai) === 'Hoạt động')
+                                            <span class="text-danger">
+                                                <i class="fas fa-times-circle"></i> <!-- Icon dấu X đỏ -->
+                                            </span>>
                                         @else
-                                           
                                             <span class="text-success">
                                                 <i class="fas fa-check-circle"></i> <!-- Icon dấu tích xanh -->
                                             </span>

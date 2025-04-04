@@ -98,13 +98,13 @@
                     ->exists();
             @endphp
 
-            <button type="submit" class="btn btn-success mt-3" @if ($daChotLuong) disabled @endif>
+            <button type="submit" class="btn btn-success mt-3">
                 Chốt Lương
             </button>
 
-            @if ($daChotLuong)
+            {{-- @if ($daChotLuong)
                 <p class="text-danger mt-2">Lương tháng này đã được chốt!</p>
-            @endif
+            @endif --}}
 
         </form>
     </div>

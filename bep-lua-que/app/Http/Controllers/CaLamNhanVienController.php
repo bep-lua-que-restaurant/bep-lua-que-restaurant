@@ -59,7 +59,9 @@ class CaLamNhanVienController extends Controller
         }
 
         // ✅ Lấy dữ liệu sau khi lọc
-        $caLamNhanViens = $query->get();
+        // $caLamNhanViens = $query->get();
+        $caLamNhanViens = $query->orderByDesc('ngay_lam')->get();
+
 
         // 🚨 Không redirect khi không có kết quả, tránh reset bộ lọc
         $errorMessage = $caLamNhanViens->isEmpty() ? 'Không tìm thấy kết quả nào!' : null;
