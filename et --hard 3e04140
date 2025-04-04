@@ -1,0 +1,256 @@
+[33m7aa84e1[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdoanvanquan[m[33m, [m[1;31morigin/doanvanquan[m[33m)[m Fix merge conflict
+[33m3e04140[m Lưu thay đổi trước khi merge
+[33ma7cdb6b[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge pull request #78 from bep-lua-que-restaurant/anhpvph46908
+[33me50b70a[m[33m ([m[1;31morigin/lygtph46902[m[33m)[m Merge pull request #77 from bep-lua-que-restaurant/lygtph46902
+[33me042ee4[m Merge pull request #76 from bep-lua-que-restaurant/hunglhvph46945
+[33m089b91b[m[33m ([m[1;31morigin/hunglhvph46945[m[33m)[m Merge branch 'main' into hunglhvph46945
+[33m0a40adb[m suagiaodienvalogo
+[33m7f2a62f[m suaphanquyen
+[33md1fdf8f[m phanquyen
+[33m1c6523e[m[33m ([m[1;31morigin/anhpvph46908[m[33m)[m sua loi
+[33m5aaadb0[m sua loi
+[33m58f65be[m merge main
+[33me5420b6[m Cập nhật file thongkehoadon.blade.php
+[33m53c4f1b[m sua loi
+[33mf295b13[m sua loi
+[33md177556[m suahoadon2
+[33m228055f[m chatbot
+[33m8ad0470[m suatenban
+[33m2b3f933[m[33m ([m[1;31morigin/quanpvmph46994[m[33m)[m Merge pull request #75 from bep-lua-que-restaurant/quanpvmph46994
+[33m3dbae1c[m Merge pull request #74 from bep-lua-que-restaurant/lygtph46902
+[33mb3860f8[m Merge pull request #73 from bep-lua-que-restaurant/hunglhvph46945
+[33m8d32e20[m Merge pull request #72 from bep-lua-que-restaurant/anhpvph46908
+[33m0712beb[m up code ngày 25-3
+[33mbbc9a96[m suahoadon2
+[33mc1f644c[m suahoadonin
+[33m45a3b27[m cập nhập
+[33mb253d0b[m Chỉnh sửa code và cập nhập lại chatbot
+[33me595ded[m Merge pull request #71 from bep-lua-que-restaurant/hunglhvph46945
+[33m2b55915[m suahoadon
+[33ma477dd0[m Merge pull request #70 from bep-lua-que-restaurant/quanpvmph46994
+[33m62d1c9b[m Merge pull request #69 from bep-lua-que-restaurant/doanvanquan
+[33mb677fe8[m Thêm cột ma_dat_ban và gio_du_kien vào bảng dat_bans
+[33m5df3f68[m show danh sách bàn đặt
+[33medd5d2a[m Thêm cột ma_dat_ban và gio_du_kien vào bảng dat_bans
+[33mf45358b[m sua thong ke
+[33m301650c[m sua thong ke
+[33m62a7d50[m pull main
+[33m7ffabcd[m Merge pull request #68 from bep-lua-que-restaurant/anhpvph46908
+[33mc7cab45[m Merge pull request #67 from bep-lua-que-restaurant/anhdtph46943
+[33m7bbf355[m tách bàn 2
+[33ma4c382b[m merge code main
+[33m74301df[m sua loi
+[33mc94b248[m logic tách bàn
+[33mbac6439[m Merge pull request #65 from bep-lua-que-restaurant/doanvanquan
+[33m4a18b51[m Merge branch 'main' into doanvanquan
+[33m53920dd[m Merge pull request #66 from bep-lua-que-restaurant/quanpvmph46994
+[33me9b1f71[m update, fix lỗi khi thanh toán, ghép bàn
+[33mf90345e[m Merge pull request #64 from bep-lua-que-restaurant/anhpvph46908
+[33m8bbd706[m Cập nhật chức năng đặt bàn và hoàn thiện realtime ở giao diện đặt bàn
+[33mb9f847d[m them validate cho bieu do thong ke
+[33m001d601[m them chuc nang cho thong ke top doanh thu va chinh sua lai cac bieu do khac
+[33m0f333c5[m Merge main into anhpvph46908
+[33m99c4144[m Hoàn tất merge
+[33m1ce85ed[m thong ke hoa don va thong ke top doanh so
+[33m6f6eeec[m Merge pull request #63 from bep-lua-que-restaurant/lygtph46902
+[33mb988535[m Merge pull request #62 from bep-lua-que-restaurant/quanpvmph46994
+[33m83f223c[m Show thông tin khách hàng ra nếu là đơn đặt trước
+[33m24cb3c9[m Merge branch 'main' into lygtph46902
+[33md26cf32[m chatbox
+[33m881345d[m Cập nhật lại trạng thái của bảng đặt bàn cho đồng nhất với bên lễ tên
+[33m93b0d2c[m Merge pull request #61 from bep-lua-que-restaurant/quanpvmph46994
+[33m56ea12e[m Merge branch 'main' into quanpvmph46994
+[33ma827975[m Merge pull request #60 from bep-lua-que-restaurant/doanvanquan
+[33maa06184[m Merge pull request #59 from bep-lua-que-restaurant/hunglhvph46945
+[33m2dc3918[m Merge branch 'main' into hunglhvph46945
+[33m23e5f1e[m show mã hóa đơn ra hóa đơn, gộp bàn theo trường hợp
+[33m8444768[m  cập nhật tính năng đặt bàn
+[33m8c4653d[m suathongkemonan
+[33m05ac4ce[m Merge pull request #58 from bep-lua-que-restaurant/quanpvmph46994
+[33m47d174e[m Merge branch 'main' into quanpvmph46994
+[33m817f99a[m Merge pull request #57 from bep-lua-que-restaurant/doanvanquan
+[33mdb58371[m Merge branch 'main' into doanvanquan
+[33m0c3847e[m Merge pull request #56 from bep-lua-que-restaurant/anhdtph46943
+[33m2ed08ac[m Merge branch 'main' into anhdtph46943
+[33m7844088[m Merge pull request #55 from bep-lua-que-restaurant/lygtph46902
+[33me677518[m Merge pull request #54 from bep-lua-que-restaurant/anhpvph46908
+[33mbb620e7[m Merge branch 'main' into anhpvph46908
+[33m39791f2[m Merge pull request #53 from bep-lua-que-restaurant/hunglhvph46945
+[33m26e3773[m fix lỗi gộp đơn
+[33mfd167f6[m Cập nhật giao diện và sửa lỗi đặt bàn
+[33m3317252[m daoanhcalamnhanvien
+[33m0989b24[m thongkemonan
+[33m417bed5[m sua lai thong ke
+[33m8c45b81[m code real-time đặt bàn, trạng thái món trong hóa đơn
+[33m3382d55[m Merge pull request #52 from bep-lua-que-restaurant/hunglhvph46945
+[33mdd9e7d0[m thongkemonan
+[33md38084a[m thongkemonan
+[33me7f8845[m món ăn
+[33m98aba85[m sua cham cong
+[33m39f3f27[m Merge pull request #51 from bep-lua-que-restaurant/quanpvmph46994
+[33mec269de[m fix lỗi thông báo tới bếp
+[33m6c2205a[m Merge pull request #50 from bep-lua-que-restaurant/quanpvmph46994
+[33ma7602ad[m Merge branch 'main' into quanpvmph46994
+[33md337529[m Cập nhật hóa đơn & giao diện, in pdf
+[33m33a2e7b[m phiếu nhập
+[33me76f0aa[m Merge pull request #49 from bep-lua-que-restaurant/lygtph46902
+[33md85b068[m sửa phiếu nhập
+[33m65730bc[m Merge pull request #48 from bep-lua-que-restaurant/trungnvph46979
+[33meedcad6[m Merge pull request #47 from bep-lua-que-restaurant/hunglhvph46945
+[33m36a20be[m Merge branch 'main' into hunglhvph46945
+[33m5d5d72e[m Merge pull request #46 from bep-lua-que-restaurant/doanvanquan
+[33m95bc3c6[m Merge pull request #45 from bep-lua-que-restaurant/anhpvph46908
+[33m45c3c2a[m Cập nhật các phần fix bug đặt bàn
+[33mdf72305[m[33m ([m[1;31morigin/trungnvph46979[m[33m)[m update bep
+[33m4ba3514[m cập nhập kho
+[33m4c44a42[m hunglhvph46945
+[33mfbdd33a[m Thông báo cho bếp thì trừ nguyên liệu của món ăn ở trong kho
+[33md4233e9[m sua nha cung cap
+[33mdfb4a31[m Merge pull request #44 from bep-lua-que-restaurant/anhpvph46908
+[33m9cceb65[m Merge pull request #43 from bep-lua-que-restaurant/quanpvmph46994
+[33m0ca1e59[m Merge pull request #42 from bep-lua-que-restaurant/doanvanquan
+[33m18ca68e[m cap nhap gui email thong bao
+[33mda49b5a[m update lại giao diện xác thực thanh toán
+[33m593fd3b[m Merge pull request #41 from bep-lua-que-restaurant/quanpvmph46994
+[33m3db7a6d[m Cập nhật trạng thái bàn real-time
+[33mefee0db[m Cập nhật code sau khi pull main
+[33mbba8af6[m Merge pull request #40 from bep-lua-que-restaurant/trungnvph46979
+[33m20212bb[m Merge branch 'main' into trungnvph46979
+[33m9fda4a0[m Merge pull request #39 from bep-lua-que-restaurant/quanpvmph46994
+[33mbb63df6[m Merge branch 'main' into quanpvmph46994
+[33m966abd1[m Merge pull request #38 from bep-lua-que-restaurant/doanvanquan
+[33m81cb733[m update thu-ngan
+[33mfb295bf[m  cập nhập giao diện chức năng của đặt bàn
+[33m3e77140[m merge main ve nhanh
+[33me2e3fb5[m bieu do thong ke so luong khach va so sanh so luong khach
+[33md3eaf13[m merge main
+[33m710a862[m realtime bep
+[33mf4ee293[m[33m ([m[1;32mmain[m[33m)[m Merge changes from origin/main and resolved conflicts
+[33m389ae11[m Resolved conflicts and committed changes in detail.blade.php
+[33m8fd33a9[m Resolved merge conflicts in composer.lock and routes/web.php
+[33md35346d[m Resolve merge conflicts và khôi phục file bị xóa
+[33m5b83dd7[m Giải quyết xung đột trong composer.lock và routes/web.php
+[33m30ea2e4[m Merge pull request #37 from bep-lua-que-restaurant/doanvanquan
+[33m7f88af6[m Merge branch 'main' into doanvanquan
+[33m2477cbc[m Merge pull request #36 from bep-lua-que-restaurant/quanpvmph46994
+[33m7c88166[m thay doi lai realtime và giao diện
+[33mdda1e29[m Merge pull request #34 from bep-lua-que-restaurant/hunglhvph46945
+[33m01483f5[m Merge pull request #33 from bep-lua-que-restaurant/anhpvph46908
+[33mc55a2c4[m Merge pull request #32 from bep-lua-que-restaurant/lygtph46902
+[33mca168a3[m thu ngan,ghép bàn,theme tách bàn
+[33m4117254[m daoanh
+[33m73bab85[m commit nguyen lieu mon ăn
+[33mc3c43d4[m bangtinhluong
+[33ma5274d9[m so sanh % bieu do tron
+[33m836f278[m thong ke moi
+[33mbb23a65[m Mô tả nội dung commit
+[33me416a40[m trang thai phieu nhap
+[33m86496d2[m Merge pull request #31 from bep-lua-que-restaurant/quanpvmph46994
+[33m3dbedc6[m Merge branch 'main' into quanpvmph46994
+[33m995694e[m Resolve merge conflicts from trungnvph46979
+[33m7994dd7[m Merge pull request #29 from bep-lua-que-restaurant/hunglhvph46945
+[33mcc4a879[m Merge branch 'main' into hunglhvph46945
+[33m1091524[m Merge pull request #28 from bep-lua-que-restaurant/doanvanquan
+[33m4b78e5f[m Merge branch 'main' into doanvanquan
+[33m027a72a[m Resolve merge conflict and remove migration file
+[33m0f79a47[m Merge pull request #26 from bep-lua-que-restaurant/anhpvph46908
+[33m38fdc69[m chức năng thu ngân
+[33mc363e19[m chamcong
+[33m2b275b7[m Chức năng cơ bản phần đặt bàn
+[33mac07fe2[m logic thong ke moi
+[33mc224d45[m logic luong
+[33mcb16fbb[m nguyenlieu
+[33m8d612c3[m Merge branch 'main' of https://github.com/bep-lua-que-restaurant/bep-lua-que-restaurant into lygtph46902
+[33m8d5cd31[m noidung
+[33m2d5e5ec[m update
+[33ma4ccba2[m logic thong ke
+[33m3be2010[m logic thong ke
+[33m48f100b[m Merge pull request #25 from bep-lua-que-restaurant/gemini25-he-patch-6
+[33m91e7b90[m[33m ([m[1;31morigin/gemini25-he-patch-6[m[33m)[m Delete bep-lua-que/database/migrations/2025_02_17_014632_add_ban_an_id_to_dat_bans.php
+[33m2ac3a85[m Merge pull request #24 from bep-lua-que-restaurant/gemini25-he-patch-5
+[33m6805007[m[33m ([m[1;31morigin/gemini25-he-patch-5[m[33m)[m Delete bep-lua-que/database/migrations/2025_02_12_130553_create_phieu_nhap_khos_table.php
+[33m54401b9[m Merge pull request #23 from bep-lua-que-restaurant/gemini25-he-patch-4
+[33m039706d[m[33m ([m[1;31morigin/gemini25-he-patch-4[m[33m)[m Delete bep-lua-que/database/migrations/2025_02_12_130517_create_nguyen_lieus_table.php
+[33m24cfeda[m Merge pull request #22 from bep-lua-que-restaurant/gemini25-he-patch-3
+[33md197387[m[33m ([m[1;31morigin/gemini25-he-patch-3[m[33m)[m Delete bep-lua-que/database/migrations/2025_02_12_130506_create_loai_nguyen_lieus_table.php
+[33mc866184[m Merge pull request #21 from bep-lua-que-restaurant/gemini25-he-patch-2
+[33m715c2d0[m[33m ([m[1;31morigin/gemini25-he-patch-2[m[33m)[m Delete bep-lua-que/database/migrations/2025_02_12_130450_create_nha_cung_caps_table.php
+[33m6c18d3d[m Resolve merge conflict in routes/web.php
+[33m385ac18[m Merge pull request #20 from bep-lua-que-restaurant/gemini25-he-patch-1
+[33m7409155[m[33m ([m[1;31morigin/gemini25-he-patch-1[m[33m)[m Delete bep-lua-que/database/migrations/2025_02_10_140116_create_phong_ans_table.php
+[33m20c79fc[m Merge remote-tracking branch 'origin/main' into anhdtph46943
+[33m2cdb2a7[m fix
+[33m0f77883[m phieunhap
+[33m2494993[m Merge pull request #19 from bep-lua-que-restaurant/quanpvmph46994
+[33m4e93338[m fix
+[33md12316f[m Merge pull request #18 from bep-lua-que-restaurant/quanpvmph46994
+[33m8b1fd5e[m Merge pull request #17 from bep-lua-que-restaurant/anhdtph46943
+[33m8c6b918[m Merge branch 'main' into anhdtph46943
+[33m2f27113[m sửa lỗi giao diện thu ngân
+[33mb709465[m Merge pull request #16 from bep-lua-que-restaurant/trungnvph46979
+[33mdd812db[m Merge branch 'main' into trungnvph46979
+[33m915414e[m Merge pull request #15 from bep-lua-que-restaurant/doanvanquan
+[33m392645f[m Merge branch 'main' into doanvanquan
+[33m1a0cd3b[m lichlamviec
+[33m3228d1a[m realtime bep
+[33mf7ebcd0[m Merge pull request #14 from bep-lua-que-restaurant/hunglhvph46945
+[33m4958413[m Merge branch 'main' into hunglhvph46945
+[33m3eb8637[m Merge pull request #13 from bep-lua-que-restaurant/anhpvph46908
+[33mbe90260[m Merge branch 'main' into anhpvph46908
+[33me646dd5[m Merge pull request #12 from bep-lua-que-restaurant/lygtph46902
+[33mdbbbddb[m giao diện + logic thu ngân
+[33mdd4cc88[m crud phieu nhap
+[33mfca09dc[m  logic dat ban le tan
+[33md37b73b[m crud phieunhap
+[33m2cb481d[m hoa don
+[33mabf1b43[m Chỉnh sửa lại Phòng, Bàn, Realtime Lễ tân đặt bànbàn
+[33m353483a[m giao dien thong ke
+[33m0b76136[m controller monan
+[33m48f57d3[m lan2
+[33me1f0ff6[m Merge pull request #11 from bep-lua-que-restaurant/quanpvmph46994
+[33m9bf5317[m Merge branch 'main' into quanpvmph46994
+[33m1740c07[m giao diên, logic thu ngân
+[33m3e569ac[m Merge pull request #10 from bep-lua-que-restaurant/lygtph46902
+[33md385d6c[m Merge pull request #9 from bep-lua-que-restaurant/trungnvph46979
+[33m3471a58[m logic bếp, xử lí món ăn
+[33m795ab59[m crud món ăn
+[33m4f18cfe[m Merge branch 'hunglhvph46945' of https://github.com/bep-lua-que-restaurant/bep-lua-que-restaurant into hunglhvph46945
+[33m26e6fc5[m crud dich vu 2
+[33m7ba7634[m merge main
+[33m82dec85[m đồng bộ
+[33med5599f[m Lưu các thay đổi trước khi pull
+[33m5e88b90[m fix crud mon an
+[33mfee4049[m Merge pull request #8 from bep-lua-que-restaurant/quanpvmph46994
+[33mf219a50[m Merge branch 'main' into quanpvmph46994
+[33mb9316f3[m bộ lọc
+[33mb711553[m Merge pull request #7 from bep-lua-que-restaurant/anhdtph46943
+[33m1c6dfde[m Merge branch 'main' into anhdtph46943
+[33ma18c9fb[m Merge pull request #6 from bep-lua-que-restaurant/hunglhvph46945
+[33mf717dd0[m Merge branch 'main' into hunglhvph46945
+[33m4c8f704[m crud dich vu
+[33m410cd9d[m Merge pull request #5 from bep-lua-que-restaurant/doanvanquan
+[33mcb1ce3e[m Merge branch 'main' into doanvanquan
+[33ma600be4[m Merge pull request #4 from bep-lua-que-restaurant/quanpvmph46994
+[33mdefbfe1[m Merge branch 'main' into quanpvmph46994
+[33mb219717[m Merge pull request #3 from bep-lua-que-restaurant/anhpvph46908
+[33m3f20c6f[m Merge branch 'main' into anhpvph46908
+[33mbfbfece[m Merge pull request #2 from bep-lua-que-restaurant/lygtph46902
+[33mbc22b24[m Merge branch 'main' into lygtph46902
+[33mdac8b57[m thungan
+[33m949ff49[m Merge pull request #1 from bep-lua-que-restaurant/trungnvph46979
+[33mf84505d[m CRUD  combo
+[33m8a0d2c7[m Đăng nhập, quản lí nhân viên
+[33macf63e0[m crud nha cung cap
+[33m1a34593[m crud phòng bàn - bàn ăn
+[33m6451ef1[m crud mon an
+[33m9ee3023[m CRUD ca làm
+[33md2e63cf[m List, thêm ca làm
+[33m4db3edd[m commit tree
+[33mbafa4ce[m CRUD danh mục
+[33m872a59a[m Chức năng list tìm kiếm,thêm, xóa,chức năng xuất file exel
+[33m90b8c08[m Giao diện danh mục, show danh sách,thêm mới danh mục
+[33me8bb459[m Merge branch 'quanpvmph46994'
+[33mee29ac9[m base dự án,bao gồm database,khung blade trang admin và client
+[33m59bbc17[m Update README.md
+[33m03f446d[m Update README.md
+[33maab4268[m Initial commit

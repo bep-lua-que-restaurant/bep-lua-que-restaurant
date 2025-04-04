@@ -140,13 +140,23 @@ function renderActionButtons(datban) {
         .querySelector('meta[name="csrf-token"]')
         ?.getAttribute("content");
 
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0]; // 'YYYY-MM-DD'
+
+    // Chuyển đổi thời gian đến thành YYYY-MM-DD
+    const datbanDateStr = new Date(datban.thoi_gian_den)
+        .toISOString()
+        .split("T")[0];
+
+    // Nếu không phải trạng thái đang xử lý, chỉ hiển thị nút xem
     if (datban.trang_thai !== "dang_xu_ly") {
         return `<a href="/dat-ban/${datban.ma_dat_ban}" class="btn btn-primary btn-sm">
                     <i class="fas fa-eye"></i>
                 </a>`;
     }
 
-    return `
+    // Nếu trạng thái đang xử lý
+    let buttons = `
         <a href="/dat-ban/${datban.ma_dat_ban}" class="btn btn-primary btn-sm">
             <i class="fas fa-eye"></i>
         </a>
@@ -157,8 +167,16 @@ function renderActionButtons(datban) {
                 <i class="fas fa-times"></i>
             </button>
         </form>
-        <a href="/dat-ban/${datban.ma_dat_ban}/edit" class="btn btn-success btn-sm">
-            <i class="fas fa-check"></i>
-        </a>
     `;
+
+    // Nếu đúng ngày hôm nay thì thêm nút xác nhận
+    if (datbanDateStr === todayStr) {
+        buttons += `
+            <a href="/dat-ban/${datban.ma_dat_ban}/edit" class="btn btn-success btn-sm">
+                <i class="fas fa-check"></i>
+            </a>
+        `;
+    }
+
+    return buttons;
 }
