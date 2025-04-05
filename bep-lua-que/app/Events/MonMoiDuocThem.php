@@ -61,6 +61,7 @@ class MonMoiDuocThem implements ShouldBroadcast
                 'ten' => optional($monAn->monAn)->ten ?? 'Không xác định', // 👈 Tránh null
                 'ban' => optional($monAn->hoaDon)->banAns->pluck('ten_ban')->join(', '),
                 'so_luong' => $monAn->so_luong,
+                'ghi_chu' => $monAn->ghi_chu,
             ];
         });
     }
@@ -89,7 +90,8 @@ class MonMoiDuocThem implements ShouldBroadcast
                     'id' => $monAn['id'],
                     'ten' => $monAn['ten'],
                     'ban' => $monAn['ban'],
-                    'so_luong' => $monAn['so_luong']
+                    'so_luong' => $monAn['so_luong'],
+                    'ghi_chu' => $monAn['ghi_chu'],
                 ];
             })
         ];

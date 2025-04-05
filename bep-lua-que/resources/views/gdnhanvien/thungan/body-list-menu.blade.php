@@ -1,6 +1,7 @@
 {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" /> --}}
 <style>
 
+
 </style>
 <link href="{{ asset('admin/css/swiper-bundle.min.css') }}" rel="stylesheet" />
 <div class="swiper mySwiper">
@@ -122,6 +123,16 @@
                         // Gán ID chi tiết hóa đơn vào nút xóa
                         $(`tr[data-id-mon="${monAnId}"] .xoa-mon-an`).attr("data-id-xoa",
                             timMon.id);
+                        // Lấy tất cả các nút ghi chú có data-id là monAnId và thay đổi data-id của nó
+                        $(`i[data-id="${monAnId}"].toggle-ghi-chu`).attr("data-id", timMon
+                            .id);
+
+                        $(`input[data-id="${monAnId}"].ghi-chu-input`).attr("data-id",
+                            timMon.id);
+
+
+                        $(`i[data-id="${monAnId}"].save-ghi-chu`).attr("data-id", timMon
+                            .id);
                     }
 
                 },
@@ -165,7 +176,22 @@
                     let row = $(`
             <tr class="table-primary" data-id-mon="${monAnId}">
                 <td class="small">${tbody.children().length + 1}</td>
-                <td class="small">${tenMon}</td>
+                <td class="small">
+                     <i class="bi bi-pencil-square text-primary toggle-ghi-chu" style="cursor: pointer;" data-id="${monAnId}"></i>
+                    ${tenMon}
+                            <!-- Ô nhập ghi chú, ẩn ban đầu -->
+<div class="ghi-chu-wrapper mt-1" style="display: none;">
+    <div class="d-flex align-items-center gap-2">
+        <!-- Ô nhập ghi chú -->
+        <input type="text" class="form-control ghi-chu-input form-control-sm ghi-chu-input"
+               placeholder="Nhập ghi chú..." 
+               value=" ""}" 
+               data-id="${monAnId}" style="flex: 1;">
+        
+        <!-- Nút lưu (biểu tượng V) -->
+        <i class="bi bi-check-circle-fill text-success save-ghi-chu" style="cursor: pointer; font-size: 20px;" data-id="${monAnId}"></i>
+    </div>
+                    </td>
                 <td class="text-center">
                     <i class="bi bi-dash-circle text-danger giam-soluong" data-id="${monAnId}" style="cursor: pointer; font-size: 20px;"></i>
                     <span class="so-luong mx-2 small">1</span>

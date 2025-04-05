@@ -120,6 +120,11 @@ $(document).ready(function () {
                         <tr data-id-mon="${item.mon_an_id}" id="mon-${item.id}">
 <td class="small">${index}</td>
 <td class="small">
+ <i class="bi bi-pencil-square text-primary toggle-ghi-chu" style="cursor: pointer;" data-id="${
+     item.id
+ }"></i>
+
+
     <!-- Thêm điều kiện để thay đổi màu tên món tùy theo trạng thái -->
     <span class="${
         item.trang_thai === "cho_che_bien"
@@ -132,6 +137,23 @@ $(document).ready(function () {
     }">
         ${item.tenMon}
     </span>
+
+        <!-- Ô nhập ghi chú, ẩn ban đầu -->
+<div class="ghi-chu-wrapper mt-1" style="display: none;">
+    <div class="d-flex align-items-center gap-2">
+        <!-- Ô nhập ghi chú -->
+        <input type="text" class="form-control form-control-sm ghi-chu-input"
+               placeholder="Nhập ghi chú..." 
+               value="${item.ghi_chu ?? ""}" 
+               data-id="${item.id}" style="flex: 1;">
+        
+        <!-- Nút lưu (biểu tượng V) -->
+        <i class="bi bi-check-circle-fill text-success save-ghi-chu" style="cursor: pointer; font-size: 20px;" data-id="${
+            item.id
+        }"></i>
+    </div>
+</div>
+
 </td>
 <td class="text-center">
 <!-- Nút giảm số lượng -->
@@ -166,6 +188,8 @@ $(document).ready(function () {
     </button>
 </td>
 </tr>
+
+
 `;
                         hoaDonBody.append(row);
                         offcanvasBody.append(row);
@@ -280,7 +304,7 @@ $(document).ready(function () {
     let nutThanhToan = document.querySelector("#thanhToan-btn");
     nutThanhToan.onclick = function () {
         let maHoaDonElement = document.getElementById("maHoaDon");
-        let maHoaDon =maHoaDonElement.textContent;
+        let maHoaDon = maHoaDonElement.textContent;
         loadHoaDonThanhToan(maHoaDon);
     };
 

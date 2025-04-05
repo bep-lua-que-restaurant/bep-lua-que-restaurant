@@ -64,6 +64,45 @@
         font-size: 12px;
         margin-top: 5px;
     }
+
+    /* Đảm bảo phần ghi chú có vị trí tuyệt đối */
+    .ghi-chu-wrapper {
+        position: absolute;
+        z-index: 100;
+        background-color: #fff;
+        /* Màu nền cho phần ghi chú */
+        border: 1px solid #ccc;
+        /* Đường viền */
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        display: none;
+    }
+
+    .ghi-chu-wrapper .d-flex {
+        align-items: center;
+    }
+
+    .ghi-chu-wrapper .ghi-chu-input {
+        flex: 1;
+        margin-right: 10px;
+    }
+
+    /* CSS cho hiệu ứng xoay */
+    .spin {
+        animation: spin 1s linear infinite;
+    }
+
+    /* Định nghĩa hiệu ứng xoay */
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
 </style>
 <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6;">
     <table class="table table-bordered table-sm">

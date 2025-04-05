@@ -85,57 +85,11 @@ class DatBanController extends Controller
 
 
 
-    //     public function DanhSach()
-    //     {
-    //         $today = Carbon::today()->toDateString();
+        public function DanhSach()
+        {
+            $today = Carbon::today()->toDateString();
 
-    //         $banhSachDatban = DatBan::select(
-    //             'dat_bans.ma_dat_ban',
-    //             'dat_bans.thoi_gian_den',
-    //             'khach_hangs.id as khach_hang_id',
-    //             'khach_hangs.ho_ten',
-    //             'khach_hangs.so_dien_thoai',
-    //             'dat_bans.so_nguoi',
-    //             DB::raw("GROUP_CONCAT(DISTINCT ban_ans.ten_ban ORDER BY ban_ans.ten_ban SEPARATOR ', ') as danh_sach_ban"),
-    //             'dat_bans.trang_thai',
-    //             'dat_bans.mo_ta'
-    //         )
-    //             ->join('khach_hangs', 'dat_bans.khach_hang_id', '=', 'khach_hangs.id')
-    //             ->join('ban_ans', 'dat_bans.ban_an_id', '=', 'ban_ans.id')
-    //             ->groupBy(
-    //                 'dat_bans.ma_dat_ban',
-    //                 'dat_bans.thoi_gian_den',
-    //                 'khach_hangs.id',
-    //                 'khach_hangs.ho_ten',
-    //                 'khach_hangs.so_dien_thoai',
-    //                 'dat_bans.so_nguoi',
-    //                 'dat_bans.trang_thai',
-    //                 'dat_bans.mo_ta'
-    //             )
-    //             ->orderByRaw("
-    //     CASE 
-    //         WHEN dat_bans.trang_thai = 'dang_xu_ly' AND DATE(dat_bans.thoi_gian_den) = ? THEN 0 
-    //         ELSE 1 
-    //     END,
-    //     dat_bans.thoi_gian_den DESC
-    // ", [$today])
-    //             ->paginate(10);
-
-    //         return view('gdnhanvien.datban.danhsach', compact('banhSachDatban', 'today'));
-    //     }
-
-
-    /**
-     * Show the form for creating a new resource.
-     */
-
-
-    public function DanhSach()
-    {
-        $today = Carbon::today()->toDateString();
-
-        $banhSachDatban = DatBan::onlyTrashed() // Chỉ lấy bản ghi đã bị xóa mềm
-            ->select(
+            $banhSachDatban = DatBan::select(
                 'dat_bans.ma_dat_ban',
                 'dat_bans.thoi_gian_den',
                 'khach_hangs.id as khach_hang_id',
@@ -146,29 +100,75 @@ class DatBanController extends Controller
                 'dat_bans.trang_thai',
                 'dat_bans.mo_ta'
             )
-            ->join('khach_hangs', 'dat_bans.khach_hang_id', '=', 'khach_hangs.id')
-            ->join('ban_ans', 'dat_bans.ban_an_id', '=', 'ban_ans.id')
-            ->groupBy(
-                'dat_bans.ma_dat_ban',
-                'dat_bans.thoi_gian_den',
-                'khach_hangs.id',
-                'khach_hangs.ho_ten',
-                'khach_hangs.so_dien_thoai',
-                'dat_bans.so_nguoi',
-                'dat_bans.trang_thai',
-                'dat_bans.mo_ta'
-            )
-            ->orderByRaw("
-            CASE 
-                WHEN dat_bans.trang_thai = 'dang_xu_ly' AND DATE(dat_bans.thoi_gian_den) = ? THEN 0 
-                ELSE 1 
-            END,
-            dat_bans.thoi_gian_den DESC
-        ", [$today])
-            ->paginate(10);
+                ->join('khach_hangs', 'dat_bans.khach_hang_id', '=', 'khach_hangs.id')
+                ->join('ban_ans', 'dat_bans.ban_an_id', '=', 'ban_ans.id')
+                ->groupBy(
+                    'dat_bans.ma_dat_ban',
+                    'dat_bans.thoi_gian_den',
+                    'khach_hangs.id',
+                    'khach_hangs.ho_ten',
+                    'khach_hangs.so_dien_thoai',
+                    'dat_bans.so_nguoi',
+                    'dat_bans.trang_thai',
+                    'dat_bans.mo_ta'
+                )
+                ->orderByRaw("
+        CASE 
+            WHEN dat_bans.trang_thai = 'dang_xu_ly' AND DATE(dat_bans.thoi_gian_den) = ? THEN 0 
+            ELSE 1 
+        END,
+        dat_bans.thoi_gian_den DESC
+    ", [$today])
+                ->paginate(10);
 
-        return view('gdnhanvien.datban.danhsach', compact('banhSachDatban', 'today'));
-    }
+            return view('gdnhanvien.datban.danhsach', compact('banhSachDatban', 'today'));
+        }
+
+
+    /**
+     * Show the form for creating a new resource.
+     */
+
+
+    // public function DanhSach()
+    // {
+    //     $today = Carbon::today()->toDateString();
+
+    //     $banhSachDatban = DatBan::onlyTrashed() // Chỉ lấy bản ghi đã bị xóa mềm
+    //         ->select(
+    //             'dat_bans.ma_dat_ban',
+    //             'dat_bans.thoi_gian_den',
+    //             'khach_hangs.id as khach_hang_id',
+    //             'khach_hangs.ho_ten',
+    //             'khach_hangs.so_dien_thoai',
+    //             'dat_bans.so_nguoi',
+    //             DB::raw("GROUP_CONCAT(DISTINCT ban_ans.ten_ban ORDER BY ban_ans.ten_ban SEPARATOR ', ') as danh_sach_ban"),
+    //             'dat_bans.trang_thai',
+    //             'dat_bans.mo_ta'
+    //         )
+    //         ->join('khach_hangs', 'dat_bans.khach_hang_id', '=', 'khach_hangs.id')
+    //         ->join('ban_ans', 'dat_bans.ban_an_id', '=', 'ban_ans.id')
+    //         ->groupBy(
+    //             'dat_bans.ma_dat_ban',
+    //             'dat_bans.thoi_gian_den',
+    //             'khach_hangs.id',
+    //             'khach_hangs.ho_ten',
+    //             'khach_hangs.so_dien_thoai',
+    //             'dat_bans.so_nguoi',
+    //             'dat_bans.trang_thai',
+    //             'dat_bans.mo_ta'
+    //         )
+    //         ->orderByRaw("
+    //         CASE 
+    //             WHEN dat_bans.trang_thai = 'dang_xu_ly' AND DATE(dat_bans.thoi_gian_den) = ? THEN 0 
+    //             ELSE 1 
+    //         END,
+    //         dat_bans.thoi_gian_den DESC
+    //     ", [$today])
+    //         ->paginate(10);
+
+    //     return view('gdnhanvien.datban.danhsach', compact('banhSachDatban', 'today'));
+    // }
 
     public function filterDatBan(Request $request)
     {
