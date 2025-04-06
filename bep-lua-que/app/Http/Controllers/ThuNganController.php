@@ -14,6 +14,7 @@ use App\Models\PhongAn;
 use Illuminate\Http\Request;
 use App\Events\HoaDonUpdated;
 use App\Events\MonMoiDuocThem;
+use App\Events\XoaMonAn;
 use App\Models\ChiTietHoaDon;
 use App\Models\DatBan;
 use App\Models\NguyenLieu;
@@ -201,6 +202,7 @@ class ThuNganController extends Controller
                     'so_luong' => $chiTiet->so_luong,
                     'tong_tien' => $chiTiet->so_luong * $chiTiet->monAn->gia, // Tính tổng tiền từng món
                     'ma_hoa_don' => $chiTiet->hoaDon->ma_hoa_don, // Lấy mã hóa đơn từ quan hệ
+                    'ghi_chu' => $chiTiet->ghi_chu,
                 ];
             });
 
@@ -688,6 +690,7 @@ class ThuNganController extends Controller
         $hoaDonId = $chiTietHoaDon->hoa_don_id;
 
         // Xóa món ăn khỏi chi tiết hóa đơn
+        broadcast(new XoaMonAn($chiTietHoaDon));
         $chiTietHoaDon->forceDelete();
 
         // Lấy lại tổng tiền của hóa đơn sau khi xóa món ăn
@@ -836,6 +839,24 @@ class ThuNganController extends Controller
         return response()->json([
             'data' => $maHoaDon,
             'chi_tiet_hoa_don' => $chiTietHoaDon,
+        ]);
+    }
+
+    public function saveNote(Request $request)
+    {
+        $idChiTiet = $request->input('id_chi_tiet');
+        $ghiChu = $request->input('ghi_chu');
+
+        // Cập nhật ghi chú vào hóa đơn
+        ChiTietHoaDon::where('id', $idChiTiet)
+            ->update(['ghi_chu' => $ghiChu]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Ghi chú đã được cập nhật thành công.',
+            'chi_tiet' => $idChiTiet,
+            'ghi_chu' => $ghiChu
+
         ]);
     }
 }
