@@ -1,7 +1,78 @@
 {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" /> --}}
 <style>
+    /* Thêm một chút kiểu dáng để "ô chữ" hiển thị lơ lửng */
+    /* Kiểu dáng cho ô thông tin món ăn */
+    /* Kiểu dáng cho ô thông tin món ăn */
+    .info-wrapper {
+        display: none;
+        position: absolute;
+        background-color: #E6F0FA;
+        /* Màu nền xanh nhạt */
+        color: #333;
+        /* Màu chữ chính */
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        top: 0;
+        left: 105%;
+        /* Vị trí bên phải */
+        width: 200px;
+        /* Chiều rộng của ô thông tin */
+        animation: spinIn 0.5s ease-out;
+        /* Hiệu ứng spin vào */
+    }
 
+    /* Thêm mũi tên trỏ vào bên trái */
+    .info-wrapper::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        /* Căn giữa mũi tên theo chiều dọc */
+        left: -10px;
+        /* Đặt mũi tên bên ngoài, phía trái của ô thông tin */
+        transform: translateY(-50%);
+        /* Căn chỉnh chính xác giữa */
+        width: 0;
+        height: 0;
+        border-top: 10px solid transparent;
+        /* Tạo hình tam giác */
+        border-bottom: 10px solid transparent;
+        border-right: 10px solid #E6F0FA;
+        /* Màu mũi tên cùng với màu nền */
+    }
 
+    /* Hiệu ứng trượt vào khi hiển thị */
+    @keyframes slideIn {
+        0% {
+            transform: translateX(10px);
+            opacity: 0;
+        }
+
+        100% {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    /* Hiệu ứng ẩn dần khi rời đi */
+    @keyframes slideOut {
+        0% {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateX(10px);
+            opacity: 0;
+        }
+    }
+
+    /* Khi ô thông tin bị ẩn */
+    .info-wrapper.hide {
+        display: none;
+        animation: slideOut 0.3s ease-out;
+    }
 </style>
 <link href="{{ asset('admin/css/swiper-bundle.min.css') }}" rel="stylesheet" />
 <div class="swiper mySwiper">
@@ -13,7 +84,7 @@
                     @foreach ($chunk as $monAn)
                         <div class="col-md-3 col-6 mb-2">
                             <div class="cardd card text-center p-1" data-banan-id="{{ $monAn->id }}">
-                                <div class="card-body p-2">
+                                <div class="card-body p-2 toggle-info" style="cursor: pointer;">
                                     <!-- Hình ảnh món ăn -->
                                     <img src="{{ asset('storage/' . optional($monAn->hinhAnhs->first())->hinh_anh) }}"
                                         class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
@@ -29,6 +100,28 @@
                                         style="padding: 2px 6px; font-size: 10px;">
                                         <i class="fa fa-plus"></i>
                                     </button>
+
+                                    <!-- Ô thông tin món ăn, ẩn ban đầu -->
+                                    <div class="info-wrapper mt-1" id="info-wrapper-{{ $monAn->id }}"
+                                        style="display: none;">
+                                        <!-- Ô hiển thị thông tin món -->
+                                        <p class="" style="flex: 1;">
+                                            Thời gian nấu:
+                                            @php
+                                                $time = $monAn->thoi_gian_nau;
+                                                if ($time >= 1) {
+                                                    // Nếu là phút (thời gian >= 1)
+                                                    echo number_format($time, 0) . ' phút';
+                                                } else {
+                                                    // Nếu là giây (thời gian < 1)
+                                                    $seconds = round($time * 60);
+                                                    echo $seconds . ' giây';
+                                                }
+                                            @endphp
+                                        </p>
+                                    </div>
+
+
                                 </div>
                             </div>
                         </div>
@@ -366,6 +459,33 @@
             }
 
 
+        });
+    });
+
+    $(document).ready(function() {
+        // Khi nhấp vào toàn bộ món ăn (thẻ card-body)
+        $('.toggle-info').click(function(event) {
+            var id = $(this).closest('.card').data(
+                'banan-id'); // Lấy ID của món ăn từ attribute data-banan-id
+            var infoWrapper = $('#info-wrapper-' + id); // Lấy phần thông tin của món ăn
+
+            // Ẩn tất cả các ô thông tin trước khi hiển thị ô thông tin của món ăn hiện tại
+            $('.info-wrapper').not(infoWrapper).slideUp(200);
+
+            // Hiển thị hoặc ẩn ô thông tin của món ăn hiện tại
+            infoWrapper.toggle(); // Thay đổi trạng thái hiển thị của ô thông tin
+
+            // Ngừng sự kiện để không làm nó bắn ra ngoài
+            event.stopPropagation();
+        });
+
+        // Đóng ô thông tin khi click ra ngoài
+        $(document).on("click", function(event) {
+            // Kiểm tra nếu click ra ngoài phần tử thông tin và không phải món ăn
+            if (!$(event.target).closest('.info-wrapper').length) {
+                // Ẩn tất cả các ô thông tin
+                $('.info-wrapper').slideUp(200);
+            }
         });
     });
 </script>
