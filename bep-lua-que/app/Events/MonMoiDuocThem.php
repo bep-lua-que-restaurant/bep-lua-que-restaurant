@@ -59,6 +59,7 @@ class MonMoiDuocThem implements ShouldBroadcast
             return [
                 'id' => $monAn->id,
                 'ten' => optional($monAn->monAn)->ten ?? 'Không xác định', // 👈 Tránh null
+                'thoi_gian_nau' => optional($monAn->monAn)->thoi_gian_nau,
                 'ban' => optional($monAn->hoaDon)->banAns->pluck('ten_ban')->join(', '),
                 'so_luong' => $monAn->so_luong,
                 'ghi_chu' => $monAn->ghi_chu,
@@ -89,6 +90,7 @@ class MonMoiDuocThem implements ShouldBroadcast
                 return [
                     'id' => $monAn['id'],
                     'ten' => $monAn['ten'],
+                    'thoi_gian_nau' => $monAn['thoi_gian_nau'],
                     'ban' => $monAn['ban'],
                     'so_luong' => $monAn['so_luong'],
                     'ghi_chu' => $monAn['ghi_chu'],

@@ -7,6 +7,7 @@
     <title>Giao diện bếp</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
@@ -91,7 +92,7 @@
 
             <div class="col-md-6">
                 <div class="container-custom">
-                    <h5 class="text-primary">Đang nấu</h5>
+                    <h5 class="text-primary">Đang xong/ Chờ cung ứng</h5>
                     <div class="list-group" id="dang-nau-list">
                         @foreach ($monAnDangNau as $mon)
                             <div id="dish-{{ $mon->id }}"
@@ -106,7 +107,17 @@
                                         <br><small style="color: #ff6347; font-size: 0.8em;">Ghi chú:
                                             {{ $mon->ghi_chu }}</small>
                                     @endif
+
+                                    @if ($mon->thoi_gian_hoan_thanh_du_kien)
+                                        <br>
+                                        <small id="timer-{{ $mon->id }}" style="color: red; font-size: 10px;"
+                                            data-thoi-gian-hoan-thanh-du-kien="{{ $mon->thoi_gian_hoan_thanh_du_kien }}">
+                                            Đang tính giờ...
+                                        </small>
+                                    @endif
                                 </div>
+
+
                                 <div class="status-buttons">
                                     <button class="btn btn-success btn-sm status-btn"
                                         onclick="updateStatus({{ $mon->id }}, 'hoan_thanh')">
@@ -212,15 +223,83 @@
 
         const channel = window.Echo.channel('bep-channel');
 
-        // Lắng nghe sự kiện cập nhật trạng thái món ăn
         channel.listen('.trang-thai-cap-nhat', (data) => {
             // console.log('Cập nhật trạng thái:', data);
             moveDish(data.monAn.id, data.monAn.trang_thai);
+            console.log(data.monAn.mon_an.thoi_gian_nau);
+            console.log(data.monAn.thoi_gian_bat_dau_nau);
+            console.log(data.monAn.thoi_gian_hoan_thanh_du_kien);
+
+            const thoiGianHoanThanhDuKien = new Date(data.monAn.thoi_gian_hoan_thanh_du_kien);
+
+            // Tạo hoặc cập nhật bộ bấm giờ
+            const timerElement = document.getElementById(`timer-${data.monAn.id}`);
+            if (!timerElement) {
+                const newTimerElement = document.createElement('div');
+                newTimerElement.id = `timer-${data.monAn.id}`;
+                newTimerElement.style.fontWeight = 'normal';
+                newTimerElement.style.color = 'red'; // Màu chữ đỏ
+                newTimerElement.style.fontSize = '10px'; // Kích thước chữ nhỏ
+                newTimerElement.innerText = 'Đang tính giờ...';
+
+                // Thêm bộ bấm giờ vào ngay dưới tên món
+                const dishInfo = document.getElementById(`dish-${data.monAn.id}`).querySelector('div:first-child');
+                dishInfo.appendChild(newTimerElement);
+            }
+
+            // Cập nhật thời gian đếm ngược mỗi giây
+            const intervalId = setInterval(() => {
+                const thoiGianHienTai = new Date();
+                const thoiGianConLai = Math.floor((thoiGianHoanThanhDuKien - thoiGianHienTai) /
+                    1000); // Thời gian còn lại tính bằng giây
+
+                if (thoiGianConLai <= 0) {
+                    // Nếu hết thời gian, dừng đếm ngược và hiển thị "Hoàn thành"
+                    clearInterval(intervalId);
+                    const timerElement = document.getElementById(`timer-${data.monAn.id}`);
+                    if (timerElement) {
+                        timerElement.innerText = 'Hoàn thành!';
+                    }
+
+                    // Đợi 1 phút và kiểm tra nếu món chưa được "lên món"
+                    setTimeout(() => {
+                        const dishElement = document.getElementById(`dish-${data.monAn.id}`);
+                        if (dishElement && dishElement.querySelector('.status-buttons button')
+                            .innerText === 'Lên món') {
+
+                            // Bôi đỏ tên món ăn
+                            const dishNameElement = dishElement.querySelector('strong');
+                            if (dishNameElement) {
+                                dishNameElement.style.color = 'red'; // Đổi màu chữ thành đỏ
+                                const tenMon = dishNameElement
+                                    .textContent; // Lấy tên món bằng JS thuần
+                                showToast(
+                                    "Cảnh báo: Món " + tenMon +
+                                    " đã hoàn thành nhưng chưa được lên món!",
+                                    "danger"
+                                );
+                            }
+                        }
+                    }, 60000); // Đợi 1 phút (60,000ms)
+                } else {
+                    // Cập nhật thời gian còn lại
+                    const thoiGianConLaiPhut = Math.floor(thoiGianConLai / 60);
+                    const thoiGianConLaiGiay = thoiGianConLai % 60;
+                    const thoiGianConLaiFormatted = `${thoiGianConLaiPhut} phút ${thoiGianConLaiGiay} giây`;
+
+                    const timerElement = document.getElementById(`timer-${data.monAn.id}`);
+                    if (timerElement) {
+                        timerElement.innerText = `Thời gian còn lại: ${thoiGianConLaiFormatted}`;
+                    }
+                }
+            }, 1000); // Cập nhật mỗi giây
         });
+
+
 
         // Lắng nghe sự kiện món mới được thêm
         channel.listen('.mon-moi-duoc-them', (data) => {
-            // console.log(data);
+            console.log(data);
             if (!data?.monAns) {
                 // console.error('Dữ liệu không hợp lệ');
                 return;
@@ -232,7 +311,6 @@
 
                 // Kiểm tra nếu món ăn chưa có trong danh sách
                 if (!document.getElementById(`dish-${monAn.id}`)) {
-                    // console.log(`Thêm món mới: ${monAn.ten} (ID: ${monAn.id})`);
                     // Thêm món ăn mới vào danh sách nếu chưa có
                     choCheBienList.appendChild(createDishElement(monAn, banAn));
                 } else {
@@ -267,7 +345,92 @@
                     console.log('Dữ liệu không hợp lệ hoặc thiếu thông tin về món ăn.');
                 }
             });
+
+        // Khởi tạo bộ đếm thời gian cho các món ăn có sẵn khi trang được tải
+        document.addEventListener('DOMContentLoaded', () => {
+            const dishes = document.querySelectorAll('[id^="dish-"]');
+            dishes.forEach(dish => {
+                const timerElement = dish.querySelector('[id^="timer-"]');
+                if (timerElement) {
+                    const monAnId = dish.id.split('-')[1];
+                    const thoiGianHoanThanhDuKien = new Date(timerElement.getAttribute(
+                        'data-thoi-gian-hoan-thanh-du-kien'));
+
+                    // Bắt đầu bộ đếm thời gian
+                    startCountdown(monAnId, thoiGianHoanThanhDuKien);
+                }
+            });
+        });
+
+        // Hàm bắt đầu bộ đếm thời gian
+        function startCountdown(monAnId, thoiGianHoanThanhDuKien) {
+            const timerElement = document.getElementById(`timer-${monAnId}`);
+            if (!timerElement) return;
+
+            const intervalId = setInterval(() => {
+                const thoiGianHienTai = new Date();
+                const thoiGianConLai = Math.floor((thoiGianHoanThanhDuKien - thoiGianHienTai) / 1000);
+
+                if (thoiGianConLai <= 0) {
+                    clearInterval(intervalId);
+                    timerElement.innerText = 'Hoàn thành!';
+                    setTimeout(() => {
+                        const dishElement = document.getElementById(`dish-${monAnId}`);
+                        if (dishElement && dishElement.querySelector('.status-buttons button').innerText ===
+                            'Lên món') {
+                            const dishNameElement = dishElement.querySelector('strong');
+                            if (dishNameElement) {
+                                dishNameElement.style.color = 'red'; // Đổi màu chữ thành đỏ
+                                const tenMon = dishNameElement.textContent;
+
+                                // Hiển thị thông báo bằng toast
+                                showToast(
+                                    `Cảnh báo: Món "${tenMon}" đã hoàn thành nhưng chưa được lên món!`,
+                                    "danger");
+                            }
+                        }
+                    }, 60000);
+                } else {
+                    const thoiGianConLaiPhut = Math.floor(thoiGianConLai / 60);
+                    const thoiGianConLaiGiay = thoiGianConLai % 60;
+                    timerElement.innerText =
+                        `Thời gian còn lại: ${thoiGianConLaiPhut} phút ${thoiGianConLaiGiay} giây`;
+                }
+            }, 1000);
+        }
+
+        // thông báo toast
+        function showToast(message, type) {
+            var toastEl = document.getElementById("toastMessage");
+
+            // Xóa các lớp màu cũ
+            toastEl.classList.remove("text-bg-success", "text-bg-danger", "text-bg-warning");
+
+            // Thêm lớp màu mới dựa trên type
+            toastEl.classList.add("text-bg-" + type);
+
+            // Cập nhật nội dung thông báo
+            toastEl.querySelector(".toast-body").textContent = message;
+
+            // Hiển thị Toast
+            var toast = new bootstrap.Toast(toastEl); // Không cần toastEl[0]
+            toast.show();
+        }
     </script>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="toastMessage" class="toast align-items-center text-bg-danger border-0" role="alert"
+            aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <!-- Nội dung thông báo sẽ được cập nhật bằng JavaScript -->
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
