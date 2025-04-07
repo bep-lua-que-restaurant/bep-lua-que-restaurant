@@ -10,36 +10,55 @@
         /* Màu nền xanh nhạt */
         color: #333;
         /* Màu chữ chính */
-        padding: 15px;
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         z-index: 10;
         top: 0;
-        left: 105%;
+        left: 0%;
         /* Vị trí bên phải */
-        width: 200px;
+        width: 150px;
         /* Chiều rộng của ô thông tin */
         animation: spinIn 0.5s ease-out;
         /* Hiệu ứng spin vào */
     }
 
-    /* Thêm mũi tên trỏ vào bên trái */
-    .info-wrapper::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        /* Căn giữa mũi tên theo chiều dọc */
-        left: -10px;
-        /* Đặt mũi tên bên ngoài, phía trái của ô thông tin */
-        transform: translateY(-50%);
-        /* Căn chỉnh chính xác giữa */
-        width: 0;
-        height: 0;
-        border-top: 10px solid transparent;
-        /* Tạo hình tam giác */
-        border-bottom: 10px solid transparent;
-        border-right: 10px solid #E6F0FA;
-        /* Màu mũi tên cùng với màu nền */
+    .food-info-card {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .food-info-card:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .cooking-time {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .icon {
+        color: #ff6f61;
+        /* Màu cam nhẹ nhàng, có thể thay đổi */
+        font-size: 16px;
+    }
+
+    .label {
+        font-weight: 600;
+        color: #555;
+    }
+
+    .value {
+        background: #fff;
+        padding: 4px 8px;
+        border-radius: 4px;
+        border: 1px solid #eee;
     }
 
     /* Hiệu ứng trượt vào khi hiển thị */
@@ -84,10 +103,11 @@
                     @foreach ($chunk as $monAn)
                         <div class="col-md-3 col-6 mb-2">
                             <div class="cardd card text-center p-1" data-banan-id="{{ $monAn->id }}">
-                                <div class="card-body p-2 toggle-info" style="cursor: pointer;">
+                                <div class="card-body p-2 " style="cursor: pointer;">
                                     <!-- Hình ảnh món ăn -->
                                     <img src="{{ asset('storage/' . optional($monAn->hinhAnhs->first())->hinh_anh) }}"
-                                        class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
+                                        class="img-thumbnail toggle-info"
+                                        style="width: 100px; height: 100px; object-fit: cover;">
                                     <!-- Tên món -->
                                     <h6 class="card-title" style="font-size: 12px;">{{ $monAn->ten }}</h6>
 
@@ -105,20 +125,25 @@
                                     <div class="info-wrapper mt-1" id="info-wrapper-{{ $monAn->id }}"
                                         style="display: none;">
                                         <!-- Ô hiển thị thông tin món -->
-                                        <p class="" style="flex: 1;">
-                                            Thời gian nấu:
-                                            @php
-                                                $time = $monAn->thoi_gian_nau;
-                                                if ($time >= 1) {
-                                                    // Nếu là phút (thời gian >= 1)
-                                                    echo number_format($time, 0) . ' phút';
-                                                } else {
-                                                    // Nếu là giây (thời gian < 1)
-                                                    $seconds = round($time * 60);
-                                                    echo $seconds . ' giây';
-                                                }
-                                            @endphp
-                                        </p>
+                                        <div class="food-info-card">
+                                            <p class="cooking-time">
+                                                <i class="fas fa-clock icon"></i>
+                                                <span class="label">Thời gian nấu:</span>
+                                                <span class="value">
+                                                    @php
+                                                        $time = $monAn->thoi_gian_nau;
+                                                        if ($time >= 1) {
+                                                            // Nếu là phút (thời gian >= 1)
+                                                            echo number_format($time, 0) . ' phút';
+                                                        } else {
+                                                            // Nếu là giây (thời gian < 1)
+                                                            $seconds = round($time * 60);
+                                                            echo $seconds . ' giây';
+                                                        }
+                                                    @endphp
+                                                </span>
+                                            </p>
+                                        </div>
                                     </div>
 
 

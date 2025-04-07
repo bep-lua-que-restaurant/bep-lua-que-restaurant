@@ -350,15 +350,15 @@ function deleteMonAn(monAnId) {
     });
 }
 
-
 window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (e) => {
     // Tìm phần tử <span> trong hàng <tr> chứa món ăn
     let ten_mon = e.monAn.mon_an.ten;
     let ten_ban = e.monAn.hoa_don.hoa_don_ban.ban_an.ten_ban;
     let trangThai = e.monAn.trang_thai;
     if (trangThai == "hoan_thanh") {
+        var dingSound = new Audio(dingSoundUrl);
+        dingSound.play();
         var message = "Món ăn " + ten_mon + " " + ten_ban + " đã được cung ứng";
-        showToast(message,'success') // Hiển thị thông báo thành công
+        showToast(message, "success"); // Hiển thị thông báo thành công
     }
-
 });
