@@ -10,6 +10,8 @@ use App\Models\NguyenLieu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
+use App\Http\Requests\StorePhieuXuatKhoRequest;
+
 
 class PhieuXuatKhoController extends Controller
 {
@@ -75,46 +77,56 @@ class PhieuXuatKhoController extends Controller
 
     public function create()
     {
+        $nguyenLieus = NguyenLieu::with('loaiNguyenLieu')->get();
+        $nhaCungCaps = NhaCungCap::all(); // nếu loại phiếu là trả hàng
         $nhanViens = NhanVien::all();
-        $nhaCungCaps = NhaCungCap::all();
-        $nguyenLieus = NguyenLieu::all();
-        return view('phieu_xuat_kho.create', compact('nhanViens', 'nhaCungCaps', 'nguyenLieus'));
+        $nextCode = 'PXK' . now()->format('YmdHis'); // Tạo mã phiếu tự động
+        return view('admin.phieuxuatkho.create', compact('nguyenLieus', 'nhaCungCaps', 'nhanViens', 'nextCode'));
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'ma_phieu' => 'required|unique:phieu_xuat_khos',
-            'ngay_xuat' => 'required|date',
-            'loai_phieu' => 'required|in:xuat_bep,xuat_tra_hang,xuat_huy',
-            'chi_tiets.*.nguyen_lieu_id' => 'required|exists:nguyen_lieus,id',
-            'chi_tiets.*.so_luong' => 'required|numeric|min:0.01',
+
+public function store(StorePhieuXuatKhoRequest $request)
+{
+    DB::beginTransaction();
+    try {
+        $phieu = PhieuXuatKho::create([
+            'ma_phieu' => 'PXK' . now()->format('YmdHis'),
+            'ngay_xuat' => $request->ngay_xuat,
+            'nguoi_nhan' => $request->nguoi_nhan,
+            'loai_phieu' => $request->loai_phieu,
+            'nha_cung_cap_id' => $request->nha_cung_cap_id,
+            'nhan_vien_id' => $request->nhan_vien_id,
+            'ghi_chu' => $request->ghi_chu,
+            'tong_tien' => 0,
         ]);
 
-        DB::beginTransaction();
-        try {
-            $phieu = PhieuXuatKho::create($request->only([
-                'ma_phieu',
-                'ngay_xuat',
-                'nhan_vien_id',
-                'nguoi_nhan',
-                'loai_phieu',
-                'nha_cung_cap_id',
-                'tong_tien',
-                'ghi_chu'
-            ]));
+        $tongTien = 0;
+        foreach ($request->nguyen_lieu_id as $index => $nguyenLieuId) {
+            $soLuong = $request->so_luong[$index];
+            $donGia = $request->don_gia[$index] ?? 0;
+            $thanhTien = $soLuong * $donGia;
+            $tongTien += $thanhTien;
 
-            foreach ($request->chi_tiets as $ct) {
-                $phieu->chiTiet()->create($ct);
-            }
-
-            DB::commit();
-            return redirect()->route('phieu-xuat-kho.index')->with('success', 'Tạo phiếu xuất kho thành công.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withErrors(['error' => 'Lỗi: ' . $e->getMessage()]);
+            $phieu->chiTiet()->create([
+                'nguyen_lieu_id' => $nguyenLieuId,
+                'don_vi_xuat' => $request->don_vi_xuat[$index],
+                'he_so_quy_doi' => $request->he_so_quy_doi[$index],
+                'so_luong' => $soLuong,
+                'don_gia' => $donGia,
+                'ghi_chu' => $request->ghi_chu_chi_tiet[$index] ?? null,
+            ]);
         }
+
+        $phieu->update(['tong_tien' => $tongTien]);
+
+        DB::commit();
+        return redirect()->route('phieu-xuat-kho.index')->with('success', 'Tạo phiếu xuất kho thành công!');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->withInput()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
     }
+}
+
 
     public function show($id)
     {
