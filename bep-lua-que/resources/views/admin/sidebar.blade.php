@@ -173,8 +173,8 @@
                         <li><a href="{{ route('thongke.topdoanhthu') }}">Thống kê top doanh thu</a></li>
                         <li><a href="{{ route('thongke.thongkesoluongkhach') }}">Thống kê số lượng khách
                                 hàng</a></li>
-                                <li><a href="{{ route('thongke.thongkesoban') }}">Thống kê số bàn
-                                </a></li>
+                        <li><a href="{{ route('thongke.thongkesoban') }}">Thống kê số bàn
+                            </a></li>
                         <li><a href="{{ route('thongke.thongkemonan') }}">Thống kê món ăn</a></li>
                     </ul>
                 </li>
@@ -222,7 +222,21 @@
                     </ul>
                 </li>
             @endif
-
+            {{-- Quản lý kho (Chỉ quản lý và nhân viên kho) --}}
+            @if (in_array($role, [4, 5]))
+                <li>
+                    <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                        <i class="fa fa-warehouse"></i>
+                        <span class="nav-text">Quản lý kho</span>
+                    </a>
+                    <ul aria-expanded="false">
+                        <li><a href="{{ route('phieu-nhap-kho.index') }}">Phiếu nhập kho</a></li>
+                        <li><a href="{{ route('phieu-xuat-kho.index') }}">Phiếu xuất kho</a></li>
+                        <li><a href="{{ route('loai-nguyen-lieu.index') }}">Loại nguyên liệu</a></li>
+                        <li><a href="{{ route('nguyen-lieu.index') }}">Nguyên liệu</a></li>
+                    </ul>
+                </li>
+            @endif
             {{-- Nhân viên (Chỉ quản lý) --}}
             @if ($role == 4)
                 <li>
