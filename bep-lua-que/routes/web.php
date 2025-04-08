@@ -13,6 +13,7 @@ use App\Http\Controllers\BanAnController;
 use App\Http\Controllers\DatBanController;
 use App\Http\Controllers\LoaiNguyenLieuController;
 use App\Http\Controllers\NguyenLieuController;
+use App\Http\Controllers\PhieuXuatKhoController;
 use App\Http\Controllers\PhongAnController;
 use App\Http\Controllers\LuongController;
 use App\Http\Controllers\ThongKeDoanhSoController;
@@ -261,6 +262,30 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
     Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
 
+    // kho
+    //loại nguyên liệu
+    Route::resource('loai-nguyen-lieu', LoaiNguyenLieuController::class);
+    Route::post('loai-nguyen-lieu/{id}/restore', [LoaiNguyenLieuController::class, 'restore'])->name('loai-nguyen-lieu.restore');
+
+    // nguyên liệu
+    Route::resource('nguyen-lieu', NguyenLieuController::class);
+    Route::post('nguyen-lieu/restore/{id}', [NguyenLieuController::class, 'restore'])->name('nguyen-lieu.restore');
+
+    // nhập nkho
+    Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
+    Route::post('phieu-nhap-kho/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore');
+    Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'export'])->name('phieu-nhap-kho.export');
+    Route::post('/import-phieu-nhap-kho', [PhieuNhapKhoController::class, 'importPhieuNhapKho'])->name('phieu-nhap-kho.import');
+    Route::put('phieu-nhap-kho/{id}/duyet', [PhieuNhapKhoController::class, 'duyet'])->name('phieu-nhap-kho.duyet');
+    Route::put('/phieu-nhap-kho/{id}/huy', [PhieuNhapKhoController::class, 'huy'])->name('phieu-nhap-kho.huy');
+
+    // xuất kho
+    Route::resource('phieu-xuat-kho', PhieuXuatKhoController::class);
+    Route::post('phieu-xuat-kho/restore/{id}', [PhieuXuatKhoController::class, 'restore'])->name('phieu-xuat-kho.restore');
+    Route::get('export-phieu-xuat-kho', [PhieuXuatKhoController::class, 'export'])->name('phieu-xuat-kho.export');
+    Route::post('/import-phieu-xuat-kho', [PhieuXuatKhoController::class, 'importPhieuXuatKho'])->name('phieu-xuat-kho.import');
+    Route::put('phieu-xuat-kho/{id}/duyet', [PhieuXuatKhoController::class, 'duyet'])->name('phieu-xuat-kho.duyet');
+    Route::put('/phieu-xuat-kho/{id}/huy', [PhieuXuatKhoController::class, 'huy'])->name('phieu-xuat-kho.huy');
     ///Ca làm việc
 
     Route::prefix('ca-lam-nhan-vien')->group(function () {

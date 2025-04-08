@@ -33,23 +33,39 @@ class DanhMucMonAnController extends Controller
                 })
                 ->addColumn('action', function ($row) {
                     $html = '<div class="d-flex align-items-center">';
-                    $html .= '<a href="' . route('danh-muc-mon-an.show', $row->id) . '" class="btn btn-info btn-sm p-2 m-2"><i class="fa fa-eye"></i></a>';
-                    $html .= '<a href="' . route('danh-muc-mon-an.edit', $row->id) . '" class="btn btn-warning btn-sm p-2 m-2"><i class="fa fa-edit"></i></a>';
-    
+                
+                    // Nút xem chi tiết
+                    $html .= '<a href="' . route('phieu-nhap-kho.show', $row->id) . '" class="btn btn-info btn-sm p-2 m-2" title="Xem chi tiết">
+                                <i class="fa fa-eye"></i>
+                              </a>';
+                
+                    // Nút sửa
+                    $html .= '<a href="' . route('phieu-nhap-kho.edit', $row->id) . '" class="btn btn-warning btn-sm p-2 m-2" title="Chỉnh sửa">
+                                <i class="fa fa-edit"></i>
+                              </a>';
+                
+                    // Nút xóa hoặc khôi phục tuỳ trạng thái soft delete
                     if ($row->deleted_at) {
-                        $html .= '<form action="' . route('danh-muc-mon-an.restore', $row->id) . '" method="POST" style="display:inline;">'
-                            . csrf_field() .
-                            '<button type="submit" class="btn btn-success btn-sm p-2 m-2" title="Khôi phục"><i class="fa fa-recycle"></i></button>'
+                        $html .= '<form action="' . route('phieu-nhap-kho.restore', $row->id) . '" method="POST" style="display:inline;">'
+                            . csrf_field()
+                            . '<button type="submit" class="btn btn-success btn-sm p-2 m-2" title="Khôi phục">
+                                    <i class="fa fa-recycle"></i>
+                               </button>'
                             . '</form>';
                     } else {
-                        $html .= '<form action="' . route('danh-muc-mon-an.destroy', $row->id) . '" method="POST" style="display:inline;">'
-                            . csrf_field() . method_field('DELETE') .
-                            '<button type="submit" class="btn btn-danger btn-sm p-2 m-2" title="Xóa"><i class="fa fa-trash"></i></button>'
+                        $html .= '<form action="' . route('phieu-nhap-kho.destroy', $row->id) . '" method="POST" style="display:inline;">'
+                            . csrf_field()
+                            . method_field('DELETE')
+                            . '<button type="submit" class="btn btn-danger btn-sm p-2 m-2" title="Xóa">
+                                    <i class="fa fa-trash"></i>
+                               </button>'
                             . '</form>';
                     }
+                
                     $html .= '</div>';
                     return $html;
                 })
+                
                 ->rawColumns(['trang_thai', 'action']) // Chỉ giữ lại các cột có HTML
                 ->make(true);
         }
