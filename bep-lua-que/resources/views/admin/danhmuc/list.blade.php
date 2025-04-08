@@ -28,9 +28,10 @@
                         <h4 class="card-title">Danh sách</h4>
 
                         <div class="btn-group">
-                            <a href="{{ route('danh-muc-mon-an.create') }}" class="btn btn-sm btn-primary">
+                            <button type="button" class="btn btn-sm btn-primary btn-create">
                                 <i class="fa fa-plus"></i> Thêm mới
-                            </a>
+                            </button>
+
                             <!-- Nút Nhập file sẽ hiển thị Modal -->
                             <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
                                 data-target=".bd-example-modal-lg">
@@ -40,19 +41,15 @@
                             <a href="{{ route('danh-muc-mon-an.export') }}" class="btn btn-sm btn-success">
                                 <i class="fa fa-upload"></i> Xuất file
                             </a>
-                            <a href="#" class="btn btn-sm btn-info">
-                                <i class="fa fa-list"></i> Danh sách
-                            </a>
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-
-                            <table class="table table-responsive-md" id="{{ $tableId }}">
-                                <thead>
+                            <table class="table table-striped table-hover align-middle text-center"
+                                id="{{ $tableId }}">
+                                <thead class="table-dark">
                                     <tr>
-
-                                        <th><strong>ID</strong></th>
+                                        <th><strong>STT</strong></th>
                                         <th><strong>Tên</strong></th>
                                         <th><strong>Trạng thái</strong></th>
                                         <th><strong>Hành động</strong></th>
@@ -60,12 +57,14 @@
                                 </thead>
                                 <tbody></tbody>
                             </table>
+
                         </div>
                     </div>
                 </div>
             </div>
 
         </div>
+
     </div>
 
     <!-- Modal Nhập file -->
@@ -95,6 +94,69 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form id="editForm" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Chỉnh sửa danh mục</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="edit-id" name="id">
+                        <div class="mb-3">
+                            <label>Tên</label>
+                            <input type="text" id="edit-ten" name="ten" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label>Mô tả</label>
+                            <textarea id="edit-mo-ta" name="mo_ta" class="form-control"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal fade" id="createModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form id="createForm" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Thêm danh mục mới</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label>Tên</label>
+                            <input type="text" name="ten" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label>Mô tả</label>
+                            <textarea name="mo_ta" class="form-control"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label>Hình ảnh</label>
+                            <input type="file" name="hinh_anh" class="form-control">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="btn-save-create" class="btn btn-primary">Lưu</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Script -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -112,40 +174,51 @@
                 processing: true,
                 serverSide: true,
                 ajax: '{{ $route }}',
-                columns: [
-
-                    {
-                        data: 'id',
-                        name: 'id'
+                columns: [{
+                        data: 'DT_RowIndex', // ✅ Số thứ tự
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
                     },
                     {
-                        data: 'ten',
+                        data: 'ten', // Tên danh mục
                         name: 'ten'
                     },
                     {
-                        data: 'trang_thai',
+                        data: 'trang_thai', // Trạng thái kinh doanh
                         name: 'deleted_at'
                     },
                     {
-                        data: 'action',
+                        data: 'action', // Các nút hành động
                         name: 'action',
                         orderable: false,
                         searchable: false
                     }
                 ],
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json' // Ngôn ngữ tiếng Việt
+                    processing: "Đang xử lý...",
+                    lengthMenu: "Hiển thị _MENU_ dòng mỗi trang",
+                    zeroRecords: "Không tìm thấy dữ liệu phù hợp",
+                    info: "Hiển thị _START_ đến _END_ của _TOTAL_ dòng",
+                    infoEmpty: "Hiển thị 0 đến 0 của 0 dòng",
+                    infoFiltered: "(lọc từ _MAX_ tổng số dòng)",
+                    search: "Tìm kiếm:",
+                    paginate: {
+                        first: "Đầu",
+                        previous: "Trước",
+                        next: "Tiếp",
+                        last: "Cuối"
+                    },
+                    aria: {
+                        sortAscending: ": Sắp xếp tăng dần",
+                        sortDescending: ": Sắp xếp giảm dần"
+                    }
                 },
-                // Tùy chỉnh phân trang
-                pagingType: 'full_numbers', // Hiển thị đầy đủ: First, Previous, số trang, Next, Last
-                renderer: 'bootstrap', // Dùng kiểu Bootstrap cho phân trang
-                lengthMenu: [5, 10, 25, 50], // Tùy chọn số dòng mỗi trang
-                pageLength: 10 // Số dòng mặc định mỗi trang
-            });
+                pagingType: 'full_numbers',
 
-            // Checkbox "Chọn tất cả"
-            $('#checkAll').on('click', function() {
-                $('input[name="ids[]"]').prop('checked', this.checked);
+
+                lengthMenu: [5, 10, 25, 50],
+                pageLength: 10
             });
 
             // Xử lý submit form với SweetAlert2
@@ -191,33 +264,103 @@
                     }
                 });
             });
+
+            // nút sửa
+            $(document).on('click', '.btn-edit', function() {
+                const id = $(this).data('id');
+
+                $.ajax({
+                    url: `/danh-muc-mon-an/${id}`,
+                    type: 'GET',
+                    success: function(data) {
+                        // Gán dữ liệu vào các input/textarea
+                        $('#edit-id').val(data.id);
+                        $('#edit-ten').val(data.ten);
+                        $('#edit-mo-ta').val(data.mo_ta ?? 'Chưa có mô tả');
+
+                        // Cập nhật action cho form (PUT về đúng route update)
+                        $('#editForm').attr('action', `/danh-muc-mon-an/${id}`);
+
+                        // Hiện modal
+                        $('#editModal').modal('show');
+                    },
+                    error: function(xhr) {
+                        alert('Lỗi khi lấy dữ liệu: ' + xhr.responseText);
+                    }
+                });
+            });
+
+            $(document).on('click', '#editForm button[type="submit"]', function(e) {
+                e.preventDefault(); // Ngăn gửi form truyền thống
+
+                const id = $('#edit-id').val();
+
+                const formData = {
+                    ten: $('#edit-ten').val(),
+                    mo_ta: $('#edit-mo-ta').val(),
+                    _token: $('input[name="_token"]').val(),
+                    _method: 'PUT'
+                };
+
+                $.ajax({
+                    url: `/danh-muc-mon-an/${id}`,
+                    type: 'POST', // Laravel hỗ trợ PUT thông qua _method
+                    data: formData,
+                    success: function(response) {
+                        // Ẩn modal sau khi lưu thành công
+                        $('#editModal').modal('hide');
+
+                        // Reload lại datatable
+                        $('#{{ $tableId }}').DataTable().ajax.reload();
+
+                        // Thông báo thành công
+                        Swal.fire('Thành công!', 'Danh mục đã được cập nhật.', 'success');
+                    },
+                    error: function(xhr) {
+                        let msg = 'Đã có lỗi xảy ra.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        Swal.fire('Lỗi!', msg, 'error');
+                    }
+                });
+            });
+
+            // thêm mới
+            $(document).on('click', '.btn-create', function() {
+                // Reset form
+                $('#createForm')[0].reset();
+                $('#createModal').modal('show');
+            });
+
+            $(document).on('click', '#btn-save-create', function(e) {
+                e.preventDefault();
+
+                const form = $('#createForm')[0];
+                const formData = new FormData(form);
+
+                $.ajax({
+                    url: '/danh-muc-mon-an',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(res) {
+                        $('#createModal').modal('hide');
+                        Swal.fire('Thành công!', res.message, 'success');
+                        $('#yourDataTableId').DataTable().ajax.reload();
+                    },
+                    error: function(xhr) {
+                        let errors = xhr.responseJSON?.errors;
+                        let message = 'Có lỗi xảy ra!';
+                        if (errors) {
+                            message = Object.values(errors).join('<br>');
+                        }
+                        Swal.fire('Lỗi', message, 'error');
+                    }
+                });
+            });
+
         });
     </script>
-
-    <!-- Thêm CSS tùy chỉnh cho phân trang -->
-    <style>
-        .dataTables_paginate .pagination {
-            justify-content: center;
-            /* Căn giữa phân trang */
-        }
-
-        .dataTables_paginate .page-item.active .page-link {
-            background-color: #007bff;
-            /* Màu xanh cho trang hiện tại */
-            border-color: #007bff;
-            color: white;
-        }
-
-        .dataTables_paginate .page-link {
-            color: #007bff;
-            /* Màu chữ nút phân trang */
-            border-radius: 5px;
-            margin: 0 5px;
-        }
-
-        .dataTables_paginate .page-link:hover {
-            background-color: #e9ecef;
-            /* Hiệu ứng hover */
-        }
-    </style>
 @endsection
