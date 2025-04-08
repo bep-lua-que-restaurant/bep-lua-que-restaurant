@@ -859,4 +859,25 @@ class ThuNganController extends Controller
 
         ]);
     }
+
+    public function taoQr($id)
+    {
+        $hoaDon = HoaDon::findOrFail($id);
+
+        $bankCode = 'CTG'; // ngân hàng
+        $accountNumber = '104883178306';
+        // $amount = $hoaDon->tong_tien;
+        $amount =100000;
+        $billCode = 'hihih';
+        // $billCode = $hoaDon->ma_hoa_don ?? ('HD' . $hoaDon->id);
+        $table = 'Ban 1';
+        // $table = $hoaDon->ban_so ?? 'Ban?';
+
+        $desc = urlencode("HD:$billCode-$table");
+        $qrUrl = "https://img.vietqr.io/image/{$bankCode}-{$accountNumber}-qr_only.png?amount={$amount}&addInfo={$desc}";
+
+        return response()->json([
+            'qr_url' => $qrUrl
+        ]);
+    }
 }
