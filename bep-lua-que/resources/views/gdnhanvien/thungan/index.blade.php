@@ -197,6 +197,7 @@
     <script src="{{ asset('js/jquery-3.6.4.min.js') }}"></script>
     <script src="{{ asset('admin') }}/js/tachBan.js" type="text/javascript"></script>
     <script src="{{ asset('admin') }}/js/donDatBan.js" type="text/javascript"></script>
+    <script src="{{ asset('admin') }}/js/ghiChuMonAn.js" type="text/javascript"></script>
     <script>
         var apiUrl = "{{ route('thungan.getBanAn') }}";
 
@@ -215,6 +216,8 @@
         var apiUrlXoaMon = "{{ route('thungan.deleteMonAn') }}";
 
         var dingSoundUrl = "{{ asset('sounds/ding.mp3') }}";
+
+      
     </script>
 
     @vite('resources/js/public.js')

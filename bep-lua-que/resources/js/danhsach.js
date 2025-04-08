@@ -171,9 +171,10 @@ function renderActionButtons(datban) {
         <form action="/dat-ban/${datban.ma_dat_ban}" method="post" class="d-inline-block">
             <input type="hidden" name="_token" value="${csrfToken}">
             <input type="hidden" name="_method" value="DELETE">
-            <button type="submit" class="btn btn-danger btn-sm">
-                <i class="fas fa-times"></i>
-            </button>
+                   <button type="submit" class="btn btn-danger btn-sm" title="Hủy đặt"
+                                                onclick="return confirm('Bạn có chắc chắn muốn hủy đặt bàn này không?');">
+                                                <i class="fas fa-times"></i>
+                                            </button>
         </form>
     `;
 

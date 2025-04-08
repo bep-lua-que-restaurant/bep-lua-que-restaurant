@@ -17,23 +17,12 @@
         </td>
 
         <!-- Số ghế -->
-        <td>
+        {{-- <td>
             <div class="d-flex align-items-center"><span class="w-space-no">{{ $item->so_ghe }}</span></div>
-        </td>
+        </td> --}}
 
 
         <!-- Trạng thái (Đang sử dụng / Ngừng sử dụng) -->
-        {{-- <td>
-            @if ($item->deleted_at != null)
-                <div class="d-flex align-items-center">
-                    <i class="fa fa-circle text-danger mr-1"></i> Ngừng sử dụng
-                </div>
-            @else
-                <div class="d-flex align-items-center">
-                    <i class="fa fa-circle text-success mr-1"></i> Đang sử dụng
-                </div>
-            @endif
-        </td> --}}
         <td>
             @if ($item->deleted_at)
                 <div class="d-flex align-items-center">
@@ -51,48 +40,51 @@
         </td>
 
 
+        @php
+            $trangThaiLabels = [
+                'trong' => 'Trống',
+                'co_khach' => 'Có khách',
+                'da_dat_truoc' => 'Đã đặt trước',
+            ];
+        @endphp
 
-
-
+        <td>
+            <div class="d-flex align-items-center">
+                <span class="w-space-no">
+                    {{ $trangThaiLabels[$item->trang_thai] ?? $item->trang_thai }}
+                </span>
+            </div>
+        </td>
 
         <!-- Hành động: Xem, Sửa, Xóa, Khôi phục -->
         <td>
             <div class="d-flex align-items-center">
-                <!-- Nút xem chi tiết -->
-                <a href="{{ route('ban-an.show', $item->id) }}" class="btn btn-info btn-sm p-2 m-2"
-                    title="Xem chi tiết">
+
+                <button class="btn btn-info btnChiTietBanAn" data-id="{{ $item->id }}">
                     <i class="fa fa-eye"></i>
-                </a>
+                </button>
 
-
-                <!-- Nút chỉnh sửa -->
+                <!-- Nút xem chi tiết -->
                 @if (!$item->deleted_at)
-                    <a href="{{ route('ban-an.edit', $item->id) }}" class="btn btn-warning btn-sm p-2 m-2">
+                    <button class="btn btn-warning btn-sm p-2 m-2 btnEditBanAn" data-id="{{ $item->id }}">
                         <i class="fa fa-edit"></i>
-                    </a>
+                    </button>
                 @endif
-
 
                 @if ($item->deleted_at)
                     <!-- Nút khôi phục nếu bàn ăn đã bị xóa -->
-                    <form action="{{ route('ban-an.restore', $item->id) }}" method="POST" style="display:inline;">
-                        @csrf
-                        <button type="submit" onclick="return confirm('Bạn có chắc muốn khôi phục bàn ăn này không?')"
-                            class="btn btn-success btn-sm p-2 m-2" title="Khôi phục">
-                            <i class="fa fa-recycle"></i>
-                        </button>
-                    </form>
+                    <button type="button" class="btn btn-success btn-sm p-2 m-2 btnRestoreBanAn"
+                        data-id="{{ $item->id }}" title="Khôi phục"
+                        onclick="return confirm('Bạn có chắc muốn khôi phục bàn ăn này không?')">
+                        <i class="fa fa-recycle"></i>
+                    </button>
                 @else
                     <!-- Nút xóa (Ngừng sử dụng bàn ăn) -->
-                    <form action="{{ route('ban-an.destroy', $item->id) }}" method="POST" style="display:inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit"
-                            onclick="return confirm('Bạn có chắc muốn ngừng sử dụng bàn ăn này không?')"
-                            class="btn btn-danger btn-sm  p-2 m-2">
+                    @if ($item->trang_thai === 'trong')
+                        <button class="btn btn-danger btn-sm p-2 m-2 btnDeleteBanAn" data-id="{{ $item->id }}">
                             <i class="fa fa-trash"></i>
                         </button>
-                    </form>
+                    @endif
                 @endif
             </div>
         </td>

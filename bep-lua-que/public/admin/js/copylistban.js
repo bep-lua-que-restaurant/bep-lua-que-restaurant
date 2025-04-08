@@ -59,12 +59,8 @@ $(document).ready(function () {
                 if (response.hoa_don_id) {
                     $("#ten-ban").data("hoaDonId", response.hoa_don_id);
                     nutHoaDon.style.display = "block";
-                    let nutThanhToan = document.querySelector("#thanhToan-btn");
                     // Gọi API để lấy chi tiết hóa đơn
                     loadChiTietHoaDon(response.hoa_don_id);
-                    nutThanhToan.onclick = function () {
-                        loadHoaDonThanhToan(response.hoa_don_id);
-                    };
                 } else {
                     // var hoaDonId = null;
                     nutHoaDon.style.display = "none";
@@ -115,7 +111,7 @@ $(document).ready(function () {
                 hoaDonBody.empty();
                 let offcanvasBody = $(".offcanvas-body tbody"); // Lấy phần bảng trong offcanvas
                 offcanvasBody.empty(); // Xóa nội dung cũ
-                var soNguoi = response.so_nguoi;
+                var soNguoi = response.so_nguoi || 0;
                 let tongTien = 0;
                 if (response.chi_tiet_hoa_don.length > 0) {
                     let index = 1;
@@ -124,6 +120,11 @@ $(document).ready(function () {
                         <tr data-id-mon="${item.mon_an_id}" id="mon-${item.id}">
 <td class="small">${index}</td>
 <td class="small">
+ <i class="bi bi-pencil-square text-primary toggle-ghi-chu" style="cursor: pointer;" data-id="${
+     item.id
+ }"></i>
+
+
     <!-- Thêm điều kiện để thay đổi màu tên món tùy theo trạng thái -->
     <span class="${
         item.trang_thai === "cho_che_bien"
@@ -136,6 +137,23 @@ $(document).ready(function () {
     }">
         ${item.tenMon}
     </span>
+
+        <!-- Ô nhập ghi chú, ẩn ban đầu -->
+<div class="ghi-chu-wrapper mt-1" style="display: none;">
+    <div class="d-flex align-items-center gap-2">
+        <!-- Ô nhập ghi chú -->
+        <input type="text" class="form-control form-control-sm ghi-chu-input"
+               placeholder="Nhập ghi chú..." 
+               value="${item.ghi_chu ?? ""}" 
+               data-id="${item.id}" style="flex: 1;">
+        
+        <!-- Nút lưu (biểu tượng V) -->
+        <i class="bi bi-check-circle-fill text-success save-ghi-chu" style="cursor: pointer; font-size: 20px;" data-id="${
+            item.id
+        }"></i>
+    </div>
+</div>
+
 </td>
 <td class="text-center">
 <!-- Nút giảm số lượng -->
@@ -170,6 +188,8 @@ $(document).ready(function () {
     </button>
 </td>
 </tr>
+
+
 `;
                         hoaDonBody.append(row);
                         offcanvasBody.append(row);
@@ -281,14 +301,22 @@ $(document).ready(function () {
         });
     }
 
-    function loadHoaDonThanhToan(hoaDonId) {
+    let nutThanhToan = document.querySelector("#thanhToan-btn");
+    nutThanhToan.onclick = function () {
+        let maHoaDonElement = document.getElementById("maHoaDon");
+        let maHoaDon = maHoaDonElement.textContent;
+        loadHoaDonThanhToan(maHoaDon);
+    };
+
+    function loadHoaDonThanhToan(maHoaDon) {
         $.ajax({
-            url: "/hoa-don/get-details",
+            url: "thu-ngan/hoa-don-thanh-toan",
             method: "GET",
             data: {
-                hoa_don_id: hoaDonId,
+                maHoaDon: maHoaDon,
             },
             success: function (response) {
+                console.log(response);
                 let hoaDonThanhToan = $("#hoa-don-thanh-toan-body");
 
                 hoaDonThanhToan.empty();

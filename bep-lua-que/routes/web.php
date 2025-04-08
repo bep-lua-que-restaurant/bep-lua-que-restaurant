@@ -107,6 +107,9 @@ Route::middleware(['auth'])->group(function () {
     });
 
 
+    Route::get('/ban-an/ajax/{id}', [BanAnController::class, 'show'])->name('ban-an.ajax-show');
+
+
     Route::get('/', function () {
         return view('admin.dashboard');
     });
@@ -121,7 +124,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Danh mục món ăn
     Route::resource('danh-muc-mon-an', DanhMucMonAnController::class);
-    Route::post('danh-muc-mon-an/restore/{id}', [DanhMucMonAnController::class, 'restore'])->name('danh-muc-mon-an.restore');
+    // Route::post('danh-muc-mon-an/restore/{id}', [DanhMucMonAnController::class, 'restore'])->name('danh-muc-mon-an.restore');
+    Route::post('/ban-an/restore/{id}', [BanAnController::class, 'restore'])->name('ban-an.restore');
+
     Route::get('export-danh-muc-mon-an', [DanhMucMonAnController::class, 'export'])->name('danh-muc-mon-an.export');
     Route::post('/import-danh-muc-mon-an', [DanhMucMonAnController::class, 'importDanhMucMonAn'])->name('danh-muc-mon-an.import');
 
@@ -367,7 +372,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/thu-ngan-thong-tin-don', [TachBanController::class, 'getDon'])->name('thungan.getDon');
     Route::post('/thu-ngan-tach-mon', [TachBanController::class, 'tachDon'])->name('thungan.tachDon');
     Route::post('/thu-ngan-xoa-hoa-don', [TachBanController::class, 'xoaHoaDonGoc'])->name('thungan.xoaHoaDon');
-
+    Route::get('thu-ngan/hoa-don-thanh-toan', [ThuNganController::class, 'getHoaDonThanhToan'])->name('thungan.getHoaDonThanhToan');
+    Route::post('thu-ngan/luu-ghi-chu-mon', [ThuNganController::class, 'saveNote'])->name('thungan.saveNote');
     //Chấm công
     Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
     Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('chamcong.store');
