@@ -106,6 +106,9 @@ Route::middleware(['auth'])->group(function () {
     });
 
 
+    Route::get('/ban-an/ajax/{id}', [BanAnController::class, 'show'])->name('ban-an.ajax-show');
+
+
     Route::get('/', function () {
         return view('admin.dashboard');
     });
@@ -120,7 +123,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Danh mục món ăn
     Route::resource('danh-muc-mon-an', DanhMucMonAnController::class);
-    Route::post('danh-muc-mon-an/restore/{id}', [DanhMucMonAnController::class, 'restore'])->name('danh-muc-mon-an.restore');
+    // Route::post('danh-muc-mon-an/restore/{id}', [DanhMucMonAnController::class, 'restore'])->name('danh-muc-mon-an.restore');
+    Route::post('/ban-an/restore/{id}', [BanAnController::class, 'restore'])->name('ban-an.restore');
+
     Route::get('export-danh-muc-mon-an', [DanhMucMonAnController::class, 'export'])->name('danh-muc-mon-an.export');
     Route::post('/import-danh-muc-mon-an', [DanhMucMonAnController::class, 'importDanhMucMonAn'])->name('danh-muc-mon-an.import');
 

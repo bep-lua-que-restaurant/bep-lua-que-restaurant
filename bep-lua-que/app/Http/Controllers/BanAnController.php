@@ -39,7 +39,7 @@ class BanAnController extends Controller
             }
         }
 
-        $data = $query->withTrashed()->latest('id')->paginate(15);
+        $data = $query->withTrashed()->latest('id')->paginate(10);
 
         // Xử lý trả về khi yêu cầu là Ajax
         if ($request->ajax()) {
@@ -111,21 +111,23 @@ class BanAnController extends Controller
         return redirect()->route('ban-an.index')->with('success', 'Thêm bàn ăn thành công!');
     }
 
-
-
-
     /**
      * Display the specified resource.
      */
+
     public function show($id)
     {
-        // Lấy thông tin Bàn ăn, kể cả khi bị xóa mềm
         $banAn = BanAn::withTrashed()->findOrFail($id);
 
-        // Lấy thông tin Phòng ăn từ `vi_tri` (chứa ID của Phòng ăn)
-        $phongAn = PhongAn::withTrashed()->find($banAn->vi_tri);
-
-        return view('admin.banan.detail', compact('banAn', 'phongAn'));
+        // Trả JSON cho AJAX
+        return response()->json([
+            'id' => $banAn->id,
+            'ten_ban' => $banAn->ten_ban,
+            'so_ghe' => $banAn->so_ghe,
+            'mo_ta' => $banAn->mo_ta,
+            'trang_thai' => $banAn->deleted_at ? 'Ngừng sử dụng' : 'Đang sử dụng',
+            'deleted_at' => $banAn->deleted_at,
+        ]);
     }
 
 
@@ -157,33 +159,36 @@ class BanAnController extends Controller
         return redirect()->route('ban-an.index')->with('success', 'Cập nhật bàn ăn thành công!');
     }
 
-
-
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(BanAn $banAn)
     {
-        $banAn->delete(); // Xóa mềm bàn ăn
+        if ($banAn->trang_thai !== 'trong') {
+            return response()->json(['message' => 'Chỉ có thể ngừng sử dụng bàn khi bàn đang trống!'], 422);
+        }
+
+        $banAn->delete();
 
         broadcast(new BanAnUpdated($banAn))->toOthers();
 
-        return redirect()->route('ban-an.index')->with('success', 'Bàn ăn đã được ngừng sử dụng!');
+        return response()->json(['message' => 'Bàn ăn đã được ngừng sử dụng!']);
     }
 
     public function restore($id)
     {
         $banAn = BanAn::withTrashed()->findOrFail($id);
 
-        if ($banAn->deleted_at) {
-            $banAn->restore(); // Khôi phục bàn ăn
-            broadcast(new BanAnUpdated($banAn))->toOthers();
-            return redirect()->route('ban-an.index')->with('success', 'Bàn ăn đã được khôi phục!');
+        if (!$banAn->deleted_at) {
+            return response()->json(['message' => 'Bàn ăn này chưa bị xóa!'], 422);
         }
 
+        $banAn->restore();
+        broadcast(new BanAnUpdated($banAn))->toOthers();
 
-        return redirect()->route('ban-an.index')->with('error', 'Bàn ăn này chưa bị xóa!');
+        return response()->json(['message' => 'Bàn ăn đã được khôi phục!']);
     }
+
 
     public function export()
     {
