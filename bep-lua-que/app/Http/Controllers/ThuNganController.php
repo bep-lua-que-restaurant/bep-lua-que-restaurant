@@ -14,6 +14,7 @@ use App\Models\PhongAn;
 use Illuminate\Http\Request;
 use App\Events\HoaDonUpdated;
 use App\Events\MonMoiDuocThem;
+use App\Events\XoaMonAn;
 use App\Models\ChiTietHoaDon;
 use App\Models\DatBan;
 use App\Models\NguyenLieu;
@@ -201,6 +202,7 @@ class ThuNganController extends Controller
                     'so_luong' => $chiTiet->so_luong,
                     'tong_tien' => $chiTiet->so_luong * $chiTiet->monAn->gia, // Tính tổng tiền từng món
                     'ma_hoa_don' => $chiTiet->hoaDon->ma_hoa_don, // Lấy mã hóa đơn từ quan hệ
+                    'ghi_chu' => $chiTiet->ghi_chu,
                 ];
             });
 
@@ -688,6 +690,7 @@ class ThuNganController extends Controller
         $hoaDonId = $chiTietHoaDon->hoa_don_id;
 
         // Xóa món ăn khỏi chi tiết hóa đơn
+        broadcast(new XoaMonAn($chiTietHoaDon));
         $chiTietHoaDon->forceDelete();
 
         // Lấy lại tổng tiền của hóa đơn sau khi xóa món ăn
@@ -806,6 +809,54 @@ class ThuNganController extends Controller
         return response()->json([
             'success' => true,
             'soNguoi' => $soNguoi,
+        ]);
+    }
+
+    public function getHoaDonThanhToan(Request $request)
+    {
+        $maHoaDon = $request->input('maHoaDon');
+        $hoaDon = HoaDon::where('ma_hoa_don', $maHoaDon)->first();
+
+        if (!$hoaDon) {
+            return response()->json(['error' => 'Không tìm thấy hóa đơn'], 404);
+        }
+
+        // lấy ra chi tiết hóa đơn
+        $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)
+            ->with(['monAn:id,ten,gia'])
+            ->get()
+            ->map(function ($chiTiet) {
+                return [
+                    'id' => $chiTiet->id,
+                    'mon_an_id' => $chiTiet->monAn->id,
+                    'tenMon' => $chiTiet->monAn->ten,
+                    'don_gia' => $chiTiet->monAn->gia,
+                    'trang_thai' => $chiTiet->trang_thai,
+                    'so_luong' => $chiTiet->so_luong,
+                    'thanh_tien' => $chiTiet->thanh_tien,
+                ];
+            });
+        return response()->json([
+            'data' => $maHoaDon,
+            'chi_tiet_hoa_don' => $chiTietHoaDon,
+        ]);
+    }
+
+    public function saveNote(Request $request)
+    {
+        $idChiTiet = $request->input('id_chi_tiet');
+        $ghiChu = $request->input('ghi_chu');
+
+        // Cập nhật ghi chú vào hóa đơn
+        ChiTietHoaDon::where('id', $idChiTiet)
+            ->update(['ghi_chu' => $ghiChu]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Ghi chú đã được cập nhật thành công.',
+            'chi_tiet' => $idChiTiet,
+            'ghi_chu' => $ghiChu
+
         ]);
     }
 }

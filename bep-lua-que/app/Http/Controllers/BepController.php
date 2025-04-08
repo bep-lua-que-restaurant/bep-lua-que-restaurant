@@ -83,36 +83,39 @@ class BepController extends Controller
             return response()->json(['success' => false, 'message' => 'Không tìm thấy món ăn.'], 404);
         }
 
-        // Lấy danh sách các món ăn khác trong cùng hóa đơn, trùng mon_an_id và trạng thái mới
-        $trangThaiMoi = $request->trang_thai;
-        $duplicateMons = ChiTietHoaDon::where('hoa_don_id', $mon->hoa_don_id)
-            ->where('mon_an_id', $mon->mon_an_id)
-            ->where('trang_thai', $trangThaiMoi)
-            ->where('id', '!=', $id)
-            ->get();
+        $thoiGianNau = $mon->monAn ? $mon->monAn->thoi_gian_nau : 0; // Thời gian nấu, giả sử là tính bằng phút
 
-        if ($duplicateMons->isNotEmpty()) {
-            // Nếu có bản ghi trùng, gộp số lượng và thành tiền
-            $totalSoLuong = $mon->so_luong + $duplicateMons->sum('so_luong');
-            $totalThanhTien = $mon->thanh_tien + $duplicateMons->sum('thanh_tien');
+        // Kiểm tra trạng thái hiện tại và cập nhật theo logic yêu cầu
+        switch ($mon->trang_thai) {
+            case 'cho_che_bien':
+                // Nếu trạng thái hiện tại là 'chờ chế biến', đổi thành 'đang nấu'
+                $trangThaiMoi = 'dang_nau';
+                $mon->thoi_gian_bat_dau_nau = now();
 
-            // Cập nhật bản ghi hiện tại
-            $mon->so_luong = $totalSoLuong;
-            $mon->thanh_tien = $totalThanhTien;
-            $mon->trang_thai = $trangThaiMoi;
-            $mon->updated_at = now();
-            $mon->save();
+                $thoiGianBatDau = now();
+                $thoiGianHoanThanh = $thoiGianBatDau->addMinutes($thoiGianNau); // Thời gian hoàn thành
 
-            // Xóa các bản ghi trùng lặp
-            foreach ($duplicateMons as $duplicate) {
-                $duplicate->forceDelete();
-            }
-        } else {
-            // Nếu không có trùng lặp, chỉ cập nhật trạng thái
-            $mon->trang_thai = $trangThaiMoi;
-            $mon->updated_at = now();
-            $mon->save();
+                // Cập nhật thời gian dự kiến hoàn thành
+                $mon->thoi_gian_hoan_thanh_du_kien = $thoiGianHoanThanh;
+                break;
+
+            case 'dang_nau':
+                // Nếu trạng thái hiện tại là 'đang nấu', đổi thành 'hoàn thành'
+                $trangThaiMoi = 'hoan_thanh';
+
+                // Lưu thời gian hoàn thành thực tế
+                $mon->thoi_gian_hoan_thanh_thuc_te = now(); // Lưu thời gian hoàn thành thực tế
+                break;
+
+            default:
+                // Nếu trạng thái hiện tại là 'hoàn thành' hoặc không hợp lệ, không thay đổi
+                return response()->json(['success' => false, 'message' => 'Không thể thay đổi trạng thái món ăn này.'], 400);
         }
+
+        // Cập nhật trạng thái mới
+        $mon->trang_thai = $trangThaiMoi;
+        $mon->updated_at = now();
+        $mon->save();
 
         // Gửi sự kiện
         event(new TrangThaiCapNhat($mon));

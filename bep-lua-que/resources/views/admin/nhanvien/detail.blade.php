@@ -107,9 +107,7 @@
                     <button type="submit" class="btn btn-danger"
                         onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?')">Xóa nhân viên</button>
                 </form>
-                <a href="{{ route('ban-an.index') }}" class="btn btn-secondary">
-                    <i class="fa fa-arrow-left"></i> Quay lại
-                </a>
+                <a href="{{ route('nhan-vien.index') }}" class="btn btn-secondary">Trở lại danh sách</a>
 
             </div>
         </div>

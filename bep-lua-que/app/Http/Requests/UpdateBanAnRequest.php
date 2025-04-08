@@ -23,7 +23,7 @@ class UpdateBanAnRequest extends FormRequest
     {
         return [
             'ten_ban' => ['required', 'string', 'max:20'],
-            'so_ghe' => ['required', 'integer', 'min:1', 'max:10'],
+            // 'so_ghe' => ['required', 'integer', 'min:1', 'max:10'],
             'mo_ta' => ['nullable', 'string', 'max:500'],
         ];
     }
