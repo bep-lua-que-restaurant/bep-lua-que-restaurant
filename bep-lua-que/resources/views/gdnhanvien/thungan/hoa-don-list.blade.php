@@ -233,7 +233,7 @@
             </div>
         </div>
 
-
+        <div id="qrResult" class="mt-3"></div>
         <!-- Chi tiết thanh toán -->
         <div class="mb-3">
             <label for="paymentDetails" class="form-label">Chi tiết thanh toán</label>
@@ -435,8 +435,9 @@
 
 {{-- giao diện lưu hóa đơn In --}}
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <!-- Select2 JS -->
+<script src="{{ asset('js/jquery-3.6.4.min.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/print-js/1.6.0/print.min.js"></script>
 
@@ -1010,4 +1011,6 @@
             });
         });
     });
+
+
 </script>

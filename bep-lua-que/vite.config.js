@@ -1,5 +1,7 @@
 import { defineConfig } from "vite";
 import laravel from "laravel-vite-plugin";
+import $ from 'jquery';
+import 'select2'; // Nếu dùng select2
 
 export default defineConfig({
     server: {
