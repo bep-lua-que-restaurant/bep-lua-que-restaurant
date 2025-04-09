@@ -23,8 +23,44 @@
             overflow-y: auto;
         }
 
+        .btn-warning:hover {
+            background-color: #e68900;
+            /* Màu cam đậm hơn khi hover */
+            border-color: #e68900;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            /* Màu xanh lá đậm */
+            border-color: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            /* Màu xanh đậm hơn khi hover */
+            border-color: #218838;
+        }
+
         .status-btn {
             min-width: 100px;
+            border-radius: 8px;
+            /* Bo góc mềm hơn */
+            transition: all 0.3s ease;
+            /* Hiệu ứng chuyển đổi mượt mà */
+            font-weight: bold;
+            /* Chữ đậm hơn */
+            text-transform: uppercase;
+            /* Chữ in hoa */
+            padding: 8px 15px;
+            /* Tăng padding cho nút lớn hơn */
+        }
+
+        .status-btn:hover {
+            transform: scale(1.05);
+            /* Phóng to nhẹ khi hover */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            /* Thêm bóng */
         }
 
         .navbar-toggler {
@@ -137,6 +173,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/laravel-echo/1.11.2/echo.iife.min.js"></script>
 
     <script>
+        var dingSoundUrl = "{{ asset('sounds/ding.mp3') }}"; // Giả lập đường dẫn âm thanh
+        const dingSound = new Audio(dingSoundUrl); // Tạo đối tượng âm thanh
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         const choCheBienList = document.getElementById('cho-che-bien-list');
         const dangNauList = document.getElementById('dang-nau-list');
@@ -221,78 +259,63 @@
             forceTLS: true
         });
 
+        // Kiểm tra xem Echo có được khởi tạo chưa
+        console.log(window.Echo);
+        console.log(window.Echo.connector); // Kiểm tra lại
+        console.log('Pusher key:', '{{ env('PUSHER_APP_KEY') }}');
+        console.log('Pusher cluster:', '{{ env('PUSHER_APP_CLUSTER') }}');
         const channel = window.Echo.channel('bep-channel');
 
+        // Cập nhật sự kiện Pusher để hiển thị toast ngay khi hoàn thành
         channel.listen('.trang-thai-cap-nhat', (data) => {
-            // console.log('Cập nhật trạng thái:', data);
             moveDish(data.monAn.id, data.monAn.trang_thai);
-            console.log(data.monAn.mon_an.thoi_gian_nau);
-            console.log(data.monAn.thoi_gian_bat_dau_nau);
-            console.log(data.monAn.thoi_gian_hoan_thanh_du_kien);
-
             const thoiGianHoanThanhDuKien = new Date(data.monAn.thoi_gian_hoan_thanh_du_kien);
 
-            // Tạo hoặc cập nhật bộ bấm giờ
             const timerElement = document.getElementById(`timer-${data.monAn.id}`);
             if (!timerElement) {
                 const newTimerElement = document.createElement('div');
                 newTimerElement.id = `timer-${data.monAn.id}`;
                 newTimerElement.style.fontWeight = 'normal';
-                newTimerElement.style.color = 'red'; // Màu chữ đỏ
-                newTimerElement.style.fontSize = '10px'; // Kích thước chữ nhỏ
+                newTimerElement.style.color = 'red';
+                newTimerElement.style.fontSize = '10px';
                 newTimerElement.innerText = 'Đang tính giờ...';
 
-                // Thêm bộ bấm giờ vào ngay dưới tên món
                 const dishInfo = document.getElementById(`dish-${data.monAn.id}`).querySelector('div:first-child');
                 dishInfo.appendChild(newTimerElement);
             }
 
-            // Cập nhật thời gian đếm ngược mỗi giây
             const intervalId = setInterval(() => {
                 const thoiGianHienTai = new Date();
-                const thoiGianConLai = Math.floor((thoiGianHoanThanhDuKien - thoiGianHienTai) /
-                    1000); // Thời gian còn lại tính bằng giây
+                const thoiGianConLai = Math.floor((thoiGianHoanThanhDuKien - thoiGianHienTai) / 1000);
 
                 if (thoiGianConLai <= 0) {
-                    // Nếu hết thời gian, dừng đếm ngược và hiển thị "Hoàn thành"
                     clearInterval(intervalId);
                     const timerElement = document.getElementById(`timer-${data.monAn.id}`);
                     if (timerElement) {
                         timerElement.innerText = 'Hoàn thành!';
-                    }
 
-                    // Đợi 1 phút và kiểm tra nếu món chưa được "lên món"
-                    setTimeout(() => {
+                        // Lấy tên món ăn
                         const dishElement = document.getElementById(`dish-${data.monAn.id}`);
-                        if (dishElement && dishElement.querySelector('.status-buttons button')
-                            .innerText === 'Lên món') {
+                        const dishNameElement = dishElement.querySelector('strong');
+                        const tenMon = dishNameElement.textContent;
 
-                            // Bôi đỏ tên món ăn
-                            const dishNameElement = dishElement.querySelector('strong');
-                            if (dishNameElement) {
-                                dishNameElement.style.color = 'red'; // Đổi màu chữ thành đỏ
-                                const tenMon = dishNameElement
-                                    .textContent; // Lấy tên món bằng JS thuần
-                                showToast(
-                                    "Cảnh báo: Món " + tenMon +
-                                    " đã hoàn thành nhưng chưa được lên món!",
-                                    "danger"
-                                );
-                            }
-                        }
-                    }, 60000); // Đợi 1 phút (60,000ms)
+                        // Đổi màu tên món thành đỏ
+                        dishNameElement.style.color = 'red';
+
+                        // Hiển thị toast và phát âm thanh ngay lập tức
+                        showToast(`Món "${tenMon}" đã nấu xong, hãy lên món!`, "success");
+                        dingSound.play().catch(error => console.log("Lỗi phát âm thanh:", error));
+                    }
                 } else {
-                    // Cập nhật thời gian còn lại
                     const thoiGianConLaiPhut = Math.floor(thoiGianConLai / 60);
                     const thoiGianConLaiGiay = thoiGianConLai % 60;
                     const thoiGianConLaiFormatted = `${thoiGianConLaiPhut} phút ${thoiGianConLaiGiay} giây`;
-
                     const timerElement = document.getElementById(`timer-${data.monAn.id}`);
                     if (timerElement) {
                         timerElement.innerText = `Thời gian còn lại: ${thoiGianConLaiFormatted}`;
                     }
                 }
-            }, 1000); // Cập nhật mỗi giây
+            }, 1000);
         });
 
 
@@ -362,6 +385,7 @@
             });
         });
 
+
         // Hàm bắt đầu bộ đếm thời gian
         function startCountdown(monAnId, thoiGianHoanThanhDuKien) {
             const timerElement = document.getElementById(`timer-${monAnId}`);
@@ -374,22 +398,18 @@
                 if (thoiGianConLai <= 0) {
                     clearInterval(intervalId);
                     timerElement.innerText = 'Hoàn thành!';
-                    setTimeout(() => {
-                        const dishElement = document.getElementById(`dish-${monAnId}`);
-                        if (dishElement && dishElement.querySelector('.status-buttons button').innerText ===
-                            'Lên món') {
-                            const dishNameElement = dishElement.querySelector('strong');
-                            if (dishNameElement) {
-                                dishNameElement.style.color = 'red'; // Đổi màu chữ thành đỏ
-                                const tenMon = dishNameElement.textContent;
 
-                                // Hiển thị thông báo bằng toast
-                                showToast(
-                                    `Cảnh báo: Món "${tenMon}" đã hoàn thành nhưng chưa được lên món!`,
-                                    "danger");
-                            }
-                        }
-                    }, 60000);
+                    // Lấy tên món ăn
+                    const dishElement = document.getElementById(`dish-${monAnId}`);
+                    const dishNameElement = dishElement.querySelector('strong');
+                    const tenMon = dishNameElement.textContent;
+
+                    // Đổi màu tên món thành đỏ
+                    dishNameElement.style.color = 'red';
+
+                    // Hiển thị toast ngay lập tức và phát âm thanh
+                    showToast(`Món "${tenMon}" đã nấu xong, hãy lên món!`, "success");
+                    dingSound.play().catch(error => console.log("Lỗi phát âm thanh:", error));
                 } else {
                     const thoiGianConLaiPhut = Math.floor(thoiGianConLai / 60);
                     const thoiGianConLaiGiay = thoiGianConLai % 60;
