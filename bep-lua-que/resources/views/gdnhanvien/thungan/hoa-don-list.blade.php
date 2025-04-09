@@ -217,10 +217,10 @@
             <input type="text" class="form-control" id="discountCode" placeholder="Nhập mã giảm giá">
         </div> --}}
 
-   
+
         <div class="d-flex mb-3 align-items-stretch">
             <div class="flex-fill me-2">
-                <label for="totalAmount" class="form-label">Khách cần trả</label>
+                <label for="totalAmount" class="form-label">Tổng tiền hàng</label>
                 <input type="text" class="form-control form-control-lg" id="totalAmount" value="" readonly>
             </div>
             <div class="flex-fill ms-2">
@@ -231,6 +231,11 @@
                     <option value="tai_khoan">Chuyển khoản</option>
                 </select>
             </div>
+        </div>
+
+        <div id="qrCodeContainer" class="text-center mt-3" style="display: none;">
+            <label class="form-label">Mã QR chuyển khoản</label>
+            <div id="qrCode"></div>
         </div>
 
         <div id="qrResult" class="mt-3"></div>
@@ -442,6 +447,61 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/print-js/1.6.0/print.min.js"></script>
 
 <script>
+    // Sự kiện khi thay đổi phương thức thanh toán
+    document.getElementById('paymentMethod').addEventListener('change', function() {
+        const method = this.value;
+        const amountGiven = document.getElementById('amountGiven');
+        const changeToReturn = document.getElementById('changeToReturn');
+        const qrContainer = document.getElementById('qrCodeContainer');
+        const qrCodeDiv = document.getElementById('qrCode');
+        const qrResult = document.getElementById('qrResult');
+
+        if (method === 'tien_mat') {
+            // Hiện 2 ô khách đưa và tiền trả
+            amountGiven.parentElement.style.display = 'block';
+            changeToReturn.parentElement.style.display = 'block';
+            qrContainer.style.display = 'none';
+            qrCodeDiv.innerHTML = '';
+        } else {
+            // Ẩn 2 ô khách đưa và tiền trả
+            amountGiven.parentElement.style.display = 'none';
+            changeToReturn.parentElement.style.display = 'none';
+        }
+
+        if (method === 'tai_khoan') {
+            // Gọi AJAX tạo mã QR
+            const maHoaDon = document.getElementById('maHoaDonInFo').textContent.trim();
+            if (!maHoaDon || maHoaDon === 'Chưa có hóa đơn') {
+                qrResult.innerHTML = `<div class="text-danger">Vui lòng tạo hóa đơn trước khi tạo mã QR.</div>`;
+                qrContainer.style.display = 'none';
+                return;
+            }
+
+            fetch(`/thu-ngan/tao-qr/${maHoaDon}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        qrCodeDiv.innerHTML =
+                            `<img src="${data.qr_url}" alt="QR Code" style="max-width: 200px;">`;
+                        qrContainer.style.display = 'block';
+                        qrResult.innerHTML = '';
+                    } else {
+                        qrResult.innerHTML = `<div class="text-danger">${data.message}</div>`;
+                        qrContainer.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    qrResult.innerHTML = `<div class="text-danger">Lỗi tạo mã QR: ${error}</div>`;
+                    qrContainer.style.display = 'none';
+                });
+
+        }
+    });
+
+    // Gọi lại khi trang mở (ẩn 2 ô nếu không phải tiền mặt)
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('paymentMethod').dispatchEvent(new Event('change'));
+    });
     // Hàm lấy dữ liệu thanh toán
     $(document).ready(function() {
         $('#thanhToan-btn').click(function() {

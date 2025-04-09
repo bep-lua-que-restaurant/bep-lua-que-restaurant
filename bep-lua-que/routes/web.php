@@ -374,7 +374,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/thu-ngan-xoa-hoa-don', [TachBanController::class, 'xoaHoaDonGoc'])->name('thungan.xoaHoaDon');
     Route::get('thu-ngan/hoa-don-thanh-toan', [ThuNganController::class, 'getHoaDonThanhToan'])->name('thungan.getHoaDonThanhToan');
     Route::post('thu-ngan/luu-ghi-chu-mon', [ThuNganController::class, 'saveNote'])->name('thungan.saveNote');
-    Route::get('/thu-ngan/tao-qr/{id}', [ThuNganController::class, 'taoQr']);
+    Route::get('/thu-ngan/tao-qr/{ma}', [ThuNganController::class, 'taoQr']);
     //Chấm công
     Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
     Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('chamcong.store');

@@ -860,23 +860,22 @@ class ThuNganController extends Controller
         ]);
     }
 
-    public function taoQr($id)
+    public function taoQr($ma)
     {
-        $hoaDon = HoaDon::findOrFail($id);
+        // Tìm hóa đơn theo mã hóa đơn chứ không phải id
+        $hoaDon = HoaDon::where('ma_hoa_don', $ma)->firstOrFail();
 
-        $bankCode = 'CTG'; // ngân hàng
+        $bankCode = 'ICB'; // ngân hàng
         $accountNumber = '104883178306';
-        // $amount = $hoaDon->tong_tien;
-        $amount =100000;
-        $billCode = 'hihih';
-        // $billCode = $hoaDon->ma_hoa_don ?? ('HD' . $hoaDon->id);
-        $table = 'Ban 1';
-        // $table = $hoaDon->ban_so ?? 'Ban?';
+        $amount = $hoaDon->tong_tien;
+        $billCode = $hoaDon->ma_hoa_don;
 
-        $desc = urlencode("HD:$billCode-$table");
+
+        $desc = urlencode("Thanh toan hoa don $billCode - BQL");
         $qrUrl = "https://img.vietqr.io/image/{$bankCode}-{$accountNumber}-qr_only.png?amount={$amount}&addInfo={$desc}";
 
         return response()->json([
+            'success' => true,
             'qr_url' => $qrUrl
         ]);
     }
