@@ -31,6 +31,7 @@ class DanhMucMonAnController extends Controller
                 })
                 ->addColumn('action', function ($row) {
                     $html = '<div class="d-flex align-items-center">';
+
                     $html .= '<button type="button" class="btn btn-warning btn-sm p-2 m-2 btn-edit" data-id="' . $row->id . '" data-bs-toggle="modal" data-bs-target="#editModal"><i class="fa fa-edit"></i></button>';
 
                     if ($row->deleted_at) {
@@ -45,6 +46,7 @@ class DanhMucMonAnController extends Controller
                     return $html;
                 })
                 ->rawColumns(['trang_thai', 'action']) // ✅ Giữ nguyên HTML
+
                 ->make(true);
         }
 
