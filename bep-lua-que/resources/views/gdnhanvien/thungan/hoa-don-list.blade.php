@@ -217,7 +217,7 @@
             <input type="text" class="form-control" id="discountCode" placeholder="Nhập mã giảm giá">
         </div> --}}
 
-        <!-- Đặt Khách cần trả và Phương thức thanh toán nằm ngang -->
+   
         <div class="d-flex mb-3 align-items-stretch">
             <div class="flex-fill me-2">
                 <label for="totalAmount" class="form-label">Khách cần trả</label>
@@ -1011,6 +1011,4 @@
             });
         });
     });
-
-
 </script>
