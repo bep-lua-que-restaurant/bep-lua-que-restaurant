@@ -234,6 +234,8 @@
                         <li><a href="{{ route('phieu-xuat-kho.index') }}">Phiếu xuất kho</a></li>
                         <li><a href="{{ route('loai-nguyen-lieu.index') }}">Loại nguyên liệu</a></li>
                         <li><a href="{{ route('nguyen-lieu.index') }}">Nguyên liệu</a></li>
+                        <li><a href="{{ route('nha-cung-cap.index') }}">Nhà cung cấp</a></li>
+
                     </ul>
                 </li>
             @endif

@@ -153,12 +153,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/import-ca-lam', [CaLamController::class, 'importCaLam'])->name('ca-lam.import');
 
 
-    // Route::resource('nha-cung-cap', \App\Http\Controllers\NhaCungCapController::class);
-    // Route::post('nha-cung-cap/restore/{id}', [\App\Http\Controllers\NhaCungCapController::class, 'restore'])->name('nha-cung-cap.restore');
+    Route::resource('nha-cung-cap', \App\Http\Controllers\NhaCungCapController::class);
+    Route::post('nha-cung-cap/restore/{id}', [\App\Http\Controllers\NhaCungCapController::class, 'restore'])->name('nha-cung-cap.restore');
 
-    // Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'export'])->name('nha-cung-cap.export');
+    Route::get('export-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'export'])->name('nha-cung-cap.export');
 
-    //Route::post('/import-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha-cung-cap.import');
+    Route::post('/import-nha-cung-cap', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha-cung-cap.import');
 
 
     // Route::get('/', function () {
@@ -170,7 +170,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/chat/tin-nhan', [ChatController::class, 'layTinNhan'])->name('chat.layTinNhan');
 
 
-    // Route::post('/nha_cung_cap/import', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha_cung_cap.import');
+    Route::post('/nha_cung_cap/import', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha_cung_cap.import');
 
     // Phong an
     // Route::resource('phong-an', PhongAnController::class);
