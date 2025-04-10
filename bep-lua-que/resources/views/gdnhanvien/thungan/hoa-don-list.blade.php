@@ -221,7 +221,7 @@
         <div class="d-flex mb-3 align-items-stretch">
             <div class="flex-fill me-2">
                 <label for="totalAmount" class="form-label">Tổng tiền hàng</label>
-                <input type="text" class="form-control form-control-lg" id="totalAmount" value="" readonly>
+                <input type="text" class="form-control form-control-lg" id="tong_tien_hang" value="" readonly>
             </div>
             <div class="flex-fill ms-2">
                 <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
@@ -635,18 +635,19 @@
     });
 
 
+    // xác nhận thanh toán
     $('#btnThanhToan').on('click', function() {
         var banId = $('#ten-ban').data('currentBan');
         var soNguoi = $(".so-nguoi").data("soNguoi") || 1;
         var khachHangId = $("#customerSelect").val();
         var phuongThucThanhToan = $('#paymentMethod').val();
         var paymentDetails = $("#paymentDetails").val();
-        var totalAmount = parseFloat($('#totalAmount').val().replace(/\./g, '').trim()) || 0;
+        var totalAmount = parseFloat($('#tong_tien_hang').val().replace(/\./g, '').trim()) || 0;
         var amountGiven = parseFloat($('#amountGiven').val().replace(/\./g, '').trim()) || 0;
         var changeToReturn = parseFloat($('#changeToReturn').val().replace(/\./g, '').trim()) || 0;
         let maHoaDonInFo = document.getElementById("maHoaDonInFo");
         let maHoaDonFind = maHoaDonInFo.innerText;
-
+        let xoaMonCho = window.mon_an_cho_xac_nhan;
         var danhSachSanPham = [];
         $("#hoa-don-thanh-toan-body tr").each(function() {
             var sanPham = {
@@ -673,6 +674,7 @@
                     chi_tiet_thanh_toan: paymentDetails,
                     tong_tien: totalAmount,
                     ma_hoa_don_cua_ban: maHoaDonFind,
+                    xoa_mon_cho: xoaMonCho,
                     _token: $('meta[name="csrf-token"]').attr("content")
                 },
                 success: function(response) {
