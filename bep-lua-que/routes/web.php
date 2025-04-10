@@ -347,8 +347,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
     Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('chamcong.store');
     // Lấy dữ liệu chấm công để hiển thị trong modal
-    Route::get('/cham-cong/edit/{nhanVienId}/{ca}/{ngay}', [ChamCongController::class, 'edit']);
-    //Update chấm công
+
+
     Route::patch(
         '/cham-cong/update/{nhan_vien_id}/{ca}/{ngay}',
         [ChamCongController::class, 'updateChamCong']

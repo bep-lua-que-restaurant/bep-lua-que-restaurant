@@ -173,8 +173,8 @@
                         <li><a href="{{ route('thongke.topdoanhthu') }}">Thống kê top doanh thu</a></li>
                         <li><a href="{{ route('thongke.thongkesoluongkhach') }}">Thống kê số lượng khách
                                 hàng</a></li>
-                                <li><a href="{{ route('thongke.thongkesoban') }}">Thống kê số bàn
-                                </a></li>
+                        <li><a href="{{ route('thongke.thongkesoban') }}">Thống kê số bàn
+                            </a></li>
                         <li><a href="{{ route('thongke.thongkemonan') }}">Thống kê món ăn</a></li>
                     </ul>
                 </li>
@@ -234,7 +234,7 @@
                         <li><a href="{{ route('chuc-vu.index') }}">Chức vụ</a></li>
                         <li><a href="{{ route('nhan-vien.index') }}">Nhân viên</a></li>
                         <li><a href="{{ route('ca-lam.index') }}">Ca làm</a></li>
-                        <li><a href="{{ route('ca-lam-nhan-vien.index') }}">Quản lý ca làm</a></li>
+                        {{-- <li><a href="{{ route('ca-lam-nhan-vien.index') }}">Quản lý ca làm</a></li> --}}
                         <li><a href="{{ route('cham-cong.index') }}">Chấm công</a></li>
                         <li><a href="{{ route('luong.index') }}">Bảng lương</a></li>
                     </ul>
