@@ -19,28 +19,36 @@
                 </ol>
             </div>
         </div>
-
         <form action="{{ route('nhan-vien.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label>Họ tên</label>
-                    <input type="text" name="ho_ten" class="form-control" required>
+                    <input type="text" name="ho_ten" class="form-control">
+                    @error('ho_ten')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Email</label>
-                    <input type="email" name="email" class="form-control" required>
+                    <input type="email" name="email" class="form-control">
+                    @error('email')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Số điện thoại</label>
-                    <input type="text" name="so_dien_thoai" class="form-control" required>
+                    <input type="text" name="so_dien_thoai" class="form-control">
+                    @error('so_dien_thoai')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Chức vụ</label>
-                    <select name="chuc_vu_id" class="form-control" required>
+                    <select name="chuc_vu_id" class="form-control">
                         @foreach ($chucVus as $chucVu)
                             <option value="{{ $chucVu->id }}">{{ $chucVu->ten_chuc_vu }}</option>
                         @endforeach
@@ -49,10 +57,13 @@
 
                 <div class="col-md-6 mb-3">
                     <label>Giới tính</label>
-                    <select name="gioi_tinh" class="form-control" required>
+                    <select name="gioi_tinh" class="form-control">
                         <option value="nam">Nam</option>
                         <option value="nu">Nữ</option>
                     </select>
+                    @error('gioi_tinh')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -77,28 +88,37 @@
 
                 <div class="col-md-6 mb-3">
                     <label>Mật khẩu</label>
-                    <input type="password" name="password" class="form-control" required>
+                    <input type="password" name="password" class="form-control">
+                    @error('password')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <!-- Hình thức lương -->
                 <div class="col-md-6 mb-3">
                     <label>Hình thức lương</label>
-                    <select name="hinh_thuc_luong" class="form-control" id="hinhThucLuong" required>
-                        <option value="thang">Lương tháng</option>
+                    <select name="hinh_thuc_luong" class="form-control" id="hinhThucLuong">
+                        {{-- <option value="thang">Lương tháng</option> --}}
                         <option value="ca">Lương theo ca</option>
-                        <option value="gio">Lương theo giờ</option>
+                        {{-- <option value="gio">Lương theo giờ</option> --}}
                     </select>
+                    @error('hinh_thuc_luong')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <!-- Mức lương -->
                 <div class="col-md-6 mb-3">
                     <label>Mức lương</label>
                     <div class="input-group">
-                        <input type="number" name="muc_luong" class="form-control" id="mucLuong" required>
+                        <input type="number" name="muc_luong" class="form-control" id="mucLuong">
                         <div class="input-group-append">
-                            <span class="input-group-text" id="donViLuong">VNĐ / Tháng</span>
+                            <span class="input-group-text" id="donViLuong">VNĐ / Ca</span>
                         </div>
                     </div>
+                    @error('muc_luong')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
                 </div>
 
             </div>
@@ -107,7 +127,7 @@
         </form>
     </div>
 
-    <script>
+    {{-- <script>
         document.getElementById('hinhThucLuong').addEventListener('change', function() {
             var donViLuong = document.getElementById('donViLuong');
             if (this.value === 'ca') {
@@ -118,5 +138,5 @@
                 donViLuong.textContent = 'VNĐ / Tháng';
             }
         });
-    </script>
+    </script> --}}
 @endsection

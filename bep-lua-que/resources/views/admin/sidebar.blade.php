@@ -248,7 +248,7 @@
                         <li><a href="{{ route('chuc-vu.index') }}">Chức vụ</a></li>
                         <li><a href="{{ route('nhan-vien.index') }}">Nhân viên</a></li>
                         <li><a href="{{ route('ca-lam.index') }}">Ca làm</a></li>
-                        <li><a href="{{ route('ca-lam-nhan-vien.index') }}">Quản lý ca làm</a></li>
+                        {{-- <li><a href="{{ route('ca-lam-nhan-vien.index') }}">Quản lý ca làm</a></li> --}}
                         <li><a href="{{ route('cham-cong.index') }}">Chấm công</a></li>
                         <li><a href="{{ route('luong.index') }}">Bảng lương</a></li>
                     </ul>

@@ -30,23 +30,38 @@ class NhanVienController extends Controller
 
     public function store(Request $request)
     {
-//        dd($request->all());
-// dd($request->file('hinh_anh')); // Debug file ảnh
 
-
-        $request->validate([
-            'ho_ten' => 'required|string|max:255',
-            'email' => 'required|email|unique:nhan_viens,email',
-            'so_dien_thoai' => 'required|unique:nhan_viens,so_dien_thoai',
-            'chuc_vu_id' => 'required|exists:chuc_vus,id',
-            'password' => 'required|min:6',
-            'gioi_tinh' => 'required|in:nam,nu',
-            'ngay_sinh' => 'nullable|date',
-            'ngay_vao_lam' => 'nullable|date',
-            'dia_chi' => 'nullable|string|max:255',
-            'hinh_thuc_luong' => 'required|in:thang,ca,gio',
-            'muc_luong' => 'required|numeric|min:0', 'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-        ]);
+       // Validate input data với thông báo lỗi tùy chỉnh
+    $request->validate([
+        'ho_ten' => 'required|string|max:255',
+        'email' => 'required|email|unique:nhan_viens,email',
+        'so_dien_thoai' => 'required|unique:nhan_viens,so_dien_thoai|regex:/^0\d{9}$/',
+        'chuc_vu_id' => 'required|exists:chuc_vus,id',
+        'password' => 'required|min:6',
+        'gioi_tinh' => 'required|in:nam,nu',
+        'ngay_sinh' => 'nullable|date',
+        'ngay_vao_lam' => 'nullable|date',
+        'dia_chi' => 'nullable|string|max:255',
+        'hinh_thuc_luong' => 'required|in:ca,thang,gio',
+        'muc_luong' => 'required|numeric|min:0',
+        'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+    ], [
+        'ho_ten.required' => 'Họ tên là bắt buộc.',
+        'email.required' => 'Email là bắt buộc.',
+        'email.email' => 'Email phải có định dạng hợp lệ.',
+        'so_dien_thoai.required' => 'Số điện thoại là bắt buộc.',
+        'so_dien_thoai.regex' => 'Số điện thoại không đúng định dạng.',
+        'chuc_vu_id.required' => 'Chức vụ là bắt buộc.',
+        'password.required' => 'Mật khẩu là bắt buộc.',
+        'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự.',
+        'gioi_tinh.required' => 'Giới tính là bắt buộc.',
+        'hinh_thuc_luong.required' => 'Hình thức lương là bắt buộc.',
+        'muc_luong.required' => 'Mức lương là bắt buộc.',
+        'muc_luong.numeric' => 'Mức lương phải là một số.',
+        'hinh_anh.image' => 'Hình ảnh phải là file ảnh.',
+        'hinh_anh.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg, gif, hoặc webp.',
+        'hinh_anh.max' => 'Hình ảnh không được vượt quá 2MB.',
+    ]);
 
 
 
@@ -54,8 +69,13 @@ class NhanVienController extends Controller
         $lastNhanVien = NhanVien::orderBy('id', 'desc')->first();
         $nextId = $lastNhanVien ? ((int)substr($lastNhanVien->ma_nhan_vien, 2)) + 1 : 1;
         $maNhanVien = 'NV' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
-        //hình ảnh
-        $hinhAnhPath = $request->file('hinh_anh')->store('hinh_anh', 'public');
+        if ($request->hasFile('hinh_anh') && $request->file('hinh_anh')->isValid()) {
+            $hinhAnhPath = $request->file('hinh_anh')->store('hinh_anh', 'public');
+        } else {
+            // Handle the case when the file is not uploaded or invalid
+            $hinhAnhPath = null; // or set a default image path
+        }
+        
 
         
         // Tạo nhân viên
@@ -96,41 +116,57 @@ class NhanVienController extends Controller
 
 
     public function update(Request $request, $id)
-    {
-        $request->validate([
-            'ho_ten' => 'required|string|max:255',
-            'email' => 'required|email|unique:nhan_viens,email,' . $id,
-            'so_dien_thoai' => 'required|unique:nhan_viens,so_dien_thoai,' . $id,
-            'chuc_vu_id' => 'required|exists:chuc_vus,id',
-            'password' => 'nullable|min:6',
-            'gioi_tinh' => 'required|in:nam,nu',
-            'ngay_sinh' => 'nullable|date',
-            'ngay_vao_lam' => 'nullable|date',
-            'dia_chi' => 'nullable|string|max:255',
-            'hinh_thuc_luong' => 'required|in:thang,ca,gio',
-            'muc_luong' => 'required|numeric|min:0',
-            'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048', // Kiểm tra ảnh
-        ]);
+{
+    $request->validate([
+        'ho_ten' => 'required|string|max:255',
+        'email' => 'required|email|unique:nhan_viens,email,' . $id,
+        'so_dien_thoai' => 'required|unique:nhan_viens,so_dien_thoai,' . $id . '|regex:/^0\d{9}$/',
+        'chuc_vu_id' => 'required|exists:chuc_vus,id',
+        'password' => 'nullable|min:6', // Để nullable vì không phải lúc nào cũng cần thay đổi mật khẩu
+        'gioi_tinh' => 'required|in:nam,nu',
+        'ngay_sinh' => 'nullable|date',
+        'ngay_vao_lam' => 'nullable|date',
+        'dia_chi' => 'nullable|string|max:255',
+        'hinh_thuc_luong' => 'required|in:ca,thang,gio',
+        'muc_luong' => 'required|numeric|min:0',
+        'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+    ], [
+        'ho_ten.required' => 'Họ tên là bắt buộc.',
+        'email.required' => 'Email là bắt buộc.',
+        'email.email' => 'Email phải có định dạng hợp lệ.',
+        'so_dien_thoai.required' => 'Số điện thoại là bắt buộc.',
+        'so_dien_thoai.regex' => 'Số điện thoại không đúng định dạng.',
+        'chuc_vu_id.required' => 'Chức vụ là bắt buộc.',
+        'password.required' => 'Mật khẩu là bắt buộc.',
+        'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự.',
+        'gioi_tinh.required' => 'Giới tính là bắt buộc.',
+        'hinh_thuc_luong.required' => 'Hình thức lương là bắt buộc.',
+        'muc_luong.required' => 'Mức lương là bắt buộc.',
+        'muc_luong.numeric' => 'Mức lương phải là một số.',
+        'hinh_anh.image' => 'Hình ảnh phải là file ảnh.',
+        'hinh_anh.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg, gif, hoặc webp.',
+        'hinh_anh.max' => 'Hình ảnh không được vượt quá 2MB.',
+    ]);
 
-        $nhanVien = NhanVien::findOrFail($id);
+    $nhanVien = NhanVien::findOrFail($id);
 
-        $data = $request->only([
-            'ho_ten',
-            'email',
-            'so_dien_thoai',
-            'chuc_vu_id',
-            'gioi_tinh',
-            'ngay_sinh',
-            'ngay_vao_lam',
-            'dia_chi'
-        ]);
+    $data = $request->only([
+        'ho_ten',
+        'email',
+        'so_dien_thoai',
+        'chuc_vu_id',
+        'gioi_tinh',
+        'ngay_sinh',
+        'ngay_vao_lam',
+        'dia_chi'
+    ]);
 
-        // Nếu có nhập mật khẩu mới, mã hóa và cập nhật
-        if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
-        }
-        //hình ảnh 
-        // Xử lý ảnh nếu có
+    // Nếu có nhập mật khẩu mới, mã hóa và cập nhật
+    if ($request->filled('password')) {
+        $data['password'] = Hash::make($request->password);
+    }
+
+    // Xử lý ảnh nếu có
     if ($request->hasFile('hinh_anh')) {
         // Xóa ảnh cũ nếu có (nếu bạn muốn xóa ảnh cũ trước khi cập nhật)
         if ($nhanVien->hinh_anh) {
@@ -142,20 +178,20 @@ class NhanVienController extends Controller
         $data['hinh_anh'] = $hinhAnhPath;
     }
 
-        // Cập nhật thông tin nhân viên
-        $nhanVien->update($data);
+    // Cập nhật thông tin nhân viên
+    $nhanVien->update($data);
 
-        // Cập nhật lương của nhân viên
-        $nhanVien->luong()->updateOrCreate(
-            ['nhan_vien_id' => $nhanVien->id],
-            [
-                'hinh_thuc' => $request->hinh_thuc_luong,
-                'muc_luong' => $request->muc_luong,
-            ]
-        );
+    // Cập nhật lương của nhân viên
+    $nhanVien->luong()->updateOrCreate(
+        ['nhan_vien_id' => $nhanVien->id],
+        [
+            'hinh_thuc' => $request->hinh_thuc_luong,
+            'muc_luong' => $request->muc_luong,
+        ]
+    );
 
-        return redirect()->route('nhan-vien.index')->with('success', 'Cập nhật nhân viên thành công!');
-    }
+    return redirect()->route('nhan-vien.index')->with('success', 'Cập nhật nhân viên thành công!');
+}
 
 
 
