@@ -205,7 +205,112 @@
                 const gioDuKienInput = document.getElementById("gioDuKien");
                 const ngayDenInput = document.getElementById("ngay_den");
 
+                // document.querySelectorAll(".selectable-slot").forEach((button) => {
+                //     const banId = button.getAttribute("data-ban-id");
+                //     const tenBan = button.getAttribute("data-ten-ban");
+                //     const timeSlot = button.getAttribute("data-time-slot");
+                //     const maDatBan = button.getAttribute("data-ma-dat-ban");
+                //     const date = button.getAttribute("data-date");
+
+                //     const slotKey = `${banId}-${timeSlot}-${date}`;
+
+                //     // Nếu button có class btn-warning => Thêm vào danh sách đã chọn ngay từ đầu
+                //     if (button.classList.contains("btn-warning")) {
+                //         selectedSlots.set(slotKey, {
+                //             banId,
+                //             tenBan,
+                //             timeSlot,
+                //             maDatBan,
+                //             date
+                //         });
+                //     }
+
+                //     // Xử lý chọn / hủy chọn khi click
+                //     button.addEventListener("click", function() {
+                //         if (button.classList.contains("btn-danger") || button.classList.contains(
+                //                 "btn-success"))
+                //             return; // Không chọn được btn-danger
+
+                //         if (!button.classList.contains("btn-warning")) {
+                //             // Kiểm tra thời gian trong quá khứ nếu button chưa được chọn
+                //             const now = new Date();
+                //             const currentHour = now.getHours();
+                //             const currentMinute = now.getMinutes();
+                //             const formattedCurrentTime =
+                //                 `${String(currentHour).padStart(2, "0")}:${String(currentMinute).padStart(2, "0")}`;
+                //             const todayDate = now.toISOString().split("T")[0];
+
+                //             if (date === todayDate && timeSlot < formattedCurrentTime) {
+                //                 alert("Không thể chọn thời gian trong quá khứ!");
+                //                 return;
+                //             }
+
+                //             // Kiểm tra hơn kém nhau 30 phút trong cùng bàn
+                //             const selectedTimes = [...selectedSlots.values()]
+                //                 .filter(slot => slot.banId === banId)
+                //                 .map(slot => slot.timeSlot)
+                //                 .sort();
+
+                //             if (selectedTimes.length > 0) {
+                //                 const [hour, minute] = timeSlot.split(":").map(Number);
+                //                 const newSlotMinutes = hour * 60 + minute;
+                //                 let isValid = false;
+
+                //                 for (const selectedTime of selectedTimes) {
+                //                     const [selectedHour, selectedMinute] = selectedTime.split(":").map(
+                //                         Number);
+                //                     const selectedSlotMinutes = selectedHour * 60 + selectedMinute;
+
+                //                     if (Math.abs(newSlotMinutes - selectedSlotMinutes) === 30) {
+                //                         isValid = true;
+                //                         break;
+                //                     }
+                //                 }
+
+                //                 if (!isValid) {
+                //                     alert(
+                //                         "Chỉ có thể chọn giờ hơn kém nhau 30 phút trong cùng một bàn!"
+                //                     );
+                //                     return;
+                //                 }
+                //             }
+                //         }
+
+                //         if (button.classList.contains("btn-warning")) {
+                //             // Hủy chọn
+                //             button.classList.remove("btn-warning");
+                //             button.classList.add("bg-light");
+                //             selectedSlots.delete(slotKey);
+                //         } else {
+                //             // Chọn
+                //             button.classList.remove("bg-light");
+                //             button.classList.add("btn-warning");
+                //             selectedSlots.set(slotKey, {
+                //                 banId,
+                //                 tenBan,
+                //                 timeSlot,
+                //                 maDatBan,
+                //                 date
+                //             });
+                //         }
+
+                //         updateModal();
+                //     });
+                // });
+
+
+
                 document.querySelectorAll(".selectable-slot").forEach((button) => {
+                    const parentRow = button.closest("tr"); // Lấy thẻ <tr> chứa button
+
+                    // Nếu parent <tr> có class bg-info và button có class bg-light
+                    if (parentRow && parentRow.classList.contains("bg-info") && button.classList.contains(
+                            "bg-light")) {
+                        button.classList.add("disabled"); // Thêm class disabled từ Bootstrap
+                        button.style.cursor = "not-allowed"; // Hiển thị con trỏ bị chặn
+                        return; // Không tiếp tục xử lý sự kiện click
+                    }
+
                     const banId = button.getAttribute("data-ban-id");
                     const tenBan = button.getAttribute("data-ten-ban");
                     const timeSlot = button.getAttribute("data-time-slot");
@@ -227,11 +332,11 @@
 
                     // Xử lý chọn / hủy chọn khi click
                     button.addEventListener("click", function() {
-                        if (button.classList.contains("btn-danger") || button.classList.contains(
-                                "btn-success"))
-                            return; // Không chọn được btn-danger
+                        if (button.classList.contains("btn-danger"))
+                    return; // Không chọn được btn-danger
 
-                        if (!button.classList.contains("btn-warning")) {
+                        if (!button.classList.contains("btn-warning") && !button.classList.contains(
+                                "btn-success")) {
                             // Kiểm tra thời gian trong quá khứ nếu button chưa được chọn
                             const now = new Date();
                             const currentHour = now.getHours();
@@ -269,20 +374,24 @@
 
                                 if (!isValid) {
                                     alert(
-                                        "Chỉ có thể chọn giờ hơn kém nhau 30 phút trong cùng một bàn!"
-                                    );
+                                        "Chỉ có thể chọn giờ hơn kém nhau 30 phút trong cùng một bàn!");
                                     return;
                                 }
                             }
                         }
 
+                        // Nếu button có class `btn-warning` => Hủy chọn
                         if (button.classList.contains("btn-warning")) {
-                            // Hủy chọn
                             button.classList.remove("btn-warning");
                             button.classList.add("bg-light");
                             selectedSlots.delete(slotKey);
-                        } else {
-                            // Chọn
+                        }
+                        // Nếu button có class `btn-success` => Không thể hủy
+                        else if (button.classList.contains("btn-success")) {
+                            return; // Không làm gì khi button đã có class `btn-success`
+                        }
+                        // Nếu button chưa được chọn => Chọn
+                        else {
                             button.classList.remove("bg-light");
                             button.classList.add("btn-warning");
                             selectedSlots.set(slotKey, {
@@ -297,6 +406,7 @@
                         updateModal();
                     });
                 });
+
 
                 // Cập nhật modal ngay khi vào trang
                 updateModal();

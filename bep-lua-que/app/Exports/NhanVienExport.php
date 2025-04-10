@@ -45,7 +45,7 @@ class NhanVienExport implements FromCollection, WithHeadings, WithEvents, WithMa
 {
     return [
         $row->id,
-        $row->chuc_vu_id,
+        $row->chucVu && !is_int($row->chucVu) ? $row->chucVu->ten_chuc_vu : '',
         $row->ma_nhan_vien,
         $row->ho_ten,
         $row->email,

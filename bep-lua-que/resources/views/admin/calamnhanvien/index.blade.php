@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 @section('content')
     <div class="container py-4">
         <div class="card shadow-sm p-4">
@@ -31,14 +31,14 @@
                 </div>
                 <div class="col-md-3 d-flex gap-2">
                     <button type="submit" class="btn btn-primary">🔎 Lọc</button>
-                    <a href="{{ route('ca-lam-nhan-vien.index') }}" class="btn btn-secondary">🔄 Reset</a>
+                    <a href="{{ route('ca-lam-nhan-vien.export') }}" class="btn btn-outline-primary">📤 Xuất file</a>
                 </div>
             </form>
 
             <div class="d-flex justify-content-between mb-3">
                 <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addShiftModal">➕ Thêm Ca
                     Làm</button>
-                <a href="{{ route('ca-lam-nhan-vien.export') }}" class="btn btn-outline-primary">📤 Xuất file</a>
+                {{-- <a href="{{ route('ca-lam-nhan-vien.export') }}" class="btn btn-outline-primary">📤 Xuất file</a> --}}
             </div>
 
             <!-- Bảng Lịch Làm Việc -->
@@ -59,15 +59,20 @@
                                 <tr>
                                     <td>{{ optional($caLamNhanVien->caLam)->ten_ca ?? 'Chưa có ca' }}
                                         ({{ optional($caLamNhanVien->caLam)->gio_bat_dau ?? '--:--' }} -
-                                        {{ optional($caLamNhanVien->caLam)->gio_ket_thuc ?? '--:--' }})</td>
+                                        {{ optional($caLamNhanVien->caLam)->gio_ket_thuc ?? '--:--' }})
+                                    </td>
                                     <td>{{ $caLamNhanVien->ngay_lam }}</td>
                                     <td>{{ optional($caLamNhanVien->nhanVien)->ho_ten ?? 'Không có nhân viên' }}</td>
                                     <td>
-                                        <span
-                                            class='badge bg-{{ trim($caLamNhanVien->trang_thai) === 'Chờ duyệt' ? 'warning' : 'success' }}'>
-                                            {{ $caLamNhanVien->trang_thai }}
-                                        </span>
-  
+                                        @if (trim($caLamNhanVien->trang_thai) === 'Hoạt động')
+                                            <span class="text-danger">
+                                                <i class="fas fa-times-circle"></i> <!-- Icon dấu X đỏ -->
+                                            </span>>
+                                        @else
+                                            <span class="text-success">
+                                                <i class="fas fa-check-circle"></i> <!-- Icon dấu tích xanh -->
+                                            </span>
+                                        @endif
                                     </td>
                                     <td>
                                         <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"

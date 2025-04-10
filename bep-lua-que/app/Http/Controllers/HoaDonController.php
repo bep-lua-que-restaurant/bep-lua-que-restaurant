@@ -144,6 +144,7 @@ class HoaDonController extends Controller
         // Kiểm tra xem món ăn đã có trong hóa đơn chưa
         $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)
             ->where('mon_an_id', $monAnId)
+            ->where('trang_thai', 'cho_xac_nhan')
             ->first();
 
         if ($chiTietHoaDon) {
@@ -151,7 +152,7 @@ class HoaDonController extends Controller
             $chiTietHoaDon->increment('so_luong');
             $chiTietHoaDon->increment('thanh_tien', $giaMon);
         } else {
-            // Nếu chưa có, thêm mới vào bảng chi tiết hóa đơn
+            // Nếu không có 'cho_xac_nhan', tạo bản ghi mới với trạng thái 'cho_xac_nhan'
             ChiTietHoaDon::create([
                 'hoa_don_id' => $hoaDon->id,
                 'mon_an_id' => $monAnId,
@@ -162,7 +163,6 @@ class HoaDonController extends Controller
             ]);
             $hoaDon = HoaDon::with('chiTietHoaDons')->find($hoaDon->id);
             broadcast(new HoaDonAdded($hoaDon))->toOthers();
-            // event(new HoaDonAdded($hoaDon));
         }
         // Cập nhật tổng tiền trong bảng `hoa_don`
         $tongTien = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)->sum('thanh_tien');

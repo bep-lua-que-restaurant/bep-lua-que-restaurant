@@ -15,11 +15,12 @@
     </script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <script src="{{ asset('js/jquery-3.6.4.min.js') }}"></script>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
+    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> --}}
     <!-- Thêm Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -44,7 +45,7 @@
         </div>
         <div class="row">
             <!-- Sidebar -->
-            <nav class="col-2 bg-light pt-3">
+            {{-- <nav class="col-2 bg-light pt-3">
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a href="/" class="btn btn-primary  w-100">Trang chủ</a>
@@ -59,7 +60,27 @@
                     </li>
 
                 </ul>
+            </nav> --}}
+
+
+            <nav class="col-2 bg-light pt-3 vh-100 d-flex flex-column align-items-start p-3 border-end shadow-sm">
+                <ul class="nav flex-column w-100 gap-2">
+                    <li class="nav-item">
+                        <a href="/" class="btn btn-primary w-100 text-start">🏠 Trang chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('dat-ban.index') }}" class="btn btn-primary w-100 text-start">📅 Đặt bàn</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('datban.danhsach') }}" class="btn btn-primary w-100 text-start">📋 Danh
+                            sách</a>
+                    </li>
+                </ul>
             </nav>
+
+
+
+
             <!-- Main Content -->
             <main class="col-10">
                 @yield('content')

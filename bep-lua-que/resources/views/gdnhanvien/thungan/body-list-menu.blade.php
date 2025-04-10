@@ -1,6 +1,97 @@
 {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" /> --}}
 <style>
+    /* Thêm một chút kiểu dáng để "ô chữ" hiển thị lơ lửng */
+    /* Kiểu dáng cho ô thông tin món ăn */
+    /* Kiểu dáng cho ô thông tin món ăn */
+    .info-wrapper {
+        display: none;
+        position: absolute;
+        background-color: #E6F0FA;
+        /* Màu nền xanh nhạt */
+        color: #333;
+        /* Màu chữ chính */
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        top: 0;
+        left: 0%;
+        /* Vị trí bên phải */
+        width: 150px;
+        /* Chiều rộng của ô thông tin */
+        animation: spinIn 0.5s ease-out;
+        /* Hiệu ứng spin vào */
+    }
 
+    .food-info-card {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .food-info-card:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .cooking-time {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .icon {
+        color: #ff6f61;
+        /* Màu cam nhẹ nhàng, có thể thay đổi */
+        font-size: 16px;
+    }
+
+    .label {
+        font-weight: 600;
+        color: #555;
+    }
+
+    .value {
+        background: #fff;
+        padding: 4px 8px;
+        border-radius: 4px;
+        border: 1px solid #eee;
+    }
+
+    /* Hiệu ứng trượt vào khi hiển thị */
+    @keyframes slideIn {
+        0% {
+            transform: translateX(10px);
+            opacity: 0;
+        }
+
+        100% {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    /* Hiệu ứng ẩn dần khi rời đi */
+    @keyframes slideOut {
+        0% {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateX(10px);
+            opacity: 0;
+        }
+    }
+
+    /* Khi ô thông tin bị ẩn */
+    .info-wrapper.hide {
+        display: none;
+        animation: slideOut 0.3s ease-out;
+    }
 </style>
 <link href="{{ asset('admin/css/swiper-bundle.min.css') }}" rel="stylesheet" />
 <div class="swiper mySwiper">
@@ -12,10 +103,11 @@
                     @foreach ($chunk as $monAn)
                         <div class="col-md-3 col-6 mb-2">
                             <div class="cardd card text-center p-1" data-banan-id="{{ $monAn->id }}">
-                                <div class="card-body p-2">
+                                <div class="card-body p-2 " style="cursor: pointer;">
                                     <!-- Hình ảnh món ăn -->
                                     <img src="{{ asset('storage/' . optional($monAn->hinhAnhs->first())->hinh_anh) }}"
-                                        class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
+                                        class="img-thumbnail toggle-info"
+                                        style="width: 100px; height: 100px; object-fit: cover;">
                                     <!-- Tên món -->
                                     <h6 class="card-title" style="font-size: 12px;">{{ $monAn->ten }}</h6>
 
@@ -28,6 +120,33 @@
                                         style="padding: 2px 6px; font-size: 10px;">
                                         <i class="fa fa-plus"></i>
                                     </button>
+
+                                    <!-- Ô thông tin món ăn, ẩn ban đầu -->
+                                    <div class="info-wrapper mt-1" id="info-wrapper-{{ $monAn->id }}"
+                                        style="display: none;">
+                                        <!-- Ô hiển thị thông tin món -->
+                                        <div class="food-info-card">
+                                            <p class="cooking-time">
+                                                <i class="fas fa-clock icon"></i>
+                                                <span class="label">Thời gian nấu:</span>
+                                                <span class="value">
+                                                    @php
+                                                        $time = $monAn->thoi_gian_nau;
+                                                        if ($time >= 1) {
+                                                            // Nếu là phút (thời gian >= 1)
+                                                            echo number_format($time, 0) . ' phút';
+                                                        } else {
+                                                            // Nếu là giây (thời gian < 1)
+                                                            $seconds = round($time * 60);
+                                                            echo $seconds . ' giây';
+                                                        }
+                                                    @endphp
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+
+
                                 </div>
                             </div>
                         </div>
@@ -122,6 +241,16 @@
                         // Gán ID chi tiết hóa đơn vào nút xóa
                         $(`tr[data-id-mon="${monAnId}"] .xoa-mon-an`).attr("data-id-xoa",
                             timMon.id);
+                        // Lấy tất cả các nút ghi chú có data-id là monAnId và thay đổi data-id của nó
+                        $(`i[data-id="${monAnId}"].toggle-ghi-chu`).attr("data-id", timMon
+                            .id);
+
+                        $(`input[data-id="${monAnId}"].ghi-chu-input`).attr("data-id",
+                            timMon.id);
+
+
+                        $(`i[data-id="${monAnId}"].save-ghi-chu`).attr("data-id", timMon
+                            .id);
                     }
 
                 },
@@ -165,7 +294,22 @@
                     let row = $(`
             <tr class="table-primary" data-id-mon="${monAnId}">
                 <td class="small">${tbody.children().length + 1}</td>
-                <td class="small">${tenMon}</td>
+                <td class="small">
+                     <i class="bi bi-pencil-square text-primary toggle-ghi-chu" style="cursor: pointer;" data-id="${monAnId}"></i>
+                    ${tenMon}
+                            <!-- Ô nhập ghi chú, ẩn ban đầu -->
+<div class="ghi-chu-wrapper mt-1" style="display: none;">
+    <div class="d-flex align-items-center gap-2">
+        <!-- Ô nhập ghi chú -->
+        <input type="text" class="form-control ghi-chu-input form-control-sm ghi-chu-input"
+               placeholder="Nhập ghi chú..." 
+               value=" ""}" 
+               data-id="${monAnId}" style="flex: 1;">
+        
+        <!-- Nút lưu (biểu tượng V) -->
+        <i class="bi bi-check-circle-fill text-success save-ghi-chu" style="cursor: pointer; font-size: 20px;" data-id="${monAnId}"></i>
+    </div>
+                    </td>
                 <td class="text-center">
                     <i class="bi bi-dash-circle text-danger giam-soluong" data-id="${monAnId}" style="cursor: pointer; font-size: 20px;"></i>
                     <span class="so-luong mx-2 small">1</span>
@@ -340,6 +484,33 @@
             }
 
 
+        });
+    });
+
+    $(document).ready(function() {
+        // Khi nhấp vào toàn bộ món ăn (thẻ card-body)
+        $('.toggle-info').click(function(event) {
+            var id = $(this).closest('.card').data(
+                'banan-id'); // Lấy ID của món ăn từ attribute data-banan-id
+            var infoWrapper = $('#info-wrapper-' + id); // Lấy phần thông tin của món ăn
+
+            // Ẩn tất cả các ô thông tin trước khi hiển thị ô thông tin của món ăn hiện tại
+            $('.info-wrapper').not(infoWrapper).slideUp(200);
+
+            // Hiển thị hoặc ẩn ô thông tin của món ăn hiện tại
+            infoWrapper.toggle(); // Thay đổi trạng thái hiển thị của ô thông tin
+
+            // Ngừng sự kiện để không làm nó bắn ra ngoài
+            event.stopPropagation();
+        });
+
+        // Đóng ô thông tin khi click ra ngoài
+        $(document).on("click", function(event) {
+            // Kiểm tra nếu click ra ngoài phần tử thông tin và không phải món ăn
+            if (!$(event.target).closest('.info-wrapper').length) {
+                // Ẩn tất cả các ô thông tin
+                $('.info-wrapper').slideUp(200);
+            }
         });
     });
 </script>

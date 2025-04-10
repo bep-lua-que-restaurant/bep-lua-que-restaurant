@@ -59,7 +59,7 @@
                             {{-- <input type="text" class="form-control" id="searchCustomer" placeholder="Tìm kiếm..."> --}}
 
                             <input type="text" class="form-control" id="searchCustomer"
-                                placeholder="Nhập tên hoặc số điện thoại">
+                                placeholder="Tìm kiếm theo họ tên hoặc số điện thoại">
                             <ul id="customerList" class="list-group mt-2" style="display: none;"></ul>
                         </div>
 
@@ -117,7 +117,7 @@
             </div>
         </div>
     </div>
-    <script>
+    {{-- <script>
         $(document).ready(function() {
             function loadDatBan(date, page = 1) {
                 $("#ngay-tabs").html('<tr><td colspan="30" class="text-center">Đang tải dữ liệu...</td></tr>');
@@ -295,6 +295,129 @@
                     let page = $(this).data("page");
                     let date = $(this).data("date");
                     loadDatBan(date, page);
+                });
+            });
+        });
+    </script> --}}
+
+
+    <script>
+        $(document).ready(function() {
+            function loadDatBan(date) {
+                $("#ngay-tabs").html('<tr><td colspan="30" class="text-center">Đang tải dữ liệu...</td></tr>');
+
+                $.ajax({
+                    url: `/api/datban`, // Không còn `?page`
+                    type: 'GET',
+                    data: {
+                        date: date
+                    },
+                    success: function(response) {
+                        let html = '';
+
+                        response.banPhong.forEach(ban => { // Không còn `.data`
+                            const tableClass = ban.trang_thai === "co_khach" ? "bg-info" : "";
+                            html +=
+                                `<tr class="${tableClass}"><td class="fw-bold sticky-col">${ban.ten_ban}</td>`;
+
+                            for (let i = 8; i <= 22; i++) {
+                                ["00", "30"].forEach(minute => {
+                                    const timeSlot =
+                                        `${i.toString().padStart(2, '0')}:${minute}`;
+                                    const thoiGianHienTai = new Date(
+                                        `${date}T${timeSlot}:00`);
+
+                                    const datBan = response.datBans.find(d => {
+                                        if (d.ban_an_id !== ban.id)
+                                            return false;
+                                        const thoiGianDen = new Date(d
+                                            .thoi_gian_den);
+                                        const [hours, minutes] = d.gio_du_kien
+                                            .split(':').map(Number);
+                                        const thoiGianKetThuc = new Date(
+                                            thoiGianDen);
+                                        thoiGianKetThuc.setHours(hours);
+                                        thoiGianKetThuc.setMinutes(minutes);
+                                        return thoiGianHienTai >= thoiGianDen &&
+                                            thoiGianHienTai <= thoiGianKetThuc;
+                                    });
+
+                                    const statusClass = datBan ? (datBan.trang_thai ===
+                                            'xac_nhan' ? 'btn-success' : 'btn-danger') :
+                                        'bg-light';
+                                    const maDatBan = datBan ? datBan.ma_dat_ban : '';
+                                    const content = `
+                                        <button class="btn btn-sm ${statusClass} text-dark btn-view-details selectable-slot" 
+                                            data-ma-dat-ban="${maDatBan}" 
+                                            data-ban-id="${ban.id}" 
+                                            data-ten-ban="${ban.ten_ban}" 
+                                            data-time-slot="${timeSlot}" 
+                                            data-date="${date}"
+                                            data-bs-toggle="tooltip" 
+                                            data-bs-title="Đang tải...">
+                                            +
+                                        </button>`;
+
+                                    html +=
+                                        `<td class="text-center ${tableClass}" data-ban-id="${ban.id}">${content}</td>`;
+                                });
+                            }
+                            html += `</tr>`;
+                        });
+
+                        $("#ngay-tabs").html(html);
+                        $('[data-bs-toggle="tooltip"]').tooltip(); // Kích hoạt tooltip
+                        attachTooltipEvents();
+                    },
+                    error: function() {
+                        $("#ngay-tabs").html(
+                            '<tr><td colspan="30" class="text-center text-danger">Lỗi tải dữ liệu</td></tr>'
+                        );
+                    }
+                });
+            }
+
+            function attachTooltipEvents() {
+                $(".selectable-slot").on("mouseenter", function() {
+                    const button = $(this);
+                    const maDatBan = button.data("ma-dat-ban");
+
+                    if (maDatBan) {
+                        fetch(`/api/datban/${maDatBan}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (!data.ho_ten) return;
+                                const title = `
+                                    <strong>Khách:</strong> ${data.ho_ten} <br>
+                                    <strong>SĐT:</strong> ${data.so_dien_thoai} <br>
+                                    <strong>Số người:</strong> ${data.so_nguoi} <br>
+                                    <strong>Mô tả:</strong> ${data.mo_ta || "Không có mô tả"} <br>
+                                    <strong>Bàn:</strong> ${data.ban_ans ? data.ban_ans.join(", ") : "Không có bàn"}`;
+                                button.attr("data-bs-title", title);
+                                const oldTooltip = bootstrap.Tooltip.getInstance(button[0]);
+                                if (oldTooltip) oldTooltip.dispose();
+                                const tooltip = new bootstrap.Tooltip(button[0], {
+                                    html: true
+                                });
+                                tooltip.show();
+                                setTimeout(() => {
+                                    tooltip.dispose();
+                                }, 1500);
+                            })
+                            .catch(error => console.error("Lỗi khi lấy dữ liệu đặt bàn:", error));
+                    }
+                });
+
+                $(".selectable-slot").on("mouseleave", function() {
+                    const tooltip = bootstrap.Tooltip.getInstance(this);
+                    if (tooltip) tooltip.dispose();
+                });
+            }
+
+            $(document).ready(function() {
+                loadDatBan($("#datePicker").val());
+                $("#datePicker").on("change", function() {
+                    loadDatBan($(this).val());
                 });
             });
         });
@@ -683,8 +806,8 @@
 
 
         /* .btn-success .btn-danger {
-                                                                                                                                                                                                    pointer-events: none;
-                                                                                                                                                                                                } */
+                                                                                                                                                                                                                        pointer-events: none;
+                                                                                                                                                                                                                    } */
 
         .border-left-rounded {
             border-top-left-radius: 10px;

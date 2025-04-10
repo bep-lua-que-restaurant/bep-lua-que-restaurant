@@ -1,177 +1,159 @@
 @extends('layouts.admin')
 
 @section('content')
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4>Bảng chấm công</h4>
-            {{-- <input type="text" class="form-control w-25" placeholder="Tìm kiếm nhân viên"> --}}
+    <div class="p-6">
+        <div class="overflow-auto border rounded shadow">
 
-            <div>
-                <button class="btn btn-light" onclick="changeDate(-1)">&#60;</button>
-                <span id="date-label" data-date="{{ $selectedDate }}">{{ $dayLabel }}</span>
-                <button class="btn btn-light" onclick="changeDate(1)">&#62;</button>
-                <a href="{{ route('cham-cong.export') }}" class="btn btn-sm btn-success">
-                    <i class="fa fa-download"></i> Xuất file
-                </a>
-            </div>
-        </div>
+            <form action="{{ route('cham-cong.store') }}" method="POST">
+                @csrf
+                <!-- Hidden input để xác định đang ở chế độ cập nhật -->
+                <input type="hidden" name="is_edit_mode" id="is_edit_mode" value="0">
+                <div class="card-header d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0" style="font-size: 1.5rem; margin-top: 10px; margin-left: 10px;">
+                        <i class="fas fa-calendar-check me-2"></i> Hệ Thống Chấm Công
+                    </h2>
+
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-calendar-alt text-primary"></i>
+                        </span>
+                        <input type="month" class="form-control border-start-0" id="monthFilter" style="width: auto;">
+                    </div>
+                    <button type="button" class="btn btn-light ms-2" onclick="filterByMonth()">
+                        <i class="fas fa-filter"></i> Lọc
+                    </button>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <button class="btn btn-outline-primary" type="button" onclick="prevMonth()">
+                        <i class="fas fa-chevron-left me-1"></i> Tháng trước
+                    </button>
+
+                    <div class="month-title text-center" id="monthTitle" style="font-size: 1.25rem; font-weight: bold;">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                    </div>
+
+                    <button class="btn btn-outline-primary" type="button" onclick="nextMonth()">
+                        Tháng sau <i class="fas fa-chevron-right ms-1"></i>
+                    </button>
+                </div>
 
 
-        <div id="cham-cong-table" class="table-responsive">
-            @include('admin.chamcong.listchamcong')
 
+                {{-- Include bảng chấm công --}}
+                @include('admin.chamcong.listchamcong')
+
+                <div class="d-flex gap-2 mt-3 ml-2">
+                    <button type="button" id="btnEdit" class="btn btn-warning px-4 fw-bold shadow-sm">
+                        Sửa
+                    </button>
+                    <button type="button" id="btnCancelEdit" class="btn btn-secondary d-none px-4 fw-bold shadow-sm">
+                        Hủy
+                    </button>
+                    <button type="submit" class="btn btn-success px-4 fw-bold shadow-sm ">
+                        Lưu
+                    </button>
+                </div>
+
+            </form>
         </div>
     </div>
 
-
-    <!-- Modal chấm công -->
-    @include('admin.chamcong.bangchamcong')
-
-
+    {{-- JS --}}
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/locale/vi.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            document.addEventListener("click", function(event) {
-                if (event.target.classList.contains("cham-cong")) {
-                    event.preventDefault();
+        let currentMonth = moment();
+        moment.locale('vi');
 
-                    document.querySelector(".btn-close").addEventListener("click", function() {
-                        modal.hide();
-                    });
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
 
-                    document.querySelector(".btn-secondary").addEventListener("click", function() {
-                        modal.hide();
-                    });
-
-                    let nhanVienId = event.target.dataset.nhanvienId;
-                    let ngay = event.target.dataset.ngay;
-                    let ca = event.target.dataset.ca;
-                    // let deletedAt = event.target.dataset.deletedAt; // Lấy giá trị deleted_at
-
-                    document.getElementById("modalNhanVien").innerText = nhanVienId;
-                    document.getElementById("modalNgay").innerText = ngay;
-                    document.getElementById("modalCa").innerText = ca;
-
-                    document.getElementById("inputNhanVienId").value = nhanVienId;
-                    document.getElementById("inputNgayChamCong").value = ngay;
-                    document.getElementById("inputCaId").value = ca;
+        function updateMonthTitle() {
+            const monthTitle = capitalizeFirstLetter(currentMonth.format('MMMM')) + ' - ' + currentMonth.format('YYYY');
+            $('#monthTitle').text(monthTitle);
+            loadChamCongData(currentMonth.format('YYYY-MM'));
+        }
 
 
-
-
-                    let modal = new bootstrap.Modal(document.getElementById("modalChamCong"));
-
-                    modal.show();
-                }
-            });
-
-            $(document).on("click", "#btnLuuChamCong", function() {
-
-
-
-                let nhan_vien_id = $("#inputNhanVienId").val();
-                let ca = $("#inputCaId").val();
-                let ngay = $("#inputNgayChamCong").val();
-                var csrfToken = "{{ csrf_token() }}"; // Lấy token từ Laravel
-
-                let data = {
-                    _token: "{{ csrf_token() }}",
-                    nhan_vien_id: $("#inputNhanVienId").val(),
-                    ca_lam_id: $("#inputCaId").val(),
-                    ngay_cham_cong: $("#inputNgayChamCong").val(),
-                    mo_ta: $("#modalGhiChu").val(),
-                    gio_vao_lam: $("#modalGioVao").val(),
-                    gio_ket_thuc: $("#modalGioRa").val()
-                };
-
-                console.log("Dữ liệu gửi lên:", data);
-
-                // Kiểm tra chấm công trước khi thực hiện hành động
-                $.ajax({
-                    url: `/cham-cong/check/${nhan_vien_id}/${ca}/${ngay}`,
-                    type: "GET",
-                    success: function(response) {
-                        console.log("Dữ liệu trả về:", response);
-                        if (response.trim() === "1") {
-                            // Đã có chấm công → Cập nhật
-                            updateChamCong(data, nhan_vien_id, ca, ngay);
-                        } else {
-                            // Chưa có chấm công → Tạo mới
-                            storeChamCong(data);
-                        }
-                    },
-                    error: function(xhr) {
-                        console.error("Lỗi kiểm tra chấm công:", xhr.responseText);
-                        alert("Lỗi kiểm tra chấm công!");
-                    }
-                });
-            });
-
-            // Hàm tạo mới chấm công
-            // function storeChamCong(data) {
-            //     $.ajax({
-            //         url: "{{ route('chamcong.store') }}",
-            //         type: "POST",
-            //         data: data,
-            //         success: function() {
-            //             alert("Chấm công thành công!");
-            //             $("#myModal").modal("hide"); // Ẩn modal sau khi lưu
-            //             location.reload();
-            //         },
-            //         error: function(xhr) {
-            //             console.error("Lỗi khi tạo mới chấm công:", xhr.responseText);
-            //             alert("Lỗi khi tạo mới: " + xhr.responseText);
-            //         }
-            //     });
-            // }
-
-            // Hàm cập nhật chấm công
-            function updateChamCong(data, nhan_vien_id, ca, ngay) {
-                $.ajax({
-                    url: `/cham-cong/update/${nhan_vien_id}/${ca}/${ngay}`,
-                    type: "POST",
-                    headers: {
-                        'X-CSRF-TOKEN': data._token
-                    },
-                    data: {
-                        ...data,
-                        _method: "PATCH"
-                    },
-                    success: function() {
-                        alert("Cập nhật thành công!");
-                        $("#myModal").modal("hide"); // Ẩn modal sau khi cập nhật
-                        location.reload();
-                    },
-                    error: function(xhr) {
-                        console.error("Lỗi khi cập nhật:", xhr.responseText);
-                        alert("Lỗi khi cập nhật: " + xhr.responseText);
-                    }
-                });
-            }
-
-        });
-
-        function changeDate(offset) {
-            let currentDate = $("#date-label").data("date"); // Lấy ngày hiện tại
-            let newDate = new Date(currentDate);
-            newDate.setDate(newDate.getDate() + offset); // Cộng/trừ số ngày
-
-            let formattedDate = newDate.toISOString().split('T')[0]; // Định dạng YYYY-MM-DD
-
+        function loadChamCongData(month) {
             $.ajax({
-                url: @json(route('cham-cong.index')), // Đảm bảo URL chính xác
-                type: "GET",
+                url: "{{ route('cham-cong.index') }}",
+                method: 'GET',
                 data: {
-                    selected_date: formattedDate // Đúng với tên biến trong controller
+                    selected_month: month
                 },
                 success: function(response) {
-                    $("#date-label").text(response.dayLabel); // Cập nhật nhãn ngày
-                    $("#date-label").data("date", formattedDate); // Cập nhật ngày mới
-                    $("#cham-cong-table").html(response.html); // Cập nhật bảng chấm công
-                },
-                error: function() {
-                    alert("Có lỗi xảy ra, vui lòng thử lại!");
+                    $('#chamcongTable').html($(response.html).find('#chamcongTable').html());
                 }
             });
         }
+
+        function prevMonth() {
+            currentMonth.subtract(1, 'month');
+            updateMonthTitle();
+        }
+
+        function nextMonth() {
+            currentMonth.add(1, 'month');
+            updateMonthTitle();
+        }
+
+        function filterByMonth() {
+            const selected = $('#monthFilter').val(); // yyyy-mm
+            if (selected) {
+                currentMonth = moment(selected, 'YYYY-MM'); // Cập nhật lại biến tháng hiện tại
+                updateMonthTitle(); // Cập nhật tiêu đề + load dữ liệu
+            }
+        }
+        // Tạo biến để lưu trạng thái ban đầu
+        let originalCheckboxStates = {};
+
+        document.getElementById('btnEdit').addEventListener('click', function() {
+            document.getElementById('is_edit_mode').value = '1';
+
+            const checkboxes = document.querySelectorAll('#chamcongTable input[type="checkbox"]');
+            checkboxes.forEach((cb, index) => {
+                cb.classList.add('checkbox-edit-mode');
+                // Lưu trạng thái ban đầu theo id hoặc index
+                originalCheckboxStates[cb.id || index] = cb.checked;
+            });
+
+            // Ẩn nút Sửa, hiện nút Hủy
+            document.getElementById('btnEdit').classList.add('d-none');
+            document.getElementById('btnCancelEdit').classList.remove('d-none');
+        });
+
+        document.getElementById('btnCancelEdit').addEventListener('click', function() {
+            document.getElementById('is_edit_mode').value = '0';
+
+            const checkboxes = document.querySelectorAll('#chamcongTable input[type="checkbox"]');
+            checkboxes.forEach((cb, index) => {
+                cb.classList.remove('checkbox-edit-mode');
+                // Khôi phục trạng thái ban đầu
+                const key = cb.id || index;
+                if (originalCheckboxStates.hasOwnProperty(key)) {
+                    cb.checked = originalCheckboxStates[key];
+                }
+            });
+
+            // Ẩn nút Hủy, hiện nút Sửa
+            document.getElementById('btnCancelEdit').classList.add('d-none');
+            document.getElementById('btnEdit').classList.remove('d-none');
+        });
+
+        $(document).ready(function() {
+            updateMonthTitle();
+        });
     </script>
 @endsection
+<style>
+    .checkbox-edit-mode {
+        outline: 2px solid red !important;
+        box-shadow: 0 0 4px red;
+        border-radius: 4px;
+    }
+</style>

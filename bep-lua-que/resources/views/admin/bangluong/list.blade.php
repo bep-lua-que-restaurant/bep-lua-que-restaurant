@@ -9,7 +9,7 @@
         <div class="row page-titles mx-0">
             <div class="col-sm-6 p-md-0">
                 <div class="welcome-text">
-                    <h4>Hi, welcome back!</h4>
+                    <h4>Chào mừng đến Bếp lửa quê !</h4>
                 </div>
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
@@ -56,7 +56,7 @@
                         <div class="table-responsive">
                             <table class="table table-responsive-md">
                                 <thead>
-                                    <tr>
+                                    <tr style="text-align: center">
                                         <th style="width:50px;">
                                             <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
                                                 <input type="checkbox" class="custom-control-input" id="checkAll"
@@ -66,9 +66,10 @@
                                         </th>
                                         <th>Mã</th>
                                         <th>Tên</th>
-                                        <th>Kỳ hạn trả</th>
-                                        <th>Kỳ làm việc</th>
+                                        <th>Tổng số ca làm </th>
+                                        <th>Mức lương</th>
                                         <th>Tổng lương</th>
+                                        <th>Thời gian</th>
                                         <th>Hành động</th>
                                     </tr>
                                 </thead>
@@ -96,7 +97,7 @@
                 </div>
                 <div class="modal-body">
                     <!-- Form nhập file -->
-                    <form action="{{ route('dich-vu.import') }}" method="POST" enctype="multipart/form-data"
+                    <form action="{{ route('luong.import') }}" method="POST" enctype="multipart/form-data"
                         id="importFileForm">
                         @csrf
                         <div class="mb-3">

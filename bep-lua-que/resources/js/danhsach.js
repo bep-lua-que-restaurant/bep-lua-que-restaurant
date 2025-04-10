@@ -37,15 +37,19 @@ function addDatBanToTable(event) {
     newRow.classList.add("text-center");
 
     newRow.innerHTML = `
-        <td>${formatDateTime(
+        <td class="align-middle">${formatDateTime(
             danh_sach_ban[0]?.thoi_gian_den || "Không rõ"
         )}</td>
-        <td>${customer?.ho_ten || "Không rõ"}</td>
-        <td>${customer?.so_dien_thoai || "Không rõ"}</td>
-        <td>${danh_sach_ban[0]?.so_nguoi || "Không rõ"}</td>
-        <td>${renderBanList(danh_sach_ban)}</td>
-        <td>${renderStatusBadge(danh_sach_ban[0]?.trang_thai)}</td>
-        <td id="action-buttons-${
+        <td class="align-middle" >${customer?.ho_ten || "Không rõ"}</td>
+        <td class="align-middle" >${customer?.so_dien_thoai || "Không rõ"}</td>
+        <td class="align-middle" >${
+            danh_sach_ban[0]?.so_nguoi || "Không rõ"
+        }</td>
+        <td class="align-middle" >${renderBanList(danh_sach_ban)}</td>
+        <td class="align-middle" >${renderStatusBadge(
+            danh_sach_ban[0]?.trang_thai
+        )}</td>
+        <td class="align-middle"  id="action-buttons-${
             danh_sach_ban[0].datban_id
         }">${renderActionButtons(danh_sach_ban[0])}</td>
     `;
@@ -87,13 +91,17 @@ function updateDatBanRow(event) {
     }
 
     row.innerHTML = `
-    <td>${formatDateTime(danh_sach_ban[0]?.thoi_gian_den || "Không rõ")}</td>
-    <td>${customer?.ho_ten || "Không rõ"}</td>
-    <td>${customer?.so_dien_thoai || "Không rõ"}</td>
-    <td>${danh_sach_ban[0]?.so_nguoi || "Không rõ"}</td>
-    <td>${renderBanList(danh_sach_ban)}</td>
-    <td>${renderStatusBadge(danh_sach_ban[0]?.trang_thai)}</td>
-    <td id="action-buttons-${maDatBan}">${renderActionButtons(
+    <td class="align-middle" >${formatDateTime(
+        danh_sach_ban[0]?.thoi_gian_den || "Không rõ"
+    )}</td>
+    <td class="align-middle" >${customer?.ho_ten || "Không rõ"}</td>
+    <td class="align-middle" >${customer?.so_dien_thoai || "Không rõ"}</td>
+    <td class="align-middle" >${danh_sach_ban[0]?.so_nguoi || "Không rõ"}</td>
+    <td class="align-middle" >${renderBanList(danh_sach_ban)}</td>
+    <td class="align-middle" >${renderStatusBadge(
+        danh_sach_ban[0]?.trang_thai
+    )}</td>
+    <td class="align-middle"  id="action-buttons-${maDatBan}">${renderActionButtons(
         danh_sach_ban[0]
     )}</td>
 `;
@@ -140,25 +148,44 @@ function renderActionButtons(datban) {
         .querySelector('meta[name="csrf-token"]')
         ?.getAttribute("content");
 
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0]; // 'YYYY-MM-DD'
+
+    // Chuyển đổi thời gian đến thành YYYY-MM-DD
+    const datbanDateStr = new Date(datban.thoi_gian_den)
+        .toISOString()
+        .split("T")[0];
+
+    // Nếu không phải trạng thái đang xử lý, chỉ hiển thị nút xem
     if (datban.trang_thai !== "dang_xu_ly") {
         return `<a href="/dat-ban/${datban.ma_dat_ban}" class="btn btn-primary btn-sm">
                     <i class="fas fa-eye"></i>
                 </a>`;
     }
 
-    return `
+    // Nếu trạng thái đang xử lý
+    let buttons = `
         <a href="/dat-ban/${datban.ma_dat_ban}" class="btn btn-primary btn-sm">
             <i class="fas fa-eye"></i>
         </a>
         <form action="/dat-ban/${datban.ma_dat_ban}" method="post" class="d-inline-block">
             <input type="hidden" name="_token" value="${csrfToken}">
             <input type="hidden" name="_method" value="DELETE">
-            <button type="submit" class="btn btn-danger btn-sm">
-                <i class="fas fa-times"></i>
-            </button>
+                   <button type="submit" class="btn btn-danger btn-sm" title="Hủy đặt"
+                                                onclick="return confirm('Bạn có chắc chắn muốn hủy đặt bàn này không?');">
+                                                <i class="fas fa-times"></i>
+                                            </button>
         </form>
-        <a href="/dat-ban/${datban.ma_dat_ban}/edit" class="btn btn-success btn-sm">
-            <i class="fas fa-check"></i>
-        </a>
     `;
+
+    // Nếu đúng ngày hôm nay thì thêm nút xác nhận
+    if (datbanDateStr === todayStr) {
+        buttons += `
+            <a href="/dat-ban/${datban.ma_dat_ban}/edit" class="btn btn-success btn-sm">
+                <i class="fas fa-check"></i>
+            </a>
+        `;
+    }
+
+    return buttons;
 }

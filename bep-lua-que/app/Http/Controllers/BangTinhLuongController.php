@@ -20,17 +20,27 @@ class BangTinhLuongController extends Controller
     public function index(Request $request)
 {
     $query = BangTinhLuong::query()
-        ->leftJoin('nhan_viens', 'bang_tinh_luongs.nhan_vien_id', '=', 'nhan_viens.id')
-        ->leftJoin('cham_congs', 'bang_tinh_luongs.nhan_vien_id', '=', 'cham_congs.nhan_vien_id')
-        ->leftJoin('ca_lams', 'cham_congs.ca_lam_id', '=', 'ca_lams.id')
-        ->leftJoin('luongs', 'bang_tinh_luongs.nhan_vien_id', '=', 'luongs.nhan_vien_id')
-        ->select(
-            'bang_tinh_luongs.id',
-            'bang_tinh_luongs.thang_nam',
-            'bang_tinh_luongs.tong_luong',
-            'nhan_viens.ho_ten as ten_nhan_vien'
-        )
-        ->groupBy('bang_tinh_luongs.id', 'bang_tinh_luongs.thang_nam', 'bang_tinh_luongs.tong_luong', 'nhan_viens.ho_ten');
+    ->leftJoin('nhan_viens', 'bang_tinh_luongs.nhan_vien_id', '=', 'nhan_viens.id')
+    ->leftJoin('cham_congs', function ($join) {
+        $join->on('bang_tinh_luongs.nhan_vien_id', '=', 'cham_congs.nhan_vien_id')
+            ->whereRaw("DATE_FORMAT(cham_congs.ngay_cham_cong, '%Y-%m') = DATE_FORMAT(bang_tinh_luongs.thang_nam, '%Y-%m')");
+    })
+    ->leftJoin('luongs', 'bang_tinh_luongs.nhan_vien_id', '=', 'luongs.nhan_vien_id')
+
+    ->select(
+        'bang_tinh_luongs.id',
+        'bang_tinh_luongs.thang_nam',
+        'bang_tinh_luongs.tong_luong',
+        'nhan_viens.ho_ten as ten_nhan_vien',
+        DB::raw('COUNT(cham_congs.id) as so_cong'),
+        DB::raw('MAX(luongs.muc_luong) as muc_luong') // dùng MAX để lấy 1 giá trị nếu có nhiều
+    )
+    ->groupBy(
+        'bang_tinh_luongs.id',
+        'bang_tinh_luongs.thang_nam',
+        'bang_tinh_luongs.tong_luong',
+        'nhan_viens.ho_ten'
+    );
 
     // 🔹 Lọc theo tháng và năm nếu có yêu cầu từ request
     if ($request->has('month') && $request->month != '') {

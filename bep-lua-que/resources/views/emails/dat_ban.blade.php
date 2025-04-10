@@ -29,7 +29,7 @@
             <h3 style="color: #333;">Danh sách bàn đã đặt:</h3>
             <ul>
                 @foreach ($danhSachBanDat as $datBan)
-                    <li>Bàn số: {{ $datBan->ban_an_id }}</li>
+                    <li>{{ $datBan->ten_ban }}</li>
                 @endforeach
             </ul>
         </div>
