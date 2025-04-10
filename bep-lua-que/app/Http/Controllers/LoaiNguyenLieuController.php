@@ -7,6 +7,7 @@ use App\Http\Requests\StoreLoaiNguyenLieuRequest;
 use App\Http\Requests\UpdateLoaiNguyenLieuRequest;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\Storage;
 
 class LoaiNguyenLieuController extends Controller
 {
@@ -27,15 +28,18 @@ class LoaiNguyenLieuController extends Controller
                 })
                 ->addColumn('action', function ($row) {
                     $html = '<div class="d-flex align-items-center">';
-                    $html .= '<a href="' . route('loai-nguyen-lieu.edit', $row->id) . '" class="btn btn-warning btn-sm p-2 m-2"><i class="fa fa-edit"></i></a>';
 
+                    // Nút sửa
+                    $html .= '<button type="button" class="btn btn-warning btn-sm p-2 m-2 btn-edit" data-id="' . $row->id . '" data-bs-toggle="modal" data-bs-target="#editModal"><i class="fa fa-edit"></i></button>';
+
+                    // Nút khôi phục hoặc xóa
                     if ($row->deleted_at) {
-                        $html .= '<form action="' . route('loai-nguyen-lieu.restore', $row->id) . '" method="POST" style="display:inline;">'
+                        $html .= '<form action="' . route('loai-nguyen-lieu.restore', $row->id) . '" method="POST" class="form-delete-restore" style="display:inline;">'
                             . csrf_field() .
                             '<button type="submit" class="btn btn-success btn-sm p-2 m-2" title="Khôi phục"><i class="fa fa-recycle"></i></button>'
                             . '</form>';
                     } else {
-                        $html .= '<form action="' . route('loai-nguyen-lieu.destroy', $row->id) . '" method="POST" style="display:inline;">'
+                        $html .= '<form action="' . route('loai-nguyen-lieu.destroy', $row->id) . '" method="POST" class="form-delete-restore" style="display:inline;">'
                             . csrf_field() . method_field('DELETE') .
                             '<button type="submit" class="btn btn-danger btn-sm p-2 m-2" title="Xóa"><i class="fa fa-trash"></i></button>'
                             . '</form>';
@@ -44,6 +48,7 @@ class LoaiNguyenLieuController extends Controller
                     $html .= '</div>';
                     return $html;
                 })
+
                 ->rawColumns(['trang_thai', 'action'])
                 ->make(true);
         }
@@ -55,29 +60,27 @@ class LoaiNguyenLieuController extends Controller
     }
 
     /**
-     * Hiển thị form thêm mới.
-     */
-    public function create()
-    {
-        return view('admin.loainguyenlieu.create');
-    }
-
-    /**
      * Lưu loại nguyên liệu mới.
      */
     public function store(StoreLoaiNguyenLieuRequest $request)
     {
-        LoaiNguyenLieu::create($request->validated());
+        $data = $request->validated();
 
-        return redirect()->route('loai-nguyen-lieu.index')->with('success', 'Thêm loại nguyên liệu thành công!');
+        $loai = LoaiNguyenLieu::create($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tạo loại nguyên liệu thành công!',
+            'data' => $loai
+        ]);
     }
 
     /**
-     * Hiển thị form chỉnh sửa.
+     * Hiển thị thông tin một loại nguyên liệu (cho edit ajax).
      */
-    public function edit(LoaiNguyenLieu $loaiNguyenLieu)
+    public function show(LoaiNguyenLieu $loaiNguyenLieu)
     {
-        return view('admin.loainguyenlieu.edit', compact('loaiNguyenLieu'));
+        return response()->json($loaiNguyenLieu);
     }
 
     /**
@@ -85,59 +88,47 @@ class LoaiNguyenLieuController extends Controller
      */
     public function update(UpdateLoaiNguyenLieuRequest $request, LoaiNguyenLieu $loaiNguyenLieu)
     {
-        $loaiNguyenLieu->update($request->validated());
+        $data = $request->validated();
 
-        return back()->with('success', 'Cập nhật thành công!');
+        $loaiNguyenLieu->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cập nhật loại nguyên liệu thành công!',
+            'data' => $loaiNguyenLieu
+        ]);
     }
 
     /**
-     * Xóa mềm.
+     * Xóa mềm loại nguyên liệu.
      */
     public function destroy(LoaiNguyenLieu $loaiNguyenLieu)
     {
         $soLuongNguyenLieu = $loaiNguyenLieu->nguyenLieus()->count();
 
         if ($soLuongNguyenLieu > 0) {
-            // Nếu là request AJAX thì trả JSON lỗi
-            if (request()->ajax()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Không thể xóa! Đang có ' . $soLuongNguyenLieu . ' nguyên liệu thuộc loại này.'
-                ], 400);
-            }
-
-            // Nếu không phải ajax (ví dụ submit form truyền thống)
-            return redirect()->route('loai-nguyen-lieu.index')
-                ->with('error', 'Không thể xóa! Đang có nguyên liệu thuộc loại này.');
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Không thể xóa! Đang có ' . $soLuongNguyenLieu . ' nguyên liệu thuộc loại này.'
+            ], 400);
         }
 
         $loaiNguyenLieu->delete();
 
-        if (request()->ajax()) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Đã xóa loại nguyên liệu!'
-            ]);
-        }
-
-        return redirect()->route('loai-nguyen-lieu.index')
-            ->with('success', 'Đã xóa loại nguyên liệu!');
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Đã xóa loại nguyên liệu!'
+        ]);
     }
 
-
-
     /**
-     * Khôi phục đã xóa.
+     * Khôi phục loại nguyên liệu đã xóa.
      */
     public function restore($id)
     {
-        try {
-            $loaiNguyenLieu = LoaiNguyenLieu::withTrashed()->findOrFail($id);
-            $loaiNguyenLieu->restore();
+        $loai = LoaiNguyenLieu::withTrashed()->findOrFail($id);
+        $loai->restore();
 
-            return redirect()->route('loai-nguyen-lieu.index')->with('success', 'Đã khôi phục loại nguyên liệu!');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Không thể khôi phục loại nguyên liệu.');
-        }
+        return redirect()->route('loai-nguyen-lieu.index')->with('success', 'Đã khôi phục loại nguyên liệu!');
     }
 }

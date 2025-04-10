@@ -90,59 +90,104 @@ class PhieuNhapKhoController extends Controller
         $nhaCungCaps = NhaCungCap::all();
         $nhanViens = NhanVien::all();
         $loaiNguyenLieus = LoaiNguyenLieu::all();
+        $nguyenLieus = NguyenLieu::all();
 
         // Tạo mã phiếu tự động
         $latestPhieuNhapKho = PhieuNhapKho::latest()->first();
         $nextCode = $latestPhieuNhapKho ? 'PNK-' . str_pad(substr($latestPhieuNhapKho->ma_phieu, 4) + 1, 4, '0', STR_PAD_LEFT) : 'PNK-0001';
 
-        return view('admin.phieunhapkho.create', compact('nhaCungCaps', 'nhanViens', 'loaiNguyenLieus', 'nextCode'));
+        return view('admin.phieunhapkho.create', compact('nhaCungCaps', 'nhanViens', 'loaiNguyenLieus', 'nextCode', 'nguyenLieus'));
     }
 
     public function store(StorePhieuNhapKhoRequest $request)
     {
-        // Tạo phiếu nhập kho mới
-        $phieuNhapKho = PhieuNhapKho::create([
-            'ma_phieu' => $request->ma_phieu,
-            'nha_cung_cap_id' => $request->nha_cung_cap_id,
-            'nhan_vien_id' => $request->nhan_vien_id,
-            'ngay_nhap' => now(),
-            'ghi_chu' => $request->ghi_chu
-        ]);
-
-        // Biến để tính tổng tiền của phiếu nhập kho
-        $tongTien = 0;
-
-        // Lưu chi tiết phiếu nhập kho
-        foreach ($request->ten_nguyen_lieus as $key => $tenNguyenLieu) {
-            $thanhTien = $request->so_luong_nhaps[$key] * $request->don_gias[$key]; // Tính thành tiền cho chi tiết
-
-            // Tính tổng tiền
-            $tongTien += $thanhTien;
-
-            // Lưu chi tiết phiếu nhập kho
-            ChiTietPhieuNhapKho::create([
-                'phieu_nhap_kho_id' => $phieuNhapKho->id,
-                'ten_nguyen_lieu' => $tenNguyenLieu, // Tên nguyên liệu nhập tay từ form
-                'loai_nguyen_lieu_id' => $request->loai_nguyen_lieu_ids[$key], // Lấy thông tin loại nguyên liệu từ form
-                'don_vi_nhap' => $request->don_vi_nhaps[$key],
-                'don_vi_ton' => $request->don_vi_tons[$key], // Lưu đơn vị tồn vào chi tiết phiếu nhập kho
-                'so_luong_nhap' => $request->so_luong_nhaps[$key],
-                'he_so_quy_doi' => $request->he_so_quy_dois[$key],
-                'don_gia' => $request->don_gias[$key],
-                'thanh_tien' => $thanhTien, // Lưu thành tiền vào chi tiết phiếu nhập kho
-                'ngay_san_xuat' => $request->ngay_san_xuats[$key],
-                'han_su_dung' => $request->ngay_het_hans[$key],
-                'ghi_chu' => $request->ghi_chus[$key],
+        DB::beginTransaction();
+        try {
+            // 1. Tạo phiếu nhập kho
+            $phieuNhapKho = PhieuNhapKho::create([
+                'ma_phieu' => $request->ma_phieu,
+                'nha_cung_cap_id' => $request->nha_cung_cap_id,
+                'nhan_vien_id' => $request->nhan_vien_id,
+                'ngay_nhap' => now(),
+                'ghi_chu' => $request->ghi_chu,
+                'tong_tien' => 0,
+                'trang_thai' => 'cho_duyet',
             ]);
+    
+            $tongTien = 0;
+    
+            // 2. Duyệt qua từng dòng nguyên liệu nhập
+            foreach ($request->ten_nguyen_lieus as $index => $tenNguyenLieu) {
+                $tenNguyenLieu = trim($tenNguyenLieu);
+                $nguyenLieuId = $request->nguyen_lieu_ids[$index] ?? null;
+                $loaiId = $request->loai_nguyen_lieu_ids[$index];
+    
+                // Khởi tạo biến nguyên liệu
+                $nguyenLieu = null;
+    
+                // Nếu có ID nguyên liệu -> chọn từ danh sách
+                if (!empty($nguyenLieuId)) {
+                    $nguyenLieu = NguyenLieu::find($nguyenLieuId);
+                    if (!$nguyenLieu) {
+                        continue; // Nếu không tìm thấy thì bỏ qua dòng này
+                    }
+                } 
+                // Nếu không có ID -> kiểm tra tên hoặc tạo mới
+                elseif (!empty($tenNguyenLieu)) {
+                    $nguyenLieu = NguyenLieu::whereRaw('LOWER(ten_nguyen_lieu) = ?', [strtolower($tenNguyenLieu)])->first();
+    
+                    // Nếu chưa có thì tạo mới
+                    if (!$nguyenLieu) {
+                        $nguyenLieu = NguyenLieu::create([
+                            'ten_nguyen_lieu' => $tenNguyenLieu,
+                            'loai_nguyen_lieu_id' => $loaiId,
+                            'don_vi_nhap' => $request->don_vi_nhaps[$index],
+                            'don_vi_ton' => $request->don_vi_tons[$index],
+                            'he_so_quy_doi' => $request->he_so_quy_dois[$index],
+                        ]);
+                    }
+                } else {
+                    // Không có ID và cũng không có tên => bỏ qua
+                    continue;
+                }
+    
+                // Tính thành tiền
+                $soLuong = $request->so_luong_nhaps[$index];
+                $donGia = $request->don_gias[$index];
+                $thanhTien = $soLuong * $donGia;
+                $tongTien += $thanhTien;
+    
+                // Tạo chi tiết phiếu nhập
+                ChiTietPhieuNhapKho::create([
+                    'phieu_nhap_kho_id' => $phieuNhapKho->id,
+                    'nguyen_lieu_id' => $nguyenLieu->id,
+                    'loai_nguyen_lieu_id' => $loaiId,
+                    'ten_nguyen_lieu' => $nguyenLieu->ten_nguyen_lieu,
+                    'don_vi_nhap' => $request->don_vi_nhaps[$index],
+                    'don_vi_ton' => $request->don_vi_tons[$index],
+                    'so_luong_nhap' => $soLuong,
+                    'don_gia' => $donGia,
+                    'thanh_tien' => $thanhTien,
+                    'he_so_quy_doi' => $request->he_so_quy_dois[$index],
+                    'ngay_san_xuat' => $request->ngay_san_xuats[$index] ?? null,
+                    'han_su_dung' => $request->ngay_het_hans[$index] ?? null,
+                    'ghi_chu' => $request->ghi_chus[$index] ?? null,
+                ]);
+            }
+    
+            // 3. Cập nhật tổng tiền
+            $phieuNhapKho->update(['tong_tien' => $tongTien]);
+    
+            DB::commit();
+            return redirect()->route('phieu-nhap-kho.index')->with('success', 'Tạo phiếu nhập kho thành công!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Lỗi tạo phiếu nhập: ' . $e->getMessage()])->withInput();
         }
-
-        // Cập nhật tổng tiền cho phiếu nhập kho
-        $phieuNhapKho->update([
-            'tong_tien' => $tongTien
-        ]);
-
-        return redirect()->route('phieu-nhap-kho.index')->with('success', 'Thêm phiếu nhập kho thành công!');
     }
+    
+
+
 
 
     public function show(PhieuNhapKho $phieuNhapKho)
@@ -254,7 +299,6 @@ class PhieuNhapKhoController extends Controller
     {
         $phieu = PhieuNhapKho::with('chiTietPhieuNhaps')->findOrFail($id);
 
-        // Nếu phiếu đã huỷ thì không được duyệt nữa
         if ($phieu->trang_thai === 'da_huy') {
             return redirect()->back()->with('error', 'Phiếu đã bị hủy. Không thể duyệt.');
         }
@@ -266,20 +310,50 @@ class PhieuNhapKhoController extends Controller
         DB::beginTransaction();
         try {
             foreach ($phieu->chiTietPhieuNhaps as $chiTiet) {
-                $nguyenLieu = NguyenLieu::where('ten_nguyen_lieu', $chiTiet->ten_nguyen_lieu)->first();
+                $nguyenLieu = null;
+
+                // Ưu tiên dùng ID nguyên liệu nếu có
+                if (!empty($chiTiet->nguyen_lieu_id)) {
+                    $nguyenLieu = NguyenLieu::find($chiTiet->nguyen_lieu_id);
+                }
+
+                // Nếu không có ID thì tìm theo tên gần đúng
+                if (!$nguyenLieu) {
+                    $nguyenLieus = NguyenLieu::where('ten_nguyen_lieu', 'LIKE', '%' . $chiTiet->ten_nguyen_lieu . '%')->get();
+                    $highestSimilarity = 0;
+
+                    foreach ($nguyenLieus as $item) {
+                        similar_text(strtolower($chiTiet->ten_nguyen_lieu), strtolower($item->ten_nguyen_lieu), $percent);
+                        if ($percent > 80 && $percent > $highestSimilarity) {
+                            $nguyenLieu = $item;
+                            $highestSimilarity = $percent;
+                        }
+                    }
+                }
 
                 if ($nguyenLieu) {
                     // Cập nhật số lượng tồn
                     $nguyenLieu->so_luong_ton += $chiTiet->so_luong_nhap * $chiTiet->he_so_quy_doi;
+
+                    // Cập nhật đơn giá nếu có sự thay đổi
+                    if ($nguyenLieu->don_gia != $chiTiet->don_gia) {
+                        $nguyenLieu->don_gia = $chiTiet->don_gia;
+                    }
+
                     $nguyenLieu->save();
                 } else {
-                    // Tạo mới nguyên liệu
-                    NguyenLieu::create([
+                    // Tạo mới nguyên liệu nếu không tìm thấy
+                    $new = NguyenLieu::create([
                         'ten_nguyen_lieu' => $chiTiet->ten_nguyen_lieu,
                         'loai_nguyen_lieu_id' => $chiTiet->loai_nguyen_lieu_id,
                         'don_vi_ton' => $chiTiet->don_vi_ton,
+                        'don_gia' => $chiTiet->don_gia,
                         'so_luong_ton' => $chiTiet->so_luong_nhap * $chiTiet->he_so_quy_doi,
                     ]);
+
+                    // Gán lại ID vào chi tiết phiếu để đồng bộ
+                    $chiTiet->nguyen_lieu_id = $new->id;
+                    $chiTiet->save();
                 }
             }
 
@@ -294,6 +368,7 @@ class PhieuNhapKhoController extends Controller
         }
     }
 
+
     /**
      * Hủy phiếu nhập kho.
      */
@@ -301,29 +376,36 @@ class PhieuNhapKhoController extends Controller
     {
         $phieu = PhieuNhapKho::with('chiTietPhieuNhaps')->findOrFail($id);
 
-        // Nếu đã huỷ rồi thì không huỷ lại nữa
         if ($phieu->trang_thai === 'da_huy') {
             return redirect()->back()->with('error', 'Phiếu đã bị hủy.');
         }
 
         DB::beginTransaction();
         try {
-            // Nếu phiếu đã duyệt trước đó, cần rollback lại kho
+            // Nếu phiếu đã được duyệt, cập nhật lại số lượng tồn kho
+            // cho từng nguyên liệu trong chi tiết phiếu nhập
             if ($phieu->trang_thai === 'da_duyet') {
                 foreach ($phieu->chiTietPhieuNhaps as $chiTiet) {
-                    $nguyenLieu = NguyenLieu::where('ten_nguyen_lieu', $chiTiet->ten_nguyen_lieu)->first();
+                    $nguyenLieu = null;
+
+                    // Tìm nguyên liệu theo ID nếu có
+                    if (!empty($chiTiet->nguyen_lieu_id)) {
+                        $nguyenLieu = NguyenLieu::find($chiTiet->nguyen_lieu_id);
+                    }
+
+                    // Nếu không có thì thử tìm theo tên
+                    if (!$nguyenLieu) {
+                        $nguyenLieu = NguyenLieu::where('ten_nguyen_lieu', $chiTiet->ten_nguyen_lieu)->first();
+                    }
 
                     if ($nguyenLieu) {
                         $soLuongTru = $chiTiet->so_luong_nhap * $chiTiet->he_so_quy_doi;
-
-                        // Đảm bảo không trừ âm kho
                         $nguyenLieu->so_luong_ton = max(0, $nguyenLieu->so_luong_ton - $soLuongTru);
                         $nguyenLieu->save();
                     }
                 }
             }
 
-            // Cập nhật trạng thái phiếu là "đã huỷ"
             $phieu->trang_thai = 'da_huy';
             $phieu->save();
 
@@ -334,6 +416,7 @@ class PhieuNhapKhoController extends Controller
             return redirect()->back()->with('error', 'Lỗi khi huỷ phiếu: ' . $e->getMessage());
         }
     }
+
 
 
 
