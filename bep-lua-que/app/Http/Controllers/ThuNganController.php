@@ -329,17 +329,17 @@ class ThuNganController extends Controller
         $chiTietThanhToan = $request->input('chi_tiet_thanh_toan');
         $phuongThucThanhToan = $request->input('phuong_thuc_thanh_toan');
         $ma_hoa_don_ban = $request->input('ma_hoa_don_cua_ban');
-        $xoa_mon_cho = $request->input('xoa_mon_cho');
+        // $xoa_mon_cho = $request->input('xoa_mon_cho');
         if (!$banAnId) {
             return response()->json(['success' => false, 'message' => 'Bàn không hợp lệ.']);
         }
 
-        if (!is_array($xoa_mon_cho) || empty($xoa_mon_cho)) {
-            return response()->json(['success' => false, 'message' => 'Danh sách ID không hợp lệ']);
-        }
+        // if (!is_array($xoa_mon_cho) || empty($xoa_mon_cho)) {
+        //     return response()->json(['success' => false, 'message' => 'Danh sách ID không hợp lệ']);
+        // }
 
         // Xoá các món theo ID
-        ChiTietHoaDon::whereIn('id', $xoa_mon_cho)->forceDelete();
+        // ChiTietHoaDon::whereIn('id', $xoa_mon_cho)->forceDelete();
         // Tìm bàn theo ID
         $banAn = BanAn::find($banAnId);
         $hoaDonTheoMa = HoaDon::where('ma_hoa_don', $ma_hoa_don_ban)->first();
