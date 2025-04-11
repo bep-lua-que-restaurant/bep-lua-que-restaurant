@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\NhaCungCapExport;
+use App\Imports\NhaCungCapImport;
 use App\Models\NhaCungCap;
 use App\Http\Requests\StoreNhaCungCapRequest;
 use App\Http\Requests\UpdateNhaCungCapRequest;
@@ -16,23 +17,23 @@ class NhaCungCapController extends Controller
     {
         $query = NhaCungCap::query();
 
-        if ($request->has('ten_nha_cung_cap') && $request->ten_nha_cung_cap != '') {
-            $query->where('ten_nha_cung_cap', 'like', '%' . $request->ten_nha_cung_cap . '%');
-        }
-
-        $data = $query->withTrashed()->latest('id')->paginate(15);
+//        if ($request->has('ten_nha_cung_cap') && $request->ten_nha_cung_cap != '') {
+//            $query->where('ten_nha_cung_cap', 'like', '%' . $request->ten_nha_cung_cap . '%');
+//        }
+        $searchInputId = 'searchInput';
+        $data = $query->withTrashed()->latest('id')->paginate(10);
 
         if ($request->ajax()) {
             return response()->json([
-                'html' => view('admin.nhacungcap.body-list', compact('data'))->render(),
+                'html' => view('admin.nhacungcap.index', compact('data', 'searchInputId'))->render(),
             ]);
         }
 
-        return view('admin.nhacungcap.list', [
+        return view('admin.nhacungcap.index', [
             'data' => $data,
             'route' => route('nha-cung-cap.index'),
             'tableId' => 'list-container',
-            'searchInputId' => 'search-name',
+            'searchInputId' => 'searchInput',
         ]);
     }
 
@@ -54,18 +55,21 @@ class NhaCungCapController extends Controller
         return redirect()->route('nha-cung-cap.index')->with('success', 'Thêm nhà cung cấp thành công!');
     }
 
-    public function show(NhaCungCap $nhaCungCap)
+    public function show($id)
     {
+        $nhaCungCap = NhaCungCap::withTrashed()->findOrFail($id);
         return view('admin.nhacungcap.detail', compact('nhaCungCap'));
     }
 
-    public function edit(NhaCungCap $nhaCungCap)
+    public function edit($id)
     {
+        $nhaCungCap = NhaCungCap::withTrashed()->findOrFail($id);
         return view('admin.nhacungcap.edit', compact('nhaCungCap'));
     }
 
-    public function update(UpdateNhaCungCapRequest $request, NhaCungCap $nhaCungCap)
+    public function update(UpdateNhaCungCapRequest $request, $id)
     {
+        $nhaCungCap = NhaCungCap::withTrashed()->findOrFail($id);
         $data = $request->validated();
 
         if ($request->hasFile('hinhAnh')) {
@@ -103,7 +107,14 @@ class NhaCungCapController extends Controller
             'file' => 'required|mimes:xlsx,xls'
         ]);
 
-        Excel::import(new NhaCungCapImport, $request->file('file'));
+        $importer = new \App\Imports\NhaCungCapImport();
+        \Maatwebsite\Excel\Facades\Excel::import($importer, $request->file('file'));
+
+        if (!empty($importer->errors)) {
+            return back()
+                ->with('error', 'Lỗi dữ liệu bị trùng hoặc không hợp lệ.')
+                ->with('import_errors', $importer->errors);
+        }
 
         return back()->with('success', 'Nhập dữ liệu thành công!');
     }
