@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+{{-- @extends('layouts.admin')
 
 @section('content')
     <div class="container">
@@ -53,4 +53,103 @@
             </tbody>
         </table>
     </div>
-@endsection
+@endsection --}}
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Bảng Lương Nhân Viên</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        .employee-name {
+            text-align: left;
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+
+        .total {
+            font-weight: bold;
+            background-color: #f1f1f1;
+        }
+
+        .total-salary {
+            color: green;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>BẢNG LƯƠNG THÁNG 4/2025</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nhân viên</th>
+                <th>01</th>
+                <th>02</th>
+                <th>03</th>
+                <th>04</th>
+                <th>05</th>
+                <th>Tổng công</th>
+                <th>Lương / công</th>
+                <th>Tổng lương</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="employee-name">Nguyễn Văn A</td>
+                <td>1</td>
+                <td>1</td>
+                <td>1</td>
+                <td>0</td>
+                <td>1</td>
+                <td class="total">4</td>
+                <td class="total">300,000</td>
+                <td class="total total-salary">1,200,000</td>
+            </tr>
+            <tr>
+                <td class="employee-name">Trần Thị B</td>
+                <td>1</td>
+                <td>0</td>
+                <td>1</td>
+                <td>1</td>
+                <td>1</td>
+                <td class="total">4</td>
+                <td class="total">280,000</td>
+                <td class="total total-salary">1,120,000</td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+
+</html>

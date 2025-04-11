@@ -329,10 +329,17 @@ class ThuNganController extends Controller
         $chiTietThanhToan = $request->input('chi_tiet_thanh_toan');
         $phuongThucThanhToan = $request->input('phuong_thuc_thanh_toan');
         $ma_hoa_don_ban = $request->input('ma_hoa_don_cua_ban');
+        // $xoa_mon_cho = $request->input('xoa_mon_cho');
         if (!$banAnId) {
             return response()->json(['success' => false, 'message' => 'Bàn không hợp lệ.']);
         }
 
+        // if (!is_array($xoa_mon_cho) || empty($xoa_mon_cho)) {
+        //     return response()->json(['success' => false, 'message' => 'Danh sách ID không hợp lệ']);
+        // }
+
+        // Xoá các món theo ID
+        // ChiTietHoaDon::whereIn('id', $xoa_mon_cho)->forceDelete();
         // Tìm bàn theo ID
         $banAn = BanAn::find($banAnId);
         $hoaDonTheoMa = HoaDon::where('ma_hoa_don', $ma_hoa_don_ban)->first();
@@ -404,7 +411,6 @@ class ThuNganController extends Controller
 
         // $datBanList = DatBan::whereIn('ban_an_id', $dsBanCungHoaDon)->where('trang_thai', 'xac_nhan')->get();
         $updateDatBan = DatBan::where('ma_dat_ban', $maDatBans)->get();
-
 
         foreach ($updateDatBan as $datBan) {
             $datBan->update([
@@ -823,6 +829,7 @@ class ThuNganController extends Controller
 
         // lấy ra chi tiết hóa đơn
         $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)
+            ->where('trang_thai', '!=', 'cho_xac_nhan')
             ->with(['monAn:id,ten,gia'])
             ->get()
             ->map(function ($chiTiet) {
@@ -836,9 +843,24 @@ class ThuNganController extends Controller
                     'thanh_tien' => $chiTiet->thanh_tien,
                 ];
             });
+
+        // danh sách id món chờ xác nhận
+        $monAnChoXacNhan = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)
+            ->where('trang_thai', 'cho_xac_nhan')
+            ->with(['monAn:id,ten,gia'])
+            ->get()
+            ->map(function ($chiTiet) {
+                return [
+                    'id' => $chiTiet->id,
+                ];
+            });
+
+        $tongTien = $chiTietHoaDon->sum('thanh_tien');
         return response()->json([
             'data' => $maHoaDon,
             'chi_tiet_hoa_don' => $chiTietHoaDon,
+            'tong_tien' => $tongTien,
+            'mon_an_cho_xac_nhan' => $monAnChoXacNhan,
         ]);
     }
 
@@ -857,6 +879,26 @@ class ThuNganController extends Controller
             'chi_tiet' => $idChiTiet,
             'ghi_chu' => $ghiChu
 
+        ]);
+    }
+
+    public function taoQr($ma)
+    {
+        // Tìm hóa đơn theo mã hóa đơn chứ không phải id
+        $hoaDon = HoaDon::where('ma_hoa_don', $ma)->firstOrFail();
+
+        $bankCode = 'ICB'; // ngân hàng
+        $accountNumber = '104883178306';
+        $amount = $hoaDon->tong_tien;
+        $billCode = $hoaDon->ma_hoa_don;
+
+
+        $desc = urlencode("Thanh toan hoa don $billCode - BQL");
+        $qrUrl = "https://img.vietqr.io/image/{$bankCode}-{$accountNumber}-qr_only.png?amount={$amount}&addInfo={$desc}";
+
+        return response()->json([
+            'success' => true,
+            'qr_url' => $qrUrl
         ]);
     }
 }

@@ -36,20 +36,6 @@ class BepController extends Controller
     }
 
 
-
-    // public function themMonAnVaoBep(Request $request)
-    // {
-    //     $monAn = MonAn::create([
-    //         'ten' => $request->ten,
-    //         'so_luong' => $request->so_luong,
-    //         'hoa_don_id' => $request->hoa_don_id
-    //     ]);
-
-    //     broadcast(new MonMoiDuocThem($monAn));
-
-    //     return response()->json(['success' => true, 'monAn' => $monAn]);
-    // }
-
     public function themMonAnVaoBep(Request $request)
     {
         $monAns = [];

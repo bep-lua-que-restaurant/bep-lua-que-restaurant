@@ -307,6 +307,7 @@ $(document).ready(function () {
         let maHoaDon = maHoaDonElement.textContent;
         loadHoaDonThanhToan(maHoaDon);
     };
+    window.mon_an_cho_xac_nhan = [];
 
     function loadHoaDonThanhToan(maHoaDon) {
         $.ajax({
@@ -316,7 +317,9 @@ $(document).ready(function () {
                 maHoaDon: maHoaDon,
             },
             success: function (response) {
-                console.log(response);
+
+                window.mon_an_cho_xac_nhan = response.mon_an_cho_xac_nhan;
+                console.log(window.mon_an_cho_xac_nhan)
                 let hoaDonThanhToan = $("#hoa-don-thanh-toan-body");
 
                 hoaDonThanhToan.empty();
@@ -376,9 +379,9 @@ $(document).ready(function () {
                     hoaDonThanhToan.html(emptyRow);
                 }
 
-                $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
-                $(".so-nguoi").text(`👥 ${soNguoi}`);
-                $("#totalAmount").val(tongTien.toLocaleString() + " VND");
+                // $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
+                // $(".so-nguoi").text(`👥 ${soNguoi}`);
+                $("#tong_tien_hang").val(tongTien.toLocaleString() + " VND");
             },
             error: function (xhr) {
                 console.error(

@@ -1,121 +1,157 @@
-<table class="table table-bordered text-center table-hover">
-    <thead class="table-dark">
-        <tr>
-            <th style="background-color: #198754;">Ca làm việc</th>
-            {{-- <th style="background-color: #198754;">Ngày làm</th> --}}
-            <th style="background-color: #198754;">Nhân viên</th>
-            <th style="background-color: #198754;">Trạng thái</th>
-            <th style="background-color: #198754;">Hành động</th>
-        </tr>
-    <tbody>
-        @foreach ($caLams as $caLam)
-            @foreach ($dates as $date)
-                @php
-                    $nhanViens = $chamCongs->filter(
-                        fn($chamCong) => $chamCong->ca_lam_id == $caLam->id &&
-                            $chamCong->ngay_lam == $date->format('Y-m-d'),
-                    );
-                @endphp
-                @foreach ($nhanViens as $nhanVien)
-                    @php
-                        $daChamCong = collect($chamCongs)->contains(
-                            fn($chamCong) => $chamCong->nhan_vien_id == $nhanVien->nhan_vien_id &&
-                                $chamCong->ca_lam_id == $caLam->id &&
-                                $chamCong->ngay_cham_cong == $date->format('Y-m-d'),
-                        );
+    {{-- PHẦN CHẤM CÔNG NHANH --}}
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="dateSelect" class="form-label">📅 Ngày chấm công</label>
+            <input type="date" id="dateSelect" name="ngay_cham_cong_nhanh" class="form-control">
+        </div>
 
-                        $badgeClass = $nhanVien->deleted_at ? 'bg-danger' : ($daChamCong ? 'bg-success' : 'bg-warning');
-
-                        $statusText = $nhanVien->deleted_at
-                            ? 'Đã hủy'
-                            : ($daChamCong
-                                ? 'Đã chấm công'
-                                : 'Chưa chấm công');
-                    @endphp
-                    <tr>
-                        {{-- <td>{{ $nhanVien->ca_lam_nhan_vien_id }}</td> --}}
-                        <td class="align-middle fw-bold">
-                            {{ $caLam->ten_ca }} <br>
-                            <span class="small text-muted">({{ $caLam->gio_bat_dau }} -
-                                {{ $caLam->gio_ket_thuc }})</span>
-                        </td>
-                        {{-- <td class="align-middle">{{ $date->format('d/m/Y') }}</td> --}}
-                        <td class="align-middle">{{ $nhanVien->ten_nhan_vien }}</td>
-                        <td class="align-middle">
-                            <span class="badge {{ $badgeClass }} px-3 py-2">{{ $statusText }}</span>
-                        </td>
-                        <td class="align-middle">
-                            @if (!$nhanVien->deleted_at)
-                                @if (!$nhanVien->da_cham_cong)
-                                    {{-- Nếu chưa chấm công, hiển thị nút "Xác nhận" --}}
-                                    <form action="{{ route('chamcong.store') }}" method="POST" class="d-inline"
-                                        onsubmit="return confirmChamCong(event, '{{ $nhanVien->ca_lam_nhan_vien_id }}', '{{ $nhanVien->ten_nhan_vien }}')">
-                                        @csrf
-                                        <input type="hidden" name="ca_lam_nhan_vien_id"
-                                            value="{{ $nhanVien->ca_lam_nhan_vien_id }}">
-                                        <button type="submit" class="btn btn-primary btn-sm">
-                                            ✔ Xác nhận
-                                        </button>
-                                    </form>
-                                @else
-                                    {{-- Nếu đã chấm công, hiển thị nút "Hủy" --}}
-                                    <form action="{{ route('cham-cong.softDelete') }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <input type="hidden" name="nhan_vien_id"
-                                            value="{{ $nhanVien->nhan_vien_id }}">
-                                        <input type="hidden" name="ca_lam_id" value="{{ $nhanVien->ca_lam_id }}">
-                                        <input type="hidden" name="ngay_cham_cong"
-                                            value="{{ $nhanVien->ngay_cham_cong }}">
-                                        <button type="submit"
-                                            onclick="return confirm('Bạn muốn hủy chấm công nhân viên này chứ?')"
-                                            class="btn btn-danger btn-sm">
-                                            ✖ Hủy
-                                        </button>
-                                    </form>
-                                @endif
-                            @endif
-
-                            @if ($nhanVien->deleted_at)
-                                {{-- Nếu đã bị xóa mềm, hiển thị nút "Khôi phục" --}}
-                                <form action="{{ route('cham-cong.restore') }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <input type="hidden" name="nhan_vien_id" value="{{ $nhanVien->nhan_vien_id }}">
-                                    <input type="hidden" name="ca_lam_id" value="{{ $nhanVien->ca_lam_id }}">
-                                    <input type="hidden" name="ngay_cham_cong"
-                                        value="{{ $nhanVien->ngay_cham_cong }}">
-                                    <button type="submit"
-                                        onclick="return confirm('Bạn có chắc muốn khôi phục chấm công này không?')"
-                                        class="btn btn-success btn-sm">
-                                        <i class="fas fa-undo-alt"></i> Khôi phục
-                                    </button>
-                                </form>
-                            @endif
-
-
-                        </td>
-
-                    </tr>
+        <div class="col-md-6">
+            <label for="shiftSelect" class="form-label">🕐 Ca làm</label>
+            <select id="shiftSelect" name="ca_lam_id_nhanh" class="form-control">
+                <option value="">-- Chọn ca làm --</option>
+                @foreach ($caLams as $caLam)
+                    <option value="{{ $caLam->id }}">{{ $caLam->ten_ca }}</option>
                 @endforeach
+            </select>
+        </div>
+    </div>
+
+
+    <div class="mb-3">
+        <label class="form-label">👥 Chọn nhân viên</label>
+        <input type="text" id="searchEmployees" class="form-control mb-3" placeholder="Tìm nhân viên...">
+
+        <div id="employeeList" class="border rounded p-3" style="max-height: 100px; overflow-y: auto;">
+            <!-- Giảm max-height xuống -->
+            <div class="row g-3">
+                @foreach ($nhanViens as $nhanVien)
+                    <div class="col-4 d-flex align-items-center">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="nhan_vien_ids_nhanh[]"
+                                value="{{ $nhanVien->id }}" id="nhanVien{{ $nhanVien->id }}">
+                            <label class="form-check-label" for="nhanVien{{ $nhanVien->id }}">
+                                {{ $nhanVien->ho_ten }}
+                            </label>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    {{-- PHẦN CHẤM CÔNG LẺ --}}
+    <table class="min-w-full text-center">
+        {{-- <thead>
+
+        </thead> --}}
+        <tbody id="chamcongTable">
+            <tr>
+                <th class="px-4 py-3 border-end text-left">Nhân Viên</th>
+                @foreach ($dates as $date)
+                    <th class="px-3 py-3 border-end text-center">
+                        <span class="d-block fs-5">{{ $date->day }}</span>
+                        <span class="text-muted small">{{ $date->locale('vi')->isoFormat('dd') }}</span>
+                    </th>
+                @endforeach
+            </tr>
+            @foreach ($nhanViens as $nhanVien)
+                <tr>
+                    <td class="px-4 py-2 border text-left">{{ $nhanVien->ho_ten }}</td>
+                    @foreach ($dates as $date)
+                        @php
+                            $chamCongForDay = $chamCongs->filter(function ($chamCong) use ($nhanVien, $date) {
+                                return $chamCong->nhan_vien_id == $nhanVien->id &&
+                                    $chamCong->ngay_cham_cong == $date->format('Y-m-d');
+                            });
+
+                            $isCaSangChecked = $chamCongForDay->contains('ca_lam_id', 1);
+                            $isCaChieuChecked = $chamCongForDay->contains('ca_lam_id', 2);
+                            $isCaToiChecked = $chamCongForDay->contains('ca_lam_id', 3);
+                            $isDisabled = !$date->equalTo(\Carbon\Carbon::today());
+
+                        @endphp
+                        <td class="relative px-2 py-2 border">
+                            <div class="flex justify-between gap-4">
+                                <label class="flex items-center gap-1 text-sm font-medium">
+                                    <input type="hidden"
+                                        name="ca_lam[{{ $nhanVien->id }}][{{ $date->format('Y-m-d') }}][ca_sang]"
+                                        value="0">
+                                    <input type="checkbox"
+                                        name="ca_lam[{{ $nhanVien->id }}][{{ $date->format('Y-m-d') }}][ca_sang]"
+                                        value="1" {{ $isCaSangChecked ? 'checked' : '' }}
+                                        {{ $isDisabled ? 'disabled' : '' }}>
+                                    <span>S</span>
+                                </label>
+                                <label class="flex items-center gap-1 text-sm font-medium">
+                                    <input type="hidden"
+                                        name="ca_lam[{{ $nhanVien->id }}][{{ $date->format('Y-m-d') }}][ca_chieu]"
+                                        value="0">
+                                    <input type="checkbox"
+                                        name="ca_lam[{{ $nhanVien->id }}][{{ $date->format('Y-m-d') }}][ca_chieu]"
+                                        value="1" {{ $isCaChieuChecked ? 'checked' : '' }}
+                                        {{ $isDisabled ? 'disabled' : '' }}>
+                                    <span>C</span>
+                                </label>
+                                <label class="flex items-center gap-1 text-sm font-medium">
+                                    <input type="hidden"
+                                        name="ca_lam[{{ $nhanVien->id }}][{{ $date->format('Y-m-d') }}][ca_toi]"
+                                        value="0">
+                                    <input type="checkbox"
+                                        name="ca_lam[{{ $nhanVien->id }}][{{ $date->format('Y-m-d') }}][ca_toi]"
+                                        value="1" {{ $isCaToiChecked ? 'checked' : '' }}
+                                        {{ $isDisabled ? 'disabled' : '' }}>
+                                    <span>T</span>
+                                </label>
+                            </div>
+
+                        </td>
+                    @endforeach
+                </tr>
             @endforeach
-        @endforeach
-    </tbody>
-</table>
-</table>
+        </tbody>
+    </table>
+    <script>
+        const searchInput = document.getElementById('searchEmployees');
+        const employeeList = document.querySelector('#employeeList .row');
+        const originalItems = Array.from(employeeList.querySelectorAll('.col-4')); // 👈 Lưu lại danh sách ban đầu
 
-<!-- Thêm phân trang -->
-{{-- <div class="d-flex justify-content-center mt-3">
-    {{ $chamCongs->links() }}
-</div> --}}
+        searchInput.addEventListener('input', function() {
+            let keyword = this.value.toLowerCase();
+            let items = Array.from(originalItems); // lấy theo thứ tự ban đầu
 
-<script>
-    function confirmChamCong(event, caLamNhanVienId, nhanVien) {
-        event.preventDefault();
-        let message =
-            `Xác nhận chấm công cho:\n\n👤 Nhân viên: ${nhanVien}\n\n\nBạn có chắc không?`;
+            if (keyword === '') {
+                // Nếu không nhập gì, reset về danh sách gốc
+                employeeList.innerHTML = '';
+                items.forEach(function(item) {
+                    item.style.display = 'flex'; // hiện tất cả
+                    employeeList.appendChild(item);
+                });
+            } else {
+                let matchedItems = [];
 
-        if (confirm(message)) {
-            event.target.submit();
+                items.forEach(function(item) {
+                    let text = item.innerText.toLowerCase();
+                    if (text.includes(keyword)) {
+                        item.style.display = 'flex';
+                        matchedItems.push(item);
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                employeeList.innerHTML = '';
+                matchedItems.forEach(function(item) {
+                    employeeList.appendChild(item);
+                });
+            }
+        });
+    </script>
+
+
+    <style>
+        #employeeList .employee-item {
+            width: calc(33.33% - 10px);
+            /* 3 người 1 dòng */
+            min-width: 200px;
         }
-    }
-</script>
+    </style>
