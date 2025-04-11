@@ -50,6 +50,50 @@
                 <canvas id="thongKeChart" height="100"></canvas>
             </div>
         </div>
+
+        <div class="row mt-4">
+            <!-- So sánh Doanh Thu -->
+            <div class="col-md-4">
+                <div class="card h-90">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">So Sánh Doanh Thu</h5>
+                        <div class="text-center mt-4">
+                            <h6>Năm nay với Năm trước</h6>
+                            <canvas id="bieuDoTronDoanhThuNam" style="max-width: 250px; max-height: 250px; margin: auto;"></canvas>
+                            <p class="fw-bold" id="phanTramChenhLechDoanhThu"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- So sánh Số Lượng Hóa Đơn -->
+            <div class="col-md-4">
+                <div class="card h-90">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">So Sánh Số Lượng Hóa Đơn</h5>
+                        <div class="text-center mt-4">
+                            <h6>Năm nay với Năm trước</h6>
+                            <canvas id="bieuDoTronHoaDonNam" style="max-width: 250px; max-height: 250px; margin: auto;"></canvas>
+                            <p class="fw-bold" id="phanTramChenhLechHoaDon"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-90">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">So Sánh Số Lượng Khách Hàng</h5>
+                        <div class="text-center mt-4">
+                            <h6>Năm nay với Năm trước</h6>
+                            <canvas id="bieuDoTronSoLuongKhachHangNam" style="max-width: 250px; max-height: 250px; margin: auto;"></canvas>
+                            <p class="fw-bold" id="phanTramChenhLechSoLuongKhachHang"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
     <!-- Nhúng Chart.js -->
@@ -61,7 +105,7 @@
             let chart;
             let isFirstLoad = true; // Đánh dấu lần load đầu tiên
 
-            function updateChart(labels, data) {
+            function capNhatBieuDo(labels, data) {
                 if (chart) {
                     chart.destroy();
                 }
@@ -93,7 +137,7 @@
                 isFirstLoad = false;
             }
 
-            function loadTodayStats() {
+            function soLieuThongKe() {
                 $.ajax({
                     url: "{{ route('dashboard') }}",
                     method: 'GET',
@@ -107,14 +151,20 @@
                         $('#donDangPhucVuHomNay').text(response.donDangPhucVuHomNay);
                         $('#donPhucVuHomQua').text(response.donPhucVuHomQua);
 
-                        updateChart(response.labels, response.data);
+                        capNhatBieuDo(response.labels, response.data);
+                        capNhatBieuDoTronDoanhThu(response.doanhThuNamNay, response.doanhThuNamTruoc);
+                        capNhatBieuDoTronSoLuongHoaDon(response.soLuongHoaDonNamNay, response.soLuongHoaDonNamTruoc);
+                        capNhatBieuDoTronSoLuongKhach(response.khachNamNay, response.khachNamTruoc)
                     }
                 });
             }
 
             // Gọi AJAX ban đầu và sau mỗi 5 phút
-            loadTodayStats();
-            setInterval(loadTodayStats, 300000);
+            soLieuThongKe();
+            setInterval(soLieuThongKe, 300000);
         });
     </script>
+    <script src="{{ asset('admin/js/bieu-do-tron-doanh-thu.js') }}"></script>
+    <script src="{{ asset('admin/js/bieu-do-tron-so-luong-hoa-don.js') }}"></script>
+    <script src="{{ asset('admin/js/bieu-do-tron-so-luong-khach.js') }}"></script>
 @endsection
