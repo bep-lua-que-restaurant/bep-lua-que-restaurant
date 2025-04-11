@@ -9,9 +9,12 @@ class CongThucMonAn extends Model
 {
     use HasFactory;
 
-    protected $table = 'cong_thuc';
-
-    protected $fillable = ['mon_an_id', 'nguyen_lieu_id', 'so_luong', 'don_vi_tinh'];
+    protected $fillable = [
+        'mon_an_id',
+        'nguyen_lieu_id',
+        'so_luong',
+        'don_vi',
+    ];
 
     public function monAn()
     {
@@ -23,4 +26,5 @@ class CongThucMonAn extends Model
         return $this->belongsTo(NguyenLieu::class, 'nguyen_lieu_id');
     }
 }
+
 
