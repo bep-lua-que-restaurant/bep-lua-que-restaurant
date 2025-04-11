@@ -18,7 +18,7 @@ class MonAnExport implements FromCollection, WithHeadings, WithMapping, WithEven
     {
         return MonAn::withTrashed()
             ->with('danhMuc') // Eager load danh mục
-            ->select('id', 'danh_muc_mon_an_id', 'ten', 'mo_ta', 'gia', 'trang_thai', 'created_at', 'deleted_at')
+            ->select('id', 'danh_muc_mon_an_id', 'ten', 'mo_ta', 'gia', 'trang_thai', 'created_at', 'deleted_at','thoi_gian_nau')
             ->get();
     }
 
@@ -26,7 +26,7 @@ class MonAnExport implements FromCollection, WithHeadings, WithMapping, WithEven
     {
         return [
             ['Món ăn'],
-            ['ID', 'Danh mục món', 'Tên món', 'Mô tả', 'Giá', 'Trạng thái', 'Ngày tạo', 'Tình trạng']
+            ['ID', 'Danh mục món', 'Tên món', 'Mô tả', 'Giá', 'Trạng thái', 'Ngày tạo', 'Tình trạng','Thời gian nấu']
         ];
     }
 
@@ -39,8 +39,9 @@ class MonAnExport implements FromCollection, WithHeadings, WithMapping, WithEven
             'Mô Tả' => $row->mo_ta,
             'Giá' => number_format($row->gia, 0, ',', '.') . ' đ',
             'Trạng Thái' => ucfirst(str_replace('_', ' ', $row->trang_thai)),
-            'Ngày Tạo' => $row->created_at ? $row->created_at->format('d/m/Y') : 'N/A',
+            'Ngày Tạo' => $row->created_at ? $row->created_at->format('d/m/Y') : 'Không có',
             'Trạng Thái Kinh Doanh' => $row->deleted_at ? 'Ngừng kinh doanh' : 'Đang kinh doanh',
+            'Thời gian nấu' => $row->thoi_gian_nau ,
         ];
     }
     
