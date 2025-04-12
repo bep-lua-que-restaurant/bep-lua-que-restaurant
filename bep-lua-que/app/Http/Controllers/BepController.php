@@ -60,64 +60,71 @@ class BepController extends Controller
         $request->validate([
             'trang_thai' => 'required|in:cho_che_bien,dang_nau,hoan_thanh'
         ]);
-
-        // Tìm bản ghi ChiTietHoaDon với các quan hệ
-        $mon = ChiTietHoaDon::with(['monAn', 'hoaDon.hoaDonBan.banAn'])
-            ->find($id);
-
+    
+        $mon = ChiTietHoaDon::with(['monAn', 'hoaDon.hoaDonBan.banAn'])->find($id);
+    
         if (!$mon) {
             return response()->json(['success' => false, 'message' => 'Không tìm thấy món ăn.'], 404);
         }
-
-        $thoiGianNau = $mon->monAn ? $mon->monAn->thoi_gian_nau : 0; // Thời gian nấu, giả sử là tính bằng phút
-
-        // Kiểm tra trạng thái hiện tại và cập nhật theo logic yêu cầu
-        switch ($mon->trang_thai) {
+    
+        $trangThaiHienTai = $mon->trang_thai;
+        $thoiGianNau = $mon->monAn ? $mon->monAn->thoi_gian_nau : 0;
+    
+        switch ($trangThaiHienTai) {
             case 'cho_che_bien':
-                // Nếu trạng thái hiện tại là 'chờ chế biến', đổi thành 'đang nấu'
                 $trangThaiMoi = 'dang_nau';
                 $mon->thoi_gian_bat_dau_nau = now();
-
-                $thoiGianBatDau = now();
-                $thoiGianHoanThanh = $thoiGianBatDau->addMinutes($thoiGianNau); // Thời gian hoàn thành
-
-                // Cập nhật thời gian dự kiến hoàn thành
-                $mon->thoi_gian_hoan_thanh_du_kien = $thoiGianHoanThanh;
+                $mon->thoi_gian_hoan_thanh_du_kien = now()->addMinutes($thoiGianNau);
                 break;
-
+    
             case 'dang_nau':
-                // Nếu trạng thái hiện tại là 'đang nấu', đổi thành 'hoàn thành'
                 $trangThaiMoi = 'hoan_thanh';
-
-                // Lưu thời gian hoàn thành thực tế
-                $mon->thoi_gian_hoan_thanh_thuc_te = now(); // Lưu thời gian hoàn thành thực tế
+                $mon->thoi_gian_hoan_thanh_thuc_te = now();
                 break;
-
+    
             default:
-                // Nếu trạng thái hiện tại là 'hoàn thành' hoặc không hợp lệ, không thay đổi
                 return response()->json(['success' => false, 'message' => 'Không thể thay đổi trạng thái món ăn này.'], 400);
         }
-
-        // Cập nhật trạng thái mới
-        $mon->trang_thai = $trangThaiMoi;
-        $mon->updated_at = now();
-        $mon->save();
-
-        // Gửi sự kiện
-        event(new TrangThaiCapNhat($mon));
-
-        // Lấy tên món và tên bàn
-        $tenMon = $mon->monAn ? $mon->monAn->ten_mon : 'Không xác định'; // Tên món
-        $tenBan = $mon->hoaDon && $mon->hoaDon->hoaDonBan && $mon->hoaDon->hoaDonBan->banAn
-            ? $mon->hoaDon->hoaDonBan->banAn->ten_ban
-            : 'Không xác định'; // Tên bàn
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Cập nhật trạng thái thành công.',
-            'mon' => $mon,
-            'ten_mon' => $tenMon,
-            'ten_ban' => $tenBan
-        ]);
+    
+        // 🔍 Tìm bản ghi trùng để gộp (cùng món, cùng hóa đơn, cùng trạng thái mới)
+        $monTrung = ChiTietHoaDon::where('id', '!=', $mon->id)
+            ->where('hoa_don_id', $mon->hoa_don_id)
+            ->where('mon_an_id', $mon->mon_an_id)
+            ->where('trang_thai', $trangThaiMoi)
+            ->first();
+    
+        if ($monTrung) {
+            // Gộp số lượng vào món trùng
+            $monTrung->so_luong += $mon->so_luong;
+            $monTrung->save();
+    
+            // Xoá món hiện tại vì đã gộp
+            $mon->forceDelete();
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Món ăn đã được gộp vào món cùng trạng thái.',
+                'mon' => $monTrung,
+                'ten_mon' => $monTrung->monAn->ten_mon ?? 'Không xác định',
+                'ten_ban' => $monTrung->hoaDon->hoaDonBan->banAn->ten_ban ?? 'Không xác định'
+            ]);
+        } else {
+            // Không có món trùng, cập nhật trạng thái như thường
+            $mon->trang_thai = $trangThaiMoi;
+            $mon->updated_at = now();
+            $mon->save();
+    
+            // Gửi event nếu cần
+            event(new TrangThaiCapNhat($mon));
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật trạng thái thành công.',
+                'mon' => $mon,
+                'ten_mon' => $mon->monAn->ten_mon ?? 'Không xác định',
+                'ten_ban' => $mon->hoaDon->hoaDonBan->banAn->ten_ban ?? 'Không xác định'
+            ]);
+        }
     }
+    
 }

@@ -317,9 +317,19 @@ $(document).ready(function () {
                 maHoaDon: maHoaDon,
             },
             success: function (response) {
+                if (
+                    response.chi_tiet_hoa_don == null ||
+                    response.chi_tiet_hoa_don.length == 0
+                ) {
+                    alert("Không có món nào trong hóa đơn này!");
+                    return;
+                }
 
+                let offcanvas = new bootstrap.Offcanvas(
+                    document.getElementById("offcanvasRight")
+                );
+                offcanvas.show();
                 window.mon_an_cho_xac_nhan = response.mon_an_cho_xac_nhan;
-                console.log(window.mon_an_cho_xac_nhan)
                 let hoaDonThanhToan = $("#hoa-don-thanh-toan-body");
 
                 hoaDonThanhToan.empty();
@@ -411,3 +421,5 @@ window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (data) => {
         }
     }
 });
+
+
