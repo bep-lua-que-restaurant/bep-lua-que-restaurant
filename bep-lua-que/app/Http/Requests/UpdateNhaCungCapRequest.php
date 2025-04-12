@@ -30,8 +30,23 @@ class UpdateNhaCungCapRequest extends FormRequest
                 'max:255',
                 Rule::unique('nha_cung_caps')->ignore($id)
             ],
-            'moTa' => 'nullable|string',
+            'dia_chi' => 'nullable|string',
+//            'so_dien_thoai' => ['required', 'unique:nha_cung_caps', 'regex:/^(0|\+84)[0-9]{9}$/'],
+            'so_dien_thoai' => [
+                'required',
+                'regex:/^(0|\+84)[0-9]{9}$/',
+                Rule::unique('nha_cung_caps')->ignore($id)
+            ],
+//            'email' => ['required', 'unique:nha_cung_caps', 'email', 'max:255'],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('nha_cung_caps')->ignore($id)
+            ],
+            'ghi_chu' => 'nullable|string',
             'hinhAnh' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'moTa' => ['string','nullable'],
         ];
     }
 
@@ -39,13 +54,17 @@ class UpdateNhaCungCapRequest extends FormRequest
     {
         return [
             'ten_nha_cung_cap.required' => 'Tên nhà cung cấp không được để trống',
+            'ten_nha_cung_cap.unique' => 'Tên nhà cung cấp đã tồn tại',
             'ten_nha_cung_cap.string' => 'Tên nhà cung cấp phải là chuỗi',
             'ten_nha_cung_cap.max' => 'Tên nhà cung cấp không được quá 255 ký tự',
-            'ten_nha_cung_cap.unique' => 'Tên nhà cung cấp đã tồn tại',
+            'so_dien_thoai.required' => 'Số điện thoại không được để trống',
+            'so_dien_thoai.unique' => 'Số điện thoại đã tồn tại đã tồn tại',
+            'so_dien_thoai.regex' => 'Số điện thoại không đúng định dạng. Ví dụ: 0912345678 hoặc +84912345678',
+            'email.required' => 'Email không được để trống',
+            'email.unique' => 'Email đã tồn tại',
             'moTa.string' => 'Mô tả phải là chuỗi',
             'hinhAnh.image' => 'Hình ảnh phải là ảnh',
-            'hinhAnh.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg, gif, svg',
-            'hinhAnh.max' => 'Hình ảnh không được quá 2048 KB',
+            'hinhAnh.max' => 'Hình ảnh không được quá 2048 KB'
         ];
     }
 }
