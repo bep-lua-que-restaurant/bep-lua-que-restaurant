@@ -49,4 +49,9 @@ class MonAn extends Model
             ->limit($limit)
             ->get(['id', 'ten_mon_an']);
     }
+    public function congThuc()
+    {
+        return $this->hasMany(CongThucMonAn::class, 'mon_an_id');
+    }
+    
 }

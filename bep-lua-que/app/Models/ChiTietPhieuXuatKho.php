@@ -36,6 +36,11 @@ class ChiTietPhieuXuatKho extends Model
      */
     public function nguyenLieu()
     {
-        return $this->belongsTo(NguyenLieu::class, 'nguyen_lieu_id', 'id');
+        return $this->belongsTo(NguyenLieu::class, 'nguyen_lieu_id');
+    }
+
+    public function loaiNguyenLieu()
+    {
+        return $this->belongsTo(LoaiNguyenLieu::class, 'loai_nguyen_lieu_id');
     }
 }

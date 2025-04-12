@@ -14,45 +14,63 @@ use App\Http\Requests\UpdateMonAnRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use Yajra\DataTables\DataTables;
 
 class MonAnController extends Controller
 {
+
+
     public function index(Request $request)
     {
-        $query = MonAn::with(['danhMuc', 'hinhAnhs'])->withTrashed();
-
-        $query->whereHas('danhMuc', function ($q) {
-            $q->whereNull('deleted_at');
-        });
-
-        if ($request->has('ten') && $request->ten != '') {
-            $query->where('ten', 'like', '%' . $request->ten . '%');
-        }
-
-        if ($request->has('statusFilter') && $request->statusFilter != '') {
-            if ($request->statusFilter == 'Đang kinh doanh') {
-                $query->whereNull('deleted_at');
-            } elseif ($request->statusFilter == 'Ngừng kinh doanh') {
-                $query->whereNotNull('deleted_at');
-            }
-        }
-
-        $data = $query->withTrashed()->latest('id')->paginate(10);
-
         if ($request->ajax()) {
-            return response()->json([
-                'html' => view('admin.monan.body-list', compact('data'))->render(),
-            ]);
+            $query = MonAn::with(['danhMuc'])->withTrashed();
+    
+            return DataTables::of($query)
+                ->addIndexColumn()
+                ->addColumn('trang_thai', function ($row) {
+                    return $row->deleted_at
+                        ? '<div class="d-flex align-items-center"><i class="fa fa-circle text-danger mr-1"></i> Ngừng bán</div>'
+                        : '<div class="d-flex align-items-center"><i class="fa fa-circle text-success mr-1"></i> Đang bán</div>';
+                })
+                ->addColumn('danh_muc', function ($row) {
+                    return $row->danhMuc ? $row->danhMuc->ten : 'Không có';
+                })
+                ->addColumn('gia', function ($row) {
+                    return number_format($row->gia, 0, ',', '.');
+                })
+                ->addColumn('action', function ($row) {
+                    $html = '<div class="d-flex align-items-center">';
+    
+                    $html .= '<a href="' . route('mon-an.show', $row->id) . '" class="btn btn-info btn-sm p-2 m-2" title="Xem chi tiết"><i class="fa fa-eye"></i></a>';
+                    $html .= '<a href="' . route('mon-an.edit', $row->id) . '" class="btn btn-warning btn-sm p-2 m-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>';
+    
+                    if ($row->deleted_at) {
+                        $html .= '<form action="' . route('mon-an.restore', $row->id) . '" method="POST" style="display:inline;">'
+                            . csrf_field()
+                            . '<button type="submit" class="btn btn-success btn-sm p-2 m-2" title="Khôi phục"><i class="fa fa-recycle"></i></button>'
+                            . '</form>';
+                    } else {
+                        $html .= '<form action="' . route('mon-an.destroy', $row->id) . '" method="POST" style="display:inline;">'
+                            . csrf_field()
+                            . method_field('DELETE')
+                            . '<button type="submit" class="btn btn-danger btn-sm p-2 m-2" title="Xóa"><i class="fa fa-trash"></i></button>'
+                            . '</form>';
+                    }
+    
+                    $html .= '</div>';
+                    return $html;
+                })
+                ->rawColumns(['trang_thai', 'action'])
+                ->make(true);
         }
-
+    
         return view('admin.monan.list', [
-            'data' => $data,
             'route' => route('mon-an.index'),
             'tableId' => 'list-container',
             'searchInputId' => 'search-name',
         ]);
     }
-
+    
     public function create()
     {
         $danhMucs = DanhMucMonAn::whereNull('deleted_at')->get();

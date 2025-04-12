@@ -63,51 +63,33 @@
                                 return $chamCong->nhan_vien_id == $nhanVien->id &&
                                     $chamCong->ngay_cham_cong == $date->format('Y-m-d');
                             });
-
-                            $isCaSangChecked = $chamCongForDay->contains('ca_lam_id', 1);
-                            $isCaChieuChecked = $chamCongForDay->contains('ca_lam_id', 2);
-                            $isCaToiChecked = $chamCongForDay->contains('ca_lam_id', 3);
-                            $isDisabled = !$date->equalTo(\Carbon\Carbon::today());
-
                         @endphp
                         <td class="relative px-2 py-2 border">
                             <div class="flex justify-between gap-4">
-                                <label class="flex items-center gap-1 text-sm font-medium">
-                                    <input type="hidden"
-                                        name="ca_lam[{{ $nhanVien->id }}][{{ $date->format('Y-m-d') }}][ca_sang]"
-                                        value="0">
-                                    <input type="checkbox"
-                                        name="ca_lam[{{ $nhanVien->id }}][{{ $date->format('Y-m-d') }}][ca_sang]"
-                                        value="1" {{ $isCaSangChecked ? 'checked' : '' }}
-                                        {{ $isDisabled ? 'disabled' : '' }}>
-                                    <span>S</span>
-                                </label>
-                                <label class="flex items-center gap-1 text-sm font-medium">
-                                    <input type="hidden"
-                                        name="ca_lam[{{ $nhanVien->id }}][{{ $date->format('Y-m-d') }}][ca_chieu]"
-                                        value="0">
-                                    <input type="checkbox"
-                                        name="ca_lam[{{ $nhanVien->id }}][{{ $date->format('Y-m-d') }}][ca_chieu]"
-                                        value="1" {{ $isCaChieuChecked ? 'checked' : '' }}
-                                        {{ $isDisabled ? 'disabled' : '' }}>
-                                    <span>C</span>
-                                </label>
-                                <label class="flex items-center gap-1 text-sm font-medium">
-                                    <input type="hidden"
-                                        name="ca_lam[{{ $nhanVien->id }}][{{ $date->format('Y-m-d') }}][ca_toi]"
-                                        value="0">
-                                    <input type="checkbox"
-                                        name="ca_lam[{{ $nhanVien->id }}][{{ $date->format('Y-m-d') }}][ca_toi]"
-                                        value="1" {{ $isCaToiChecked ? 'checked' : '' }}
-                                        {{ $isDisabled ? 'disabled' : '' }}>
-                                    <span>T</span>
-                                </label>
-                            </div>
+                                @foreach ($caLams as $caLam)
+                                    @php
+                                        $caKey = Str::slug($caLam->ten_ca, '_'); // ví dụ: "Ca Sáng" => "ca_sang"
+                                    @endphp
+                                    <label class="flex items-center gap-2 text-sm font-medium inline-flex">
+                                        <input type="hidden"
+                                            name="ca_lam[{{ $nhanVien->id }}][{{ $date->format('Y-m-d') }}][{{ $caKey }}]"
+                                            value="0">
+                                        <input type="checkbox"
+                                            name="ca_lam[{{ $nhanVien->id }}][{{ $date->format('Y-m-d') }}][{{ $caKey }}]"
+                                            value="1"
+                                            {{ $chamCongForDay->contains('ca_lam_id', $caLam->id) ? 'checked' : '' }}
+                                            {{ $date->isToday() ? '' : 'disabled' }}>
+                                        <span>{{ $caLam->ten_ca }}</span>
+                                    </label>
+                                @endforeach
 
+
+                            </div>
                         </td>
                     @endforeach
                 </tr>
             @endforeach
+
         </tbody>
     </table>
     <script>
