@@ -172,7 +172,13 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/nha_cung_cap/import', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha_cung_cap.import');
 
+    // Route::post('/nha_cung_cap/import', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha_cung_cap.import');
+
+
     // Phong an
+    Route::get('/ban-an', [BanAnController::class, 'index'])->name('ban-an.index');
+    Route::get('/ban-an/fetch', [BanAnController::class, 'fetchData'])->name('ban-an.fetch');
+
     // Route::resource('phong-an', PhongAnController::class);
     // Route::post('/phong-an/{banAn}/restore', [PhongAnController::class, 'restore'])->name('phong-an.restore');
     Route::get('ban-an/them-nhanh', [BanAnController::class, 'them'])->name('ban-an.themNhanh');
