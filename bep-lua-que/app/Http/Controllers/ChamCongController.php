@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 use App\Models\NhanVien; // Đảm bảo import model NhanVien
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
-
+use Illuminate\Support\Str;
 
 class ChamCongController extends Controller
 {
@@ -139,51 +139,45 @@ class ChamCongController extends Controller
             }
         }
     
-        // ========== CHẤM CÔNG LẺ ========== 
         $isEditMode = $request->has('is_edit_mode') && $request->input('is_edit_mode') == 1;
-        $caLamData = $request->input('ca_lam');
-    
-        if ($caLamData && is_array($caLamData) && count($caLamData) > 0) {
-            $caSang = DB::table('ca_lams')->where('ten_ca', 'Ca Sáng')->first();
-            $caChieu = DB::table('ca_lams')->where('ten_ca', 'Ca Chiều')->first();
-            $caToi = DB::table('ca_lams')->where('ten_ca', 'Ca Tối')->first();
-    
-            foreach ($caLamData as $nhanVienId => $dates) {
-                foreach ($dates as $date => $ca) {
-                    if (Carbon::parse($date)->gt(Carbon::now()->startOfDay())) {
-                        continue;
+$caLamData = $request->input('ca_lam');
+
+if ($caLamData && is_array($caLamData) && count($caLamData) > 0) {
+    $danhSachCaLams = DB::table('ca_lams')->get(); // Lấy tất cả các ca
+    $today = Carbon::now()->toDateString();
+
+    foreach ($caLamData as $nhanVienId => $dates) {
+        foreach ($dates as $date => $caArray) {
+            if ($date != $today) {
+                continue;
+            }
+
+            foreach ($danhSachCaLams as $caLam) {
+                $caKey = Str::slug($caLam->ten_ca, '_'); // Đồng bộ với Blade
+                $checked = !empty($caArray[$caKey] ?? null);
+
+                $existingChamCong = ChamCong::where('nhan_vien_id', $nhanVienId)
+                    ->where('ngay_cham_cong', $date)
+                    ->where('ca_lam_id', $caLam->id)
+                    ->first();
+                    if ($checked && !$existingChamCong) {
+                        ChamCong::create([
+                            'nhan_vien_id' => $nhanVienId,
+                            'ngay_cham_cong' => $date,
+                            'ca_lam_id' => $caLam->id,
+                        ]);
+                        $changesMade = true;
+                    } elseif (!$checked && $existingChamCong && $isEditMode) {
+                        $existingChamCong->forceDelete();
+                        $changesMade = true;
                     }
-    
-                    foreach ([
-                        'ca_sang' => $caSang,
-                        'ca_chieu' => $caChieu,
-                        'ca_toi' => $caToi
-                    ] as $caKey => $caObj) {
-                        if (!$caObj) {
-                            continue;
-                        }
-    
-                        $checked = !empty($ca[$caKey] ?? null);
-                        $existingChamCong = ChamCong::where('nhan_vien_id', $nhanVienId)
-                            ->where('ngay_cham_cong', $date)
-                            ->where('ca_lam_id', $caObj->id)
-                            ->first();
-    
-                        if ($checked && !$existingChamCong) {
-                            ChamCong::create([
-                                'nhan_vien_id' => $nhanVienId,
-                                'ngay_cham_cong' => $date,
-                                'ca_lam_id' => $caObj->id,
-                            ]);
-                            $changesMade = true;
-                        } elseif (!$checked && $existingChamCong && $isEditMode) {
-                            $existingChamCong->forceDelete();
-                            $changesMade = true;
-                        }
-                    }
-                }
+                    
             }
         }
+    }
+}
+
+        
     
         // Check biến changesMade chung
         if (!$changesMade) {

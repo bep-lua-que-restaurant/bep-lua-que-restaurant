@@ -23,7 +23,7 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
             return new BanAn([
                 'ten_ban' => $row['ten_ban'] ,
                 'so_ghe'=>$row['so_ghe'] ,
-                'vi_tri' => $row['vi_tri'] ?? null,
+               
                 'mo_ta' => $row['mo_ta'] ?? null,
                 'created_at' => $row['created_at'] ?? null,      
                 'deleted_at' => $row['deleted_at'] ?? null,
