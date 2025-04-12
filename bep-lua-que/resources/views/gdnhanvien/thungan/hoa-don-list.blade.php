@@ -64,6 +64,45 @@
         font-size: 12px;
         margin-top: 5px;
     }
+
+    /* Đảm bảo phần ghi chú có vị trí tuyệt đối */
+    .ghi-chu-wrapper {
+        position: absolute;
+        z-index: 100;
+        background-color: #fff;
+        /* Màu nền cho phần ghi chú */
+        border: 1px solid #ccc;
+        /* Đường viền */
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        display: none;
+    }
+
+    .ghi-chu-wrapper .d-flex {
+        align-items: center;
+    }
+
+    .ghi-chu-wrapper .ghi-chu-input {
+        flex: 1;
+        margin-right: 10px;
+    }
+
+    /* CSS cho hiệu ứng xoay */
+    .spin {
+        animation: spin 1s linear infinite;
+    }
+
+    /* Định nghĩa hiệu ứng xoay */
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
 </style>
 <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6;">
     <table class="table table-bordered table-sm">
@@ -178,11 +217,11 @@
             <input type="text" class="form-control" id="discountCode" placeholder="Nhập mã giảm giá">
         </div> --}}
 
-        <!-- Đặt Khách cần trả và Phương thức thanh toán nằm ngang -->
+
         <div class="d-flex mb-3 align-items-stretch">
             <div class="flex-fill me-2">
-                <label for="totalAmount" class="form-label">Khách cần trả</label>
-                <input type="text" class="form-control form-control-lg" id="totalAmount" value="" readonly>
+                <label for="totalAmount" class="form-label">Tổng tiền hàng</label>
+                <input type="text" class="form-control form-control-lg" id="tong_tien_hang" value="" readonly>
             </div>
             <div class="flex-fill ms-2">
                 <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
@@ -194,7 +233,12 @@
             </div>
         </div>
 
+        <div id="qrCodeContainer" class="text-center mt-3" style="display: none;">
+            <label class="form-label">Mã QR chuyển khoản</label>
+            <div id="qrCode"></div>
+        </div>
 
+        <div id="qrResult" class="mt-3"></div>
         <!-- Chi tiết thanh toán -->
         <div class="mb-3">
             <label for="paymentDetails" class="form-label">Chi tiết thanh toán</label>
@@ -396,12 +440,68 @@
 
 {{-- giao diện lưu hóa đơn In --}}
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <!-- Select2 JS -->
+<script src="{{ asset('js/jquery-3.6.4.min.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/print-js/1.6.0/print.min.js"></script>
 
 <script>
+    // Sự kiện khi thay đổi phương thức thanh toán
+    document.getElementById('paymentMethod').addEventListener('change', function() {
+        const method = this.value;
+        const amountGiven = document.getElementById('amountGiven');
+        const changeToReturn = document.getElementById('changeToReturn');
+        const qrContainer = document.getElementById('qrCodeContainer');
+        const qrCodeDiv = document.getElementById('qrCode');
+        const qrResult = document.getElementById('qrResult');
+
+        if (method === 'tien_mat') {
+            // Hiện 2 ô khách đưa và tiền trả
+            amountGiven.parentElement.style.display = 'block';
+            changeToReturn.parentElement.style.display = 'block';
+            qrContainer.style.display = 'none';
+            qrCodeDiv.innerHTML = '';
+        } else {
+            // Ẩn 2 ô khách đưa và tiền trả
+            amountGiven.parentElement.style.display = 'none';
+            changeToReturn.parentElement.style.display = 'none';
+        }
+
+        if (method === 'tai_khoan') {
+            // Gọi AJAX tạo mã QR
+            const maHoaDon = document.getElementById('maHoaDonInFo').textContent.trim();
+            if (!maHoaDon || maHoaDon === 'Chưa có hóa đơn') {
+                qrResult.innerHTML = `<div class="text-danger">Vui lòng tạo hóa đơn trước khi tạo mã QR.</div>`;
+                qrContainer.style.display = 'none';
+                return;
+            }
+
+            fetch(`/thu-ngan/tao-qr/${maHoaDon}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        qrCodeDiv.innerHTML =
+                            `<img src="${data.qr_url}" alt="QR Code" style="max-width: 200px;">`;
+                        qrContainer.style.display = 'block';
+                        qrResult.innerHTML = '';
+                    } else {
+                        qrResult.innerHTML = `<div class="text-danger">${data.message}</div>`;
+                        qrContainer.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    qrResult.innerHTML = `<div class="text-danger">Lỗi tạo mã QR: ${error}</div>`;
+                    qrContainer.style.display = 'none';
+                });
+
+        }
+    });
+
+    // Gọi lại khi trang mở (ẩn 2 ô nếu không phải tiền mặt)
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('paymentMethod').dispatchEvent(new Event('change'));
+    });
     // Hàm lấy dữ liệu thanh toán
     $(document).ready(function() {
         $('#thanhToan-btn').click(function() {
@@ -535,20 +635,19 @@
     });
 
 
-
-
+    // xác nhận thanh toán
     $('#btnThanhToan').on('click', function() {
         var banId = $('#ten-ban').data('currentBan');
         var soNguoi = $(".so-nguoi").data("soNguoi") || 1;
         var khachHangId = $("#customerSelect").val();
         var phuongThucThanhToan = $('#paymentMethod').val();
         var paymentDetails = $("#paymentDetails").val();
-        var totalAmount = parseFloat($('#totalAmount').val().replace(/\./g, '').trim()) || 0;
+        var totalAmount = parseFloat($('#tong_tien_hang').val().replace(/\./g, '').trim()) || 0;
         var amountGiven = parseFloat($('#amountGiven').val().replace(/\./g, '').trim()) || 0;
         var changeToReturn = parseFloat($('#changeToReturn').val().replace(/\./g, '').trim()) || 0;
         let maHoaDonInFo = document.getElementById("maHoaDonInFo");
         let maHoaDonFind = maHoaDonInFo.innerText;
-
+        let xoaMonCho = window.mon_an_cho_xac_nhan;
         var danhSachSanPham = [];
         $("#hoa-don-thanh-toan-body tr").each(function() {
             var sanPham = {
@@ -575,91 +674,182 @@
                     chi_tiet_thanh_toan: paymentDetails,
                     tong_tien: totalAmount,
                     ma_hoa_don_cua_ban: maHoaDonFind,
-                    // tien_khach_dua: amountGiven,
-                    // tien_thua: changeToReturn,
-                    // san_pham: danhSachSanPham, // Gửi danh sách sản phẩm lên server
+                    xoa_mon_cho: xoaMonCho,
                     _token: $('meta[name="csrf-token"]').attr("content")
                 },
                 success: function(response) {
                     if (response.success) {
                         hoaDonId = response.hoaDon.id;
-                        // Tạo nội dung in
                         var maHoaDon = response.hoaDon.ma_hoa_don;
-                        tenKhachHang = response.khachHang.ho_ten
-                        // Tạo nội dung cần in (chỉ in mã hóa đơn)
+                        var tenKhachHang = response.khachHang.ho_ten;
+                        var ngayBan = response.hoaDon.created_at ? new Date(response.hoaDon
+                            .created_at).toLocaleString('vi-VN', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        }) : new Date().toLocaleString('vi-VN', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        var soDienThoai = response.khachHang.so_dien_thoai || 'Chưa cập nhật';
+
+                        // Tạo nội dung in, không dùng cấu trúc HTML đầy đủ
                         var printContent = `
-        <!-- Thông tin cửa hàng -->
-            <div>
-                <h2><strong>Hóa đơn bán hàng</h2>
-                <h5><strong>Ngày bán:</strong> 14-03-2025</h5>
-            </div>
+                    <div class="container">
+                        <h1 class="store-name">NHÀ HÀNG BẾP LỬA QUÊ</h1>
+                        <h2 class="invoice-title">HÓA ĐƠN THANH TOÁN</h2>
+                        <p><strong>Mã hóa đơn:</strong> ${maHoaDon}</p>
+                        <p><strong>Ngày:</strong> ${ngayBan}</p>
+                        <p><strong>Khách hàng:</strong> Bàn ${banId}</p>
+                        <p><strong>Khách hàng:</strong> ${tenKhachHang}</p>
+                        <p><strong>Số điện thoại:</strong> ${soDienThoai}</p>
 
-            <hr>
+                        <div class="divider">-----------------------------------------</div>
 
-            <!-- Thông tin khách hàng -->
-            <div>
-                <p><strong>Khách hàng: ${tenKhachHang}</strong></p>
-                <p><strong>Số điện thoại:</strong>0332491395</p>
-            </div>
+                        <div class="row header-row">
+                            <div class="col-stt">STT</div>
+                            <div class="col-mon-an">Món ăn</div>
+                            <div class="col-sl">SL.</div>
+                            <div class="col-gia">Giá</div>
+                            <div class="col-tong">Tổng</div>
+                        </div>
 
- <table class="table table-bordered text-start">
-            <thead>
-                <tr>
-                    <th>Tên món</th>  
-                    <th>SL</th>      
-                    <th>Thành tiền</th> 
-                </tr>
-            </thead>
-            <tbody>
-                ${danhSachSanPham.map(item => `
-                    <tr>
-                        <td>${item.ten_san_pham}</td>
-                        <td>${item.so_luong}</td>
-                        <td>${item.tong_cong}</td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
+                        ${
+                            danhSachSanPham && danhSachSanPham.length > 0 
+                            ? danhSachSanPham.map((item, index) => `
+                                <div class="row">
+                                    <div class="col-stt">${index + 1}</div>
+                                    <div class="col-mon-an">${item.ten_san_pham}</div>
+                                    <div class="col-sl">${item.so_luong}</div>
+                                    <div class="col-gia">${(item.tong_cong / item.so_luong).toLocaleString('vi-VN', { minimumFractionDigits: 0 })} VND</div>
+                                    <div class="col-tong">${item.tong_cong.toLocaleString('vi-VN', { minimumFractionDigits: 0 })} VND</div>
+                                </div>
+                            `).join('')
+                            : `<div class="row"><div class="col-full">Không có dữ liệu</div></div>`
+                        }
 
+                        <div class="divider">-----------------------------------------</div>
 
-            <hr>
-
-            <!-- Tổng tiền -->
-            <div>
-                <p><strong>Tổng tiền hàng:</strong> ${totalAmount}</p>
-                <p><strong>Tiền khách đưa:</strong>${amountGiven} </p>
-                <p><strong>Tiền thừa trả khách:</strong> ${changeToReturn}</p>
-            </div>
-        </div>
-    `;
+                        <p class="total"><strong>Tổng cộng:</strong> ${totalAmount.toLocaleString('vi-VN', { minimumFractionDigits: 0 })} VND</p>
+                        <p class="amount-given"><strong>Tiền khách đưa:</strong> ${amountGiven.toLocaleString('vi-VN', { minimumFractionDigits: 0 })} VND</p>
+                        <p class="change-return"><strong>Tiền thừa trả khách:</strong> ${changeToReturn.toLocaleString('vi-VN', { minimumFractionDigits: 0 })} VND</p>
+                        <p class="thank-you">Cảm ơn quý khách! Hẹn gặp lại! 😊</p>
+                    </div>
+                `;
 
                         // Tạo phần tử tạm trong DOM để chứa nội dung in
                         var tempDiv = document.createElement('div');
                         tempDiv.innerHTML = printContent;
 
-                        // Thêm phần tử vào body hoặc một phần tử nào đó trong DOM
+                        // Thêm phần tử vào body
                         document.body.appendChild(tempDiv);
 
-                        // In nội dung của phần tử tạm
+                        // In nội dung bằng printJS
                         printJS({
-                            printable: tempDiv, // Truyền phần tử DOM vào Print.js
-                            type: 'html', // Kiểu nội dung (html)
+                            printable: tempDiv,
+                            type: 'html',
                             showModal: true,
                             modalTitle: 'Cài Đặt In',
+                            style: `
+                        body {
+                            font-family: Arial, sans-serif;
+                            font-size: 14px;
+                            line-height: 1.5;
+                        }
+                        .container {
+                            width: 100%;
+                            max-width: 300px; /* Khổ giấy in nhỏ, thường 80mm */
+                            margin: 0 auto;
+                            padding: 10px;
+                            text-align: left;
+                        }
+                        .store-name {
+                            text-align: center;
+                            font-size: 16px;
+                            font-weight: bold;
+                            margin-bottom: 5px;
+                        }
+                        .invoice-title {
+                            text-align: center;
+                            font-size: 14px;
+                            font-weight: bold;
+                            margin-bottom: 10px;
+                        }
+                        p {
+                            margin: 5px 0;
+                        }
+                        .divider {
+                            text-align: center;
+                            margin: 10px 0;
+                            font-size: 12px;
+                        }
+.row {
+    display: flex;
+    justify-content: flex-start;
+    gap: 5px;
+    margin-bottom: 0; /* Giảm khoảng cách dưới của mỗi hàng */
+    line-height: 1; /* Giảm khoảng cách dọc giữa các dòng văn bản */
+}
+                        .header-row {
+                            font-weight: bold;
+                        }
+                        .col-stt {
+                            width: 8%; /* Giảm chiều rộng */
+                            text-align: left;
+                        }
+                        .col-mon-an {
+                            width: 35%; /* Tăng chiều rộng để chứa tên món dài */
+                            text-align: left;
+                            white-space: nowrap; /* Ngăn tên món xuống dòng */
+                            overflow: hidden; /* Ẩn phần thừa */
+                            text-overflow: ellipsis; /* Thêm dấu ... nếu tên quá dài */
+                        }
+                        .col-sl {
+                            width: 10%; /* Giảm chiều rộng */
+                            text-align: center;
+                        }
+                        .col-gia {
+                            width: 22%; /* Giảm chiều rộng */
+                            text-align: center;
+                        }
+                        .col-tong {
+                            width: 20%; /* Giảm chiều rộng */
+                            text-align: right;
+                        }
+                        .col-full {
+                            width: 100%;
+                            text-align: center;
+                        }
+                        .total, .amount-given, .change-return {
+                            text-align: right;
+                            font-weight: bold;
+                            margin-top: 5px;
+                        }
+                        .thank-you {
+                            text-align: center;
+                            margin-top: 10px;
+                            font-size: 12px;
+                        }
+                    `,
                             options: {
-                                orientation: 'portrait', // Chế độ chân dung
-                                color: true, // In màu
-                                duplex: false, // Không in 2 mặt
+                                orientation: 'portrait',
+                                color: true,
+                                duplex: false,
                                 margins: {
                                     top: 10,
                                     left: 10,
                                     right: 10,
                                     bottom: 10
-                                } // Cài đặt lề
+                                }
                             }
                         });
 
-                        // Sau khi in xong, có thể xóa phần tử tạm đi
+                        // Xóa phần tử tạm
                         document.body.removeChild(tempDiv);
 
                         showToast("Đã thanh toán đơn hàng", "success");
@@ -675,10 +865,9 @@
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error("Lỗi chi tiết:", xhr.responseText); // In lỗi chi tiết ra console
+                    console.error("Lỗi chi tiết:", xhr.responseText);
                     showToast("Lỗi khi cập nhật trạng thái bàn: " + xhr.responseText, "danger");
                 }
-
             });
         } else {
             showToast("Không tìm thấy ID bàn!", "warning");

@@ -34,14 +34,6 @@ class DatBanController extends Controller
         return view('gdnhanvien.datban.index', compact('today'));
     }
 
-    public function indexNgay()
-    {
-        // $today = Carbon::now('Asia/Ho_Chi_Minh')->toDateString();
-        $today = \Carbon\Carbon::today();
-        return view('gdnhanvien.datban.indexngay', compact('today'));
-    }
-
-
     public function getDatBan($maDatBan)
     {
         $datBans = DatBan::where('ma_dat_ban', $maDatBan)->with('banAn')->get();
@@ -67,7 +59,8 @@ class DatBanController extends Controller
         // Lấy danh sách bàn (PHÂN TRANG 10 bàn/trang)
         $banPhong = BanAn::whereNull('deleted_at')
             ->orderBy('id')
-            ->paginate(10); // Sử dụng phân trang
+            ->get(); // Lấy toàn bộ bàn ăn
+        // ->paginate(10); // Sử dụng phân trang
 
         // Lấy danh sách đặt bàn theo ngày, loại bỏ trạng thái 'da_huy' và 'da_thanh_toan'
         $datBans = DatBan::whereDate('thoi_gian_den', $date)
@@ -82,13 +75,15 @@ class DatBanController extends Controller
         ]);
     }
 
-
+    /**
+     * Show the form for creating a new resource.
+     */
 
     public function DanhSach()
     {
         $today = Carbon::today()->toDateString();
 
-        $banhSachDatban = DatBan::select(
+        $banhSachDatban = DatBan::withTrashed()->select(
             'dat_bans.ma_dat_ban',
             'dat_bans.thoi_gian_den',
             'khach_hangs.id as khach_hang_id',
@@ -112,12 +107,12 @@ class DatBanController extends Controller
                 'dat_bans.mo_ta'
             )
             ->orderByRaw("
-    CASE 
-        WHEN dat_bans.trang_thai = 'dang_xu_ly' AND DATE(dat_bans.thoi_gian_den) = ? THEN 0 
-        ELSE 1 
-    END,
-    dat_bans.thoi_gian_den DESC
-", [$today])
+         CASE 
+             WHEN dat_bans.trang_thai = 'dang_xu_ly' AND DATE(dat_bans.thoi_gian_den) = ? THEN 0 
+             ELSE 1 
+         END,
+         dat_bans.thoi_gian_den DESC
+     ", [$today])
             ->paginate(10);
 
         return view('gdnhanvien.datban.danhsach', compact('banhSachDatban', 'today'));
@@ -127,6 +122,8 @@ class DatBanController extends Controller
     /**
      * Show the form for creating a new resource.
      */
+
+
     public function filterDatBan(Request $request)
     {
         $search = $request->input('search');
@@ -352,7 +349,7 @@ class DatBanController extends Controller
     public function show($maDatBan)
     {
         // Lấy thông tin đặt bàn dựa trên mã đặt bàn
-        $datBans = DatBan::where('ma_dat_ban', $maDatBan)
+        $datBans = DatBan::withTrashed()->where('ma_dat_ban', $maDatBan)
             ->with(['khachHang', 'banAn']) // Load thêm thông tin khách hàng, bàn ăn và phòng ăn
             ->get();
 
@@ -367,12 +364,6 @@ class DatBanController extends Controller
         // Lấy thông tin đặt bàn đầu tiên trong danh sách
         $datBan = $datBans->first();
 
-        // Trả về dữ liệu JSON
-        // return response()->json([
-        //     'error' => false,
-        //     'datBan' => $datBan,
-        //     'datBans' => $datBans,
-        // ]);
         return view('gdnhanvien.datban.show', compact('datBan', 'datBans'));
     }
 
@@ -381,31 +372,34 @@ class DatBanController extends Controller
      */
     public function edit($maDatBan)
     {
-        // Lấy thông tin đặt bàn chính
         $datBan = DatBan::with('khachHang')->where('ma_dat_ban', $maDatBan)->first();
-
-        $customer = KhachHang::find($datBan->khach_hang_id);
 
         if (!$datBan) {
             return redirect()->route('dat-ban.index')->with('error', 'Không tìm thấy đặt bàn!');
         }
 
-        // Lấy tất cả bàn ăn để hiển thị
-        // $banAns = BanAn::whereNull('deleted_at')->paginate(10);
+        $customer = KhachHang::find($datBan->khach_hang_id);
         $banAns = BanAn::whereNull('deleted_at')->get();
+        $datBanCurrent = DatBan::where('ma_dat_ban', $maDatBan)->get();
 
-        // Lấy các bàn của đơn đặt hiện tại (bàn đang được chỉnh sửa)
-        $datBanCurrent = DatBan::where('ma_dat_ban', $maDatBan)
-            ->get();
+        // ✅ Lấy ngày từ `thoi_gian_den`
+        $ngayDen = \Illuminate\Support\Carbon::parse($datBan->thoi_gian_den)->toDateString(); // "YYYY-MM-DD"
 
-        // Lấy tất cả các đơn đặt bàn, trừ ma_dat_ban hiện tại
         $datBansOther = DatBan::where('ma_dat_ban', '!=', $maDatBan)
+            ->whereDate('thoi_gian_den', $ngayDen)
             ->whereIn('trang_thai', ['dang_xu_ly', 'xac_nhan'])
             ->get();
 
-        // Truyền dữ liệu vào view
-        return view('gdnhanvien.datban.edit', compact('datBan', 'banAns', 'datBanCurrent', 'datBansOther', 'maDatBan', 'customer'));
+        return view('gdnhanvien.datban.edit', compact(
+            'datBan',
+            'banAns',
+            'datBanCurrent',
+            'datBansOther',
+            'maDatBan',
+            'customer'
+        ));
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -557,6 +551,6 @@ class DatBanController extends Controller
         event(new DatBanDeleted(maDatBan: $maDatBan));
         // \Log::info("🚀 Sự kiện DatBanDeleted đã được phát", ['ma_dat_ban' => $maDatBan]);
 
-        return redirect()->back()->with('success', 'Tất cả đơn đặt bàn đã được hủy thành công!');
+        return redirect()->back()->with('success', 'Đơn đặt bàn đã được hủy thành công!');
     }
 }

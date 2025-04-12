@@ -16,4 +16,11 @@ class CaLam extends Model
         'gio_ket_thuc',
         'mo_ta'
     ];
+    // app/Models/CaLam.php
+
+public function chamCongs()
+{
+    return $this->hasMany(ChamCong::class, 'ca_lam_id');
+}
+
 }

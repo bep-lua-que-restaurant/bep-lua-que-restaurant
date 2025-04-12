@@ -100,16 +100,15 @@
                             việc</button>
                     </form>
                 @endif
-                <form action="{{ route('nhan-vien.destroy', $nhanVien->id) }}" method="POST"
+                {{-- <form action="{{ route('nhan-vien.destroy', $nhanVien->id) }}" method="POST"
                     style="display:inline;height:20px; margin: 0px 10px">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger"
                         onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?')">Xóa nhân viên</button>
-                </form>
-                <a href="{{ route('ban-an.index') }}" class="btn btn-secondary">
-                    <i class="fa fa-arrow-left"></i> Quay lại
-                </a>
+                </form> --}}
+                <a style="margin-left: 10px;" href="{{ route('nhan-vien.index') }}" class="btn btn-secondary">Trở lại danh
+                    sách</a>
 
             </div>
         </div>

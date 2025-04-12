@@ -48,21 +48,6 @@
                                 <td>{{ $banAn->mo_ta ?? 'Không có mô tả' }}</td>
                             </tr>
 
-
-                            {{-- <tr class="{{ $phongAn && $phongAn->deleted_at ? 'table-danger' : '' }}">
-                                <th>Vị trí</th>
-                                <td>
-                                    @if ($phongAn)
-                                        {{ $phongAn->ten_phong_an }}
-                                        @if ($phongAn->deleted_at)
-                                            <small class="text-danger">* Phòng không còn sử dụng</small>
-                                        @endif
-                                    @else
-                                        <span class="text-danger">Không tìm thấy phòng ăn</span>
-                                    @endif
-                                </td>
-                            </tr> --}}
-
                             <tr class="{{ $banAn->deleted_at ? 'table-danger' : '' }}">
                                 <th>Trạng thái</th>
                                 <td>

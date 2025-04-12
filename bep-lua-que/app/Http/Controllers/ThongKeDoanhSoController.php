@@ -10,76 +10,76 @@ class ThongKeDoanhSoController extends Controller
 {
     public function index(Request $request)
     {
-        $filterType = $request->input('filterType', 'day');
-        $fromDate = $request->input('fromDate');
-        $toDate = $request->input('toDate');
+        $boLoc = $request->input('boLoc', 'day');
+        $ngayBatDau = $request->input('ngayBatDau');
+        $ngayKetThuc = $request->input('ngayKetThuc');
         $data = [];
         $labels = [];
 
-        if ($fromDate && $toDate) {
-            $from = Carbon::parse($fromDate)->startOfDay();
-            $to = Carbon::parse($toDate)->endOfDay();
-            $diffDays = $from->diffInDays($to);
+        if ($ngayBatDau && $ngayKetThuc) {
+            $tu = Carbon::parse($ngayBatDau)->startOfDay();
+            $den = Carbon::parse($ngayKetThuc)->endOfDay();
+            $dieuKienNgay = $tu->diffInDays($den);
 
-            if ($diffDays >= 365) {
-                $filterType = 'year';
-            } elseif ($diffDays >= 30) {
-                $filterType = 'month';
+            if ($dieuKienNgay >= 365) {
+                $boLoc = 'year';
+            } elseif ($dieuKienNgay >= 30) {
+                $boLoc = 'month';
             } else {
-                $filterType = 'day';
+                $boLoc = 'day';
             }
 
-            if ($filterType === 'day') {
+            if ($boLoc === 'day') {
                 $labels = [];
-                for ($date = $from->copy(); $date->lte($to); $date->addDay()) {
+                for ($date = $tu->copy(); $date->lte($den); $date->addDay()) {
                     $labels[] = $date->format('d/m/Y');
                 }
-                $rawData = HoaDon::selectRaw('DATE(hoa_dons.created_at) as date, SUM(hoa_dons.tong_tien) as revenue')
+                $duLieu = HoaDon::selectRaw('DATE(hoa_dons.created_at) as date, SUM(hoa_dons.tong_tien) as revenue')
                     ->join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
                     ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
-                    ->whereBetween('hoa_dons.created_at', [$from, $to])
+                    ->whereBetween('hoa_dons.created_at', [$tu, $den])
                     ->groupBy('date')
                     ->orderBy('date')
                     ->pluck('revenue', 'date')
                     ->toArray();
                 foreach ($labels as $label) {
-                    $data[] = $rawData[Carbon::createFromFormat('d/m/Y', $label)->toDateString()] ?? 0;
+                    $data[] = $duLieu[Carbon::createFromFormat('d/m/Y', $label)->toDateString()] ?? 0;
                 }
-            } elseif ($filterType === 'month') {
+            } elseif ($boLoc === 'month') {
                 $labels = [];
-                for ($date = $from->copy(); $date->lte($to); $date->addMonth()) {
+                for ($date = $tu->copy(); $date->lte($den); $date->addMonth()) {
                     $labels[] = $date->format('m/Y');
                 }
-                $rawData = HoaDon::selectRaw('DATE_FORMAT(hoa_dons.created_at, "%Y-%m") as month, SUM(hoa_dons.tong_tien) as revenue')
+                $duLieu = HoaDon::selectRaw('DATE_FORMAT(hoa_dons.created_at, "%Y-%m") as month, SUM(hoa_dons.tong_tien) as revenue')
                     ->join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
                     ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
-                    ->whereBetween('hoa_dons.created_at', [$from, $to])
+                    ->whereBetween('hoa_dons.created_at', [$tu, $den])
                     ->groupBy('month')
                     ->orderBy('month')
                     ->pluck('revenue', 'month')
                     ->toArray();
                 foreach ($labels as $label) {
-                    $data[] = $rawData[Carbon::createFromFormat('m/Y', $label)->format('Y-m')] ?? 0;
+                    $data[] = $duLieu[Carbon::createFromFormat('m/Y', $label)->format('Y-m')] ?? 0;
                 }
-            } elseif ($filterType === 'year') {
-                $labels = range($from->year, $to->year);
-                $rawData = HoaDon::selectRaw('YEAR(hoa_dons.created_at) as year, SUM(hoa_dons.tong_tien) as revenue')
+            } elseif ($boLoc === 'year') {
+                $labels = range($tu->year, $den->year);
+                $duLieu = HoaDon::selectRaw('YEAR(hoa_dons.created_at) as year, SUM(hoa_dons.tong_tien) as revenue')
                     ->join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
                     ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
-                    ->whereBetween('hoa_dons.created_at', [$from, $to])
+                    ->whereBetween('hoa_dons.created_at', [$tu, $den])
                     ->groupBy('year')
                     ->orderBy('year')
                     ->pluck('revenue', 'year')
                     ->toArray();
                 foreach ($labels as $label) {
-                    $data[] = $rawData[$label] ?? 0;
+                    $data[] = $duLieu[$label] ?? 0;
                 }
             }
         } else {
-            if ($filterType == 'year') {
+            if ($boLoc == 'year') {
                 $year = Carbon::now()->year;
                 $labels = array_map(fn($m) => "Tháng $m", range(1, 12));
-                $rawData = HoaDon::selectRaw('MONTH(hoa_dons.created_at) as month, SUM(hoa_dons.tong_tien) as revenue')
+                $duLieu = HoaDon::selectRaw('MONTH(hoa_dons.created_at) as month, SUM(hoa_dons.tong_tien) as revenue')
                     ->join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
                     ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
                     ->whereYear('hoa_dons.created_at', $year)
@@ -88,14 +88,14 @@ class ThongKeDoanhSoController extends Controller
                     ->pluck('revenue', 'month')
                     ->toArray();
                 foreach (range(1, 12) as $month) {
-                    $data[] = $rawData[$month] ?? 0;
+                    $data[] = $duLieu[$month] ?? 0;
                 }
-            } elseif ($filterType == 'month') {
+            } elseif ($boLoc == 'month') {
                 $year = Carbon::now()->year;
                 $month = Carbon::now()->month;
                 $daysInMonth = Carbon::now()->daysInMonth;
                 $labels = array_map(fn($d) => "Ngày $d", range(1, $daysInMonth));
-                $rawData = HoaDon::selectRaw('DAY(hoa_dons.created_at) as day, SUM(hoa_dons.tong_tien) as revenue')
+                $duLieu = HoaDon::selectRaw('DAY(hoa_dons.created_at) as day, SUM(hoa_dons.tong_tien) as revenue')
                     ->join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
                     ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
                     ->whereYear('hoa_dons.created_at', $year)
@@ -105,16 +105,16 @@ class ThongKeDoanhSoController extends Controller
                     ->pluck('revenue', 'day')
                     ->toArray();
                 foreach (range(1, $daysInMonth) as $day) {
-                    $data[] = $rawData[$day] ?? 0;
+                    $data[] = $duLieu[$day] ?? 0;
                 }
-            } elseif ($filterType == 'week') {
+            } elseif ($boLoc == 'week') {
                 $startOfWeek = Carbon::now()->startOfWeek();
                 $endOfWeek = Carbon::now()->endOfWeek();
                 $labels = [];
                 for ($date = $startOfWeek->copy(); $date->lte($endOfWeek); $date->addDay()) {
                     $labels[] = "Ngày " . $date->format('d/m');
                 }
-                $rawData = HoaDon::selectRaw('DATE(hoa_dons.created_at) as date, SUM(hoa_dons.tong_tien) as revenue')
+                $duLieu = HoaDon::selectRaw('DATE(hoa_dons.created_at) as date, SUM(hoa_dons.tong_tien) as revenue')
                     ->join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
                     ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
                     ->whereBetween('hoa_dons.created_at', [$startOfWeek, $endOfWeek])
@@ -123,12 +123,12 @@ class ThongKeDoanhSoController extends Controller
                     ->pluck('revenue', 'date')
                     ->toArray();
                 foreach (range(0, 6) as $i) {
-                    $data[] = $rawData[$startOfWeek->copy()->addDays($i)->toDateString()] ?? 0;
+                    $data[] = $duLieu[$startOfWeek->copy()->addDays($i)->toDateString()] ?? 0;
                 }
-            } elseif ($filterType == 'day') {
+            } elseif ($boLoc == 'day') {
                 $date = Carbon::now()->toDateString();
                 $labels = array_map(fn($h) => "$h:00", range(0, 23));
-                $rawData = HoaDon::selectRaw('HOUR(hoa_dons.created_at) as hour, SUM(hoa_dons.tong_tien) as revenue')
+                $duLieu = HoaDon::selectRaw('HOUR(hoa_dons.created_at) as hour, SUM(hoa_dons.tong_tien) as revenue')
                     ->join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
                     ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
                     ->whereDate('hoa_dons.created_at', $date)
@@ -137,7 +137,7 @@ class ThongKeDoanhSoController extends Controller
                     ->pluck('revenue', 'hour')
                     ->toArray();
                 foreach (range(0, 23) as $hour) {
-                    $data[] = $rawData[$hour] ?? 0;
+                    $data[] = $duLieu[$hour] ?? 0;
                 }
             }
         }
@@ -146,11 +146,11 @@ class ThongKeDoanhSoController extends Controller
             return response()->json([
                 'labels' => $labels,
                 'data' => $data,
-                'filterType' => $filterType,
-                'totalSales' => number_format(array_sum($data), 0, ',', '.') . ' VND',
+                'boLoc' => $boLoc,
+                'tongDoanhSo' => number_format(array_sum($data), 0, ',', '.') . ' VND',
             ]);
         }
 
-        return view('admin.thongke.thongkedoanhso', compact('labels', 'data', 'filterType'));
+        return view('admin.thongke.thongkedoanhso', compact('labels', 'data', 'boLoc'));
     }
 }

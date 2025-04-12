@@ -63,6 +63,40 @@ class ThongKeController extends Controller
         $labels = array_map(fn($h) => "$h:00", range(0, 23));
         $data = array_map(fn($h) => $duLieuBanHang[$h] ?? 0, range(0, 23));
 
+        //
+        $namHienTai = Carbon::now()->year;
+        $namTruoc = $namHienTai - 1;
+
+        $doanhThuNamNay = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
+            ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
+            ->whereYear('hoa_dons.created_at', $namHienTai)
+            ->sum('hoa_dons.tong_tien');
+
+        $doanhThuNamTruoc = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
+            ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
+            ->whereYear('hoa_dons.created_at', $namTruoc)
+            ->sum('hoa_dons.tong_tien');
+
+        // Lấy tổng số lượng hóa đơn của năm trước
+        $soLuongHoaDonNamNay = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
+            ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
+            ->whereYear('hoa_dons.created_at', $namHienTai)
+            ->count();
+
+        // Lấy tổng số lượng hóa đơn của năm hiện tại
+        $soLuongHoaDonNamTruoc = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
+            ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
+            ->whereYear('hoa_dons.created_at', $namTruoc)
+            ->count();
+
+        $khachNamNay = DatBan::whereYear('thoi_gian_den', $namHienTai)
+            ->where('trang_thai', 'da_thanh_toan')
+            ->sum('so_nguoi');
+
+        $khachNamTruoc = DatBan::whereYear('thoi_gian_den', $namTruoc)
+            ->where('trang_thai', 'da_thanh_toan')
+            ->sum('so_nguoi');
+
         if ($request->ajax()) {
             return response()->json([
                 'labels' => $labels,
@@ -73,14 +107,23 @@ class ThongKeController extends Controller
                 'soLuongKhachHomNay' => $soLuongKhachHomNay,
                 'soLuongKhachHomQua' => $soLuongKhachHomQua,
                 'donDangPhucVuHomNay' => $donDangPhucVuHomNay,
-                'donPhucVuHomQua' => $donPhucVuHomQua
+                'donPhucVuHomQua' => $donPhucVuHomQua,
+                'doanhThuNamNay' => $doanhThuNamNay,
+                'doanhThuNamTruoc' => $doanhThuNamTruoc,
+                'soLuongHoaDonNamNay' => $soLuongHoaDonNamNay,
+                'soLuongHoaDonNamTruoc' => $soLuongHoaDonNamTruoc,
+                'khachNamNay' => $khachNamNay,
+                'khachNamTruoc' => $khachNamTruoc
             ]);
         }
 
         return view('admin.dashboard', compact(
             'labels', 'data', 'tongTienHomNay', 'tongTienHomQua',
             'donDangPhucVuHomNay', 'donPhucVuHomQua',
-            'soLuongKhachHomNay', 'soLuongKhachHomQua'
+            'soLuongKhachHomNay', 'soLuongKhachHomQua',
+            'doanhThuNamNay', 'doanhThuNamTruoc',
+            'soLuongHoaDonNamNay', 'soLuongHoaDonNamTruoc',
+            'khachNamNay', 'khachNamTruoc'
         ));
     }
 }
