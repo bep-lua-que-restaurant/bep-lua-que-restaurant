@@ -73,7 +73,7 @@
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Đơn vị tồn</label>
-                            <input type="text" name="don_vi_tons[]" class="form-control" value="{{ $chiTiet->don_vi_nhap }}">
+                            <input type="text" name="don_vi_tons[]" class="form-control" value="{{ $chiTiet->don_vi_ton }}">
                         </div>
 
                         <div class="col-md-2">

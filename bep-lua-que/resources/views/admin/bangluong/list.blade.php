@@ -56,7 +56,7 @@
                         <div class="table-responsive">
                             <table class="table table-responsive-md">
                                 <thead>
-                                    <tr>
+                                    <tr style="text-align: center">
                                         <th style="width:50px;">
                                             <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
                                                 <input type="checkbox" class="custom-control-input" id="checkAll"
@@ -66,9 +66,10 @@
                                         </th>
                                         <th>Mã</th>
                                         <th>Tên</th>
-                                        <th>Kỳ hạn trả</th>
-                                        <th>Kỳ làm việc</th>
+                                        <th>Tổng số ca làm </th>
+                                        <th>Mức lương</th>
                                         <th>Tổng lương</th>
+                                        <th>Thời gian</th>
                                         <th>Hành động</th>
                                     </tr>
                                 </thead>

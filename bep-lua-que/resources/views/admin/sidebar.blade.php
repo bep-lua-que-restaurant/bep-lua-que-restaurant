@@ -167,7 +167,7 @@
                         <span class="nav-text">Thống kê</span>
                     </a>
                     <ul aria-expanded="false">
-                        <li><a href="{{ route('thongke.thongkedoanhso') }}">Thống kê doanh số</a></li>
+                        <li><a href="{{ route('thongke.thongkedoanhso') }}">Thống kê doanh thu</a></li>
                         <li><a href="{{ route('thongke.thongkehoadon') }}">Thống kê số lượng hóa đơn</a>
                         </li>
                         <li><a href="{{ route('thongke.topdoanhthu') }}">Thống kê top doanh thu</a></li>
@@ -234,6 +234,8 @@
                         <li><a href="{{ route('phieu-xuat-kho.index') }}">Phiếu xuất kho</a></li>
                         <li><a href="{{ route('loai-nguyen-lieu.index') }}">Loại nguyên liệu</a></li>
                         <li><a href="{{ route('nguyen-lieu.index') }}">Nguyên liệu</a></li>
+                        <li><a href="{{ route('nha-cung-cap.index') }}">Nhà cung cấp</a></li>
+
                     </ul>
                 </li>
             @endif
@@ -248,7 +250,7 @@
                         <li><a href="{{ route('chuc-vu.index') }}">Chức vụ</a></li>
                         <li><a href="{{ route('nhan-vien.index') }}">Nhân viên</a></li>
                         <li><a href="{{ route('ca-lam.index') }}">Ca làm</a></li>
-                        <li><a href="{{ route('ca-lam-nhan-vien.index') }}">Quản lý ca làm</a></li>
+                        {{-- <li><a href="{{ route('ca-lam-nhan-vien.index') }}">Quản lý ca làm</a></li> --}}
                         <li><a href="{{ route('cham-cong.index') }}">Chấm công</a></li>
                         <li><a href="{{ route('luong.index') }}">Bảng lương</a></li>
                     </ul>

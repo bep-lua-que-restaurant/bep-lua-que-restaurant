@@ -54,8 +54,9 @@
                                         <th><strong>ID</strong></th>
                                         <th><strong>Mã phiếu</strong></th>
                                         <th><strong>Người nhận</strong></th>
+                                        <th><strong>Nhà cung cấp</strong></th>
                                         <th><strong>Ngày xuất</strong></th>
-                                        <th><strong>Tổng giá trị</strong></th>
+                                        <th><strong>Loại phiếu</strong></th>
                                         <th><strong>Trạng thái</strong></th>
                                         <th><strong>Hành động</strong></th>
                                     </tr>
@@ -70,7 +71,6 @@
     </div>
 
     <!-- Script -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -87,14 +87,52 @@
                 processing: true,
                 serverSide: true,
                 ajax: '{{ $route }}',
-                columns: [
-                    { data: 'id', name: 'id' },
-                    { data: 'ma_phieu', name: 'ma_phieu' },
-                    { data: 'nguoi_nhan', name: 'nguoi_nhan' },
-                    { data: 'ngay_xuat', name: 'ngay_xuat' },
-                    { data: 'tong_gia_tri', name: 'tong_gia_tri' },
-                    { data: 'trang_thai', name: 'deleted_at' },
-                    { data: 'action', name: 'action', orderable: false, searchable: false }
+                columns: [{
+                        data: 'id',
+                        name: 'id'
+                    },
+                    {
+                        data: 'ma_phieu',
+                        name: 'ma_phieu'
+                    },
+                    {
+                        data: 'nguoi_nhan',
+                        name: 'nguoi_nhan'
+                    },
+                    {
+                        data: 'nha_cung_cap',
+                        name: 'nha_cung_cap'
+                    },
+                    {
+                        data: 'ngay_xuat',
+                        name: 'ngay_xuat'
+                    },
+                    {
+                        data: 'loai_phieu',
+                        name: 'loai_phieu',
+                        render: function(data, type, row) {
+                            switch (data) {
+                                case 'xuat_bep':
+                                    return 'Xuất Bếp';
+                                case 'xuat_tra_hang':
+                                    return 'Trả Nhà Cung Cấp';
+                                case 'xuat_huy':
+                                    return 'Hủy Hàng';
+                                default:
+                                    return 'Không xác định';
+                            }
+                        }
+                    },
+                    {
+                        data: 'trang_thai',
+                        name: 'deleted_at'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
+                    }
                 ],
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json'

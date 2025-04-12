@@ -27,9 +27,9 @@
                         <h4 class="card-title">Danh sách nguyên liệu</h4>
 
                         <div class="btn-group">
-                            <a href="{{ route('nguyen-lieu.create') }}" class="btn btn-sm btn-primary">
+                            {{-- <a href="{{ route('nguyen-lieu.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm mới
-                            </a>
+                            </a> --}}
                             <a href="#" class="btn btn-sm btn-info">
                                 <i class="fa fa-list"></i> Danh sách
                             </a>
@@ -59,7 +59,6 @@
     </div>
 
     <!-- Script -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

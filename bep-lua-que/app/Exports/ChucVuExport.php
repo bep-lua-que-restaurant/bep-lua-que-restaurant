@@ -51,7 +51,7 @@ class ChucVuExport implements FromCollection, WithHeadings, WithEvents, WithMapp
 
                 // Gộp ô cho tiêu đề lớn
                 $sheet->mergeCells('A1:D1');
-                $sheet->setCellValue('A1', 'Dịch vụ');
+                $sheet->setCellValue('A1', 'Chức vụ');
 
                 // Định dạng tiêu đề lớn
                 $sheet->getStyle('A1')->applyFromArray([
