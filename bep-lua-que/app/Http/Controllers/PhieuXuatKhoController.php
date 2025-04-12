@@ -171,71 +171,71 @@ class PhieuXuatKhoController extends Controller
 
     public function show(PhieuXuatKho $phieuXuatKho)
     {
-        // Nếu đã bị xoá, chuyển về danh sách kèm thông báo lỗi
         if ($phieuXuatKho->deleted_at !== null) {
             return redirect()->route('phieu-xuat-kho.index')->with('error', 'Không thể xem phiếu xuất kho đã bị xoá.');
         }
-
-        // Load các quan hệ liên quan để tránh N+1
+    
         $phieuXuatKho->load([
-            'nhaCungCap', // nếu có
+            'nhaCungCap',
             'nhanVien',
-            'chiTietPhieuXuatKhos.nguyenLieu',
+            'chiTietPhieuXuatKhos.nguyenLieu' => function ($query) {
+                $query->withTrashed(); // Hiện nguyên liệu đã bị xoá
+            },
             'chiTietPhieuXuatKhos.loaiNguyenLieu',
         ]);
-
+    
         $chiTietPhieuXuatKhos = $phieuXuatKho->chiTietPhieuXuatKhos;
-
+    
         return view('admin.phieuxuatkho.detail', compact('phieuXuatKho', 'chiTietPhieuXuatKhos'));
     }
+    
 
 
     public function edit(PhieuXuatKho $phieuXuatKho)
     {
-        // Không cho sửa nếu đã bị xoá
         if ($phieuXuatKho->deleted_at !== null) {
             return redirect()->route('phieu-xuat-kho.index')->with('error', 'Không thể sửa phiếu đã bị xoá.');
         }
-
-        // Chỉ cho phép sửa nếu trạng thái là "chờ duyệt"
+    
         if ($phieuXuatKho->trang_thai !== 'cho_duyet') {
             return redirect()->route('phieu-xuat-kho.index')->with('error', 'Chỉ được sửa phiếu ở trạng thái "Chờ duyệt".');
         }
-
-        // Load chi tiết và nguyên liệu + loại nguyên liệu cho từng chi tiết
+    
+        // Load nguyên liệu kể cả bị xoá
         $phieuXuatKho->load([
-            'chiTietPhieuXuatKhos.nguyenLieu.loaiNguyenLieu'
+            'chiTietPhieuXuatKhos.nguyenLieu' => function ($query) {
+                $query->withTrashed();
+            },
+            'chiTietPhieuXuatKhos.loaiNguyenLieu',
+            'nhaCungCap'
         ]);
-        $loaiNguyenLieus = LoaiNguyenLieu::with('nguyenLieus')->get();
+    
+        $loaiNguyenLieus = LoaiNguyenLieu::with(['nguyenLieus' => function ($query) {
+            $query->withTrashed(); 
+        }])->get();
+    
         $nguyenLieuOptions = collect($loaiNguyenLieus)->flatMap(function ($loai) {
             return $loai->nguyenLieus
-                ->filter(function ($nl) {
-                    return $nl->so_luong_ton > 5000;
-                })
-                ->map(function ($nl) use ($loai) {
-                    return [
-                        'id' => $nl->id,
-                        'text' => $loai->ten_loai . ' - ' . $nl->ten_nguyen_lieu,
-                        'don_gia' => $nl->don_gia,
-                        'loai_nguyen_lieu_id' => $nl->loai_nguyen_lieu_id,
-                    ];
-                });
+                ->filter(fn($nl) => $nl->so_luong_ton > 5000)
+                ->map(fn($nl) => [
+                    'id' => $nl->id,
+                    'text' => $loai->ten_loai . ' - ' . $nl->ten_nguyen_lieu,
+                    'don_gia' => $nl->don_gia,
+                    'loai_nguyen_lieu_id' => $nl->loai_nguyen_lieu_id,
+                    'deleted_at' => $nl->deleted_at,
+                ]);
         })->values();
-        
-        // Tải danh sách nhân viên
+    
         $nhanViens = NhanVien::all();
-        // Tải danh sách nhà cung cấp (nếu cần)
-        $phieuXuatKho->load('nhaCungCap');
-
-
-        // Tải danh sách loại nguyên liệu kèm nguyên liệu
-        $loaiNguyenLieus = LoaiNguyenLieu::with('nguyenLieus')->get();
-
-        return view(
-            'admin.phieuxuatkho.edit',
-            compact('phieuXuatKho', 'nhanViens', 'loaiNguyenLieus', 'nguyenLieuOptions')
-        );
+    
+        return view('admin.phieuxuatkho.edit', compact(
+            'phieuXuatKho',
+            'nhanViens',
+            'loaiNguyenLieus',
+            'nguyenLieuOptions'
+        ));
     }
+    
 
 
 

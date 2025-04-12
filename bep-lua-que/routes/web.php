@@ -279,10 +279,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('nguyen-lieu/restore/{id}', [NguyenLieuController::class, 'restore'])->name('nguyen-lieu.restore');
 
     // nhập nkho
+    Route::get('/phieu-nhap-kho/export', [PhieuNhapKhoController::class, 'exportDanhSach'])->name('phieu-nhap-kho.export');
+
     Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
     Route::post('phieu-nhap-kho/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore');
-    Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'export'])->name('phieu-nhap-kho.export');
-    Route::post('/import-phieu-nhap-kho', [PhieuNhapKhoController::class, 'importPhieuNhapKho'])->name('phieu-nhap-kho.import');
     Route::put('phieu-nhap-kho/{id}/duyet', [PhieuNhapKhoController::class, 'duyet'])->name('phieu-nhap-kho.duyet');
     Route::put('/phieu-nhap-kho/{id}/huy', [PhieuNhapKhoController::class, 'huy'])->name('phieu-nhap-kho.huy');
 
