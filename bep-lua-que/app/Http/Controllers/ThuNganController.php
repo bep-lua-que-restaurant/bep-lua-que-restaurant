@@ -336,7 +336,7 @@ class ThuNganController extends Controller
         $chiTietThanhToan = $request->input('chi_tiet_thanh_toan');
         $phuongThucThanhToan = $request->input('phuong_thuc_thanh_toan');
         $ma_hoa_don_ban = $request->input('ma_hoa_don_cua_ban');
-        // $xoa_mon_cho = $request->input('xoa_mon_cho');
+        $xoa_mon_cho = $request->input('xoa_mon_cho');
         if (!$banAnId) {
             return response()->json(['success' => false, 'message' => 'Bàn không hợp lệ.']);
         }
