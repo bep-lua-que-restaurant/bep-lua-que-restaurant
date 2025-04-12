@@ -149,8 +149,7 @@
 <div class="d-flex justify-content-between align-items-center mt-3">
     <!-- Nút bấm -->
     <div class="nut-hoa-don">
-        <button class="btn btn-success btn-sm px-4" type="button" data-bs-toggle="offcanvas"
-            data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" id="thanhToan-btn">Thanh toán</button>
+        <button class="btn btn-success btn-sm px-4" type="button" id="thanhToan-btn">Thanh toán</button>
         <button class="btn-thong-bao btn btn-primary btn-sm px-4">Thông báo</button>
     </div>
 
@@ -647,7 +646,11 @@
         var changeToReturn = parseFloat($('#changeToReturn').val().replace(/\./g, '').trim()) || 0;
         let maHoaDonInFo = document.getElementById("maHoaDonInFo");
         let maHoaDonFind = maHoaDonInFo.innerText;
-        let xoaMonCho = window.mon_an_cho_xac_nhan;
+        let xoaMonCho = (typeof window.mon_an_cho_xac_nhan !== 'undefined' && window.mon_an_cho_xac_nhan) ?
+            window.mon_an_cho_xac_nhan :
+            0; // hoặc dùng null tùy yêu cầu phía server
+
+            // console.log("xoaMonCho", xoaMonCho);
         var danhSachSanPham = [];
         $("#hoa-don-thanh-toan-body tr").each(function() {
             var sanPham = {

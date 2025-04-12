@@ -267,21 +267,6 @@ class ThuNganController extends Controller
             'searchInputId' => 'search-name', // ID của ô tìm kiếm
         ]);
     }
-    // public function show(Request $request)
-    // {
-    //     $banAnId = $request->get('id'); // Lấy ID bàn từ request
-    //     $banAn = BanAn::find($banAnId);
-
-    //     if ($banAn) {
-    //         // Trả về dữ liệu dưới dạng JSON
-    //         return response()->json([
-    //             'ten_ban' => $banAn->ten_ban,
-    //             'trang_thai' => $banAn->trang_thai
-    //         ]);
-    //     } else {
-    //         return response()->json(['error' => 'Bàn không tồn tại.'], 404);
-    //     }
-    // }
 
     public function xoaHoaDon($id)
     {
@@ -296,31 +281,53 @@ class ThuNganController extends Controller
     public function updateStatus(Request $request)
     {
         $hoaDonId = $request->hoa_don_id;
-
+    
         if (!$hoaDonId) {
             return response()->json(['success' => false, 'message' => 'Hóa đơn không hợp lệ.']);
         }
-
-        // Lấy danh sách món ăn theo hóa đơn và trạng thái "cho_xac_nhan"
+    
         $monAnList = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
             ->where('trang_thai', 'cho_xac_nhan')
             ->get();
-
+    
         if ($monAnList->isEmpty()) {
             return response()->json(['success' => false, 'message' => 'Không có món ăn nào hợp lệ hoặc đã thay đổi trạng thái.']);
         }
-
+    
         foreach ($monAnList as $monAn) {
-            // Cập nhật trạng thái món ăn thành "cho_che_bien"
-            $monAn->update([
-                'trang_thai' => 'cho_che_bien',
-                'updated_at' => now()
-            ]);
-            // Gửi sự kiện thông báo món ăn đã cập nhật
-            event(new MonMoiDuocThem($monAnList));
+            // Tìm bản ghi đã có trạng thái 'cho_che_bien' và cùng món ăn
+            $monAnTrung = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
+                ->where('mon_an_id', $monAn->mon_an_id)
+                ->where('trang_thai', 'cho_che_bien')
+                ->first();
+    
+            if ($monAnTrung) {
+                // Gộp số lượng
+                $monAnTrung->so_luong += $monAn->so_luong;
+                $monAnTrung->updated_at = now();
+                $monAnTrung->save();
+    
+                // Xóa bản ghi cũ (cho_xac_nhan)
+                $monAn->forceDelete();
+            } else {
+                // Nếu chưa có, chỉ cập nhật trạng thái
+                $monAn->update([
+                    'trang_thai' => 'cho_che_bien',
+                    'updated_at' => now()
+                ]);
+            }
         }
+    
+        // Gửi sự kiện sau khi cập nhật xong
+        event(new MonMoiDuocThem(
+            ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
+            ->where('trang_thai', 'cho_che_bien')
+            ->get()
+        ));
+    
         return response()->json(['success' => true]);
     }
+    
 
     public function updateBanStatus(Request $request)
     {
@@ -334,13 +341,12 @@ class ThuNganController extends Controller
             return response()->json(['success' => false, 'message' => 'Bàn không hợp lệ.']);
         }
 
-        // if (!is_array($xoa_mon_cho) || empty($xoa_mon_cho)) {
-        //     return response()->json(['success' => false, 'message' => 'Danh sách ID không hợp lệ']);
-        // }
 
-        // Xoá các món theo ID
-        // ChiTietHoaDon::whereIn('id', $xoa_mon_cho)->forceDelete();
-        // Tìm bàn theo ID
+        // // // Nếu là mảng và có ít nhất 1 phần tử thì mới xoá
+        if (is_array($xoa_mon_cho) && count($xoa_mon_cho) > 0) {
+            ChiTietHoaDon::whereIn('id', $xoa_mon_cho)->forceDelete();
+        }
+
         $banAn = BanAn::find($banAnId);
         $hoaDonTheoMa = HoaDon::where('ma_hoa_don', $ma_hoa_don_ban)->first();
 
@@ -640,45 +646,60 @@ class ThuNganController extends Controller
     {
         $monAnId = $request->mon_an_id;
         $thayDoi = (int) $request->thay_doi;
-
+    
+        // Giả sử trạng thái 'chờ xác nhận' là chuỗi "cho_xac_nhan"
         $chiTietHoaDon = ChiTietHoaDon::where('id', $monAnId)->first();
-
+    
         if (!$chiTietHoaDon) {
             return response()->json(['error' => 'Món ăn không tồn tại!'], 404);
         }
-
-        // Kiểm tra số lượng không nhỏ hơn 1
-        if ($chiTietHoaDon->so_luong + $thayDoi < 1) {
-            return response()->json(['error' => 'Số lượng tối thiểu là 1'], 400);
+    
+        // Nếu trạng thái là 'chờ xác nhận'
+        if ($chiTietHoaDon->trang_thai === 'cho_xac_nhan') {
+    
+            if ($chiTietHoaDon->so_luong + $thayDoi < 1) {
+                return response()->json(['error' => 'Số lượng tối thiểu là 1'], 400);
+            }
+    
+            $chiTietHoaDon->so_luong += $thayDoi;
+            $chiTietHoaDon->thanh_tien = $chiTietHoaDon->so_luong * $chiTietHoaDon->don_gia;
+            $chiTietHoaDon->save();
+    
+        } else {
+            // Tạo bản ghi mới y hệt, chỉ khác trạng thái và số lượng
+            $newChiTiet = $chiTietHoaDon->replicate(); // sao chép tất cả cột trừ khóa chính
+            $newChiTiet->so_luong = max(1, $thayDoi); // số lượng tối thiểu là 1
+            $newChiTiet->thanh_tien = $newChiTiet->so_luong * $newChiTiet->don_gia;
+            $newChiTiet->trang_thai = 'cho_xac_nhan';
+            $newChiTiet->save();
+    
+            $chiTietHoaDon = $newChiTiet; // để phần dưới xử lý tiếp
         }
-
-        // Cập nhật số lượng món ăn
-        $chiTietHoaDon->so_luong += $thayDoi;
-        $chiTietHoaDon->thanh_tien = $chiTietHoaDon->so_luong * $chiTietHoaDon->don_gia;
-        $chiTietHoaDon->save();
-
-        $thanhTien = $chiTietHoaDon->thanh_tien;
-        // Lấy lại tổng tiền của hóa đơn
+    
         $hoaDonId = $chiTietHoaDon->hoa_don_id;
+    
+        // Tính lại tổng tiền
         $tongTien = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
             ->get()
             ->map(fn($item) => $item->so_luong * $item->don_gia)
             ->sum();
-
+    
         $hoaDon = HoaDon::find($hoaDonId);
         $hoaDon->update(['tong_tien' => $tongTien]);
-
-        // 🔥 Phát sự kiện cập nhật hóa đơn
-        $hoaDon->load('chiTietHoaDons'); // Nạp lại dữ liệu chi tiết hóa đơn
+    
+        // Phát sự kiện
+        $hoaDon->load('chiTietHoaDons');
         broadcast(new HoaDonUpdated($hoaDon))->toOthers();
+    
         return response()->json([
             'success' => true,
             'hoa_don_id' => $hoaDonId,
             'tong_tien' => $tongTien,
             'so_luong' => $chiTietHoaDon->so_luong,
-            'thanh_tien' => $thanhTien
+            'thanh_tien' => $chiTietHoaDon->thanh_tien
         ]);
     }
+    
 
     //xóa món ăn
     public function deleteMonAn(Request $request)
