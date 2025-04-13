@@ -344,6 +344,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('ma-giam-gia/restore/{id}', [MaGiamGiaController::class, 'restore'])->name('ma-giam-gia.restore');
     Route::get('export-ma-giam-gia', [MaGiamGiaController::class, 'export'])->name('ma-giam-gia.export');
     Route::post('/import-ma-giam-gia', [MaGiamGiaController::class, 'importMaGiamGia'])->name('ma-giam-gia.import');
+   
 
     // thu ngân
     Route::get('/thu-ngan', [ThunganController::class, 'getBanAn'])->name('thungan.getBanAn');

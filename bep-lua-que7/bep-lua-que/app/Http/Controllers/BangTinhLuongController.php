@@ -75,67 +75,56 @@ class BangTinhLuongController extends Controller
 
 
     // Hiển thị form tạo bảng lương
-    public function create(Request $request)
-    {
-        $thangChon = $request->input('thang', now()->format('Y-m'));
-        $ngayBatDauThang = Carbon::parse($thangChon . '-01');
-        $ngayKetThucThang = $ngayBatDauThang->copy()->endOfMonth();
-    
-        // Lấy danh sách nhân viên có chấm công trong tháng đã chọn
-        $nhanViens = NhanVien::whereHas('chamCongs', function ($query) use ($thangChon) {
+  public function create(Request $request)
+{
+    // Lấy tháng từ request, mặc định là tháng hiện tại
+    $thangChon = $request->input('thang', now()->format('Y-m'));
+
+    // Lọc chỉ những nhân viên có chấm công trong tháng được chọn
+    $nhanViens = NhanVien::whereHas('chamCongs', function ($query) use ($thangChon) {
+        $query->whereYear('ngay_cham_cong', date('Y', strtotime($thangChon)))
+            ->whereMonth('ngay_cham_cong', date('m', strtotime($thangChon)));
+    })
+        ->with(['luong', 'chamCongs' => function ($query) use ($thangChon) {
             $query->whereYear('ngay_cham_cong', date('Y', strtotime($thangChon)))
-                  ->whereMonth('ngay_cham_cong', date('m', strtotime($thangChon)));
-        })->with([
-            'luong',
-            'chamCongs' => function ($query) use ($thangChon) {
-                $query->whereYear('ngay_cham_cong', date('Y', strtotime($thangChon)))
-                      ->whereMonth('ngay_cham_cong', date('m', strtotime($thangChon)))
-                      ->with('caLam');
+                ->whereMonth('ngay_cham_cong', date('m', strtotime($thangChon)))
+                ->with('caLam');
+        }])
+        ->get();
+
+    // Duyệt qua các nhân viên để xử lý lương theo tháng
+    foreach ($nhanViens as $nhanVien) {
+        // Kiểm tra xem nhân viên có dữ liệu lương không
+        if ($nhanVien->luong) {
+            // Lấy lương của tháng trước (nếu có)
+            $luongThangTruoc = $nhanVien->luong()
+                ->whereYear('ngay_cham_cong', '<', date('Y', strtotime($thangChon))) // Sử dụng năm từ `ngay_cham_cong`
+                ->whereMonth('ngay_cham_cong', '<', date('m', strtotime($thangChon))) // Sử dụng tháng từ `ngay_cham_cong`
+                ->orderByDesc('ngay_cham_cong') // Sắp xếp theo ngày chấm công
+                ->first();
+
+            if ($luongThangTruoc) {
+                // Sử dụng mức lương của tháng trước
+                $nhanVien->luong->muc_luong = $luongThangTruoc->muc_luong;
+            } else {
+                // Nếu không có lương tháng trước, sử dụng mức lương mặc định (hoặc 0)
+                $nhanVien->luong->muc_luong = 0;
             }
-        ])->get();
-    
-        foreach ($nhanViens as $nhanVien) {
-            // Lấy tất cả bản lương của nhân viên, sắp xếp theo ngày áp dụng tăng dần
-            $luongs = $nhanVien->luong()->orderBy('ngay_ap_dung', 'asc')->get();
-    
-            $luongCu = null;
-            $luongMoi = null;
-    
-            foreach ($luongs as $luong) {
-                $ngayApDung = Carbon::parse($luong->ngay_ap_dung);
-    
-                // Nếu ngày áp dụng <= cuối tháng => là lương cũ (đang áp dụng)
-                if ($ngayApDung <= $ngayKetThucThang) {
-                    $luongCu = $luong;
-                }
-    
-                // Nếu ngày áp dụng > cuối tháng => là lương mới (áp dụng tháng sau)
-                if ($ngayApDung > $ngayKetThucThang) {
-                    $luongMoi = $luong;
-                }
+
+            // Kiểm tra nếu lương có thay đổi cho tháng hiện tại (dùng lương mới cho tháng sau)
+            $luongMoi = $nhanVien->luong()->whereYear('ngay_cham_cong', '=', date('Y', strtotime($thangChon)))
+                ->whereMonth('ngay_cham_cong', '=', date('m', strtotime($thangChon)))
+                ->first();
+
+            if ($luongMoi && $luongMoi->updated_at > now()->subMonth()) {
+                // Chỉ áp dụng mức lương mới từ tháng sau
+                $nhanVien->luong->muc_luong = $luongMoi->muc_luong;
             }
-    
-            // Gán lại lương cũ và lương mới vào nhân viên
-            $nhanVien->luong_cu = $luongCu ? $luongCu->muc_luong : 0;
-            $nhanVien->luong_moi = $luongMoi ? $luongMoi->muc_luong : 0;
-    
-            // Nếu không có lương cũ nhưng có lương mới, dùng luôn lương mới cho cả 2
-            if ($luongMoi !== null && $luongCu === null) {
-                $nhanVien->luong_cu = $luongMoi->muc_luong;
-                $nhanVien->luong_moi = $luongMoi->muc_luong;
-                $nhanVien->hinh_thuc = $luongMoi->hinh_thuc;
-            }
-    
-            // Ưu tiên lấy hình thức từ lương cũ, nếu không có thì lấy từ lương mới
-            $nhanVien->hinh_thuc = $luongCu 
-                ? $luongCu->hinh_thuc 
-                : ($luongMoi ? $luongMoi->hinh_thuc : 'Theo ca');
         }
-    
-        // Trả về view tính lương
-        return view('admin.bangluong.tinhluong', compact('nhanViens', 'thangChon'));
     }
-    
+
+    return view('admin.bangluong.tinhluong', compact('nhanViens', 'thangChon'));
+}
 
 
 

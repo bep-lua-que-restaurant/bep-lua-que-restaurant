@@ -1,58 +1,140 @@
-<div class="accordion" id="discountAccordion">
-    @foreach ($data as $index => $item)
-        <div class="accordion-item mb-3 shadow-sm border rounded">
-            <h2 class="accordion-header" id="heading{{ $index }}">
-                <button class="accordion-button collapsed d-flex justify-content-between" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $index }}" aria-expanded="false" aria-controls="collapse{{ $index }}">
-                    <div class="d-flex flex-column flex-md-row w-100 justify-content-between align-items-start align-items-md-center">
-                        <span><strong>#{{ $item->id }}</strong> - {{ $item->code }}</span>
-                        <span>
-                            <span class="badge bg-{{ $item->type === 'percent' ? 'primary' : 'success' }}">
-                                {{ $item->type === 'percent' ? 'Phần trăm' : 'Tiền mặt' }}
-                            </span>
-                            <span class="badge bg-warning text-dark ms-2">
-                                {{ $item->value }}{{ $item->type === 'percent' ? '%' : '₫' }}
-                            </span>
-                        </span>
-                    </div>
-                </button>
-            </h2>
-            <div id="collapse{{ $index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ $index }}" data-bs-parent="#discountAccordion">
-                <div class="accordion-body">
-                    <p><strong>Hiệu lực:</strong>
-                        @if($item->start_date && $item->end_date)
-                            {{ \Carbon\Carbon::parse($item->start_date)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($item->end_date)->format('d/m/Y') }}
-                        @else
-                            Không xác định
-                        @endif
-                    </p>
-                    <p><strong>Số lượt đã dùng:</strong> {{ $item->usage_count ?? 0 }}</p>
-                    
-                    <div class="d-flex gap-2">
-                        <a href="{{ route('ma-giam-gia.show', $item->id) }}" class="btn btn-outline-info btn-sm">
-                            <i class="fa fa-eye"></i> Xem
+<table class="table align-middle text-center custom-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Mã</th>
+            <th>Loại</th>
+            <th>Giá trị</th>
+            <th>Hiệu lực</th>
+            <th>Đã dùng</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($data as $item)
+            <tr @if($item->deleted_at) class="table-danger" @endif>
+                <td>{{ $item->id }}</td>
+                <td><span class="fw-bold text-primary">{{ $item->code }}</span></td>
+                <td>
+                    <span class="status-badge {{ $item->type == 'percent' ? 'bg-info' : 'bg-success' }}">
+                        {{ $item->type == 'percent' ? 'Phần trăm' : 'Tiền mặt' }}
+                    </span>
+                </td>
+                <td>
+                    <span class="status-badge bg-dark">
+                        {{ $item->type == 'percent' ? $item->value . '%' : number_format($item->value, 0, ',', '.') . '₫' }}
+                    </span>
+                </td>
+                <td>
+                    @if($item->start_date && $item->end_date)
+                        <small>
+                            {{ \Carbon\Carbon::parse($item->start_date)->format('d/m/Y') }} <br>
+                            – {{ \Carbon\Carbon::parse($item->end_date)->format('d/m/Y') }}
+                        </small>
+                    @else
+                        <span class="text-muted fst-italic">Không xác định</span>
+                    @endif
+                </td>
+                <td>
+                    <span class="status-badge bg-secondary">{{ $item->usage_count ?? 0 }}</span>
+                </td>
+                <td>
+                    <div class="btn-group action-buttons">
+                        <a href="{{ route('ma-giam-gia.show', $item->id) }}" class="btn btn-view" title="Xem">
+                            <i class="fas fa-eye"></i>
                         </a>
-                        <a href="{{ route('ma-giam-gia.edit', $item->id) }}" class="btn btn-outline-warning btn-sm">
-                            <i class="fa fa-edit"></i> Sửa
+                        <a href="{{ route('ma-giam-gia.edit', $item->id) }}" class="btn btn-edit" title="Sửa">
+                            <i class="fas fa-edit"></i>
                         </a>
                         @if ($item->deleted_at)
                             <form action="{{ route('ma-giam-gia.restore', $item->id) }}" method="POST" class="d-inline">
                                 @csrf
-                                <button type="submit" onclick="return confirm('Khôi phục mục này?')" class="btn btn-outline-success btn-sm">
-                                    <i class="fa fa-recycle"></i> Khôi phục
+                                <button type="submit" class="btn btn-restore" title="Khôi phục" onclick="return confirm('Khôi phục mã này?')">
+                                    <i class="fas fa-recycle"></i>
                                 </button>
                             </form>
                         @else
                             <form action="{{ route('ma-giam-gia.destroy', $item->id) }}" method="POST" class="d-inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" onclick="return confirm('Ngừng mã giảm giá này?')" class="btn btn-outline-danger btn-sm">
-                                    <i class="fa fa-trash"></i> Xóa
+                                <button type="submit" class="btn btn-delete" title="Xóa" onclick="return confirm('Ngừng mã này?')">
+                                    <i class="fas fa-trash"></i>
                                 </button>
                             </form>
                         @endif
                     </div>
-                </div>
-            </div>
-        </div>
-    @endforeach
-</div>
+                </td>
+            </tr>
+        @endforeach
+    </tbody>
+</table>
+<style>
+    .custom-table th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 14px;
+    }
+
+    .custom-table td {
+        vertical-align: middle;
+        font-size: 15px;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: white;
+    }
+
+    .bg-info {
+        background-color: #17a2b8 !important;
+    }
+
+    .bg-success {
+        background-color: #28a745 !important;
+    }
+
+    .bg-dark {
+        background-color: #343a40 !important;
+    }
+
+    .bg-secondary {
+        background-color: #6c757d !important;
+    }
+
+    .action-buttons .btn {
+        border-radius: 8px;
+        padding: 5px 10px;
+        margin: 0 2px;
+        color: white;
+    }
+
+    .btn-view {
+        background-color: #00bcd4;
+    }
+
+    .btn-edit {
+        background-color: #ffc107;
+        color: black;
+    }
+
+    .btn-delete {
+        background-color: #f44336;
+    }
+
+    .btn-restore {
+        background-color: #28a745;
+    }
+
+    .action-buttons .btn i {
+        font-size: 14px;
+    }
+
+    .action-buttons .btn:hover {
+        opacity: 0.85;
+    }
+</style>
