@@ -16,6 +16,7 @@ use App\Models\ChiTietPhieuXuatKho;
 use App\Models\HoaDonBan;
 use App\Models\HoaDon;
 use App\Models\ChiTietHoaDon;
+use App\Models\ChiTietPhieuNhapKho;
 use App\Models\CongThucMonAn;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -149,6 +150,40 @@ class NguyenLieuController extends Controller
             }
         }
 
+        // ✅ Phần này cần đưa LÊN TRƯỚC return view
+        $homNay = Carbon::today();
+        $nguyenLieuHetHan = ChiTietPhieuNhapKho::with('nguyenLieu')
+            ->whereNotNull('han_su_dung')
+            ->when($loaiId, function ($query) use ($loaiId) {
+                $query->whereHas('nguyenLieu', function ($q) use ($loaiId) {
+                    $q->where('loai_nguyen_lieu_id', $loaiId);
+                });
+            })
+            ->get()
+            ->map(function ($ct) use ($homNay) {
+                $daysLeft = Carbon::parse($ct->han_su_dung)->diffInDays($homNay, false);
+                $trangThai = null;
+
+                if ($daysLeft < 0) {
+                    $trangThai = 'Hết hạn';
+                } elseif ($daysLeft <= 3) {
+                    $trangThai = 'Dưới 3 ngày';
+                } elseif ($daysLeft <= 7) {
+                    $trangThai = 'Dưới 7 ngày';
+                }
+
+                return $trangThai ? [
+                    'nguyen_lieu' => $ct->nguyenLieu->ten_nguyen_lieu ?? 'N/A',
+                    'ngay_san_xuat' => $ct->ngay_san_xuat,
+                    'han_su_dung' => $ct->han_su_dung,
+                    'so_luong' => $ct->so_luong,
+                    'don_vi' => $ct->nguyenLieu->don_vi_ton ?? '',
+                    'trang_thai' => $trangThai,
+                ] : null;
+            })
+            ->filter()
+            ->values();
+
         $dsLoai = LoaiNguyenLieu::all();
 
         return view('admin.nguyenlieu.kiemtratonkho', compact(
@@ -158,9 +193,11 @@ class NguyenLieuController extends Controller
             'ngay',
             'loaiId',
             'dsLoai',
-            'soNgay'
+            'soNgay',
+            'nguyenLieuHetHan'
         ));
     }
+
 
 
 
