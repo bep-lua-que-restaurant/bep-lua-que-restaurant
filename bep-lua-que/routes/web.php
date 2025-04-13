@@ -411,7 +411,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/bangluong/filter', [BangTinhLuongController::class, 'filter'])->name('bangluong.filter');
     Route::get('/bang-luong-export', [BangTinhLuongController::class, 'exportBangLuong'])->name('bang-luong.export');
-    Route::post('luong/import', [BangTinhLuongController::class, 'import'])->name('luong.import');
+    Route::post('luong/import', [BangTinhLuongController::class, 'BangLuongImport'])->name('bang-luong.import');
 
 
     //Thống kê

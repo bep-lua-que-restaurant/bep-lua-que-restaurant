@@ -4,6 +4,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\BangLuongExport;
+use App\Imports\BangLuongImport;
 use App\Models\BangTinhLuong;
 use App\Models\ChamCong;
 use App\Models\NhanVien;
@@ -13,6 +14,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Optional;
 use Maatwebsite\Excel\Facades\Excel;
+
 
 class BangTinhLuongController extends Controller
 {
@@ -161,6 +163,18 @@ class BangTinhLuongController extends Controller
     
         return Excel::download(new BangLuongExport($month, $year), 'BangLuong-Thang-' . $month . '.xlsx');
     }
+    public function BangLuongImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
+
+        Excel::import(new BangLuongImport(), $request->file('file'));
+
+        return back()->with('success', 'Nhập dữ liệu thành công!');
+    }
+
+    
     
     
 }
