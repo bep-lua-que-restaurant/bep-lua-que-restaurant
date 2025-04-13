@@ -20,7 +20,7 @@ class NhaCungCapExport implements FromCollection, WithHeadings, WithEvents, With
 
     public function collection()
     {
-        return NhaCungCap::withTrashed()->select('id', 'ten', 'created_at', 'deleted_at')->get();
+        return NhaCungCap::withTrashed()->select('ten_nha_cung_cap', 'dia_chi', 'so_dien_thoai', 'email', 'moTa', 'created_at', 'deleted_at')->get();
     }
 
 
@@ -28,17 +28,20 @@ class NhaCungCapExport implements FromCollection, WithHeadings, WithEvents, With
     {
         return [
             ['Nhà Cung Cấp'], // Tiêu đề lớn (dòng 1)
-            ['ID', 'Tên', 'Ngày tạo', 'Trạng thái kinh doanh'], // Headers (dòng 2)
+            ['Tên', 'Địa chỉ', 'Số điện thoại', 'Email', 'Mô tả'], // Headers (dòng 2)
         ];
     }
 
     public function map($row): array
     {
         return [
-            $row->id,
-            $row->ten,
-            $row->created_at ? $row->created_at->format('d/m/Y') : '',
-            $row->deleted_at ? 'Ngừng kinh doanh' : 'Đang kinh doanh', // Trạng thái kinh doanh
+            $row->ten_nha_cung_cap,
+            $row->dia_chi,
+            $row->so_dien_thoai,
+            $row->email,
+            $row->moTa,
+//            $row->created_at ? $row->created_at->format('d/m/Y') : '',
+//            $row->deleted_at ? 'Ngừng hoạt động' : 'Đang hoạt động', // Trạng thái kinh doanh
         ];
     }
 
@@ -49,7 +52,7 @@ class NhaCungCapExport implements FromCollection, WithHeadings, WithEvents, With
                 $sheet = $event->sheet->getDelegate();
 
                 // Gộp ô cho tiêu đề lớn
-                $sheet->mergeCells('A1:D1');
+                $sheet->mergeCells('A1:E1');
                 $sheet->setCellValue('A1', 'Nhà Cung Cấp');
 
                 // Định dạng tiêu đề lớn
@@ -70,7 +73,7 @@ class NhaCungCapExport implements FromCollection, WithHeadings, WithEvents, With
                 ]);
 
                 // Định dạng heading
-                $sheet->getStyle('A2:D2')->applyFromArray([
+                $sheet->getStyle('A2:E2')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'color' => ['rgb' => 'FFFFFF'],
@@ -86,7 +89,7 @@ class NhaCungCapExport implements FromCollection, WithHeadings, WithEvents, With
                 ]);
 
                 // Tự động căn chỉnh độ rộng cột
-                foreach (range('A', 'D') as $column) {
+                foreach (range('A', 'E') as $column) {
                     $sheet->getColumnDimension($column)->setAutoSize(true);
                 }
             },

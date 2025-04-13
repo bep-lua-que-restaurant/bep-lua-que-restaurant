@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\DanhSachPhieuNhapExport;
+use App\Exports\PhieuNhapKhoDetailExport;
 use App\Models\PhieuNhapKho;
 use App\Models\ChiTietPhieuNhapKho;
 use App\Models\NguyenLieu;
@@ -12,6 +14,7 @@ use App\Http\Requests\UpdatePhieuNhapKhoRequest;
 use App\Models\LoaiNguyenLieu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class PhieuNhapKhoController extends Controller
@@ -86,24 +89,26 @@ class PhieuNhapKhoController extends Controller
      */
     public function create()
     {
-        // Lấy danh sách nhà cung cấp, nhân viên và loại nguyên liệu
+        // Lấy danh sách các đối tượng (nguyên liệu chỉ lấy còn tồn tại)
         $nhaCungCaps = NhaCungCap::all();
         $nhanViens = NhanVien::all();
         $loaiNguyenLieus = LoaiNguyenLieu::all();
-        $nguyenLieus = NguyenLieu::all();
+        $nguyenLieus = NguyenLieu::whereNull('deleted_at')->get(); // chỉ lấy nguyên liệu chưa bị xoá
 
         // Tạo mã phiếu tự động
         $latestPhieuNhapKho = PhieuNhapKho::latest()->first();
-        $nextCode = $latestPhieuNhapKho ? 'PNK-' . str_pad(substr($latestPhieuNhapKho->ma_phieu, 4) + 1, 4, '0', STR_PAD_LEFT) : 'PNK-0001';
+        $nextCode = $latestPhieuNhapKho
+            ? 'PNK-' . str_pad(substr($latestPhieuNhapKho->ma_phieu, 4) + 1, 4, '0', STR_PAD_LEFT)
+            : 'PNK-0001';
 
         return view('admin.phieunhapkho.create', compact('nhaCungCaps', 'nhanViens', 'loaiNguyenLieus', 'nextCode', 'nguyenLieus'));
     }
+
 
     public function store(StorePhieuNhapKhoRequest $request)
     {
         DB::beginTransaction();
         try {
-            // 1. Tạo phiếu nhập kho
             $phieuNhapKho = PhieuNhapKho::create([
                 'ma_phieu' => $request->ma_phieu,
                 'nha_cung_cap_id' => $request->nha_cung_cap_id,
@@ -113,30 +118,32 @@ class PhieuNhapKhoController extends Controller
                 'tong_tien' => 0,
                 'trang_thai' => 'cho_duyet',
             ]);
-    
+
             $tongTien = 0;
-    
-            // 2. Duyệt qua từng dòng nguyên liệu nhập
+            $canhBaoNguyenLieuXoa = [];
+
             foreach ($request->ten_nguyen_lieus as $index => $tenNguyenLieu) {
                 $tenNguyenLieu = trim($tenNguyenLieu);
                 $nguyenLieuId = $request->nguyen_lieu_ids[$index] ?? null;
                 $loaiId = $request->loai_nguyen_lieu_ids[$index];
-    
-                // Khởi tạo biến nguyên liệu
                 $nguyenLieu = null;
-    
-                // Nếu có ID nguyên liệu -> chọn từ danh sách
+
                 if (!empty($nguyenLieuId)) {
-                    $nguyenLieu = NguyenLieu::find($nguyenLieuId);
+                    // Kiểm tra nguyên liệu, kể cả đã bị xoá mềm
+                    $nguyenLieu = NguyenLieu::withTrashed()->find($nguyenLieuId);
+
                     if (!$nguyenLieu) {
-                        continue; // Nếu không tìm thấy thì bỏ qua dòng này
+                        continue; // Không tìm thấy, bỏ qua
                     }
-                } 
-                // Nếu không có ID -> kiểm tra tên hoặc tạo mới
-                elseif (!empty($tenNguyenLieu)) {
+
+                    // Nếu nguyên liệu đã bị soft delete -> cảnh báo
+                    if ($nguyenLieu->trashed()) {
+                        $canhBaoNguyenLieuXoa[] = $nguyenLieu->ten_nguyen_lieu;
+                        continue; // không cho nhập nguyên liệu đã bị xoá
+                    }
+                } elseif (!empty($tenNguyenLieu)) {
                     $nguyenLieu = NguyenLieu::whereRaw('LOWER(ten_nguyen_lieu) = ?', [strtolower($tenNguyenLieu)])->first();
-    
-                    // Nếu chưa có thì tạo mới
+
                     if (!$nguyenLieu) {
                         $nguyenLieu = NguyenLieu::create([
                             'ten_nguyen_lieu' => $tenNguyenLieu,
@@ -147,17 +154,14 @@ class PhieuNhapKhoController extends Controller
                         ]);
                     }
                 } else {
-                    // Không có ID và cũng không có tên => bỏ qua
                     continue;
                 }
-    
-                // Tính thành tiền
+
                 $soLuong = $request->so_luong_nhaps[$index];
                 $donGia = $request->don_gias[$index];
                 $thanhTien = $soLuong * $donGia;
                 $tongTien += $thanhTien;
-    
-                // Tạo chi tiết phiếu nhập
+
                 ChiTietPhieuNhapKho::create([
                     'phieu_nhap_kho_id' => $phieuNhapKho->id,
                     'nguyen_lieu_id' => $nguyenLieu->id,
@@ -174,34 +178,39 @@ class PhieuNhapKhoController extends Controller
                     'ghi_chu' => $request->ghi_chus[$index] ?? null,
                 ]);
             }
-    
-            // 3. Cập nhật tổng tiền
+
             $phieuNhapKho->update(['tong_tien' => $tongTien]);
-    
             DB::commit();
-            return redirect()->route('phieu-nhap-kho.index')->with('success', 'Tạo phiếu nhập kho thành công!');
+
+            $message = 'Tạo phiếu nhập kho thành công!';
+            if (!empty($canhBaoNguyenLieuXoa)) {
+                $message .= ' Tuy nhiên, các nguyên liệu sau đã bị xoá và không được nhập: ' . implode(', ', $canhBaoNguyenLieuXoa);
+            }
+
+            return redirect()->route('phieu-nhap-kho.index')->with('success', $message);
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => 'Lỗi tạo phiếu nhập: ' . $e->getMessage()])->withInput();
         }
     }
-    
+
 
 
 
 
     public function show(PhieuNhapKho $phieuNhapKho)
     {
-        // Nếu đã bị xoá, chuyển về danh sách kèm thông báo lỗi
         if ($phieuNhapKho->deleted_at !== null) {
             return redirect()->route('phieu-nhap-kho.index')->with('error', 'Không thể xem phiếu nhập kho đã bị xoá.');
         }
 
-        // Eager load các quan hệ cần thiết để tránh N+1 query
+        // Load các quan hệ kèm nguyên liệu đã bị xoá
         $phieuNhapKho->load([
             'nhaCungCap',
             'nhanVien',
-            'chiTietPhieuNhaps.nguyenLieu',
+            'chiTietPhieuNhaps.nguyenLieu' => function ($query) {
+                $query->withTrashed();
+            },
             'chiTietPhieuNhaps.loaiNguyenLieu'
         ]);
 
@@ -212,23 +221,27 @@ class PhieuNhapKhoController extends Controller
 
 
 
+
     /**
      * Hiển thị form chỉnh sửa phiếu nhập kho.
      */
     public function edit(PhieuNhapKho $phieuNhapKho)
     {
-        // Không cho sửa nếu đã bị xoá
         if ($phieuNhapKho->deleted_at !== null) {
             return redirect()->route('phieu-nhap-kho.index')->with('error', 'Không thể sửa phiếu nhập kho đã bị xoá.');
         }
 
-        // Chỉ cho phép sửa nếu trạng thái là "chờ duyệt"
         if ($phieuNhapKho->trang_thai !== 'cho_duyet') {
             return redirect()->route('phieu-nhap-kho.index')->with('error', 'Chỉ được sửa phiếu ở trạng thái "Chờ duyệt".');
         }
 
-        // Load dữ liệu cần thiết
-        $phieuNhapKho->load('chiTietPhieuNhaps.nguyenLieu.loaiNguyenLieu');
+        // Load chi tiết kèm nguyên liệu đã bị xoá
+        $phieuNhapKho->load([
+            'chiTietPhieuNhaps.nguyenLieu' => function ($query) {
+                $query->withTrashed();
+            },
+            'chiTietPhieuNhaps.loaiNguyenLieu',
+        ]);
 
         $nhaCungCaps = NhaCungCap::all();
         $nhanViens = NhanVien::all();
@@ -457,4 +470,11 @@ class PhieuNhapKhoController extends Controller
 
         return redirect()->route('phieu-nhap-kho.index')->with('success', 'Đã khôi phục phiếu nhập kho!');
     }
+
+    public function exportDanhSach()
+    {
+        return Excel::download(new DanhSachPhieuNhapExport, 'danh_sach_phieu_nhap.xlsx');
+    }
+
+    
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PhieuXuatKhoExport;
 use App\Http\Requests\UpdatePhieuXuatKhoRequest;
 use App\Models\PhieuXuatKho;
 use App\Models\ChiTietPhieuXuatKho;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Requests\StorePhieuXuatKhoRequest;
 use App\Models\LoaiNguyenLieu;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PhieuXuatKhoController extends Controller
 {
@@ -80,9 +82,9 @@ class PhieuXuatKhoController extends Controller
     {
         // Eager load quan hệ loại nguyên liệu và chi tiết nhập kho mới nhất
         $nguyenLieus = NguyenLieu::with(['loaiNguyenLieu', 'chiTietNhapKhoMoiNhat'])
-        ->where('so_luong_ton', '>', 5000)
-        ->get();
-    
+            ->where('so_luong_ton', '>', 5000)
+            ->get();
+
 
         // Lấy danh sách loại nguyên liệu, nhà cung cấp và nhân viên
         $loaiNguyenLieus = LoaiNguyenLieu::all();
@@ -117,14 +119,14 @@ class PhieuXuatKhoController extends Controller
                 'nhan_vien_id' => $request->nhan_vien_id,
                 'ghi_chu' => $request->ghi_chu,
                 'tong_tien' => 0,
-            
+
                 // người nhận luôn có nếu là xuat_bep, xuat_huy, hoặc xuat_tra_hang
                 'nguoi_nhan' => in_array($request->loai_phieu, ['xuat_bep', 'xuat_huy', 'xuat_tra_hang']) ? $request->nguoi_nhan : null,
-            
+
                 // nhà cung cấp chỉ khi là xuat_tra_hang
                 'nha_cung_cap_id' => $request->loai_phieu === 'xuat_tra_hang' ? $request->nha_cung_cap_id : null,
             ]);
-            
+
 
             // Kiểm tra danh sách nguyên liệu
             if (!is_array($request->nguyen_lieu_ids) || empty($request->nguyen_lieu_ids)) {
@@ -171,16 +173,16 @@ class PhieuXuatKhoController extends Controller
 
     public function show(PhieuXuatKho $phieuXuatKho)
     {
-        // Nếu đã bị xoá, chuyển về danh sách kèm thông báo lỗi
         if ($phieuXuatKho->deleted_at !== null) {
             return redirect()->route('phieu-xuat-kho.index')->with('error', 'Không thể xem phiếu xuất kho đã bị xoá.');
         }
 
-        // Load các quan hệ liên quan để tránh N+1
         $phieuXuatKho->load([
-            'nhaCungCap', // nếu có
+            'nhaCungCap',
             'nhanVien',
-            'chiTietPhieuXuatKhos.nguyenLieu',
+            'chiTietPhieuXuatKhos.nguyenLieu' => function ($query) {
+                $query->withTrashed(); // Hiện nguyên liệu đã bị xoá
+            },
             'chiTietPhieuXuatKhos.loaiNguyenLieu',
         ]);
 
@@ -190,52 +192,52 @@ class PhieuXuatKhoController extends Controller
     }
 
 
+
     public function edit(PhieuXuatKho $phieuXuatKho)
     {
-        // Không cho sửa nếu đã bị xoá
         if ($phieuXuatKho->deleted_at !== null) {
             return redirect()->route('phieu-xuat-kho.index')->with('error', 'Không thể sửa phiếu đã bị xoá.');
         }
 
-        // Chỉ cho phép sửa nếu trạng thái là "chờ duyệt"
         if ($phieuXuatKho->trang_thai !== 'cho_duyet') {
             return redirect()->route('phieu-xuat-kho.index')->with('error', 'Chỉ được sửa phiếu ở trạng thái "Chờ duyệt".');
         }
 
-        // Load chi tiết và nguyên liệu + loại nguyên liệu cho từng chi tiết
+        // Load nguyên liệu kể cả bị xoá
         $phieuXuatKho->load([
-            'chiTietPhieuXuatKhos.nguyenLieu.loaiNguyenLieu'
+            'chiTietPhieuXuatKhos.nguyenLieu' => function ($query) {
+                $query->withTrashed();
+            },
+            'chiTietPhieuXuatKhos.loaiNguyenLieu',
+            'nhaCungCap'
         ]);
-        $loaiNguyenLieus = LoaiNguyenLieu::with('nguyenLieus')->get();
+
+        $loaiNguyenLieus = LoaiNguyenLieu::with(['nguyenLieus' => function ($query) {
+            $query->withTrashed();
+        }])->get();
+
         $nguyenLieuOptions = collect($loaiNguyenLieus)->flatMap(function ($loai) {
             return $loai->nguyenLieus
-                ->filter(function ($nl) {
-                    return $nl->so_luong_ton > 5000;
-                })
-                ->map(function ($nl) use ($loai) {
-                    return [
-                        'id' => $nl->id,
-                        'text' => $loai->ten_loai . ' - ' . $nl->ten_nguyen_lieu,
-                        'don_gia' => $nl->don_gia,
-                        'loai_nguyen_lieu_id' => $nl->loai_nguyen_lieu_id,
-                    ];
-                });
+                ->filter(fn($nl) => $nl->so_luong_ton > 5000)
+                ->map(fn($nl) => [
+                    'id' => $nl->id,
+                    'text' => $loai->ten_loai . ' - ' . $nl->ten_nguyen_lieu,
+                    'don_gia' => $nl->don_gia,
+                    'loai_nguyen_lieu_id' => $nl->loai_nguyen_lieu_id,
+                    'deleted_at' => $nl->deleted_at,
+                ]);
         })->values();
-        
-        // Tải danh sách nhân viên
+
         $nhanViens = NhanVien::all();
-        // Tải danh sách nhà cung cấp (nếu cần)
-        $phieuXuatKho->load('nhaCungCap');
 
-
-        // Tải danh sách loại nguyên liệu kèm nguyên liệu
-        $loaiNguyenLieus = LoaiNguyenLieu::with('nguyenLieus')->get();
-
-        return view(
-            'admin.phieuxuatkho.edit',
-            compact('phieuXuatKho', 'nhanViens', 'loaiNguyenLieus', 'nguyenLieuOptions')
-        );
+        return view('admin.phieuxuatkho.edit', compact(
+            'phieuXuatKho',
+            'nhanViens',
+            'loaiNguyenLieus',
+            'nguyenLieuOptions'
+        ));
     }
+
 
 
 
@@ -255,11 +257,11 @@ class PhieuXuatKhoController extends Controller
                 'loai_phieu'      => $request->loai_phieu,
                 'ghi_chu'         => $request->ghi_chu,
                 'ngay_xuat'       => $request->filled('ngay_xuat') ? $request->ngay_xuat : now(),
-            
+
                 'nguoi_nhan'      => in_array($request->loai_phieu, ['xuat_bep', 'xuat_huy', 'xuat_tra_hang']) ? $request->nguoi_nhan : null,
                 'nha_cung_cap_id' => $request->loai_phieu === 'xuat_tra_hang' ? $request->nha_cung_cap_id : null,
             ]);
-            
+
             $updatedIds = [];
 
             // Duyệt từng dòng chi tiết
@@ -415,4 +417,9 @@ class PhieuXuatKhoController extends Controller
             return redirect()->back()->with('error', 'Lỗi khi huỷ phiếu: ' . $e->getMessage());
         }
     }
+    public function export()
+    {
+        return Excel::download(new PhieuXuatKhoExport, 'phieu_xuat_kho.xlsx');
+    }
+    
 }

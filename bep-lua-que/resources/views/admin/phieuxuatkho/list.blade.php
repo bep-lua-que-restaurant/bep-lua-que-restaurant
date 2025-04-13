@@ -38,6 +38,10 @@
                         <h4 class="card-title">Danh sách Phiếu xuất kho</h4>
 
                         <div class="btn-group">
+                            <a href="{{ route('phieu-xuat-kho.export') }}" class="btn btn-success">
+                                <i class="fa fa-file-excel"></i> Export Excel
+                            </a>
+                            
                             <a href="{{ route('phieu-xuat-kho.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>

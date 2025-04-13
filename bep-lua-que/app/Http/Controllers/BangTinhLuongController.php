@@ -77,23 +77,14 @@ class BangTinhLuongController extends Controller
     // Hiển thị form tạo bảng lương
     public function create(Request $request)
     {
-        // Lấy tháng từ request, mặc định là tháng hiện tại
-        $thangChon = $request->input('thang', now()->format('Y-m'));
+        
     
-        // Lọc chỉ những nhân viên có chấm công trong tháng được chọn
-        $nhanViens = NhanVien::whereHas('chamCongs', function ($query) use ($thangChon) {
-            $query->whereYear('ngay_cham_cong', date('Y', strtotime($thangChon)))
-                  ->whereMonth('ngay_cham_cong', date('m', strtotime($thangChon)));
-        })
-        ->with(['luong', 'chamCongs' => function ($query) use ($thangChon) {
-            $query->whereYear('ngay_cham_cong', date('Y', strtotime($thangChon)))
-                  ->whereMonth('ngay_cham_cong', date('m', strtotime($thangChon)))
-                  ->with('caLam');
-        }])
-        ->get();
+        // Kiểm tra kết quả
+        // dd($nhanViens);
     
         return view('admin.bangluong.tinhluong', compact('nhanViens', 'thangChon'));
     }
+    
     
 
     // Lưu bảng lương vào database
@@ -163,13 +154,14 @@ class BangTinhLuongController extends Controller
         return view('admin.bangluong.show', compact('bangTinhLuong'));
     }
 
-
-    public function exportBangLuong()
+    public function exportBangLuong(Request $request)
     {
-        // Xuất file Excel với tên "DanhMucMonAn.xlsx"
-        return Excel::download(new BangLuongExport, 'BangLuong.xlsx');
+        $month = $request->query('month', now()->month); // Lấy tháng được chọn
+        $year = now()->year; // Bạn cũng có thể cho chọn năm nếu muốn
+    
+        return Excel::download(new BangLuongExport($month, $year), 'BangLuong-Thang-' . $month . '.xlsx');
     }
-
+    
     
 }
 

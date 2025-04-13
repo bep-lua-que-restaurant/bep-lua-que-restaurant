@@ -22,13 +22,11 @@ class UpdateMonAnRequest extends FormRequest
      */
     public function rules(): array
     {
-        // Lấy ID món ăn hiện tại từ route (tên tham số là 'mon_an' theo mặc định của Route::resource)
         $monAnId = $this->route('mon_an');
 
         return [
             'danh_muc_mon_an_id' => ['required', 'exists:danh_muc_mon_ans,id'],
 
-            // Kiểm tra tên món ăn duy nhất, bỏ qua món ăn hiện tại
             'ten' => [
                 'required',
                 'max:255',
@@ -36,10 +34,10 @@ class UpdateMonAnRequest extends FormRequest
             ],
 
             'gia' => ['required', 'numeric', 'min:0'],
+            'thoi_gian_nau' => ['required', 'integer', 'min:0'], // ✅ thêm dòng này
             'trang_thai' => ['required', Rule::in(['dang_ban', 'het_hang', 'ngung_ban'])],
         ];
     }
-
 
     public function messages()
     {
@@ -50,6 +48,9 @@ class UpdateMonAnRequest extends FormRequest
             'gia.required' => 'Giá món ăn là bắt buộc.',
             'gia.numeric' => 'Giá món ăn phải là một số.',
             'gia.min' => 'Giá món ăn phải lớn hơn hoặc bằng 0.',
+            'thoi_gian_nau.required' => 'Thời gian nấu là bắt buộc.',
+            'thoi_gian_nau.integer' => 'Thời gian nấu phải là số nguyên.',
+            'thoi_gian_nau.min' => 'Thời gian nấu phải lớn hơn hoặc bằng 0.',
             'trang_thai.required' => 'Trạng thái món ăn là bắt buộc.',
             'trang_thai.in' => 'Trạng thái món ăn không hợp lệ.',
         ];

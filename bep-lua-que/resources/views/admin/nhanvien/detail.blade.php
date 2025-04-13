@@ -60,20 +60,29 @@
                     <div class="col-md-12">
                         <h4>Thông tin lương</h4>
                         <ul class="list-group">
-                            <li class="list-group-item"><strong>Hình thức lương:</strong>
-                                @if ($nhanVien->luong)
-                                    {{ $nhanVien->luong->hinh_thuc == 'ca' ? 'Lương theo ca' : ($nhanVien->luong->hinh_thuc == 'gio' ? 'Lương theo giờ' : 'Lương tháng') }}
+
+                            <li class="list-group-item"><strong>Hình thức:</strong>
+                                @if ($nhanVien->luong && $nhanVien->luong->first() && $nhanVien->luong->first()->hinh_thuc == 'ca')
+                                    Lương theo ca
                                 @else
                                     <span class="text-danger">Chưa thiết lập</span>
                                 @endif
                             </li>
                             <li class="list-group-item"><strong>Mức lương:</strong>
-                                @if ($nhanVien->luong)
-                                    {{ number_format($nhanVien->luong->muc_luong, 0, ',', '.') }} VNĐ
+                                @if ($nhanVien->luong && $nhanVien->luong->first())
+                                    {{ number_format($nhanVien->luong->first()->muc_luong, 0, ',', '.') }} VNĐ
                                 @else
                                     <span class="text-danger">Chưa thiết lập</span>
                                 @endif
                             </li>
+
+                            <li class="list-group-item">
+                                <strong>Ngày áp dụng lương:</strong>
+                                {{ optional($nhanVien->luong->first())->ngay_ap_dung ? \Carbon\Carbon::parse($nhanVien->luong->first()->ngay_ap_dung)->format('d/m/Y') : 'Chưa thiết lập' }}
+                            </li>
+
+
+
                         </ul>
                     </div>
                 </div>

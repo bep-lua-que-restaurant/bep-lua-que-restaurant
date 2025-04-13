@@ -1,7 +1,7 @@
 import "./bootstrap";
 window.Echo.channel("banan-channel").listen("BanAnUpdated", (data) => {
     let updatedBan = $("#ban-" + data.id);
-
+    // console.log("Bàn ăn đã được cập nhật:", data);
     if (updatedBan.length) {
         // Nếu bàn ăn đã có trên giao diện, cập nhật thông tin
         updatedBan.find(".card-title").text(data.ten_ban);

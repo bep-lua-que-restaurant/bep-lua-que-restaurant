@@ -90,6 +90,9 @@
 
                             <!-- Nút submit -->
                             <div class="form-group text-right">
+                                <a href="{{ route('nha-cung-cap.index') }}" class="btn btn-primary btn-sm"> <i
+                                        class="fa fa-arrow-left"></i> Quay lại
+                                </a>
                                 <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Thêm
                                     mới</button>
                             </div>

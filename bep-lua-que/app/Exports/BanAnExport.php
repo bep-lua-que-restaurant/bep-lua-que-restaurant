@@ -15,7 +15,7 @@ class BanAnExport implements FromCollection, WithHeadings, WithEvents, WithMappi
 {
     public function collection()
     {
-        return BanAn::withTrashed()->select('id', 'ten_ban', 'so_ghe', 'vi_tri', 'created_at', 'deleted_at')->get();
+        return BanAn::withTrashed()->select('id', 'ten_ban', 'so_ghe',  'created_at', 'deleted_at')->get();
     }
 
     /**
@@ -25,7 +25,7 @@ class BanAnExport implements FromCollection, WithHeadings, WithEvents, WithMappi
     {
         return [
             ['Danh Sách Bàn Ăn'], // Tiêu đề lớn
-            ['ID', 'Tên Bàn', 'Số Ghế', 'Vị Trí', 'Ngày Tạo', 'Trạng Thái'], // Headers (dòng 2)
+            ['ID', 'Tên Bàn', 'Số Ghế', 'Ngày Tạo', 'Trạng Thái'], // Headers (dòng 2)
         ];
     }
 
@@ -38,7 +38,6 @@ class BanAnExport implements FromCollection, WithHeadings, WithEvents, WithMappi
             $row->id,
             $row->ten_ban,
             $row->so_ghe,
-            $row->vi_tri,
             $row->created_at ? $row->created_at->format('d/m/Y') : '',
             $row->deleted_at ? 'Ngừng sử dụng' : 'Đang sử dụng',
         ];

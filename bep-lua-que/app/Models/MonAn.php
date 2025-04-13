@@ -15,7 +15,9 @@ class MonAn extends Model
         'ten',
         'mo_ta',
         'gia',
+        'thoi_gian_nau',
         'trang_thai',
+        'thoi_gian_nau'
 
     ];
     /**

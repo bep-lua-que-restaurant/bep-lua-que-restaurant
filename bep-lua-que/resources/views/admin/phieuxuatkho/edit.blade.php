@@ -177,22 +177,29 @@
     <script>
         const nguyenLieuOptions = @json($nguyenLieuOptions);
 
-        $('#addRow').click(function () {
-    let options = '';
-    let firstLoaiId = '';
-    let firstDonGia = '';
-    if (nguyenLieuOptions.length > 0) {
-        firstLoaiId = nguyenLieuOptions[0].loai_nguyen_lieu_id;
-        firstDonGia = nguyenLieuOptions[0].don_gia;
-    }
+        $('#addRow').click(function() {
+            let options = '';
+            let firstLoaiId = '';
+            let firstDonGia = '';
 
-    nguyenLieuOptions.forEach(opt => {
-        options += `<option value="${opt.id}" data-loai="${opt.loai_nguyen_lieu_id}" data-don-gia="${opt.don_gia}">
-                        ${opt.text}
+            // Bỏ qua nguyên liệu bị xoá khi chọn mặc định
+            const validNguyenLieu = nguyenLieuOptions.find(nl => nl.deleted_at === null);
+            if (validNguyenLieu) {
+                firstLoaiId = validNguyenLieu.loai_nguyen_lieu_id;
+                firstDonGia = validNguyenLieu.don_gia;
+            }
+
+            nguyenLieuOptions.forEach(opt => {
+                const isDeleted = opt.deleted_at !== null;
+                const deletedLabel = isDeleted ? ' (ĐÃ XOÁ)' : '';
+                const disabledAttr = isDeleted ? 'disabled style="color:red;"' : '';
+
+                options += `<option value="${opt.id}" data-loai="${opt.loai_nguyen_lieu_id}" data-don-gia="${opt.don_gia}" ${disabledAttr}>
+                        ${opt.text}${deletedLabel}
                     </option>`;
-    });
+            });
 
-    const row = `
+            const row = `
         <tr>
             <td>
                 <input type="hidden" name="chi_tiet_ids[]" value="">
@@ -206,9 +213,8 @@
             <td><input type="text" name="ghi_chus[]" class="form-control"></td>
             <td><button type="button" class="btn btn-outline-danger btn-sm remove-row">Xoá</button></td>
         </tr>`;
-    $('#chiTietTable tbody').append(row);
-});
-
+            $('#chiTietTable tbody').append(row);
+        });
 
 
 

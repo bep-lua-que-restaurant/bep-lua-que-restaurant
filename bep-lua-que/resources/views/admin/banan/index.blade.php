@@ -20,33 +20,44 @@
             </div>
         </div>
         <!-- row -->
-        <div class="row">
+        {{-- <div class="row">
             @include('admin.filter')
+        </div> --}}
+
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <input type="text" id="filter-ten" class="form-control" placeholder="Nhập tên bàn">
+            </div>
+            <div class="col-md-4">
+                <select id="filter-status" class="form-control">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option value="Đang kinh doanh">Đang kinh doanh</option>
+                    <option value="Ngừng kinh doanh">Ngừng kinh doanh</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button id="btn-filter" class="btn btn-primary">Lọc</button>
+            </div>
         </div>
+
 
         <div class="row">
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-header">
                         <h4 class="card-title">Danh sách</h4>
-
-
-
                         <div class="btn-group">
-                            {{-- <a href="{{ route('ban-an.themNhanh') }}" class="btn btn-sm btn-primary">
-                                <i class="fa fa-plus"></i> Thêm nhanh
-                            </a> --}}
+
                             <!-- Nút hiển thị modal -->
-                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                            {{-- <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
                                 data-bs-target="#modalThemNhanhBanAn">
                                 <i class="fa fa-plus"></i> Thêm nhanh
+                            </button> --}}
+
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalThemNhanhBanAn">
+                                <i class="fa fa-plus"></i> Thêm nhanh bàn ăn
                             </button>
 
-
-                            <!-- Nút Thêm mới -->
-                            {{-- <a href="{{ route('ban-an.create') }}" class="btn btn-sm btn-primary">
-                                <i class="fa fa-plus"></i> Thêm mới
-                            </a> --}}
 
                             <!-- Nút Nhập file (Mở Modal) -->
                             <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
@@ -125,8 +136,8 @@
                                 </thead>
 
 
-                                <tbody id="{{ $tableId }}">
-                                    @include('admin.banan.body-list')
+                                <tbody id="table-body">
+                                    <!-- Dữ liệu render bằng JS -->
                                 </tbody>
 
                             </table>
@@ -138,12 +149,105 @@
         </div>
     </div>
 
-    @include('admin.search-srcip')
+    <script>
+        function renderTable(data) {
+            let html = '';
+            data.forEach((item, index) => {
+                let deleted = item.deleted_at !== null;
+                let statusKD = deleted ?
+                    '<div class="d-flex align-items-center"><i class="fa fa-circle text-danger mr-1"></i> Ngừng sử dụng</div>' :
+                    '<div class="d-flex align-items-center"><i class="fa fa-circle text-success mr-1"></i> Đang sử dụng</div>';
+
+                const labels = {
+                    trong: 'Trống',
+                    co_khach: 'Có khách',
+                    da_dat_truoc: 'Đã đặt trước'
+                };
+
+                html += `
+            <tr>
+                <td>
+                    <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
+                        <input type="checkbox" class="custom-control-input" id="customCheckBox${index}">
+                        <label class="custom-control-label" for="customCheckBox${index}"></label>
+                    </div>
+                </td>
+                <td><strong>${item.id}</strong></td>
+                <td><div class="d-flex align-items-center"><span class="w-space-no">${item.ten_ban}</span></div></td>
+                <td>${statusKD}</td>
+                <td><span>${labels[item.trang_thai] ?? item.trang_thai}</span></td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-info btnChiTietBanAn" data-id="${item.id}"><i class="fa fa-eye"></i></button>
+                        ${!deleted ? `<button class="btn btn-warning btn-sm p-2 m-2 btnEditBanAn" data-id="${item.id}"><i class="fa fa-edit"></i></button>` : ''}
+                        ${deleted
+                            ? `<button class="btn btn-success btn-sm p-2 m-2 btnRestoreBanAn" data-id="${item.id}"><i class="fa fa-recycle"></i></button>`
+                            : (item.trang_thai === 'trong'
+                                ? `<button class="btn btn-danger btn-sm p-2 m-2 btnDeleteBanAn" data-id="${item.id}"><i class="fa fa-trash"></i></button>`
+                                : '')
+                        }
+                    </div>
+                </td>
+            </tr>
+        `;
+            });
+
+            $('#table-body').html(html);
+
+            // Gắn lại các sự kiện
+            attachEventListeners(); // ← DÒNG QUAN TRỌNG NÀY
+        }
+
+
+        $('#btn-filter').on('click', function() {
+            let ten = $('#filter-ten').val();
+            let status = $('#filter-status').val();
+
+            $.ajax({
+                url: '{{ route('ban-an.fetch') }}',
+                method: 'GET',
+                data: {
+                    ten: ten,
+                    statusFilter: status
+                },
+                success: function(res) {
+                    renderTable(res.data.data); // Laravel paginate trả về trong `data.data`
+                },
+                error: function(err) {
+                    console.error(err);
+                }
+            });
+        });
+
+        // Gọi mặc định khi load trang
+        $(document).ready(function() {
+            $('#btn-filter').click();
+        });
+
+        function fetchAllData() {
+            $.ajax({
+                url: '{{ route('ban-an.fetch') }}',
+                method: 'GET',
+                data: {}, // không gửi filter gì cả
+                success: function(res) {
+                    renderTable(res.data.data); // render lại bảng
+                },
+                error: function(err) {
+                    console.error(err);
+                }
+            });
+        }
+    </script>
+
+
+    {{-- @include('admin.search-srcip') --}}
     <!-- Hiển thị phân trang -->
-    {{ $data->links('pagination::bootstrap-5') }}
+    {{-- {{ $data->links('pagination::bootstrap-5') }} --}}
 
     <!-- Modal có sẵn form -->
-    <div class="modal fade" id="modalThemNhanhBanAn" tabindex="-1" aria-hidden="true">
+    {{-- <div class="modal fade" id="modalThemNhanhBanAn" tabindex="-1" aria-hidden="true" data-bs-backdrop="false"> --}}
+    <div class="modal fade" id="modalThemNhanhBanAn" tabindex="-1" aria-hidden="true" data-bs-backdrop="false">
+
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -244,7 +348,7 @@
     </div>
 
 
-
+    {{-- 
     <script>
         $(document).ready(function() {
 
@@ -394,6 +498,177 @@
                 });
             });
 
+        });
+    </script> --}}
+
+    <script>
+        $(document).ready(function() {
+            // THÊM NHANH
+            $('#formThemNhanhBanAn').on('submit', function(e) {
+                e.preventDefault();
+
+                const $form = $(this);
+
+                $.ajax({
+                    url: '{{ route('ban-an.store-quick') }}',
+                    type: 'POST',
+                    data: $form.serialize(),
+                    success: function(response) {
+                        // ✅ Hiển thị thông báo thành công
+                        alert(response.message || 'Thêm nhanh thành công!');
+
+                        // ✅ Cập nhật bảng dữ liệu
+                        renderTable(response.data);
+
+                        // ✅ Reset lại form để người dùng thêm tiếp
+                        $form[0].reset();
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            let errors = xhr.responseJSON.errors;
+                            let messages = Object.values(errors).flat().join('\n');
+                            alert(messages);
+                        } else {
+                            alert('Có lỗi xảy ra!');
+                        }
+                    }
+                });
+            });
+
+
+            $('#modalThemNhanhBanAn').on('hidden.bs.modal', function() {
+                $('#formThemNhanhBanAn')[0].reset();
+            });
+
+
+
+
+
+
+            // XEM CHI TIẾT
+            $(document).on('click', '.btnChiTietBanAn', function() {
+                const id = $(this).data('id');
+
+                $.ajax({
+                    url: `/ban-an/ajax/${id}`,
+                    type: 'GET',
+                    success: function(data) {
+                        $('#modal-ban-id').text(data.id);
+                        $('#modal-ten-ban').text(data.ten_ban);
+                        $('#modal-so-ghe').text(data.so_ghe);
+                        $('#modal-mo-ta').text(data.mo_ta ?? 'Không có mô tả');
+                        $('#modal-trang-thai').html(data.deleted_at ?
+                            '<span class="badge bg-danger">Ngừng sử dụng</span>' :
+                            '<span class="badge bg-success">Đang sử dụng</span>'
+                        );
+                        $('#chiTietBanAnModal').modal('show');
+                    },
+                    error: function() {
+                        alert('Không thể lấy thông tin bàn ăn.');
+                    }
+                });
+            });
+
+            // CHỈNH SỬA
+            $(document).on('click', '.btnEditBanAn', function() {
+                const id = $(this).data('id');
+
+                $.ajax({
+                    url: `/ban-an/ajax/${id}`,
+                    type: 'GET',
+                    success: function(data) {
+                        $('#edit-id').val(data.id);
+                        $('#edit-ten-ban').val(data.ten_ban);
+                        $('#edit-mo-ta').val(data.mo_ta);
+                        $('#editBanAnModal').modal('show');
+                    },
+                    error: function() {
+                        alert('Không thể lấy dữ liệu bàn ăn.');
+                    }
+                });
+            });
+
+            // GỬI FORM CHỈNH SỬA
+            $('#formEditBanAn').on('submit', function(e) {
+                e.preventDefault();
+
+                const id = $('#edit-id').val();
+                const formData = {
+                    ten_ban: $('#edit-ten-ban').val(),
+                    mo_ta: $('#edit-mo-ta').val(),
+                    _token: '{{ csrf_token() }}',
+                    _method: 'PUT'
+                };
+
+                $.ajax({
+                    url: `/ban-an/${id}`,
+                    type: 'POST',
+                    data: formData,
+                    success: function() {
+                        $('#editBanAnModal').modal('hide');
+                        alert('Cập nhật thành công!');
+                        fetchAllData(); // không reload trangg
+                    },
+                    error: function(xhr) {
+                        let msg = 'Đã xảy ra lỗi';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        alert(msg);
+                    }
+                });
+            });
+
+            // XOÁ
+            $(document).on('click', '.btnDeleteBanAn', function() {
+                const id = $(this).data('id');
+
+                if (!confirm('Bạn có chắc muốn ngừng sử dụng bàn ăn này không?')) return;
+
+                $.ajax({
+                    url: `/ban-an/${id}`,
+                    type: 'POST',
+                    data: {
+                        _method: 'DELETE',
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function() {
+                        alert('Đã ngừng sử dụng bàn ăn!');
+                        // location.reload();
+                        fetchAllData(); // load lại danh sách
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 403 || xhr.status === 422) {
+                            alert(xhr.responseJSON.message ?? 'Không thể xoá bàn ăn!');
+                        } else {
+                            alert('Lỗi khi xóa bàn ăn!');
+                        }
+                    }
+                });
+            });
+
+            // KHÔI PHỤC
+            $(document).on('click', '.btnRestoreBanAn', function() {
+                const id = $(this).data('id');
+
+                if (!confirm('Bạn có chắc muốn khôi phục bàn ăn này không?')) return;
+
+                $.ajax({
+                    url: `/ban-an/restore/${id}`,
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        alert(response.message ?? 'Khôi phục thành công!');
+                        // location.reload();
+                        fetchAllData();
+                    },
+                    error: function(xhr) {
+                        alert(xhr.responseJSON.message ?? 'Lỗi khi khôi phục bàn ăn!');
+                    }
+                });
+            });
         });
     </script>
 @endsection

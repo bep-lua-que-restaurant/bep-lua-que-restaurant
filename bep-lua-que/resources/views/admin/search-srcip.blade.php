@@ -1,34 +1,22 @@
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script>
-    $(document).ready(function() {
-        function fetchFilteredData() {
-            let searchQuery = $('#search-name').val();
-            let statusFilter = $('#statusFilter').val();
+    function filterEmployees() {
+        const input = document.getElementById("searchInput").value.toLowerCase();
+        const statusFilter = document.getElementById("statusFilter").value;
+        const rows = document.querySelectorAll(".nha-cung-cap-row");
 
-            $.ajax({
-                url: "{{ $route }}",
-                method: "GET",
-                data: {
-                    ten: searchQuery,
-                    statusFilter: statusFilter,
-                },
-                success: function(response) {
-                    $('#list-container').html(response.html);
-                },
-                error: function(xhr) {
-                    console.error("Lỗi khi tải dữ liệu:", xhr);
-                }
-            });
-        }
+        rows.forEach(row => {
+            const name = row.querySelector(".ten-nha-cung-cap").textContent.toLowerCase();
+            const id = row.querySelector("td:nth-child(2)").textContent.toLowerCase();
+            const status = row.querySelector(".trang-thai-nha-cung-cap").textContent.trim();
 
-        // Gửi yêu cầu khi người dùng nhập vào ô tìm kiếm
-        $('#search-name').on('input', function() {
-            fetchFilteredData();
+            const matchesSearch = name.includes(input) || id.includes(input);
+            const matchesStatus = statusFilter === "Tất cả" || statusFilter === "" || status.includes(statusFilter);
+
+            if (matchesSearch && matchesStatus) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
         });
-
-        // Gửi yêu cầu khi chọn bộ lọc trạng thái
-        $('#statusFilter').on('change', function() {
-            fetchFilteredData();
-        });
-    });
+    }
 </script>

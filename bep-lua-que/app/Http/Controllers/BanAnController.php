@@ -21,17 +21,20 @@ class BanAnController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $query = BanAn::query(); // Xóa with('phongAn') vì không cần nữa
+        return view('admin.banan.index'); // chỉ render giao diện
+    }
 
-        // Lọc theo tên
-        if ($request->has('ten') && $request->ten != '') {
+    public function fetchData(Request $request)
+    {
+        $query = BanAn::query();
+
+        if ($request->filled('ten')) {
             $query->where('ten_ban', 'like', '%' . $request->ten . '%');
         }
 
-        // Lọc theo trạng thái kinh doanh
-        if ($request->has('statusFilter') && $request->statusFilter != '') {
+        if ($request->filled('statusFilter')) {
             if ($request->statusFilter == 'Đang kinh doanh') {
                 $query->whereNull('deleted_at');
             } elseif ($request->statusFilter == 'Ngừng kinh doanh') {
@@ -39,22 +42,15 @@ class BanAnController extends Controller
             }
         }
 
+        // $data = $query->withTrashed()->latest('id')->paginate(10);
         $data = $query->withTrashed()->latest('id')->paginate(10);
 
-        // Xử lý trả về khi yêu cầu là Ajax
-        if ($request->ajax()) {
-            return response()->json([
-                'html' => view('admin.banan.body-list', compact('data'))->render(),
-            ]);
-        }
-
-        return view('admin.banan.index', [
-            'data' => $data,
-            'route' => route('ban-an.index'),
-            'tableId' => 'list-container',
-            'searchInputId' => 'search-name',
+        return response()->json([
+            'data' => $data
         ]);
     }
+
+
 
 
     public function getSoLuongBan(Request $request)
@@ -211,6 +207,33 @@ class BanAnController extends Controller
         return view('admin.banan.themNhanh');
     }
 
+    // public function storeQuick(Request $request)
+    // {
+    //     $request->validate([
+    //         'so_luong' => 'required|integer|min:1',
+    //         'prefix' => 'required|string|max:50',
+    //     ]);
+
+    //     $soLuong = $request->input('so_luong');
+    //     $prefix = $request->input('prefix');
+    //     $maxCount = BanAn::count();
+
+    //     for ($i = 1; $i <= $soLuong; $i++) {
+    //         $number = $maxCount + $i;
+    //         $banAn = BanAn::create([
+    //             'ten_ban' => $prefix . ' ' . $number, // Có khoảng trống như yêu cầu
+    //             'so_ghe' => 4,
+    //             'trang_thai' => 'trống',
+    //             // 'ma' => 'MA' . str_pad($number, 4, '0', STR_PAD_LEFT), // Nếu cần cột ma
+    //         ]);
+
+    //         // Gửi sự kiện real-time cho từng bàn được tạo
+    //         broadcast(new BanAnUpdated($banAn))->toOthers();
+    //     }
+
+    //     return redirect()->route('ban-an.index')->with('success', "Đã thêm $soLuong bàn ăn thành công!");
+    // }
+
     public function storeQuick(Request $request)
     {
         $request->validate([
@@ -220,21 +243,28 @@ class BanAnController extends Controller
 
         $soLuong = $request->input('so_luong');
         $prefix = $request->input('prefix');
-        $maxCount = BanAn::count();
+        $maxCount = BanAn::withTrashed()->count();
+
+        $createdBanAn = [];
 
         for ($i = 1; $i <= $soLuong; $i++) {
             $number = $maxCount + $i;
             $banAn = BanAn::create([
-                'ten_ban' => $prefix . ' ' . $number, // Có khoảng trống như yêu cầu
+                'ten_ban' => $prefix . ' ' . $number,
                 'so_ghe' => 4,
-                'trang_thai' => 'trống',
-                // 'ma' => 'MA' . str_pad($number, 4, '0', STR_PAD_LEFT), // Nếu cần cột ma
+                'trang_thai' => 'trong', // dùng đúng với JS
             ]);
+            $createdBanAn[] = $banAn;
 
-            // Gửi sự kiện real-time cho từng bàn được tạo
             broadcast(new BanAnUpdated($banAn))->toOthers();
         }
 
-        return redirect()->route('ban-an.index')->with('success', "Đã thêm $soLuong bàn ăn thành công!");
+        // Trả về toàn bộ danh sách bàn ăn để render lại bảng
+        $allBanAn = BanAn::withTrashed()->orderBy('id', 'desc')->get();
+
+        return response()->json([
+            'message' => "Đã thêm $soLuong bàn ăn thành công!",
+            'data' => $allBanAn
+        ]);
     }
 }
