@@ -105,40 +105,57 @@
     }
 
     .discount-list {
-        max-height: 200px; /* Giới hạn chiều cao */
-        overflow-y: auto; /* Thanh cuộn dọc */
+        max-height: 200px;
+        /* Giới hạn chiều cao */
+        overflow-y: auto;
+        /* Thanh cuộn dọc */
         border: 1px solid #e9ecef;
         border-radius: 8px;
         padding: 5px;
     }
+
     .list-group-item {
-        border: none; /* Loại bỏ viền mặc định */
+        border: none;
+        /* Loại bỏ viền mặc định */
         border-radius: 6px;
         padding: 10px 15px;
         margin: 5px 0;
         background-color: #f8f9fa;
     }
+
     .btn-outline-primary {
-        padding: 4px 8px; /* Nút nhỏ hơn */
+        padding: 4px 8px;
+        /* Nút nhỏ hơn */
         border-color: #007bff;
         color: #007bff;
         transition: all 0.3s;
     }
+
     .btn-outline-primary:hover {
         background-color: #007bff;
         color: white;
     }
+
     .btn-applied {
         border-color: #6c757d !important;
         color: #6c757d !important;
         background-color: #f8f9fa !important;
         cursor: not-allowed;
     }
+
     .btn-applied i.bi-ticket-perforated {
-        display: none; /* Ẩn icon khi đã áp dụng */
+        display: none;
+        /* Ẩn icon khi đã áp dụng */
     }
+
     .btn-applied i.bi-check-circle {
-        display: inline !important; /* Hiện icon check */
+        display: inline !important;
+        /* Hiện icon check */
+    }
+
+    .discount-list .applied {
+        background-color: #e6ffe6;
+        border-left: 4px solid #28a745;
     }
 </style>
 <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6;">
@@ -248,67 +265,30 @@
             </table>
         </div>
 
-        <div class="mb-3">
+        <div class="mb-3 wrap-ma-giam-gia">
             <label class="form-label fw-bold">Mã giảm giá</label>
             <div class="mt-2" id="applied-code" style="font-size: 0.9rem; color: #28a745; display: none;">
                 <span>Đang áp dụng: </span><span id="applied-code-text"></span>
-                <button class="btn btn-outline-danger btn-sm ms-2 cancel-discount" style="font-size: 0.8rem; padding: 4px 8px;">
+                <button class="btn btn-outline-danger btn-sm ms-2 cancel-discount"
+                    style="font-size: 0.8rem; padding: 4px 8px;">
                     <i class="bi bi-x-circle me-1"></i>Hủy
                 </button>
             </div>
-            <div class="discount-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #e9ecef; border-radius: 8px;">
+            <div class="discount-list"
+                style="max-height: 200px; overflow-y: auto; border: 1px solid #e9ecef; border-radius: 8px;">
                 <ul class="list-group list-group-flush">
-                    <!-- Mã 1 -->
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <span class="fw-bold text-primary">GIAM500K</span>
-                            <p class="mb-0 text-muted" style="font-size: 0.85rem;">Giảm 500K cho đơn từ 2 triệu</p>
-                        </div>
-                        <button class="btn btn-outline-primary btn-sm apply-discount" data-code="GIAM500K">
-                            <i class="bi bi-ticket-perforated me-1"></i><span style="font-size: 0.8rem;">Áp dụng</span>
-                        </button>
-                    </li>
-                    <!-- Mã 2 -->
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <span class="fw-bold text-primary">FREESHIP</span>
-                            <p class="mb-0 text-muted" style="font-size: 0.85rem;">Miễn phí vận chuyển cho đơn từ 500K</p>
-                        </div>
-                        <button class="btn btn-outline-primary btn-sm apply-discount" data-code="FREESHIP">
-                            <i class="bi bi-ticket-perforated me-1"></i><span style="font-size: 0.8rem;">Áp dụng</span>
-                        </button>
-                    </li>
-                    <!-- Mã 3 -->
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <span class="fw-bold text-primary">GIAM10</span>
-                            <p class="mb-0 text-muted" style="font-size: 0.85rem;">Giảm 10% cho tất cả đơn hàng</p>
-                        </div>
-                        <button class="btn btn-outline-primary btn-sm apply-discount" data-code="GIAM10">
-                            <i class="bi bi-ticket-perforated me-1"></i><span style="font-size: 0.8rem;">Áp dụng</span>
-                        </button>
-                    </li>
-                    <!-- Mã 4 (thêm để demo cuộn) -->
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <span class="fw-bold text-primary">GIAM200K</span>
-                            <p class="mb-0 text-muted" style="font-size: 0.85rem;">Giảm 200K cho đơn từ 1 triệu</p>
-                        </div>
-                        <button class="btn btn-outline-primary btn-sm apply-discount" data-code="GIAM200K">
-                            <i class="bi bi-ticket-perforated me-1"></i><span style="font-size: 0.8rem;">Áp dụng</span>
-                        </button>
-                    </li>
+                    <!-- Các mã giảm giá sẽ được render ở đây -->
                 </ul>
             </div>
-
-
         </div>
+
 
 
         <div class="d-flex mb-3 align-items-stretch">
             <div class="flex-fill me-2">
                 <label for="totalAmount" class="form-label">Tổng tiền hàng</label>
-                <input type="text" class="form-control form-control-lg" id="tong_tien_hang" value="" readonly>
+                <input type="text" class="form-control form-control-lg" id="tong_tien_hang" value=""
+                    readonly>
             </div>
             <div class="flex-fill ms-2">
                 <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
@@ -318,6 +298,14 @@
                     <option value="tai_khoan">Chuyển khoản</option>
                 </select>
             </div>
+
+            
+        </div>
+
+        <div class="flex-fill me-2">
+            <label for="totalAmount" class="form-label">Khách cần trả</label>
+            <input type="text" class="form-control form-control-lg" id="khach_can_tra" value=""
+                readonly>
         </div>
 
         <div id="qrCodeContainer" class="text-center mt-3" style="display: none;">
@@ -738,7 +726,7 @@
             window.mon_an_cho_xac_nhan :
             0; // hoặc dùng null tùy yêu cầu phía server
 
-            // console.log("xoaMonCho", xoaMonCho);
+        // console.log("xoaMonCho", xoaMonCho);
         var danhSachSanPham = [];
         $("#hoa-don-thanh-toan-body tr").each(function() {
             var sanPham = {
@@ -953,7 +941,7 @@
                         maHoaDonElement.style.color = "red";
                     } else {
                         showToast("Thanh toán không thành công.", "danger");
-                        
+
                     }
                 },
                 error: function(xhr, status, error) {
@@ -1165,50 +1153,4 @@
             });
         });
     });
-</script>
-
-<script>
-// Lấy các phần tử
-const applyButtons = document.querySelectorAll('.apply-discount');
-const appliedCodeDiv = document.getElementById('applied-code');
-const appliedCodeText = document.getElementById('applied-code-text');
-const cancelButton = document.querySelector('.cancel-discount');
-
-// Hàm khôi phục trạng thái ban đầu
-function resetDiscount() {
-    applyButtons.forEach(button => {
-        button.innerHTML = '<i class="bi bi-ticket-perforated me-1"></i><span style="font-size: 0.8rem;">Áp dụng</span>';
-        button.classList.remove('btn-applied');
-        button.disabled = false;
-    });
-    appliedCodeDiv.style.display = 'none';
-    appliedCodeText.textContent = '';
-}
-
-// Xử lý nút áp dụng
-applyButtons.forEach(button => {
-    button.addEventListener('click', function() {
-        const code = this.getAttribute('data-code');
-
-        // Chọn mã
-        resetDiscount(); // Xóa trạng thái cũ
-        this.innerHTML = '<i class="bi bi-check-circle me-1"></i><span style="font-size: 0.8rem;">Đã dùng</span>';
-        this.classList.add('btn-applied');
-        this.disabled = true;
-
-        // Vô hiệu hóa các nút khác
-        applyButtons.forEach(otherButton => {
-            if (otherButton !== this) {
-                otherButton.disabled = true;
-            }
-        });
-
-        // Hiển thị trạng thái
-        appliedCodeText.textContent = code;
-        appliedCodeDiv.style.display = 'block';
-    });
-});
-
-// Xử lý nút hủy
-cancelButton.addEventListener('click', resetDiscount);
 </script>
