@@ -18,10 +18,10 @@ class NhapKho extends Model
         'trang_thai'
     ];
 
-    public function chiTiets()
-    {
-        return $this->hasMany(NhapKhoChiTiet::class);
-    }
+    // public function chiTiets()
+    // {
+    //     return $this->hasMany(NhapKhoChiTiet::class);
+    // }
 
     public function nhaCungCap()
     {
