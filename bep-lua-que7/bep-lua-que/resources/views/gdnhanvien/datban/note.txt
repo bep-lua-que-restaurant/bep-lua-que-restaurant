@@ -1,9 +1,0 @@
-php artisan datban:update-status
-
-php artisan schedule:work
-
-php artisan queue:work
-
-
-
-php artisan queue:work --queue=high,low
