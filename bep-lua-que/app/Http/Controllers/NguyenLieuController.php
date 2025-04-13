@@ -18,6 +18,7 @@ use App\Models\HoaDon;
 use App\Models\ChiTietHoaDon;
 use App\Models\CongThucMonAn;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class NguyenLieuController extends Controller
@@ -83,33 +84,29 @@ class NguyenLieuController extends Controller
     {
         $ngay = $request->input('ngay') ? Carbon::parse($request->input('ngay')) : Carbon::today();
         $loaiId = $request->input('loai_nguyen_lieu_id');
+        $soNgay = 7;
+        $ngayBatDau = $ngay->copy()->subDays($soNgay - 1);
 
+        // Lọc nguyên liệu
         $nguyenLieus = NguyenLieu::when($loaiId, function ($query) use ($loaiId) {
             $query->where('loai_nguyen_lieu_id', $loaiId);
         })->get();
 
+        // Tính tồn kho và sử dụng trong ngày
         $duLieuTonKho = $nguyenLieus->map(function ($nl) use ($ngay) {
             $soLuongXuat = ChiTietPhieuXuatKho::whereHas('phieuXuatKho', function ($query) use ($ngay) {
                 $query->whereDate('ngay_xuat', $ngay)->where('trang_thai', 'da_duyet');
-            })->where('nguyen_lieu_id', $nl->id)->get()
-                ->sum(fn($ct) => $ct->so_luong * $ct->he_so_quy_doi);
+            })->where('nguyen_lieu_id', $nl->id)->sum(DB::raw('so_luong * he_so_quy_doi'));
 
-            $soLuongDung = 0;
-            $hoaDonIds = HoaDonBan::where('trang_thai', 'da_thanh_toan')
-                ->whereDate('created_at', $ngay)
-                ->pluck('hoa_don_id');
+            $hoaDonIds = HoaDonBan::where('trang_thai', 'da_thanh_toan')->whereDate('created_at', $ngay)->pluck('hoa_don_id');
 
-            $chiTietHoaDons = ChiTietHoaDon::whereIn('hoa_don_id', $hoaDonIds)->get();
-
-            foreach ($chiTietHoaDons as $cthd) {
-                $congThuc = CongThucMonAn::where('mon_an_id', $cthd->mon_an_id)
-                    ->where('nguyen_lieu_id', $nl->id)->first();
-                if ($congThuc) {
-                    $soLuongDung += $cthd->so_luong * $congThuc->so_luong;
-                }
-            }
+            $soLuongDung = ChiTietHoaDon::whereIn('hoa_don_id', $hoaDonIds)->get()->sum(function ($cthd) use ($nl) {
+                $ct = CongThucMonAn::where('mon_an_id', $cthd->mon_an_id)->where('nguyen_lieu_id', $nl->id)->first();
+                return $ct ? $cthd->so_luong * $ct->so_luong : 0;
+            });
 
             return [
+                'id'               => $nl->id,
                 'nguyen_lieu'      => $nl->ten_nguyen_lieu,
                 'don_vi'           => $nl->don_vi_ton,
                 'ton_kho_hien_tai' => $nl->so_luong_ton,
@@ -119,44 +116,52 @@ class NguyenLieuController extends Controller
             ];
         });
 
-        // ===== Định mức sử dụng =====
-        $soNgay = 7;
-        $ngayBatDau = $ngay->copy()->subDays($soNgay - 1);
+        // Tính định mức trung bình 7 ngày
         $duLieuDinhMuc = $nguyenLieus->map(function ($nl) use ($ngayBatDau, $ngay, $soNgay) {
             $hoaDonIds = HoaDonBan::where('trang_thai', 'da_thanh_toan')
                 ->whereBetween('created_at', [$ngayBatDau, $ngay])
                 ->pluck('hoa_don_id');
 
-            $chiTietHoaDons = ChiTietHoaDon::whereIn('hoa_don_id', $hoaDonIds)->get();
-            $tongSoLuongDung = 0;
+            $tongSoLuongDung = ChiTietHoaDon::whereIn('hoa_don_id', $hoaDonIds)->get()->sum(function ($cthd) use ($nl) {
+                $ct = CongThucMonAn::where('mon_an_id', $cthd->mon_an_id)->where('nguyen_lieu_id', $nl->id)->first();
+                return $ct ? $cthd->so_luong * $ct->so_luong : 0;
+            });
 
-            foreach ($chiTietHoaDons as $cthd) {
-                $congThuc = CongThucMonAn::where('mon_an_id', $cthd->mon_an_id)
-                    ->where('nguyen_lieu_id', $nl->id)->first();
-                if ($congThuc) {
-                    $tongSoLuongDung += $cthd->so_luong * $congThuc->so_luong;
-                }
-            }
-
-            $trungBinh = $tongSoLuongDung / $soNgay;
             return [
-                'nguyen_lieu'      => $nl->ten_nguyen_lieu,
-                'ton_kho'          => $nl->so_luong_ton,
-                'trung_binh_su_dung' => round($trungBinh, 2),
+                'id'                  => $nl->id,
+                'nguyen_lieu'         => $nl->ten_nguyen_lieu,
+                'trung_binh_su_dung'  => round($tongSoLuongDung / $soNgay, 2),
+                'ton_kho'             => $nl->so_luong_ton,
             ];
         });
+
+        // Cảnh báo nguyên liệu tồn thấp hơn trung bình
+        $duLieuCanhBao = collect();
+        foreach ($duLieuDinhMuc as $dm) {
+            $ton = $duLieuTonKho->firstWhere('id', $dm['id']);
+            if ($ton && $ton['ton_kho_hien_tai'] < $dm['trung_binh_su_dung']) {
+                $duLieuCanhBao->push([
+                    'nguyen_lieu'         => $dm['nguyen_lieu'],
+                    'ton_kho'             => $ton['ton_kho_hien_tai'],
+                    'trung_binh_su_dung'  => $dm['trung_binh_su_dung'],
+                    'don_vi'              => $ton['don_vi'],
+                ]);
+            }
+        }
 
         $dsLoai = LoaiNguyenLieu::all();
 
         return view('admin.nguyenlieu.kiemtratonkho', compact(
             'duLieuTonKho',
             'duLieuDinhMuc',
+            'duLieuCanhBao',
             'ngay',
             'loaiId',
             'dsLoai',
             'soNgay'
         ));
     }
+
 
 
 
