@@ -88,12 +88,7 @@
             <!-- Thông tin hóa đơn -->
             <p><strong>Mã hóa đơn:</strong> {{ $hoa_dons->ma_hoa_don }}</p>
             <p><strong>Ngày:</strong> {{ \Carbon\Carbon::parse($hoa_dons->ngay_tao)->format('d/m/Y H:i') }}</p>
-
-
-            <p><strong>Khách hàng:</strong> {{ $hoa_dons->ten_ban }}</p>
-
-
-
+            <p><strong>Tên bàn:</strong> {{ $hoa_dons->ten_ban }}</p>
 
             <p><strong>Khách hàng:</strong> {{ $hoa_dons->ho_ten }}</p>
             <p><strong>Số điện thoại:</strong> {{ $hoa_dons->so_dien_thoai }}</p>
@@ -123,7 +118,8 @@
                                     {{ number_format($chiTiet->monAn->gia ?? 0, 0, ',', '.') }} VNĐ
                                 </td>
                                 <td style="padding: 8px; text-align: right;">
-                                    {{ number_format($chiTiet->thanh_tien ?? 0, 0, ',', '.') }} VNĐ
+                                    {{ number_format(($chiTiet->so_luong ?? 0) * ($chiTiet->monAn->gia ?? 0), 0, ',', '.') }}
+                                    VNĐ
                                 </td>
                             </tr>
                         @endforeach
@@ -136,10 +132,12 @@
             </table>
 
             <hr style="border-top: 1px dashed #000;">
-
+            <p style="text-align: right; font-size: 18px; font-weight: bold; color: #000;">
+                Tổng tiền trước áp mã giảm giá: {{ number_format($hoa_dons->tong_tien_truoc_khi_giam, 0, ',', '.') }} VNĐ
+            </p>
             <!-- Tổng cộng -->
             <p style="text-align: right; font-size: 18px; font-weight: bold; color: #000;">
-                Tổng cộng: {{ number_format($hoa_dons->tong_tien, 0, ',', '.') }} VNĐ
+                Tiền thanh toán: {{ number_format($hoa_dons->tong_tien, 0, ',', '.') }} VNĐ
             </p>
 
             <p style="text-align: center; font-style: italic; margin-top: 15px; color: #000;">

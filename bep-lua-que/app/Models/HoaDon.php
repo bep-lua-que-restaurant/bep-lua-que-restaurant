@@ -11,7 +11,7 @@ class HoaDon extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['ma_hoa_don', 'ma_dat_ban', 'tong_tien', 'phuong_thuc_thanh_toan', 'mo_ta'];
+    protected $fillable = ['ma_hoa_don', 'ma_dat_ban', 'tong_tien', 'phuong_thuc_thanh_toan', 'mo_ta','id_ma_giam'];
 
     public function chiTietHoaDons()
     {
@@ -40,4 +40,10 @@ class HoaDon extends Model
     {
         return $this->hasOne(HoaDonBan::class, 'hoa_don_id', 'id');
     }
+   // Trong model HoaDon
+    public function maGiamGia()
+    {
+    return $this->belongsTo(MaGiamGia::class, 'id_ma_giam', 'id');
+    }
+
 }

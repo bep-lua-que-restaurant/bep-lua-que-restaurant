@@ -24,10 +24,10 @@ class StoreNhaCungCapRequest extends FormRequest
         return [
             'ten_nha_cung_cap' => ['required', 'unique:nha_cung_caps', 'string', 'max:255'],
             'dia_chi' => 'nullable|string',
-            'so_dien_thoai' => 'required|string|max:20', // Đảm bảo có giá trị
-            'email' => 'required|email|max:255',
+            'so_dien_thoai' => ['required', 'unique:nha_cung_caps', 'regex:/^(0|\+84)[0-9]{9}$/'],
+            'email' => ['required', 'unique:nha_cung_caps', 'email', 'max:255'],
             'ghi_chu' => 'nullable|string',
-            'hinhAnh' => ['image','nullable'],
+            'hinhAnh' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'moTa' => ['string','nullable'],
         ];
     }
@@ -39,8 +39,14 @@ class StoreNhaCungCapRequest extends FormRequest
             'ten_nha_cung_cap.unique' => 'Tên nhà cung cấp đã tồn tại',
             'ten_nha_cung_cap.string' => 'Tên nhà cung cấp phải là chuỗi',
             'ten_nha_cung_cap.max' => 'Tên nhà cung cấp không được quá 255 ký tự',
+            'so_dien_thoai.required' => 'Số điện thoại không được để trống',
+            'so_dien_thoai.unique' => 'Số điện thoại đã tồn tại đã tồn tại',
+            'so_dien_thoai.regex' => 'Số điện thoại không đúng định dạng. Ví dụ: 0912345678 hoặc +84912345678',
+            'email.required' => 'Email không được để trống',
+            'email.unique' => 'Email đã tồn tại',
             'moTa.string' => 'Mô tả phải là chuỗi',
-            'hinh_anh.image' => 'Hình ảnh phải là ảnh',
+            'hinhAnh.image' => 'Hình ảnh phải là ảnh',
+            'hinhAnh.max' => 'Hình ảnh không được quá 2048 KB'
         ];
     }
 }

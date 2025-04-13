@@ -194,8 +194,9 @@
 
 
 
-        <div class="text-end">
+        <div class="d-flex justify-content-between">
             <button type="submit" class="btn btn-primary">Lưu Phiếu Xuất</button>
+            <a href="{{ route('phieu-xuat-kho.index') }}" class="btn btn-secondary">⬅ Quay lại</a>
         </div>
     </form>
 

@@ -317,9 +317,28 @@ $(document).ready(function () {
                 maHoaDon: maHoaDon,
             },
             success: function (response) {
+                console.log("tien trc giam" + response.tong_tien);
+                let ma_hoa_don = response.data;
+                let divMaGiamGia = document.querySelector(".wrap-ma-giam-gia");
+                let maGiamGia = response.ma_giam_gia; // chứa thông tin mã giảm
+                // if (maGiamGia.length == 0) {
+                //     divMaGiamGia.style.display = "none";
+                // }
+                // console.log("Mã giảm giá:", maGiamGia);
+                renderDiscountCodes(maGiamGia, ma_hoa_don);
+                if (
+                    response.chi_tiet_hoa_don == null ||
+                    response.chi_tiet_hoa_don.length == 0
+                ) {
+                    alert("Không có món nào trong hóa đơn này!");
+                    return;
+                }
 
+                let offcanvas = new bootstrap.Offcanvas(
+                    document.getElementById("offcanvasRight")
+                );
+                offcanvas.show();
                 window.mon_an_cho_xac_nhan = response.mon_an_cho_xac_nhan;
-                console.log(window.mon_an_cho_xac_nhan)
                 let hoaDonThanhToan = $("#hoa-don-thanh-toan-body");
 
                 hoaDonThanhToan.empty();
@@ -382,6 +401,12 @@ $(document).ready(function () {
                 // $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
                 // $(".so-nguoi").text(`👥 ${soNguoi}`);
                 $("#tong_tien_hang").val(tongTien.toLocaleString() + " VND");
+                let khach_can_tra = parseFloat(response.tong_tien_sau_giam);
+
+
+                $("#khach_can_tra").val(
+                    khach_can_tra.toLocaleString() + " VND"
+                );
             },
             error: function (xhr) {
                 console.error(
@@ -391,6 +416,100 @@ $(document).ready(function () {
             },
         });
     }
+
+    function renderDiscountCodes(discounts, ma_hoa_don) {
+        console.log(discounts);
+        let discountListHtml = "";
+
+        discounts.forEach((discount) => {
+            const isApplied = discount.is_applied; // <-- thêm biến này
+            const buttonClass = isApplied
+                ? "btn-success"
+                : "btn-outline-primary";
+            const buttonText = isApplied
+                ? '<i class="bi bi-check-circle me-1"></i><span style="font-size: 0.8rem;">Đã áp dụng</span>'
+                : '<i class="bi bi-ticket-perforated me-1"></i><span style="font-size: 0.8rem;">Áp dụng</span>';
+            const isDisabled = isApplied ? "disabled" : "";
+
+            discountListHtml += `
+                <li class="list-group-item d-flex justify-content-between align-items-center ${
+                    isApplied ? "applied" : ""
+                }">
+                    <div>
+                        <span class="fw-bold text-primary">${
+                            discount.code
+                        }</span>
+                        <p class="mb-0 text-muted" style="font-size: 0.85rem;">
+                            Giảm ${discount.value}% cho đơn từ ${
+                discount.min_order_value
+            } VNĐ
+                        </p>
+                    </div>
+                    <button class="btn ${buttonClass} btn-sm apply-discount"  data-ma-hoa-don="${ma_hoa_don}"  data-id="${
+                discount.id
+            }" ${isDisabled}>
+                        ${buttonText}
+                    </button>
+                </li>
+            `;
+        });
+
+        document.querySelector(".discount-list .list-group").innerHTML =
+            discountListHtml;
+    }
+
+    $(document).on("click", ".apply-discount", function () {
+        const $btn = $(this);
+        const idCode = $(this).data("id");
+        const maHoaDon = $(this).data("ma-hoa-don");
+
+        $.ajax({
+            url: "thu-ngan/apply-discount",
+            type: "POST",
+            data: {
+                code: idCode,
+                ma_hoa_don: maHoaDon,
+                _token: $('meta[name="csrf-token"]').attr("content"),
+            },
+            success: function (response) {
+                if (response.success) {
+                    console.log(response);
+
+                    showToast("Đã áp dụng mã giảm giá!", "success");
+
+                    // 👉 Reset lại tất cả các nút về mặc định
+                    $(".apply-discount")
+                        .removeClass("btn-success")
+                        .addClass("btn-outline-primary")
+                        .html(
+                            '<i class="bi bi-ticket-perforated me-1"></i><span style="font-size: 0.8rem;">Áp dụng</span>'
+                        )
+                        .prop("disabled", false);
+
+                    // 👉 Cập nhật nút hiện tại
+                    $btn.removeClass("btn-outline-primary")
+                        .addClass("btn-success")
+                        .html(
+                            '<i class="bi bi-check-circle me-1"></i><span style="font-size: 0.8rem;">Đã áp dụng</span>'
+                        )
+                        .prop("disabled", true);
+
+                    // 👉 Optional: Thêm class cho li (nếu muốn hiệu ứng khác)
+                    $(".discount-list .list-group-item").removeClass("applied");
+                    $btn.closest("li").addClass("applied");
+
+                    $("#khach_can_tra").val(
+                        response.tong_tien_sau_giam.toLocaleString() + " VND"
+                    );
+                } else {
+                    alert(response.message || "Không áp dụng được mã giảm.");
+                }
+            },
+            error: function () {
+                alert("Lỗi khi áp dụng mã.");
+            },
+        });
+    });
 });
 
 window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (data) => {
@@ -411,3 +530,47 @@ window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (data) => {
         }
     }
 });
+
+// // Lấy các phần tử
+// const applyButtons = document.querySelectorAll('.apply-discount');
+// const appliedCodeDiv = document.getElementById('applied-code');
+// const appliedCodeText = document.getElementById('applied-code-text');
+// const cancelButton = document.querySelector('.cancel-discount');
+
+// // Hàm khôi phục trạng thái ban đầu
+// function resetDiscount() {
+//     applyButtons.forEach(button => {
+//         button.innerHTML = '<i class="bi bi-ticket-perforated me-1"></i><span style="font-size: 0.8rem;">Áp dụng</span>';
+//         button.classList.remove('btn-applied');
+//         button.disabled = false;
+//     });
+//     appliedCodeDiv.style.display = 'none';
+//     appliedCodeText.textContent = '';
+// }
+
+// // Xử lý nút áp dụng
+// applyButtons.forEach(button => {
+//     button.addEventListener('click', function() {
+//         const code = this.getAttribute('data-code');
+
+//         // Chọn mã
+//         resetDiscount(); // Xóa trạng thái cũ
+//         this.innerHTML = '<i class="bi bi-check-circle me-1"></i><span style="font-size: 0.8rem;">Đã dùng</span>';
+//         this.classList.add('btn-applied');
+//         this.disabled = true;
+
+//         // Vô hiệu hóa các nút khác
+//         applyButtons.forEach(otherButton => {
+//             if (otherButton !== this) {
+//                 otherButton.disabled = true;
+//             }
+//         });
+
+//         // Hiển thị trạng thái
+//         appliedCodeText.textContent = code;
+//         appliedCodeDiv.style.display = 'block';
+//     });
+// });
+
+// // Xử lý nút hủy
+// cancelButton.addEventListener('click', resetDiscount);

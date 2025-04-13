@@ -6,11 +6,17 @@
     <div class="container mt-4">
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3><i class="fa fa-file-alt me-2 text-primary"></i>Chi tiết phiếu nhập kho: <span
-                    class="text-dark">{{ $phieuNhapKho->ma_phieu }}</span></h3>
-            <a href="{{ route('phieu-nhap-kho.index') }}" class="btn btn-secondary">
-                <i class="fa fa-arrow-left"></i> Quay lại
-            </a>
+            <h3>
+                <i class="fa fa-file-alt me-2 text-primary"></i>Chi tiết phiếu nhập kho: <span
+                    class="text-dark">{{ $phieuNhapKho->ma_phieu }}</span>
+            </h3>
+            <div>
+               
+                <a href="{{ route('phieu-nhap-kho.index') }}" class="btn btn-secondary">
+                    <i class="fa fa-arrow-left"></i> Quay lại
+                </a>
+            </div>
+
         </div>
 
         <div class="card mb-4 shadow-sm border-primary">

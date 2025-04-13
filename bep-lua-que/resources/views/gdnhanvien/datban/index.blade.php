@@ -66,14 +66,16 @@
                         <!-- Form nhập thông tin -->
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="fullName" class="form-label">Họ tên:</label>
+                                <label for="fullName" class="form-label"> <span class="text-danger fs-5">*</span> Họ
+                                    tên:</label>
                                 <input type="text" class="form-control" id="customerName" name="customer_name">
                                 @error('customer_name')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
                             <div class="col-md-6">
-                                <label for="email" class="form-label">Email:</label>
+                                <label for="email" class="form-label"> <span
+                                        class="text-danger fs-5">*</span>Email:</label>
                                 <input type="email" class="form-control" id="customerEmail" name="customer_email">
                                 @error('customer_email')
                                     <span class="text-danger">{{ $message }}</span>
@@ -83,14 +85,16 @@
 
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="phone" class="form-label">Số điện thoại:</label>
+                                <label for="phone" class="form-label"><span class="text-danger fs-5">*</span>Số điện
+                                    thoại:</label>
                                 <input type="tel" class="form-control" id="customerPhone" name="customer_phone">
                                 @error('customer_phone')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
                             <div class="col-md-6">
-                                <label for="numberOfGuests" class="form-label">Số người:</label>
+                                <label for="numberOfGuests" class="form-label"><span class="text-danger fs-5">*</span>Số
+                                    người:</label>
                                 <input type="number" class="form-control" name="num_people" id="numPeople" min="1">
                                 @error('num_people')
                                     <span class="text-danger">{{ $message }}</span>
@@ -806,8 +810,8 @@
 
 
         /* .btn-success .btn-danger {
-                                                                                                                                                                                                                        pointer-events: none;
-                                                                                                                                                                                                                    } */
+                                                                                                                                                                                                                                                            pointer-events: none;
+                                                                                                                                                                                                                                                        } */
 
         .border-left-rounded {
             border-top-left-radius: 10px;

@@ -28,7 +28,7 @@
                 <p><strong>Mã hóa đơn:</strong> {{ $hoaDon->ma_hoa_don }}</p>
                 <p><strong>Khách hàng:</strong> {{ $hoaDon->ten_khach_hang }}</p>
                 <p><strong>Số điện thoại:</strong> {{ $hoaDon->so_dien_thoai }}</p>
-                <p><strong>Tổng tiền:</strong> {{ number_format($hoaDon->tong_tien, 0, ',', '.') }} VND</p>
+                <p><strong>Mã giảm giá:</strong> {{ $hoaDon->maGiamGia->code }}</p>
                 <p><strong>Phương thức thanh toán:</strong>
                     {{ $hoaDon->phuong_thuc_thanh_toan == 'tien_mat'
                         ? 'Tiền mặt'
@@ -38,6 +38,8 @@
                 </p>
 
                 <p><strong>Mô tả:</strong> {{ $hoaDon->mo_ta }}</p>
+                <p><strong>Tổng tiền trước khi giảm:</strong> {{ $hoaDon->tong_tien_truoc_khi_giam }}</p>
+                <p><strong>Tiền thanh toán: </strong> {{ number_format($hoaDon->tong_tien, 0, ',', '.') }} VND</p>
                 <p><strong>Ngày tạo:</strong> {{ $hoaDon->created_at ? $hoaDon->created_at->format('d/m/Y H:i') : 'N/A' }}
                 </p>
             </div>
@@ -76,7 +78,8 @@
                                         <td>{{ $chiTiet->monAn->ten ?? 'Không có' }}</td>
                                         <td>{{ $chiTiet->so_luong }}</td>
                                         <td>{{ number_format($chiTiet->don_gia, 0, ',', '.') }} VND</td>
-                                        <td>{{ number_format($chiTiet->thanh_tien, 0, ',', '.') }} VND</td>
+                                        <td>{{ number_format($chiTiet->so_luong * $chiTiet->don_gia, 0, ',', '.') }} VND
+                                        </td>
 
                                     </tr>
                                 @endforeach

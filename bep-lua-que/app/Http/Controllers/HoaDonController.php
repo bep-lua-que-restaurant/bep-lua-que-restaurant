@@ -33,6 +33,7 @@ class HoaDonController extends Controller
                 'hoa_dons.id',
                 'hoa_dons.ma_hoa_don',
                 'hoa_dons.tong_tien',
+                'hoa_dons.tong_tien_truoc_khi_giam',
                 'hoa_dons.phuong_thuc_thanh_toan',
                 'hoa_dons.created_at as ngay_tao',
                 DB::raw('IFNULL(
@@ -63,7 +64,7 @@ class HoaDonController extends Controller
             "Không có số") as so_dien_thoai'),
                 DB::raw('IFNULL(GROUP_CONCAT(DISTINCT ban_ans.ten_ban ORDER BY ban_ans.ten_ban ASC SEPARATOR ", "), "Chưa có bàn") as ten_ban')
             )
-            ->groupBy('hoa_dons.id', 'hoa_dons.ma_hoa_don', 'hoa_dons.tong_tien', 'hoa_dons.phuong_thuc_thanh_toan', 'hoa_dons.created_at')
+            ->groupBy('hoa_dons.id', 'hoa_dons.ma_hoa_don', 'hoa_dons.tong_tien','hoa_dons.tong_tien_truoc_khi_giam', 'hoa_dons.phuong_thuc_thanh_toan', 'hoa_dons.created_at')
             ->orderByDesc('hoa_dons.created_at');
 
         if ($request->has('search') && !empty($request->search)) {

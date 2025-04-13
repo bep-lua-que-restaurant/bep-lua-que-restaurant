@@ -172,7 +172,13 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/nha_cung_cap/import', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha_cung_cap.import');
 
+    // Route::post('/nha_cung_cap/import', [\App\Http\Controllers\NhaCungCapController::class, 'importNhaCungCap'])->name('nha_cung_cap.import');
+
+
     // Phong an
+    Route::get('/ban-an', [BanAnController::class, 'index'])->name('ban-an.index');
+    Route::get('/ban-an/fetch', [BanAnController::class, 'fetchData'])->name('ban-an.fetch');
+
     // Route::resource('phong-an', PhongAnController::class);
     // Route::post('/phong-an/{banAn}/restore', [PhongAnController::class, 'restore'])->name('phong-an.restore');
     Route::get('ban-an/them-nhanh', [BanAnController::class, 'them'])->name('ban-an.themNhanh');
@@ -274,15 +280,23 @@ Route::middleware(['auth'])->group(function () {
     Route::get('export-loai-nguyen-lieu', [LoaiNguyenLieuController::class, 'export'])->name('loai-nguyen-lieu.export');
     Route::post('/import-loai-nguyen-lieu', [LoaiNguyenLieuController::class, 'importLoaiNguyenLieu'])->name('loai-nguyen-lieu.import');
 
-    // nguyên liệu
+    // nguyên liệu 
+    // Route::get('/nguyen-lieu/export', [NguyenLieuController::class, 'exportNguyenLieu']);
+    // Route::post('/nguyen-lieu/import', [NguyenLieuController::class, 'importNguyenLieu']);
+
+    Route::get('/nguyen-lieu/kiem-tra-ton-kho', [NguyenLieuController::class, 'kiemTraTonKhoTrongNgay'])->name('nguyen-lieu.kiemtra');
     Route::resource('nguyen-lieu', NguyenLieuController::class);
     Route::post('nguyen-lieu/restore/{id}', [NguyenLieuController::class, 'restore'])->name('nguyen-lieu.restore');
-
+    Route::get('export-nguyen-lieu', [NguyenLieuController::class, 'export'])->name('nguyen-lieu.export');
+    Route::prefix('tools')->group(function () {
+        Route::post('/import-nguyen-lieu', [NguyenLieuController::class, 'importNguyenLieu'])->name('tools.nguyen-lieu.import');
+    });
+    
     // nhập nkho
+    Route::get('/phieu-nhap-kho/export', [PhieuNhapKhoController::class, 'exportDanhSach'])->name('phieu-nhap-kho.export');
+
     Route::resource('phieu-nhap-kho', PhieuNhapKhoController::class);
     Route::post('phieu-nhap-kho/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore');
-    Route::get('export-phieu-nhap-kho', [PhieuNhapKhoController::class, 'export'])->name('phieu-nhap-kho.export');
-    Route::post('/import-phieu-nhap-kho', [PhieuNhapKhoController::class, 'importPhieuNhapKho'])->name('phieu-nhap-kho.import');
     Route::put('phieu-nhap-kho/{id}/duyet', [PhieuNhapKhoController::class, 'duyet'])->name('phieu-nhap-kho.duyet');
     Route::put('/phieu-nhap-kho/{id}/huy', [PhieuNhapKhoController::class, 'huy'])->name('phieu-nhap-kho.huy');
 
@@ -377,6 +391,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('thu-ngan/hoa-don-thanh-toan', [ThuNganController::class, 'getHoaDonThanhToan'])->name('thungan.getHoaDonThanhToan');
     Route::post('thu-ngan/luu-ghi-chu-mon', [ThuNganController::class, 'saveNote'])->name('thungan.saveNote');
     Route::get('/thu-ngan/tao-qr/{ma}', [ThuNganController::class, 'taoQr']);
+    Route::post('thu-ngan/apply-discount', [ThuNganController::class, 'applyDiscount'])->name('thungan.applyDiscount');
     //Chấm công
     Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
     Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('chamcong.store');

@@ -1,0 +1,399 @@
+@extends('layouts.admin')
+
+@section('title')
+    Danh mục Bàn Ăn
+@endsection
+
+@section('content')
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Chào mừng đến Bếp lửa quê !</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Danh mục bàn ăn</a></li>
+                </ol>
+            </div>
+        </div>
+        <!-- row -->
+        <div class="row">
+            @include('admin.filter')
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Danh sách</h4>
+
+
+
+                        <div class="btn-group">
+                            {{-- <a href="{{ route('ban-an.themNhanh') }}" class="btn btn-sm btn-primary">
+                                <i class="fa fa-plus"></i> Thêm nhanh
+                            </a> --}}
+                            <!-- Nút hiển thị modal -->
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#modalThemNhanhBanAn">
+                                <i class="fa fa-plus"></i> Thêm nhanh
+                            </button>
+
+
+                            <!-- Nút Thêm mới -->
+                            {{-- <a href="{{ route('ban-an.create') }}" class="btn btn-sm btn-primary">
+                                <i class="fa fa-plus"></i> Thêm mới
+                            </a> --}}
+
+                            <!-- Nút Nhập file (Mở Modal) -->
+                            <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
+                                data-target="#importExcelModal">
+                                <i class="fa fa-upload"></i> Nhập file
+                            </a>
+
+                            <!-- Nút Xuất file -->
+                            <a href="{{ route('ban-an.export') }}" class="btn btn-sm btn-success">
+                                <i class="fa fa-download"></i> Xuất file
+                            </a>
+
+                            <!-- Nút Danh sách -->
+                            <a href="{{ route('ban-an.index') }}" class="btn btn-sm btn-info">
+                                <i class="fa fa-list"></i> Danh sách
+                            </a>
+                        </div>
+
+                        <!-- Modal Nhập File -->
+                        <div class="modal fade" id="importExcelModal" tabindex="-1" role="dialog"
+                            aria-labelledby="importExcelModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="importExcelModalLabel">Nhập dữ liệu từ Excel</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="{{ route('ban-an.import') }}" method="POST"
+                                            enctype="multipart/form-data">
+                                            @csrf
+                                            <div class="form-group">
+                                                <label for="file">Chọn file Excel (.xlsx, .xls)</label>
+                                                <input type="file" name="file" id="file" class="form-control"
+                                                    required>
+                                                @if ($errors->has('file'))
+                                                    <small class="text-danger">*{{ $errors->first('file') }}</small>
+                                                @endif
+                                            </div>
+                                            <div class="text-right">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-dismiss="modal">Hủy</button>
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fa fa-upload"></i> Nhập dữ liệu
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-responsive-md">
+                                <thead>
+                                    <tr>
+                                        <th style="width:50px;">
+                                            <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
+                                                <input type="checkbox" class="custom-control-input" id="checkAll"
+                                                    required="">
+                                                <label class="custom-control-label" for="checkAll"></label>
+                                            </div>
+                                        </th>
+                                        <th><strong>ID.</strong></th>
+                                        <th><strong>Tên bàn </strong></th>
+                                        {{-- <th><strong>Số ghế </strong></th> --}}
+                                        <th><strong>Trạng Thái</strong></th>
+                                        <th><strong>Tình Trạng </strong></th>
+                                        <th><strong>Hành động</strong></th>
+                                    </tr>
+                                </thead>
+
+
+                                <tbody id="{{ $tableId }}">
+                                    @include('admin.banan.body-list')
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    @include('admin.search-srcip')
+    <!-- Hiển thị phân trang -->
+    {{ $data->links('pagination::bootstrap-5') }}
+
+    <!-- Modal có sẵn form -->
+    <div class="modal fade" id="modalThemNhanhBanAn" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm nhanh bàn ăn</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formThemNhanhBanAn">
+                        @csrf
+                        <div class="form-group mb-2">
+                            <label for="so_luong">Số lượng bàn:</label>
+                            <input type="number" class="form-control" id="so_luong" name="so_luong" min="1"
+                                required>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="prefix">Tiền tố tên bàn:</label>
+                            <input type="text" class="form-control" id="prefix" name="prefix" value="Bàn "
+                                required>
+                            <small class="form-text text-muted">Tên bàn sẽ là: [Tiền tố] + Số thứ tự (ví dụ: Bàn 1, Bàn
+                                2...)</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Thêm nhanh</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="chiTietBanAnModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chi tiết bàn ăn</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <tr>
+                            <th>ID</th>
+                            <td id="modal-ban-id"></td>
+                        </tr>
+                        <tr>
+                            <th>Tên bàn</th>
+                            <td id="modal-ten-ban"></td>
+                        </tr>
+                        <tr>
+                            <th>Số ghế</th>
+                            <td id="modal-so-ghe"></td>
+                        </tr>
+                        <tr>
+                            <th>Mô tả</th>
+                            <td id="modal-mo-ta"></td>
+                        </tr>
+                        <tr>
+                            <th>Trạng thái</th>
+                            <td id="modal-trang-thai"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal chỉnh sửa -->
+    <div class="modal fade" id="editBanAnModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form id="formEditBanAn">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Chỉnh sửa bàn ăn</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="edit-id" name="id">
+                        <div class="mb-3">
+                            <label>Tên bàn</label>
+                            <input type="text" class="form-control" id="edit-ten-ban" name="ten_ban" required>
+                        </div>
+                        {{-- <div class="mb-3">
+                            <label>Số ghế</label>
+                            <input type="number" class="form-control" id="edit-so-ghe" name="so_ghe" required>
+                        </div> --}}
+                        <div class="mb-3">
+                            <label>Mô tả</label>
+                            <textarea class="form-control" id="edit-mo-ta" name="mo_ta"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+    <script>
+        $(document).ready(function() {
+
+            $('#formThemNhanhBanAn').on('submit', function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: '{{ route('ban-an.store-quick') }}',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('#modalThemNhanhBanAn').modal('hide');
+                        alert('Thêm nhanh thành công!');
+                        location.reload(); // hoặc cập nhật danh sách DOM
+                    },
+                    error: function(xhr) {
+                        alert('Lỗi khi thêm bàn ăn!');
+                    }
+                });
+            });
+
+            // Chi tiết bàn ăn
+            $('.btnChiTietBanAn').on('click', function() {
+                const id = $(this).data('id');
+
+                $.ajax({
+                    url: `/ban-an/ajax/${id}`,
+                    type: 'GET',
+                    success: function(data) {
+                        $('#modal-ban-id').text(data.id);
+                        $('#modal-ten-ban').text(data.ten_ban);
+                        $('#modal-so-ghe').text(data.so_ghe);
+                        $('#modal-mo-ta').text(data.mo_ta ?? 'Không có mô tả');
+                        $('#modal-trang-thai').html(data.deleted_at ?
+                            '<span class="badge bg-danger">Ngừng sử dụng</span>' :
+                            '<span class="badge bg-success">Đang sử dụng</span>'
+                        );
+                        $('#chiTietBanAnModal').modal('show');
+                    },
+                    error: function() {
+                        alert('Không thể lấy thông tin bàn ăn.');
+                    }
+                });
+            });
+
+            // Sửa bàn ăn
+            $('.btnEditBanAn').on('click', function() {
+                const id = $(this).data('id');
+
+                $.ajax({
+                    url: `/ban-an/ajax/${id}`,
+                    type: 'GET',
+                    success: function(data) {
+                        $('#edit-id').val(data.id);
+                        $('#edit-ten-ban').val(data.ten_ban);
+                        $('#edit-so-ghe').val(data.so_ghe);
+                        $('#edit-mo-ta').val(data.mo_ta);
+                        $('#editBanAnModal').modal('show');
+                    },
+                    error: function() {
+                        alert('Không thể lấy dữ liệu bàn ăn.');
+                    }
+                });
+            });
+
+            // Gửi form chỉnh sửa
+            $('#formEditBanAn').on('submit', function(e) {
+                e.preventDefault();
+
+                const id = $('#edit-id').val();
+                const formData = {
+                    ten_ban: $('#edit-ten-ban').val(),
+                    mo_ta: $('#edit-mo-ta').val(),
+                    _token: '{{ csrf_token() }}',
+                    _method: 'PUT'
+                };
+
+                $.ajax({
+                    url: `/ban-an/${id}`,
+                    type: 'POST',
+                    data: formData,
+                    success: function() {
+                        $('#editBanAnModal').modal('hide');
+                        alert('Cập nhật thành công!');
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        let msg = 'Đã xảy ra lỗi';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        alert(msg);
+                    }
+                });
+            });
+
+            // Xoá bàn ăn
+            $('.btnDeleteBanAn').on('click', function() {
+                const id = $(this).data('id');
+
+                if (!confirm('Bạn có chắc muốn ngừng sử dụng bàn ăn này không?')) {
+                    return;
+                }
+
+                $.ajax({
+                    url: `/ban-an/${id}`,
+                    type: 'POST',
+                    data: {
+                        _method: 'DELETE',
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function() {
+                        alert('Đã ngừng sử dụng bàn ăn!');
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 403 || xhr.status === 422) {
+                            alert(xhr.responseJSON.message ?? 'Không thể xoá bàn ăn!');
+                        } else {
+                            alert('Lỗi khi xóa bàn ăn!');
+                        }
+                    }
+                });
+            });
+
+            // Khôi phục bàn ăn
+            $('.btnRestoreBanAn').on('click', function() {
+                const id = $(this).data('id');
+
+                if (!confirm('Bạn có chắc muốn khôi phục bàn ăn này không?')) {
+                    return;
+                }
+
+                $.ajax({
+                    url: `/ban-an/restore/${id}`,
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        alert(response.message ?? 'Khôi phục thành công!');
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert(xhr.responseJSON.message ?? 'Lỗi khi khôi phục bàn ăn!');
+                    }
+                });
+            });
+
+        });
+    </script>
+@endsection

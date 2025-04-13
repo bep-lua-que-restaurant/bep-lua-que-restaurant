@@ -77,12 +77,12 @@
 
                             <!-- Trạng thái -->
                             <div class="form-group ">
-                                <label for="status">Trạng thái kinh doanh</label>
+                                <label for="status">Trạng thái hoạt động</label>
                                 @if ($nhaCungCap->deleted_at != null)
-                                    <input type="text" id="status" class="form-control" value="Đã ngừng kinh doanh"
+                                    <input type="text" id="status" class="form-control" value="Đã ngừng hoạt động"
                                         readonly>
                                 @else
-                                    <input type="text" id="status" class="form-control" value="Đang kinh doanh"
+                                    <input type="text" id="status" class="form-control" value="Đang hoạt động"
                                         readonly>
                                 @endif
                             </div>
