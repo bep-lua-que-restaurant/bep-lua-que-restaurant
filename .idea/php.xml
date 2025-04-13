@@ -160,6 +160,7 @@
       <path value="$PROJECT_DIR$/bep-lua-que/vendor/symfony/psr-http-message-bridge" />
       <path value="$PROJECT_DIR$/bep-lua-que/vendor/cboden/ratchet" />
       <path value="$PROJECT_DIR$/bep-lua-que/vendor/sabberworm/php-css-parser" />
+      <path value="$PROJECT_DIR$/bep-lua-que/vendor/yajra/laravel-datatables-oracle" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.1" />

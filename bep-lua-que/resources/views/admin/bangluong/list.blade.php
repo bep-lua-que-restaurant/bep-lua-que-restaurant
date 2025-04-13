@@ -34,7 +34,10 @@
                             <a href="{{ route('luong.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Tính lương
                             </a>
-
+                            <a href="{{ route('bang-luong.import') }}" class="btn btn-sm btn-secondary" data-toggle="modal"
+                                data-target=".bd-example-modal-lg">
+                                <i class="fa fa-upload"></i> Nhập file
+                            </a>
                             <a id="exportLink" href="{{ route('bang-luong.export') }}" class="btn btn-sm btn-success">
                                 <i class="fa fa-download"></i> Xuất file
                             </a>
@@ -86,7 +89,7 @@
         </div>
     </div>
 
-    {{-- <!-- Modal Nhập file -->
+    <!-- Modal Nhập file -->
     <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true" id="importFileModal">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -97,12 +100,13 @@
                 </div>
                 <div class="modal-body">
                     <!-- Form nhập file -->
-                    <form action="{{ route('luong.import') }}" method="POST" enctype="multipart/form-data"
+                    <form action="{{ route('bang-luong.import') }}" method="POST" enctype="multipart/form-data"
                         id="importFileForm">
                         @csrf
                         <div class="mb-3">
                             <label for="fileUpload" class="form-label">Chọn file</label>
                             <input type="file" name="file" id="fileUpload" class="form-control" required>
+                            <input type="hidden" name="month" id="selectedMonth">
                         </div>
                     </form>
                 </div>
@@ -112,7 +116,7 @@
                 </div>
             </div>
         </div>
-    </div> --}}
+    </div>
 
     @include('admin.search-srcip')
     <!-- Hiển thị phân trang -->
@@ -154,6 +158,18 @@
             const selectedMonth = monthSelect.value;
             const baseUrl = "{{ route('bang-luong.export') }}";
             exportLink.href = baseUrl + '?month=' + selectedMonth;
+        });
+        // Lắng nghe sự kiện thay đổi chọn tháng
+        $('#monthSelect').change(function() {
+            var selectedMonth = $(this).val();
+
+            // Cập nhật giá trị của tháng đã chọn vào trường ẩn trong form
+            $('#selectedMonth').val(selectedMonth);
+        });
+        // Đảm bảo rằng tháng hiện tại sẽ được gửi khi load trang lần đầu
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectedMonth = $('#monthSelect').val();
+            $('#selectedMonth').val(selectedMonth);
         });
     </script>
 @endsection

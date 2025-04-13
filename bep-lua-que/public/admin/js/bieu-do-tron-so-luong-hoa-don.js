@@ -7,7 +7,10 @@ function capNhatBieuDoTronSoLuongHoaDon(namNay, namTruoc) {
     new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Năm nay', 'Năm trước'],
+            labels: [
+                `Năm nay (${namNay.toLocaleString('vi-VN')} hóa đơn)`,
+                `Năm trước (${namTruoc.toLocaleString('vi-VN')} hóa đơn)`
+            ],
             datasets: [{
                 data: [namNay, namTruoc],
                 backgroundColor: ['rgba(54, 162, 235, 1)', '#4caf50']
@@ -23,8 +26,16 @@ function capNhatBieuDoTronSoLuongHoaDon(namNay, namTruoc) {
         }
     });
 
-    // Cập nhật phần trăm
-    const chenhLechText = tiLe >= 0 ? `Tăng ${tiLe}%` : `Giảm ${Math.abs(tiLe)}%`;
-    console.log(chenhLechText)
+    // Cập nhật phần trăm nâng cao
+    let chenhLechText = '';
+    if (namNay > namTruoc) {
+        chenhLechText = `Tăng ${tiLe}% so với năm trước`;
+    } else if (namNay < namTruoc) {
+        chenhLechText = `Giảm ${Math.abs(tiLe)}% so với năm trước`;
+    } else {
+        chenhLechText = 'Không thay đổi so với năm trước';
+    }
+    // const chenhLechText = tiLe >= 0 ? `Tăng ${tiLe}%` : `Giảm ${Math.abs(tiLe)}%`;
+    // console.log(chenhLechText)
     document.getElementById('phanTramChenhLechHoaDon').innerText = chenhLechText;
 }

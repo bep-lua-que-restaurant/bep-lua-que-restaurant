@@ -24,20 +24,21 @@ class BangLuongExport implements FromCollection, WithHeadings, WithMapping, With
     }
 
     public function collection()
-    {
-        return BangTinhLuong::with(['nhanVien:id,ho_ten'])
-            ->whereMonth('thang_nam', $this->month)   // lọc theo tháng
-            ->whereYear('thang_nam', $this->year)      // lọc theo năm
-            ->select('id', 'nhan_vien_id', 'thang_nam', 'so_ca_lam', 'so_ngay_cong', 'tong_luong', 'ghi_chu', 'created_at', 'updated_at')
-            ->get();
-    }
+{
+    return BangTinhLuong::with(['nhanVien:id,ho_ten'])
+        ->whereMonth('thang_nam', $this->month)   // lọc theo tháng
+        ->whereYear('thang_nam', $this->year)      // lọc theo năm
+        ->select('id', 'nhan_vien_id', 'so_ca_lam', 'so_ngay_cong', 'tong_luong', 'ghi_chu', 'created_at', 'updated_at') // bỏ 'thang_nam' ở đây
+        ->get();
+}
+
 
 
     public function headings(): array
     {
         return [
             ['Bảng lương'], // Tiêu đề lớn
-            ['ID', 'Tên nhân viên', 'Tháng năm', 'Số ca làm', 'Số ngày công', 'Tổng lương', 'Ghi chú', 'Ngày tạo', 'Ngày cập nhật'],
+            ['ID', 'Tên nhân viên', 'Số ca làm', 'Số ngày công', 'Tổng lương', 'Ghi chú', 'Ngày tạo', 'Ngày cập nhật'],
         ];
     }
 
@@ -46,7 +47,7 @@ class BangLuongExport implements FromCollection, WithHeadings, WithMapping, With
         return [
             $bangLuong->id,
             $bangLuong->nhanVien->ho_ten ?? 'N/A',
-            $bangLuong->thang_nam,
+            // $bangLuong->thang_nam,
             $bangLuong->so_ca_lam,
             $bangLuong->so_ngay_cong,
             $bangLuong->tong_luong,

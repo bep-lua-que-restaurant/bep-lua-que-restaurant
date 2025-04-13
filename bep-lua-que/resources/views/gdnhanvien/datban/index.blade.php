@@ -69,17 +69,17 @@
                                 <label for="fullName" class="form-label"> <span class="text-danger fs-5">*</span> Họ
                                     tên:</label>
                                 <input type="text" class="form-control" id="customerName" name="customer_name">
-                                @error('customer_name')
+                                {{-- @error('customer_name')
                                     <span class="text-danger">{{ $message }}</span>
-                                @enderror
+                                @enderror --}}
                             </div>
                             <div class="col-md-6">
                                 <label for="email" class="form-label"> <span
                                         class="text-danger fs-5">*</span>Email:</label>
                                 <input type="email" class="form-control" id="customerEmail" name="customer_email">
-                                @error('customer_email')
+                                {{-- @error('customer_email')
                                     <span class="text-danger">{{ $message }}</span>
-                                @enderror
+                                @enderror --}}
                             </div>
                         </div>
 
@@ -88,17 +88,17 @@
                                 <label for="phone" class="form-label"><span class="text-danger fs-5">*</span>Số điện
                                     thoại:</label>
                                 <input type="tel" class="form-control" id="customerPhone" name="customer_phone">
-                                @error('customer_phone')
+                                {{-- @error('customer_phone')
                                     <span class="text-danger">{{ $message }}</span>
-                                @enderror
+                                @enderror --}}
                             </div>
                             <div class="col-md-6">
                                 <label for="numberOfGuests" class="form-label"><span class="text-danger fs-5">*</span>Số
                                     người:</label>
                                 <input type="number" class="form-control" name="num_people" id="numPeople" min="1">
-                                @error('num_people')
+                                {{-- @error('num_people')
                                     <span class="text-danger">{{ $message }}</span>
-                                @enderror
+                                @enderror --}}
                             </div>
                         </div>
                         <div class="mt-3">
@@ -112,7 +112,7 @@
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                        {{-- <button id="clearButton" class="btn btn-danger">clearButton</button> --}}
+                        <button id="clearButton" class="btn btn-danger">clearButton</button>
                         <button type="submit" id="confirmButton" class="btn btn-primary">Xác nhận đặt bàn</button>
 
                     </div>
@@ -458,8 +458,10 @@
                     return;
                 }
 
-                if (!isAdjacentToAnySelectedTime(timeSlot, banId)) {
-                    alert("Thời gian không hợp lệ! Vui lòng chọn slot có khoảng cách ±30 phút.");
+                if (!isValidNewSlot(timeSlot, banId)) {
+                    alert(
+                        "Vui lòng chọn tối đa 3 tiếng (6 slot) liên tiếp, mỗi slot cách nhau đúng 30 phút!"
+                    );
                     return;
                 }
 
@@ -494,18 +496,105 @@
             });
 
             // 🔹 Kiểm tra xem có slot nào ±30 phút với thời gian mới không
-            function isAdjacentToAnySelectedTime(newTimeSlot, banId) {
-                if (!selectedSlots[banId] || selectedSlots[banId].length === 0) return true;
+            // function isValidNewSlot(newTimeSlot, banId) {
+            //     let [newHour, newMinute] = newTimeSlot.split(":").map(Number);
+            //     let newTime = newHour * 60 + newMinute;
 
+            //     if (!selectedSlots[banId] || selectedSlots[banId].length === 0) {
+            //         return true;
+            //     }
+
+            //     // Nếu slot này đã được chọn, cho phép bỏ chọn
+            //     let existingIndex = selectedSlots[banId].findIndex(slot => slot.timeSlot === newTimeSlot);
+            //     if (existingIndex !== -1) {
+            //         return true;
+            //     }
+
+            //     // Lấy danh sách thời gian đã chọn (đơn vị phút)
+            //     let times = selectedSlots[banId].map(slot => {
+            //         let [h, m] = slot.timeSlot.split(":").map(Number);
+            //         return h * 60 + m;
+            //     });
+
+            //     times.push(newTime);
+            //     times.sort((a, b) => a - b);
+
+            //     // Kiểm tra tổng thời gian liên tiếp
+            //     let totalDuration = times[times.length - 1] - times[0] + 30;
+            //     if (totalDuration > 180) return false;
+
+            //     // Kiểm tra các slot có cách nhau đúng 30 phút
+            //     for (let i = 1; i < times.length; i++) {
+            //         if (times[i] - times[i - 1] !== 30) {
+            //             return false;
+            //         }
+            //     }
+
+            //     return true;
+            // }
+
+            function isValidNewSlot(newTimeSlot, banId) {
                 let [newHour, newMinute] = newTimeSlot.split(":").map(Number);
-                let newTime = newHour * 60 + newMinute; // Chuyển thành phút để so sánh
+                let newTime = newHour * 60 + newMinute;
 
-                return selectedSlots[banId].some(slot => {
-                    let [slotHour, slotMinute] = slot.timeSlot.split(":").map(Number);
-                    let slotTime = slotHour * 60 + slotMinute;
-                    return Math.abs(slotTime - newTime) <= 30;
+                // Nếu slot này đã được chọn => cho phép bỏ chọn
+                if (selectedSlots[banId]) {
+                    let existingIndex = selectedSlots[banId].findIndex(slot => slot.timeSlot === newTimeSlot);
+                    if (existingIndex !== -1) {
+                        return true; // Cho phép huỷ chọn slot đã chọn
+                    }
+                }
+
+                // Nếu bàn đã chọn trước đó
+                if (selectedSlots[banId] && selectedSlots[banId].length > 0) {
+                    if (selectedSlots[banId].length < 6) {
+                        let times = selectedSlots[banId].map(slot => {
+                            let [h, m] = slot.timeSlot.split(":").map(Number);
+                            return h * 60 + m;
+                        });
+
+                        times.push(newTime);
+                        times.sort((a, b) => a - b);
+
+                        let totalDuration = times[times.length - 1] - times[0] + 30;
+                        if (totalDuration > 180) {
+                            return false;
+                        }
+
+                        for (let i = 1; i < times.length; i++) {
+                            if (times[i] - times[i - 1] !== 30) {
+                                return false;
+                            }
+                        }
+
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+
+                // Nếu là bàn mới, kiểm tra đồng bộ thời gian với các bàn khác
+                let selectedBanList = Object.keys(selectedSlots).map(banId => {
+                    return {
+                        banId: banId,
+                        tenBan: selectedSlots[banId][0].tenBan
+                    };
                 });
+
+                if (selectedBanList.length > 0) {
+                    let firstSelectedSlot = selectedSlots[selectedBanList[0].banId][0];
+                    let [firstHour, firstMinute] = firstSelectedSlot.timeSlot.split(":").map(Number);
+                    let firstTime = firstHour * 60 + firstMinute;
+
+                    if (newTime !== firstTime) {
+                        alert("Thời gian của các bàn phải giống nhau!");
+                        return false;
+                    }
+                }
+
+                return true;
             }
+
 
             // Hiển thị hoặc ẩn nút mở modal
             function updateModalButton() {
@@ -810,8 +899,8 @@
 
 
         /* .btn-success .btn-danger {
-                                                                                                                                                                                                                                                            pointer-events: none;
-                                                                                                                                                                                                                                                        } */
+                                                                                                                                                                                                                                                                                                                        pointer-events: none;
+                                                                                                                                                                                                                                                                                                                    } */
 
         .border-left-rounded {
             border-top-left-radius: 10px;
