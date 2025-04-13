@@ -26,14 +26,55 @@
                     <div class="card-header">
                         <h4 class="card-title">Danh sách nguyên liệu</h4>
 
-                        <div class="btn-group">
-                            {{-- <a href="{{ route('nguyen-lieu.create') }}" class="btn btn-sm btn-primary">
-                                <i class="fa fa-plus"></i> Thêm mới
-                            </a> --}}
+                        <div class="btn-group mb-3">
+                            <!-- Nút mở modal import -->
+                            {{-- <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#importModal">
+                                <i class="fa fa-upload"></i> Import
+                            </button> --}}
+                        
+                            <!-- Export -->
+                            <a href="{{ route('nguyen-lieu.export') }}" class="btn btn-success">
+                                <i class="fa fa-download"></i> Export
+                            </a>
+                        
+                            <!-- Kiểm tra tồn kho -->
+                            <a href="{{ route('nguyen-lieu.kiemtra') }}" class="btn btn-warning">
+                                <i class="bi bi-bar-chart-line"></i> Kiểm tra tồn kho
+                            </a>
+                        
+                            <!-- Danh sách -->
                             <a href="#" class="btn btn-sm btn-info">
                                 <i class="fa fa-list"></i> Danh sách
                             </a>
                         </div>
+                        
+                        <!-- Modal import -->
+                        <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content border-0 shadow-lg rounded-4">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title" id="importModalLabel">
+                                            <i class="fa fa-upload"></i> Import Nguyên Liệu
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form action="{{ route('tools.nguyen-lieu.import') }}" method="POST" enctype="multipart/form-data">
+                                        @csrf
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label for="file" class="form-label">Chọn file Excel (*.xlsx, *.csv):</label>
+                                                <input type="file" name="file" class="form-control" required accept=".xlsx,.csv">
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-success">Import</button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">

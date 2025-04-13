@@ -17,8 +17,11 @@ class HoaDonBan extends Model
         return $this->belongsTo(BanAn::class, 'ban_an_id');
     }
     public function chiTietHoaDons()
-{
-    return $this->hasMany(ChiTietHoaDon::class, 'hoa_don_id');
-}
-
+    {
+        return $this->hasMany(ChiTietHoaDon::class, 'hoa_don_id');
+    }
+    public function hoaDon()
+    {
+        return $this->belongsTo(HoaDon::class, 'hoa_don_id');
+    }
 }

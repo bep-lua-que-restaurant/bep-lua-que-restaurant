@@ -2,13 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\NguyenLieuExport;
 use App\Models\NguyenLieu;
 use App\Models\LoaiNguyenLieu;
 use App\Http\Requests\StoreNguyenLieuRequest;
 use App\Http\Requests\UpdateNguyenLieuRequest;
+use App\Imports\NguyenLieuImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
+use App\Models\PhieuXuatKho;
+use App\Models\ChiTietPhieuXuatKho;
+use App\Models\HoaDonBan;
+use App\Models\HoaDon;
+use App\Models\ChiTietHoaDon;
+use App\Models\CongThucMonAn;
+use Carbon\Carbon;
+use Maatwebsite\Excel\Facades\Excel;
 
 class NguyenLieuController extends Controller
 {
@@ -69,36 +79,87 @@ class NguyenLieuController extends Controller
         ]);
     }
 
-    public function getNguyenLieuByLoai($loai_id)
+    public function kiemTraTonKhoTrongNgay(Request $request)
     {
-        // $nguyenLieus = NguyenLieu::where('loai_nguyen_lieu_id', $loai_id)->get();
-        // return response()->json($nguyenLieus);
+        $ngay = $request->input('ngay') ? Carbon::parse($request->input('ngay')) : Carbon::today();
+        $loaiId = $request->input('loai_nguyen_lieu_id');
+
+        $nguyenLieus = NguyenLieu::when($loaiId, function ($query) use ($loaiId) {
+            $query->where('loai_nguyen_lieu_id', $loaiId);
+        })->get();
+
+        $duLieuTonKho = $nguyenLieus->map(function ($nl) use ($ngay) {
+            $soLuongXuat = ChiTietPhieuXuatKho::whereHas('phieuXuatKho', function ($query) use ($ngay) {
+                $query->whereDate('ngay_xuat', $ngay)->where('trang_thai', 'da_duyet');
+            })->where('nguyen_lieu_id', $nl->id)->get()
+                ->sum(fn($ct) => $ct->so_luong * $ct->he_so_quy_doi);
+
+            $soLuongDung = 0;
+            $hoaDonIds = HoaDonBan::where('trang_thai', 'da_thanh_toan')
+                ->whereDate('created_at', $ngay)
+                ->pluck('hoa_don_id');
+
+            $chiTietHoaDons = ChiTietHoaDon::whereIn('hoa_don_id', $hoaDonIds)->get();
+
+            foreach ($chiTietHoaDons as $cthd) {
+                $congThuc = CongThucMonAn::where('mon_an_id', $cthd->mon_an_id)
+                    ->where('nguyen_lieu_id', $nl->id)->first();
+                if ($congThuc) {
+                    $soLuongDung += $cthd->so_luong * $congThuc->so_luong;
+                }
+            }
+
+            return [
+                'nguyen_lieu'      => $nl->ten_nguyen_lieu,
+                'don_vi'           => $nl->don_vi_ton,
+                'ton_kho_hien_tai' => $nl->so_luong_ton,
+                'da_xuat'          => $soLuongXuat,
+                'da_dung'          => $soLuongDung,
+                'chenh_lech'       => $soLuongXuat - $soLuongDung,
+            ];
+        });
+
+        // ===== Định mức sử dụng =====
+        $soNgay = 7;
+        $ngayBatDau = $ngay->copy()->subDays($soNgay - 1);
+        $duLieuDinhMuc = $nguyenLieus->map(function ($nl) use ($ngayBatDau, $ngay, $soNgay) {
+            $hoaDonIds = HoaDonBan::where('trang_thai', 'da_thanh_toan')
+                ->whereBetween('created_at', [$ngayBatDau, $ngay])
+                ->pluck('hoa_don_id');
+
+            $chiTietHoaDons = ChiTietHoaDon::whereIn('hoa_don_id', $hoaDonIds)->get();
+            $tongSoLuongDung = 0;
+
+            foreach ($chiTietHoaDons as $cthd) {
+                $congThuc = CongThucMonAn::where('mon_an_id', $cthd->mon_an_id)
+                    ->where('nguyen_lieu_id', $nl->id)->first();
+                if ($congThuc) {
+                    $tongSoLuongDung += $cthd->so_luong * $congThuc->so_luong;
+                }
+            }
+
+            $trungBinh = $tongSoLuongDung / $soNgay;
+            return [
+                'nguyen_lieu'      => $nl->ten_nguyen_lieu,
+                'ton_kho'          => $nl->so_luong_ton,
+                'trung_binh_su_dung' => round($trungBinh, 2),
+            ];
+        });
+
+        $dsLoai = LoaiNguyenLieu::all();
+
+        return view('admin.nguyenlieu.kiemtratonkho', compact(
+            'duLieuTonKho',
+            'duLieuDinhMuc',
+            'ngay',
+            'loaiId',
+            'dsLoai',
+            'soNgay'
+        ));
     }
 
 
-    /**
-     * Hiển thị form thêm nguyên liệu.
-     */
-    public function create()
-    {
-        // return view('admin.nguyenlieu.create');
-    }
 
-    /**
-     * Lưu nguyên liệu mới vào database.
-     */
-    public function store(StoreNguyenLieuRequest $request)
-    {
-        // $data = $request->validated();
-
-        // if ($request->hasFile('hinh_anh')) {
-        //     $data['hinh_anh'] = $request->file('hinh_anh')->store('NguyenLieuImg', 'public');
-        // }
-
-        // NguyenLieu::create($data);
-
-        // return redirect()->route('nguyen-lieu.index')->with('success', 'Thêm nguyên liệu thành công!');
-    }
 
     /**
      * Hiển thị thông tin chi tiết nguyên liệu.
@@ -120,34 +181,6 @@ class NguyenLieuController extends Controller
     }
 
 
-
-
-    /**
-     * Hiển thị form sửa nguyên liệu.
-     */
-    public function edit(NguyenLieu $nguyenLieu)
-    {
-        // return view('admin.nguyenlieu.edit', compact('nguyenLieu'));
-    }
-
-    /**
-     * Cập nhật thông tin nguyên liệu.
-     */
-    public function update(UpdateNguyenLieuRequest $request, NguyenLieu $nguyenLieu)
-    {
-        // $data = $request->validated();
-
-        // if ($request->hasFile('hinh_anh')) {
-        //     if ($nguyenLieu->hinh_anh) {
-        //         Storage::disk('public')->delete($nguyenLieu->hinh_anh);
-        //     }
-        //     $data['hinh_anh'] = $request->file('hinh_anh')->store('NguyenLieuImg', 'public');
-        // }
-
-        // $nguyenLieu->update($data);
-
-        // return back()->with('success', 'Cập nhật nguyên liệu thành công!');
-    }
 
     /**
      * Xóa nguyên liệu (soft delete).
@@ -179,5 +212,21 @@ class NguyenLieuController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Không thể khôi phục nguyên liệu.');
         }
+    }
+
+    public function export()
+    {
+        return Excel::download(new NguyenLieuExport, 'nguyen_lieu.xlsx');
+    }
+
+    public function importNguyenLieu(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv,xls'
+        ]);
+
+        Excel::import(new NguyenLieuImport, $request->file('file'));
+
+        return back()->with('success', 'Import nguyên liệu thành công!');
     }
 }

@@ -11,9 +11,7 @@
                     class="text-dark">{{ $phieuNhapKho->ma_phieu }}</span>
             </h3>
             <div>
-                <a href="{{ route('phieu-nhap-kho.exportDetail', $phieuNhapKho->id) }}" class="btn btn-success">
-                    <i class="fa fa-file-excel"></i> Xuất Excel
-                </a>
+               
                 <a href="{{ route('phieu-nhap-kho.index') }}" class="btn btn-secondary">
                     <i class="fa fa-arrow-left"></i> Quay lại
                 </a>

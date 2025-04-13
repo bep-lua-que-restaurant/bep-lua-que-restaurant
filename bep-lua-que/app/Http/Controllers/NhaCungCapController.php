@@ -6,6 +6,7 @@ use App\Exports\NhaCungCapExport;
 use App\Models\NhaCungCap;
 use App\Http\Requests\StoreNhaCungCapRequest;
 use App\Http\Requests\UpdateNhaCungCapRequest;
+use App\Imports\NhaCungCapImport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
