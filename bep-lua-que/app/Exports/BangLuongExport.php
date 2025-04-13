@@ -14,16 +14,23 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 class BangLuongExport implements FromCollection, WithHeadings, WithMapping, WithEvents
 {
+    protected $month;
+    protected $year;
+
+    public function __construct($month, $year)
+    {
+        $this->month = $month;
+        $this->year = $year;
+    }
+
     public function collection()
-{
-    $latestMonth = BangTinhLuong::max('thang_nam'); // Lấy tháng mới nhất
-
-    return BangTinhLuong::with(['nhanVien:id,ho_ten'])
-    ->where('thang_nam', $latestMonth)
-    ->select('id', 'nhan_vien_id', 'thang_nam', 'so_ca_lam', 'so_ngay_cong', 'tong_luong', 'ghi_chu', 'created_at', 'updated_at')
-    ->get();
-
-}
+    {
+        return BangTinhLuong::with(['nhanVien:id,ho_ten'])
+            ->whereMonth('thang_nam', $this->month)   // lọc theo tháng
+            ->whereYear('thang_nam', $this->year)      // lọc theo năm
+            ->select('id', 'nhan_vien_id', 'thang_nam', 'so_ca_lam', 'so_ngay_cong', 'tong_luong', 'ghi_chu', 'created_at', 'updated_at')
+            ->get();
+    }
 
 
     public function headings(): array

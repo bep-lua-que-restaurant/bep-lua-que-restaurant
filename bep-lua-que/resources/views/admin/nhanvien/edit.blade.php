@@ -110,9 +110,11 @@
                 <div class="col-md-6 mb-3">
                     <label>Hình thức lương</label>
                     <select name="hinh_thuc_luong" class="form-control" id="hinhThucLuong">
-                        <option value="ca" {{ optional($nhanVien->luong)->hinh_thuc == 'ca' ? 'selected' : '' }}>
+                        <option value="ca"
+                            {{ optional($nhanVien->luong->first())->hinh_thuc == 'ca' ? 'selected' : '' }}>
                             Lương theo ca
                         </option>
+
                     </select>
                     @error('hinh_thuc_luong')
                         <div class="text-danger">{{ $message }}</div>
@@ -123,12 +125,22 @@
                     <label>Mức lương</label>
                     <div class="input-group">
                         <input type="number" name="muc_luong" class="form-control" id="mucLuong"
-                            value="{{ optional($nhanVien->luong)->muc_luong }}">
+                            value="{{ optional($nhanVien->luong)->muc_luong ?? '' }}">
                         <div class="input-group-append">
-                            <span class="input-group-text" id="donViLuong">VNĐ / Tháng</span>
+                            <span class="input-group-text" id="donViLuong">VNĐ / Ca</span>
                         </div>
                     </div>
+
                     @error('muc_luong')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Ngày áp dụng</label>
+                    <input type="date" id="ngay_ap_dung" name="ngay_ap_dung" class="form-control"
+                        value="{{ old('ngay_ap_dung', optional($nhanVien->luong->first())->ngay_ap_dung ? \Carbon\Carbon::parse(optional($nhanVien->luong->first())->ngay_ap_dung)->toDateString() : '') }}">
+
+                    @error('ngay_ap_dung')
                         <div class="text-danger">{{ $message }}</div>
                     @enderror
                 </div>
@@ -158,6 +170,15 @@
 
             hinhThucLuong.addEventListener('change', updateDonViLuong);
             updateDonViLuong();
+        });
+        const input = document.getElementById('ngay_ap_dung');
+
+        input.addEventListener('change', function() {
+            const date = new Date(this.value);
+            if (date.getDate() !== 1) {
+                alert('Vui lòng chọn ngày đầu tiên của tháng!');
+                this.value = ''; // Xóa giá trị sai
+            }
         });
     </script>
 @endsection

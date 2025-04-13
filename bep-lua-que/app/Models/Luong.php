@@ -10,7 +10,7 @@ class Luong extends Model
 {
     use HasFactory;
     // use SoftDeletes;
-    protected $fillable = ['nhan_vien_id', 'hinh_thuc', 'muc_luong'];
+    protected $fillable = ['nhan_vien_id', 'hinh_thuc', 'muc_luong','ngay_ap_dung'];
 
     public function nhanVien()
     {

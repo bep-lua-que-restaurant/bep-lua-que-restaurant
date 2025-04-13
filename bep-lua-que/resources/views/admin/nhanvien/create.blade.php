@@ -120,6 +120,13 @@
                         <div class="text-danger">{{ $message }}</div>
                     @enderror
                 </div>
+                <div class="col-md-6 mb-3">
+                    <label>Ngày áp dụng lương</label>
+                    <input type="date" name="ngay_ap_dung" class="form-control">
+                    @error('ngay_ap_dung')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
+                </div>
 
             </div>
 

@@ -35,7 +35,7 @@
                                 <i class="fa fa-plus"></i> Tính lương
                             </a>
 
-                            <a href="{{ route('bang-luong.export') }}" class="btn btn-sm btn-success">
+                            <a id="exportLink" href="{{ route('bang-luong.export') }}" class="btn btn-sm btn-success">
                                 <i class="fa fa-download"></i> Xuất file
                             </a>
 
@@ -86,7 +86,7 @@
         </div>
     </div>
 
-    <!-- Modal Nhập file -->
+    {{-- <!-- Modal Nhập file -->
     <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true" id="importFileModal">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -112,7 +112,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     @include('admin.search-srcip')
     <!-- Hiển thị phân trang -->
@@ -138,6 +138,22 @@
                     }
                 });
             });
+        });
+        const monthSelect = document.getElementById('monthSelect');
+        const exportLink = document.getElementById('exportLink');
+
+        // Khi chọn tháng, update link export
+        monthSelect.addEventListener('change', function() {
+            const selectedMonth = this.value;
+            const baseUrl = "{{ route('bang-luong.export') }}"; // Link export
+            exportLink.href = baseUrl + '?month=' + selectedMonth;
+        });
+
+        // Ngay khi load trang cũng set đúng tháng hiện tại
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectedMonth = monthSelect.value;
+            const baseUrl = "{{ route('bang-luong.export') }}";
+            exportLink.href = baseUrl + '?month=' + selectedMonth;
         });
     </script>
 @endsection
