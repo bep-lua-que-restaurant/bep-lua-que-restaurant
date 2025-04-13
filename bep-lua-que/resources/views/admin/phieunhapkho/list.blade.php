@@ -42,7 +42,7 @@
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
                             <a href="{{ route('phieu-nhap-kho.export') }}" class="btn btn-sm btn-success ">
-                                <i class="bi bi-file-earmark-excel"></i> Xuất danh sách phiếu nhập
+                                <i class="bi bi-file-earmark-excel"></i> Xuất file
                             </a>
                             <a href="#" class="btn btn-sm btn-info">
                                 <i class="fa fa-list"></i> Danh sách
