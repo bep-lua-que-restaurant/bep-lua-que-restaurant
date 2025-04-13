@@ -16,12 +16,6 @@
             <div class="d-flex align-items-center"><span class="w-space-no">{{ $item->ten_ban }}</span></div>
         </td>
 
-        <!-- Số ghế -->
-        {{-- <td>
-            <div class="d-flex align-items-center"><span class="w-space-no">{{ $item->so_ghe }}</span></div>
-        </td> --}}
-
-
         <!-- Trạng thái (Đang sử dụng / Ngừng sử dụng) -->
         <td>
             @if ($item->deleted_at)

@@ -6,7 +6,7 @@
 
     @endphp
     <div class="container">
-        <h1 class="text-center my-4">Quản lý Đặt Bàn</h1>
+        <h1 class="text-center my-4">Xác nhận Bàn</h1>
         {{-- {{ dd($maDatBan) }} --}}
 
         <!-- Bảng đặt bàn -->
@@ -333,7 +333,7 @@
                     // Xử lý chọn / hủy chọn khi click
                     button.addEventListener("click", function() {
                         if (button.classList.contains("btn-danger"))
-                    return; // Không chọn được btn-danger
+                            return; // Không chọn được btn-danger
 
                         if (!button.classList.contains("btn-warning") && !button.classList.contains(
                                 "btn-success")) {
@@ -374,7 +374,8 @@
 
                                 if (!isValid) {
                                     alert(
-                                        "Chỉ có thể chọn giờ hơn kém nhau 30 phút trong cùng một bàn!");
+                                        "Chỉ có thể chọn giờ hơn kém nhau 30 phút trong cùng một bàn!"
+                                        );
                                     return;
                                 }
                             }
