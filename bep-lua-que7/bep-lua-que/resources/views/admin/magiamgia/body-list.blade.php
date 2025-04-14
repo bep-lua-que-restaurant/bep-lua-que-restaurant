@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 <table class="table table-bordered">
     <thead>
         <tr>
@@ -50,7 +50,7 @@
                                 <button type="submit" onclick="return confirm('Bạn muốn ngừng mã giảm này chứ?')"
                                     class="btn btn-danger btn-sm m-1" title="Xóa">
                                     <i class="fa fa-trash"></i>
-=======
+
 <div class="accordion" id="discountAccordion">
     @foreach ($data as $index => $item)
         <div class="accordion-item mb-3 shadow-sm border rounded">
@@ -100,12 +100,12 @@
                                 @method('DELETE')
                                 <button type="submit" onclick="return confirm('Ngừng mã giảm giá này?')" class="btn btn-outline-danger btn-sm">
                                     <i class="fa fa-trash"></i> Xóa
->>>>>>> eb0fe4acf6f066edf0be422cb1177add1f22f2ba
+<
                                 </button>
                             </form>
                         @endif
                     </div>
-<<<<<<< HEAD
+
                 </td>
             </tr>
             <!-- Nếu muốn có hàng chi tiết ẩn hiện, bạn có thể thêm row dưới dạng collapse -->
@@ -127,10 +127,9 @@
         @endforeach
     </tbody>
 </table>
-=======
+
                 </div>
             </div>
         </div>
     @endforeach
 </div>
->>>>>>> eb0fe4acf6f066edf0be422cb1177add1f22f2ba

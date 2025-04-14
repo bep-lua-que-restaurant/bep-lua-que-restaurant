@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-<<<<<<< HEAD
+
 
 @section('title')
     Chi tiết mã giảm giá
@@ -70,7 +70,7 @@
     </div>
     </div>
 @endsection
-=======
+
  
  @section('title')
      Chi tiết mã giảm giá
@@ -140,5 +140,6 @@
          </div>
      </div>
      </div>
+
  @endsection
->>>>>>> eb0fe4acf6f066edf0be422cb1177add1f22f2ba
+

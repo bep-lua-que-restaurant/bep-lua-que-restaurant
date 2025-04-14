@@ -6,12 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\Luong;
 use Carbon\Carbon;
 use App\Models\NhanVien;
-<<<<<<< HEAD
-use App\Models\BangTinhLuong; // <--- Thêm dòng này
-=======
+
 use App\Models\BangTinhLuong; 
 use App\Models\LichSuLuong;// <--- Thêm dòng này
->>>>>>> eb0fe4acf6f066edf0be422cb1177add1f22f2ba
+
 
 class LuongController extends Controller
 {
@@ -88,8 +86,7 @@ class LuongController extends Controller
 
         // return redirect()->route('luong.luong')->with('success', 'Lương đã được tính!');
     }
-<<<<<<< HEAD
-=======
+
     public function capNhatLuong(Request $request, $idNhanVien)
     {
         $request->validate([
@@ -131,5 +128,5 @@ class LuongController extends Controller
 
         return response()->json($luong);
     }
->>>>>>> eb0fe4acf6f066edf0be422cb1177add1f22f2ba
+
 }

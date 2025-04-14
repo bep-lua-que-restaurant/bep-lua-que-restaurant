@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-<<<<<<< HEAD
+
 
 @section('title')
     Mã giảm
@@ -117,7 +117,7 @@
     <!-- Hiển thị phân trang -->
     {{ $data->links('pagination::bootstrap-5') }}
 @endsection
-=======
+
  
  @section('title')
      Mã giảm
@@ -234,5 +234,6 @@
      @include('admin.search-srcip')
      <!-- Hiển thị phân trang -->
      {{ $data->links('pagination::bootstrap-5') }}
+
  @endsection
->>>>>>> eb0fe4acf6f066edf0be422cb1177add1f22f2ba
+

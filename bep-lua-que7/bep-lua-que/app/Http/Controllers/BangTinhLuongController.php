@@ -18,7 +18,7 @@ class BangTinhLuongController extends Controller
 {
     // Lấy danh sách bảng lương
     public function index(Request $request)
-<<<<<<< HEAD
+
 {
     $query = BangTinhLuong::query()
     ->leftJoin('nhan_viens', 'bang_tinh_luongs.nhan_vien_id', '=', 'nhan_viens.id')
@@ -74,7 +74,7 @@ class BangTinhLuongController extends Controller
 }
 
     
-=======
+
     {
         $query = BangTinhLuong::query()
             ->leftJoin('nhan_viens', 'bang_tinh_luongs.nhan_vien_id', '=', 'nhan_viens.id')
@@ -130,12 +130,12 @@ class BangTinhLuongController extends Controller
     }
 
 
->>>>>>> eb0fe4acf6f066edf0be422cb1177add1f22f2ba
+
 
     // Hiển thị form tạo bảng lương
     public function create(Request $request)
     {
-<<<<<<< HEAD
+
         // Lấy tháng từ request, mặc định là tháng hiện tại
         $thangChon = $request->input('thang', now()->format('Y-m'));
     
@@ -151,7 +151,7 @@ class BangTinhLuongController extends Controller
         }])
         ->get();
     
-=======
+
         $thangChon = $request->input('thang', now()->format('Y-m'));
         $ngayBatDauThang = Carbon::parse($thangChon . '-01');
         $ngayKetThucThang = $ngayBatDauThang->copy()->endOfMonth();
@@ -208,20 +208,12 @@ class BangTinhLuongController extends Controller
         }
     
         // Trả về view tính lương
->>>>>>> eb0fe4acf6f066edf0be422cb1177add1f22f2ba
+
         return view('admin.bangluong.tinhluong', compact('nhanViens', 'thangChon'));
     }
     
 
-<<<<<<< HEAD
-=======
 
-
-
-
-
-
->>>>>>> eb0fe4acf6f066edf0be422cb1177add1f22f2ba
     // Lưu bảng lương vào database
     public function store(Request $request)
     {
@@ -233,7 +225,7 @@ class BangTinhLuongController extends Controller
             'tong_luong' => 'required|array',
             'thang_nam' => 'required|date_format:Y-m',
         ]);
-<<<<<<< HEAD
+
     
         $thangNam = $request->thang_nam . '-01';
     
@@ -243,7 +235,7 @@ class BangTinhLuongController extends Controller
     
         foreach ($request->nhan_vien_id as $index => $nhan_vien_id) {
             $nhanVien = NhanVien::findOrFail($nhan_vien_id);    
-=======
+
 
         $thangNam = $request->thang_nam . '-01';
 
@@ -253,13 +245,13 @@ class BangTinhLuongController extends Controller
 
         foreach ($request->nhan_vien_id as $index => $nhan_vien_id) {
             $nhanVien = NhanVien::findOrFail($nhan_vien_id);
->>>>>>> eb0fe4acf6f066edf0be422cb1177add1f22f2ba
+
             $hinhThuc = optional($nhanVien->luong)->hinh_thuc ?? 'ca';
             $mucLuong = optional($nhanVien->luong)->muc_luong ?? 0;
             $soCaLam = $request->so_ca_lam[$index] ?? 0;
             $soNgayLam = $request->so_ngay_cong[$index] ?? 0;
             $tongLuong = $request->tong_luong[$index] ?? 0;
-<<<<<<< HEAD
+
     
            // ✅ Thêm dòng này để lưu mức lương vào bảng lương
     BangTinhLuong::create([
@@ -294,7 +286,7 @@ class BangTinhLuongController extends Controller
             'bang_tinh_luongs.tong_luong' // Lấy t��ng lương
             )
         ->get();
-=======
+
 
             // ✅ Thêm dòng này để lưu mức lương vào bảng lương
             BangTinhLuong::create([
@@ -329,7 +321,7 @@ class BangTinhLuongController extends Controller
                 'bang_tinh_luongs.tong_luong' // Lấy t��ng lương
             )
             ->get();
->>>>>>> eb0fe4acf6f066edf0be422cb1177add1f22f2ba
+
 
         return view('admin.bangluong.show', compact('bangTinhLuong'));
     }
@@ -340,12 +332,14 @@ class BangTinhLuongController extends Controller
         // Xuất file Excel với tên "DanhMucMonAn.xlsx"
         return Excel::download(new BangLuongExport, 'BangLuong.xlsx');
     }
-<<<<<<< HEAD
+
     
 
     
 }
 
-=======
+
 }
->>>>>>> eb0fe4acf6f066edf0be422cb1177add1f22f2ba
+
+}
+

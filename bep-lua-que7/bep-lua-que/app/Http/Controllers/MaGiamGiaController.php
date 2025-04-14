@@ -1,5 +1,5 @@
 <?php
-<<<<<<< HEAD
+
 
 namespace App\Http\Controllers;
 
@@ -169,7 +169,8 @@ class MaGiamGiaController extends Controller
         return back()->with('success', 'Nhập dữ liệu thành công!');
     }
 }
-=======
+
+
  
  namespace App\Http\Controllers;
  
@@ -338,5 +339,7 @@ class MaGiamGiaController extends Controller
  
          return back()->with('success', 'Nhập dữ liệu thành công!');
      }
+
  }
->>>>>>> eb0fe4acf6f066edf0be422cb1177add1f22f2ba
+
+
