@@ -59,18 +59,26 @@
                 <div class="row mt-4">
                     <div class="col-md-12">
                         <h4>Thông tin lương</h4>
-                        <ul class="list-group">
+                        @php
+                            $luongMoi = $nhanVien->luong()->orderByDesc('ngay_ap_dung')->first(); // hoặc orderByDesc('updated_at')
+                        @endphp
 
-                            <li class="list-group-item"><strong>Hình thức:</strong>
-                                @if ($nhanVien->luong && $nhanVien->luong->first() && $nhanVien->luong->first()->hinh_thuc == 'ca')
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <strong>Hình thức:</strong>
+                                @if ($luongMoi && $luongMoi->hinh_thuc == 'ca')
                                     Lương theo ca
+                                @elseif ($luongMoi)
+                                    {{ $luongMoi->hinh_thuc }}
                                 @else
                                     <span class="text-danger">Chưa thiết lập</span>
                                 @endif
                             </li>
-                            <li class="list-group-item"><strong>Mức lương:</strong>
-                                @if ($nhanVien->luong && $nhanVien->luong->first())
-                                    {{ number_format($nhanVien->luong->first()->muc_luong, 0, ',', '.') }} VNĐ
+
+                            <li class="list-group-item">
+                                <strong>Mức lương:</strong>
+                                @if ($luongMoi)
+                                    {{ number_format($luongMoi->muc_luong, 0, ',', '.') }} VNĐ
                                 @else
                                     <span class="text-danger">Chưa thiết lập</span>
                                 @endif
@@ -78,48 +86,50 @@
 
                             <li class="list-group-item">
                                 <strong>Ngày áp dụng lương:</strong>
-                                {{ optional($nhanVien->luong->first())->ngay_ap_dung ? \Carbon\Carbon::parse($nhanVien->luong->first()->ngay_ap_dung)->format('d/m/Y') : 'Chưa thiết lập' }}
+                                @if ($luongMoi)
+                                    {{ \Carbon\Carbon::parse($luongMoi->ngay_ap_dung)->format('d/m/Y') }}
+                                @else
+                                    <span class="text-danger">Chưa thiết lập</span>
+                                @endif
                             </li>
-
-
-
                         </ul>
+
                     </div>
                 </div>
-            </div>
-            <div class="card-footer d-flex justify-content-end">
-                <a href="{{ route('nhan-vien.edit', $nhanVien->id) }}" class="btn btn-success "
-                    style="margin-right: 10px; height: 40px;">Cập nhật</a>
+                <div class="card-footer d-flex justify-content-end">
+                    <a href="{{ route('nhan-vien.edit', $nhanVien->id) }}" class="btn btn-success "
+                        style="margin-right: 10px; height: 40px;">Cập nhật</a>
 
-                <!-- Nút Nghỉ việc / Khôi phục -->
-                @if ($nhanVien->trang_thai === 'dang_lam_viec')
-                    <form action="{{ route('nhan-vien.nghi-viec', $nhanVien->id) }}" method="POST"
-                        style="display:inline;">
-                        @csrf
-                        <button type="submit" class="btn btn-danger"
-                            onclick="return confirm('Bạn có chắc chắn muốn nghỉ việc nhân viên này?')">Ngừng làm
-                            việc</button>
-                    </form>
-                @else
-                    <form action="{{ route('nhan-vien.khoi-phuc', $nhanVien->id) }}" method="POST"
-                        style="display:inline;">
-                        @csrf
-                        <button type="submit" class="btn btn-success"
-                            onclick="return confirm('Bạn có chắc chắn muốn khôi phục nhân viên này?')">Quay lại làm
-                            việc</button>
-                    </form>
-                @endif
-                {{-- <form action="{{ route('nhan-vien.destroy', $nhanVien->id) }}" method="POST"
+                    <!-- Nút Nghỉ việc / Khôi phục -->
+                    @if ($nhanVien->trang_thai === 'dang_lam_viec')
+                        <form action="{{ route('nhan-vien.nghi-viec', $nhanVien->id) }}" method="POST"
+                            style="display:inline;">
+                            @csrf
+                            <button type="submit" class="btn btn-danger"
+                                onclick="return confirm('Bạn có chắc chắn muốn nghỉ việc nhân viên này?')">Ngừng làm
+                                việc</button>
+                        </form>
+                    @else
+                        <form action="{{ route('nhan-vien.khoi-phuc', $nhanVien->id) }}" method="POST"
+                            style="display:inline;">
+                            @csrf
+                            <button type="submit" class="btn btn-success"
+                                onclick="return confirm('Bạn có chắc chắn muốn khôi phục nhân viên này?')">Quay lại làm
+                                việc</button>
+                        </form>
+                    @endif
+                    {{-- <form action="{{ route('nhan-vien.destroy', $nhanVien->id) }}" method="POST"
                     style="display:inline;height:20px; margin: 0px 10px">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger"
                         onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?')">Xóa nhân viên</button>
                 </form> --}}
-                <a style="margin-left: 10px;" href="{{ route('nhan-vien.index') }}" class="btn btn-secondary">Trở lại danh
-                    sách</a>
+                    <a style="margin-left: 10px;" href="{{ route('nhan-vien.index') }}" class="btn btn-secondary">Trở lại
+                        danh
+                        sách</a>
 
+                </div>
             </div>
         </div>
-    </div>
-@endsection
+    @endsection

@@ -44,9 +44,9 @@
                             <a href="{{ route('phieu-nhap-kho.export') }}" class="btn btn-sm btn-success ">
                                 <i class="bi bi-file-earmark-excel"></i> Xuất file
                             </a>
-                            <a href="#" class="btn btn-sm btn-info">
+                            {{-- <a href="#" class="btn btn-sm btn-info">
                                 <i class="fa fa-list"></i> Danh sách
-                            </a>
+                            </a> --}}
                         </div>
                     </div>
                     <div class="card-body">

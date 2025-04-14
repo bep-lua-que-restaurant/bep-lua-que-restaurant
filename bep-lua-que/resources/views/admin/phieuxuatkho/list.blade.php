@@ -41,13 +41,13 @@
                             <a href="{{ route('phieu-xuat-kho.export') }}" class="btn btn-success">
                                 <i class="fa fa-file-excel"></i> Export Excel
                             </a>
-                            
+
                             <a href="{{ route('phieu-xuat-kho.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
-                            <a href="#" class="btn btn-sm btn-info">
+                            {{-- <a href="#" class="btn btn-sm btn-info">
                                 <i class="fa fa-list"></i> Danh sách
-                            </a>
+                            </a> --}}
                         </div>
                     </div>
                     <div class="card-body">

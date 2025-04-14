@@ -899,7 +899,8 @@
 
 
         /* .btn-success .btn-danger {
-
+                                                                                                                                                                                                                                                                                                                            pointer-events: none;
+                                                                                                                                                                                                                                                                                                                        } */
 
         .border-left-rounded {
             border-top-left-radius: 10px;

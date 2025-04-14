@@ -5,7 +5,7 @@
         <td>{{ $hoa_dons->ho_ten }}</td>
         <td>{{ $hoa_dons->so_dien_thoai }}</td>
         <td class="text-danger fw-bold">
-            {{ number_format($hoa_dons->tong_tien, 0, ',', '.') }} VNĐ
+            {{ number_format($hoa_dons->tong_tien, 0, ',', '.') }} VND
         </td>
         @php
             $paymentMethods = [

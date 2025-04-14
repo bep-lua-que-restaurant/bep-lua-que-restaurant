@@ -63,9 +63,9 @@
                             <a href="{{ route('ca-lam.export') }}" class="btn btn-sm btn-success">
                                 <i class="fa fa-download"></i> Xuất file
                             </a>
-                            <a href="#" class="btn btn-sm btn-info">
+                            {{-- <a href="#" class="btn btn-sm btn-info">
                                 <i class="fa fa-list"></i> Danh sách
-                            </a>
+                            </a> --}}
                         </div>
                     </div>
                     <div class="card-body">

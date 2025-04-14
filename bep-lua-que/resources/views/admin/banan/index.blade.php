@@ -71,9 +71,9 @@
                             </a>
 
                             <!-- Nút Danh sách -->
-                            <a href="{{ route('ban-an.index') }}" class="btn btn-sm btn-info">
+                            {{-- <a href="{{ route('ban-an.index') }}" class="btn btn-sm btn-info">
                                 <i class="fa fa-list"></i> Danh sách
-                            </a>
+                            </a> --}}
                         </div>
 
                         <!-- Modal Nhập File -->

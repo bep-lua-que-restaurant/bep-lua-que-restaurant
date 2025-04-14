@@ -7,7 +7,10 @@ use App\Models\MaGiamGia;
 use App\Http\Requests\StoreMaGiamGiaRequest;
 use App\Http\Requests\UpdateMaGiamGiaRequest;
 use App\Imports\MaGiamGiaImport;
+use App\Models\HoaDon;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
@@ -17,31 +20,60 @@ class MaGiamGiaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
-{
-    $searchInput = $request->input('searchInput');
-    $statusFilter = $request->input('statusFilter');
 
-    $query = MaGiamGia::query();
-
-    // Apply search filter
-    if ($searchInput) {
-        $query->where('code', 'like', '%' . $searchInput . '%');
-    }
-
-    // Apply status filter
-    if ($statusFilter && $statusFilter !== 'Tất cả') {
-        if ($statusFilter === 'Đang hoạt động') {
-            $query->whereNull('deleted_at');
-        } else if ($statusFilter === 'Đã ngừng hoạt động') {
-            $query->whereNotNull('deleted_at');
+     public function index(Request $request)
+     {
+         // TỰ ĐỘNG UPDATE: Những mã hết hạn hoặc hết lượt dùng thì set deleted_at = now()
+         MaGiamGia::whereNull('deleted_at')
+             ->where(function($query) {
+                 $query->whereDate('end_date', '<', Carbon::today())
+                       ->orWhere(function($q) {
+                           // Kiểm tra nếu số lượt đã dùng >= usage_limit
+                           $q->where('usage_limit', '<=', 0)
+                             ->orWhere('usage_limit', '<=', DB::raw('(SELECT COUNT(*) FROM hoa_dons WHERE hoa_dons.id_ma_giam = ma_giam_gias.id)')); // Đếm số lượt sử dụng từ hoa_dons
+                       });
+             })
+             ->update(['deleted_at' => now()]);
+         
+         $searchInput = $request->input('searchInput');
+         $statusFilter = $request->input('statusFilter');
+     
+         $query = MaGiamGia::query();
+     
+         // Apply search filter
+         if ($searchInput) {
+             $query->where('code', 'like', '%' . $searchInput . '%');
+         }
+     
+         // Apply status filter
+         if ($statusFilter && $statusFilter !== 'Tất cả') {
+             if ($statusFilter === 'Đang hoạt động') {
+                 $query->where(function($q) {
+                     $q->whereNull('deleted_at')
+                       ->whereDate('end_date', '>=', Carbon::today())
+                       ->where('usage_limit', '>', 0)
+                       ->whereRaw('(SELECT COUNT(*) FROM hoa_dons WHERE hoa_dons.id_ma_giam = ma_giam_gias.id) < usage_limit'); // Đảm bảo số lượt chưa dùng hết
+                 });
+             } else if ($statusFilter === 'Đã ngừng hoạt động') {
+                 $query->where(function($q) {
+                     $q->whereNotNull('deleted_at')
+                       ->orWhereDate('end_date', '<', Carbon::today())
+                       ->orWhere('usage_limit', '<=', 0)
+                       ->orWhereRaw('(SELECT COUNT(*) FROM hoa_dons WHERE hoa_dons.id_ma_giam = ma_giam_gias.id) >= usage_limit'); // Đã hết lượt hoặc hết hạn
+                 });
+             }
+         }
+     
+         $data = $query->withTrashed()->paginate(10);
+     // Thêm số lượt đã sử dụng vào dữ liệu
+        foreach ($data as $item) {
+        $item->usage_count = HoaDon::where('id_ma_giam', $item->id)->count();
         }
-    }
+         return view('admin.magiamgia.list', compact('data'));
+     }
+     
 
-    $data = $query->withTrashed()->paginate(10);
-
-    return view('admin.magiamgia.list', compact('data'));
-}
+    
 
 
     /**
@@ -162,12 +194,27 @@ class MaGiamGiaController extends Controller
     }
 
     public function restore($id)
-    {
-        $maGiamGia = MaGiamGia::withTrashed()->findOrFail($id);
-        $maGiamGia->restore();
-
-        return redirect()->route('ma-giam-gia.index')->with('success', 'Khôi phục thành công!');
+{
+    $maGiamGia = MaGiamGia::withTrashed()->findOrFail($id);
+    
+    // Nếu mã đã hoàn toàn hết hạn (qua hết ngày) hoặc hết số lượt
+    if (Carbon::parse($maGiamGia->end_date)->endOfDay()->lt(now())) {
+        return redirect()->route('ma-giam-gia.index')->with('error', 'Mã giảm giá đã hết hạn, không thể khôi phục.');
     }
+
+    // Kiểm tra nếu mã giảm giá đã hết số lượt sử dụng (usage_limit <= 0)
+    $usageCount = HoaDon::where('id_ma_giam', $maGiamGia->id)->count(); // Đếm số lần đã sử dụng mã giảm giá
+    if ($maGiamGia->usage_limit <= $usageCount) {
+        return redirect()->route('ma-giam-gia.index')->with('error', 'Mã giảm giá đã hết số lượt sử dụng, không thể khôi phục.');
+    }
+
+    // Nếu không hết hạn và còn lượt, cho phép khôi phục
+    $maGiamGia->restore();
+    
+    return redirect()->route('ma-giam-gia.index')->with('success', 'Khôi phục thành công!');
+}
+
+    
 
     public function export()
     {
