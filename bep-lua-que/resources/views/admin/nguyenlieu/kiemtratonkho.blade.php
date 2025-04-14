@@ -3,285 +3,168 @@
 @section('title', 'Kiểm Tra Tồn Kho')
 
 @section('content')
-    <div class="container">
-        <h3 class="mb-4">📊 Kiểm Tra Tồn Kho ({{ $ngay->format('d/m/Y') }})</h3>
+    <div class="container py-4">
+        <h4 class="mb-4">📦 Kiểm tra tồn kho - xuất - dùng</h4>
+        <p class="fst-italic text-danger small">* Nguyên liệu hiển thị màu đỏ là đã ngưng sử dụng</p>
 
-        <div class="text-end mt-4">
-            <a href="{{ route('nguyen-lieu.index') }}" class="btn btn-secondary">← Quay lại danh sách</a>
-        </div>
-
-        <form id="filterForm" class="row g-2 my-4">
-            <div class="col-auto">
-                <input type="date" name="ngay" class="form-control" value="{{ $ngay->toDateString() }}">
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label for="ngay">Ngày:</label>
+                <input type="date" id="ngay" class="form-control" value="{{ now()->toDateString() }}">
             </div>
-            <div class="col-auto">
-                <select name="loai_nguyen_lieu_id" class="form-select">
-                    <option value="">-- Tất cả loại --</option>
-                    @foreach ($dsLoai as $loai)
-                        <option value="{{ $loai->id }}" @selected($loai->id == $loaiId)>
-                            {{ $loai->ten_loai }}
-                        </option>
+            <div class="col-md-4">
+                <label for="loai_nguyen_lieu">Loại nguyên liệu:</label>
+                <select id="loai_nguyen_lieu" class="form-select">
+                    <option value="">-- Tất cả --</option>
+                    @foreach ($loaiNguyenLieus as $loai)
+                        <option value="{{ $loai->id }}">{{ $loai->ten_loai }}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-primary">Xem báo cáo</button>
-            </div>
-        </form>
-        
-
-        <!-- Tabs biểu đồ -->
-        <ul class="nav nav-tabs mt-5" id="chartTabs">
-            @php
-                $tabs = [
-                    ['id' => 'xuat-dung', 'label' => '📈 Xuất - Dùng nguyên liệu', 'active' => true],
-                    ['id' => 'dinh-muc', 'label' => '📉 So với định mức sử dụng'],
-                    ['id' => 'canh-bao-hsd', 'label' => '📅 Cảnh báo hạn sử dụng'],
-                ];
-            @endphp
-
-            @foreach ($tabs as $tab)
-                <li class="nav-item">
-                    <button class="nav-link @if ($tab['active'] ?? false) active @endif" id="{{ $tab['id'] }}-tab"
-                        data-bs-toggle="tab" data-bs-target="#{{ $tab['id'] }}" type="button" role="tab">
-                        {{ $tab['label'] }}
-                    </button>
-                </li>
-            @endforeach
-        </ul>
-
-        <div class="tab-content border border-top-0 p-3" id="chartTabsContent">
-            <div class="tab-pane fade show active" id="xuat-dung">
-                <canvas id="tonKhoChart" height="100"></canvas>
-            </div>
-            <div class="tab-pane fade" id="dinh-muc">
-                <canvas id="dinhMucChart" height="100"></canvas>
-            </div>
-            <div class="tab-pane fade" id="canh-bao-hsd">
-                <form method="GET" class="row g-2 mb-3">
-                    <input type="hidden" name="ngay" value="{{ $ngay->toDateString() }}">
-                    <input type="hidden" name="loai_nguyen_lieu_id" value="{{ $loaiId }}">
-                    <div class="col-auto">
-                        <select name="canh_bao" class="form-select" onchange="this.form.submit()">
-                            <option value="">-- Tất cả trạng thái --</option>
-                            <option value="het_han" @selected(request('canh_bao') == 'het_han')>Hết hạn</option>
-                            <option value="duoi_3_ngay" @selected(request('canh_bao') == 'duoi_3_ngay')>Còn dưới 3 ngày</option>
-                            <option value="duoi_7_ngay" @selected(request('canh_bao') == 'duoi_7_ngay')>Còn dưới 7 ngày</option>
-                        </select>
-                    </div>
-                </form>
-            
-                @if ($nguyenLieuHetHan->count())
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped align-middle">
-                            <thead class="table-danger text-center">
-                                <tr>
-                                    <th>#</th>
-                                    <th>Nguyên Liệu</th>
-                                    <th>Ngày Sản Xuất</th>
-                                    <th>Hạn Sử Dụng</th>
-                                    <th>Số Lượng</th>
-                                    <th>Đơn Vị</th>
-                                    <th>Trạng Thái</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($nguyenLieuHetHan as $index => $item)
-                                    @php
-                                        $class = $item['trang_thai'] === 'Hết hạn' ? 'text-danger fw-bold' :
-                                                ($item['trang_thai'] === 'Dưới 3 ngày' ? 'text-warning fw-semibold' : 'text-secondary');
-                                    @endphp
-                                    <tr>
-                                        <td class="text-center">{{ $index + 1 }}</td>
-                                        <td>{{ $item['nguyen_lieu'] }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($item['ngay_san_xuat'])->format('d/m/Y') }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($item['han_su_dung'])->format('d/m/Y') }}</td>
-                                        <td class="text-end">{{ number_format($item['so_luong'], 2) }}</td>
-                                        <td class="text-center">{{ $item['don_vi'] }}</td>
-                                        <td class="text-center {{ $class }}">{{ $item['trang_thai'] }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @else
-                    <p class="text-muted mt-3">✅ Không có nguyên liệu nào thuộc trạng thái này.</p>
-                @endif
-            </div>
-            
-            
         </div>
 
-        <div class="table-responsive mt-4">
-            <table id="tonKhoTable" class="table table-bordered table-hover table-striped">
-                <thead class="table-dark">
+        <div class="table-responsive">
+            <table id="tonKhoTable" class="table table-hover table-bordered table-striped align-middle">
+                <thead class="table-dark text-center">
                     <tr>
-                        <th>#</th>
-                        <th>Nguyên Liệu</th>
-                        <th>Đơn Vị</th>
-                        <th>Tồn Kho Hiện Tại</th>
-                        <th>Đã Xuất Hôm Nay</th>
-                        <th>Đã Dùng Hôm Nay</th>
-                        <th>Chênh Lệch</th>
-                        <th>Gợi Ý</th>
+                        <th>Nguyên liệu</th>
+                        <th>Tồn kho</th>
+                        <th>Đã xuất (Tất cả)</th>
+                        <th>Đã xuất (bếp)</th>
+                        <th>Đã xuất (trả hàng)</th>
+                        <th>Đã xuất (hủy)</th>
+                        <th>Đã dùng (theo món)</th>
+                        <th>Chênh lệch (Xuất - Dùng)</th>
+                        <th>Cảnh báo</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @foreach ($duLieuTonKho as $index => $item)
-                        @php
-                            $rowClass =
-                                $item['chenh_lech'] < 0
-                                    ? 'table-danger'
-                                    : ($item['chenh_lech'] > 5
-                                        ? 'table-warning'
-                                        : '');
-                            $badge =
-                                $item['chenh_lech'] < 0
-                                    ? ['bg-danger', 'Thiếu']
-                                    : ($item['chenh_lech'] > 5
-                                        ? ['bg-warning text-dark', 'Xuất dư']
-                                        : ['bg-success', 'OK']);
-                        @endphp
-                        <tr class="{{ $rowClass }}">
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ $item['nguyen_lieu'] }}</td>
-                            <td>{{ $item['don_vi'] }}</td>
-                            <td>{{ number_format($item['ton_kho_hien_tai'], 2) }}</td>
-                            <td>{{ number_format($item['da_xuat'], 2) }}</td>
-                            <td>{{ number_format($item['da_dung'], 2) }}</td>
-                            <td>{{ number_format($item['chenh_lech'], 2) }}</td>
-                            <td><span class="badge {{ $badge[0] }}">{{ $badge[1] }}</span></td>
-                        </tr>
-                    @endforeach
-                </tbody>
+                <tbody id="data-body" class="text-center"></tbody>
+                <tfoot class="table-light fw-bold text-center">
+                    <tr>
+                        <td>Tổng</td>
+                        <td id="sum-ton-kho"></td>
+                        <td id="sum-tong-xuat"></td>
+                        <td id="sum-xuat-bep"></td>
+                        <td id="sum-xuat-tra"></td>
+                        <td id="sum-xuat-huy"></td>
+                        <td id="sum-da-dung"></td>
+                        <td id="sum-chenh-lech"></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </div>
 
-    <!-- Script + Styles -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
+    <!-- DataTables + jQuery -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
     <script>
-        const tonKhoChart = new Chart(document.getElementById('tonKhoChart'), {
-            type: 'bar',
-            data: {
-                labels: {!! json_encode($duLieuTonKho->pluck('nguyen_lieu')) !!},
-                datasets: [{
-                        label: 'Đã Xuất',
-                        data: {!! json_encode($duLieuTonKho->pluck('da_xuat')) !!},
-                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
-                    },
-                    {
-                        label: 'Đã Dùng',
-                        data: {!! json_encode($duLieuTonKho->pluck('da_dung')) !!},
-                        backgroundColor: 'rgba(255, 99, 132, 0.7)'
-                    },
-                    {
-                        label: 'Chênh Lệch',
-                        data: {!! json_encode($duLieuTonKho->pluck('chenh_lech')) !!},
-                        backgroundColor: 'rgba(255, 206, 86, 0.7)'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Tình trạng xuất - dùng nguyên liệu trong ngày'
-                    },
-                    legend: {
-                        position: 'top'
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false
-                    }
-                },
-                scales: {
-                    x: {
-                        ticks: {
-                            autoSkip: false,
-                            maxRotation: 45,
-                            minRotation: 30
-                        }
-                    },
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
+        let dataTable;
 
-        const dinhMucChart = new Chart(document.getElementById('dinhMucChart'), {
-            type: 'line',
-            data: {
-                labels: {!! json_encode($duLieuDinhMuc->pluck('nguyen_lieu')) !!},
-                datasets: [{
-                        label: 'Tồn kho hiện tại',
-                        data: {!! json_encode($duLieuDinhMuc->pluck('ton_kho')) !!},
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        fill: false,
-                        tension: 0.3
-                    },
-                    {
-                        label: 'Định mức trung bình',
-                        data: {!! json_encode($duLieuDinhMuc->pluck('dinh_muc_trung_binh')) !!},
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        fill: false,
-                        tension: 0.3
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: '📉 So sánh tồn kho với định mức sử dụng trung bình'
-                    },
-                    legend: {
-                        position: 'top'
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false
-                    }
-                },
-                interaction: {
-                    mode: 'nearest',
-                    axis: 'x',
-                    intersect: false
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Số lượng'
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            autoSkip: false,
-                            maxRotation: 45,
-                            minRotation: 30
-                        }
-                    }
-                }
-            }
-        });
+        function formatNumber(num) {
+            return num ? parseFloat(num).toLocaleString('vi-VN', {
+                maximumFractionDigits: 2
+            }) : '0';
+        }
 
-        $(document).ready(() => {
-            $('#tonKhoTable').DataTable({
-                responsive: true
+        function loadTonKho() {
+            let ngay = $('#ngay').val();
+            let loaiId = $('#loai_nguyen_lieu').val();
+
+            $.get('/api/ton-kho/xuat-dung', {
+                ngay: ngay,
+                loai_nguyen_lieu_id: loaiId
+            }, function(data) {
+                let html = '';
+                let tongTonKho = 0,
+                    tongXuat = 0,
+                    tongXuatBep = 0,
+                    tongXuatTra = 0,
+                    tongXuatHuy = 0,
+                    tongDung = 0,
+                    tongChenhLech = 0;
+
+                data.forEach(item => {
+                    let warning = item.chenh_lech_xuat_dung < 0 ? '⚠️' : '';
+                    let rowClass = item.chenh_lech_xuat_dung < 0 ? 'table-danger' : '';
+                    let style = item.da_ngung_su_dung ? 'color: #dc3545; font-style: italic; opacity: 0.7;' : '';
+
+                    let tonKho = parseFloat(item.ton_kho_hien_tai) || 0;
+                    let tongXuatItem = parseFloat(item.tong_da_xuat) || 0;
+                    let xuatBep = parseFloat(item.xuat_bep) || 0;
+                    let xuatTra = parseFloat(item.xuat_tra_hang) || 0;
+                    let xuatHuy = parseFloat(item.xuat_huy) || 0;
+                    let daDung = parseFloat(item.da_dung) || 0;
+                    let chenhLech = parseFloat(item.chenh_lech_xuat_dung) || 0;
+
+                    tongTonKho += tonKho;
+                    tongXuat += tongXuatItem;
+                    tongXuatBep += xuatBep;
+                    tongXuatTra += xuatTra;
+                    tongXuatHuy += xuatHuy;
+                    tongDung += daDung;
+                    tongChenhLech += chenhLech;
+
+                    html += `
+                        <tr class="${rowClass}">
+                            <td style="${style}">${item.nguyen_lieu}</td>
+                            <td style="${style}">${formatNumber(tonKho)}</td>
+                            <td style="${style}">${formatNumber(tongXuatItem)}</td>
+                            <td style="${style}">${formatNumber(xuatBep)}</td>
+                            <td style="${style}">${formatNumber(xuatTra)}</td>
+                            <td style="${style}">${formatNumber(xuatHuy)}</td>
+                            <td style="${style}">${formatNumber(daDung)}</td>
+                            <td style="${style}">${formatNumber(chenhLech)}</td>
+                            <td style="${style}">${warning} ${item.can_nhap_them}</td>
+                        </tr>`;
+                });
+
+                // Reset bảng trước khi vẽ lại
+                if (dataTable) {
+                    dataTable.destroy();
+                    $('#tonKhoTable tbody').remove();
+                    $('#tonKhoTable').append('<tbody id="data-body" class="text-center"></tbody>');
+                }
+
+                $('#data-body').html(html);
+
+                // Tổng cộng
+                $('#sum-ton-kho').text(formatNumber(tongTonKho));
+                $('#sum-tong-xuat').text(formatNumber(tongXuat));
+                $('#sum-xuat-bep').text(formatNumber(tongXuatBep));
+                $('#sum-xuat-tra').text(formatNumber(tongXuatTra));
+                $('#sum-xuat-huy').text(formatNumber(tongXuatHuy));
+                $('#sum-da-dung').text(formatNumber(tongDung));
+                $('#sum-chenh-lech').text(formatNumber(tongChenhLech));
+
+                // Khởi tạo lại DataTable
+                dataTable = $('#tonKhoTable').DataTable({
+                    paging: true,
+                    searching: true,
+                    ordering: true,
+                    language: {
+                        search: "🔍 Tìm kiếm:",
+                        lengthMenu: "Hiển thị _MENU_ dòng",
+                        info: "Hiển thị _START_ đến _END_ của _TOTAL_ dòng",
+                        paginate: {
+                            first: "Đầu",
+                            last: "Cuối",
+                            next: "›",
+                            previous: "‹"
+                        },
+                        emptyTable: "Không có dữ liệu tồn kho"
+                    }
+                });
             });
+        }
+
+        $(document).ready(function() {
+            loadTonKho();
+            $('#ngay, #loai_nguyen_lieu').change(loadTonKho);
         });
     </script>
 @endsection

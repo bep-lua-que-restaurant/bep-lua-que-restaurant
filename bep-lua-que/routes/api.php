@@ -2,6 +2,7 @@
 
 
 
+use App\Http\Controllers\NguyenLieuController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BepController;
@@ -44,6 +45,9 @@ Route::get('/get-so-luong-ban', [BanAnController::class, 'getSoLuongBan']);
 
 Route::get('/chat/tin-nhan', [ChatController::class, 'layTinNhan']);
 Route::post('/chat/gui', [ChatController::class, 'guiTinNhan']);
+
+Route::get('/ton-kho/xuat-dung', [NguyenLieuController::class, 'tonKhoXuatDung']);
+
 
 
 
