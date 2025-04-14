@@ -179,12 +179,29 @@ function renderActionButtons(datban) {
     `;
 
     // Nếu đúng ngày hôm nay thì thêm nút xác nhận
-    if (datbanDateStr === todayStr) {
+    // if (datbanDateStr === todayStr) {
+    //     buttons += `
+    //         <a href="/dat-ban/${datban.ma_dat_ban}/edit" class="btn btn-success btn-sm">
+    //             <i class="fas fa-check"></i>
+    //         </a>
+    //     `;
+    // }
+
+    // Nếu còn dưới hoặc bằng 60 phút nữa mới đến giờ đặt thì hiển thị nút xác nhận
+    const now = new Date();
+    const thoiGianDen = new Date(datban.thoi_gian_den);
+    const diffInMinutes = (thoiGianDen - now) / (1000 * 60); // Đổi ra phút
+
+    if (
+        thoiGianDen.toDateString() === now.toDateString() && // Cùng ngày
+        diffInMinutes <= 60 &&
+        diffInMinutes >= 0 // Đảm bảo chưa quá giờ
+    ) {
         buttons += `
-            <a href="/dat-ban/${datban.ma_dat_ban}/edit" class="btn btn-success btn-sm">
-                <i class="fas fa-check"></i>
-            </a>
-        `;
+        <a href="/dat-ban/${datban.ma_dat_ban}/edit" class="btn btn-success btn-sm">
+            <i class="fas fa-check"></i>
+        </a>
+    `;
     }
 
     return buttons;

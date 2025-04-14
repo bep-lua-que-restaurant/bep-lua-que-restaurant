@@ -97,11 +97,16 @@
                                         </form>
 
                                         <!-- Nút Xác nhận: chỉ khi đúng ngày -->
+                                        {{-- @if (($datban->thoi_gian_den instanceof \Carbon\Carbon ? $datban->thoi_gian_den : \Carbon\Carbon::parse($datban->thoi_gian_den))->isSameDay($today))
+                                            <a href="{{ route('dat-ban.edit', $datban->ma_dat_ban) }}"
+                                                class="btn btn-success btn-sm">
+                                                <i class="fas fa-check"></i> <!-- Icon "Xác nhận" -->
+                                            </a>
+                                        @endif --}}
+
                                         @if (
-                                            ($datban->thoi_gian_den instanceof \Carbon\Carbon
-                                                ? $datban->thoi_gian_den
-                                                : \Carbon\Carbon::parse($datban->thoi_gian_den)
-                                            )->isSameDay($today))
+                                            \Carbon\Carbon::parse($datban->thoi_gian_den)->isSameDay($today) &&
+                                                \Carbon\Carbon::parse($datban->thoi_gian_den)->diffInMinutes(\Carbon\Carbon::now()) <= 60)
                                             <a href="{{ route('dat-ban.edit', $datban->ma_dat_ban) }}"
                                                 class="btn btn-success btn-sm">
                                                 <i class="fas fa-check"></i> <!-- Icon "Xác nhận" -->
