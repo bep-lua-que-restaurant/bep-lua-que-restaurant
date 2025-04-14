@@ -6,7 +6,12 @@ use Illuminate\Http\Request;
 use App\Models\Luong;
 use Carbon\Carbon;
 use App\Models\NhanVien;
+<<<<<<< HEAD
 use App\Models\BangTinhLuong; // <--- Thêm dòng này
+=======
+use App\Models\BangTinhLuong; 
+use App\Models\LichSuLuong;// <--- Thêm dòng này
+>>>>>>> eb0fe4acf6f066edf0be422cb1177add1f22f2ba
 
 class LuongController extends Controller
 {
@@ -83,4 +88,48 @@ class LuongController extends Controller
 
         // return redirect()->route('luong.luong')->with('success', 'Lương đã được tính!');
     }
+<<<<<<< HEAD
+=======
+    public function capNhatLuong(Request $request, $idNhanVien)
+    {
+        $request->validate([
+            'luong' => 'required|numeric',
+            'thang' => 'required|integer',
+            'nam' => 'required|integer',
+        ]);
+
+        // Lấy nhân viên
+        $nhanVien = NhanVien::findOrFail($idNhanVien);
+
+        // Lưu lương cũ cho tháng trước
+        if ($request->thang > 1) {
+            LichSuLuong::create([
+                'id_nhan_vien' => $idNhanVien,
+                'luong' => 5000000, // Lương cũ
+                'thang' => $request->thang - 1,
+                'nam' => $request->nam,
+            ]);
+        }
+
+        // Lưu lương mới cho tháng hiện tại
+        LichSuLuong::create([
+            'id_nhan_vien' => $idNhanVien,
+            'luong' => $request->luong, // Lương mới
+            'thang' => $request->thang,
+            'nam' => $request->nam,
+        ]);
+
+        return response()->json(['message' => 'Cập nhật lương thành công!']);
+    }
+
+    public function layLuong($idNhanVien, $thang, $nam)
+    {
+        $luong = LichSuLuong::where('id_nhan_vien', $idNhanVien)
+            ->where('thang', $thang)
+            ->where('nam', $nam)
+            ->first();
+
+        return response()->json($luong);
+    }
+>>>>>>> eb0fe4acf6f066edf0be422cb1177add1f22f2ba
 }
