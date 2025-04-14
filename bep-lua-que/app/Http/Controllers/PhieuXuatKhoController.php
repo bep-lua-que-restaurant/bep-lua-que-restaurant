@@ -80,20 +80,19 @@ class PhieuXuatKhoController extends Controller
 
     public function create()
     {
-        // Eager load quan hệ loại nguyên liệu và chi tiết nhập kho mới nhất
-        $nguyenLieus = NguyenLieu::with(['loaiNguyenLieu', 'chiTietNhapKhoMoiNhat'])
-            ->where('so_luong_ton', '>', 5000)
-            ->get();
-
-
+        // Lấy toàn bộ nguyên liệu (cả đã bị xóa mềm), load thêm loại và chi tiết nhập kho mới nhất
+        $nguyenLieus = NguyenLieu::withTrashed()
+            ->with(['loaiNguyenLieu', 'chiTietNhapKhoMoiNhat'])
+            ->get(); // Bỏ điều kiện so_luong_ton nếu muốn lấy tất cả
+    
         // Lấy danh sách loại nguyên liệu, nhà cung cấp và nhân viên
         $loaiNguyenLieus = LoaiNguyenLieu::all();
         $nhaCungCaps = NhaCungCap::all(); // Chỉ dùng nếu loại phiếu là trả hàng
         $nhanViens = NhanVien::all();
-
+    
         // Tạo mã phiếu tự động
         $nextCode = 'PXK' . now()->format('YmdHis');
-
+    
         return view('admin.phieuxuatkho.create', compact(
             'nguyenLieus',
             'loaiNguyenLieus',
@@ -102,6 +101,7 @@ class PhieuXuatKhoController extends Controller
             'nextCode'
         ));
     }
+    
 
 
 
@@ -345,38 +345,43 @@ class PhieuXuatKhoController extends Controller
     public function duyet($id)
     {
         $phieu = PhieuXuatKho::with('chiTietPhieuXuatKhos')->findOrFail($id);
-
+    
         if ($phieu->trang_thai === 'da_huy') {
             return redirect()->back()->with('error', 'Phiếu đã bị hủy. Không thể duyệt.');
         }
-
+    
         if ($phieu->trang_thai !== 'cho_duyet') {
             return redirect()->back()->with('error', 'Phiếu đã được xử lý.');
         }
-
+    
         DB::beginTransaction();
         try {
             foreach ($phieu->chiTietPhieuXuatKhos as $chiTiet) {
                 $nguyenLieu = NguyenLieu::find($chiTiet->nguyen_lieu_id);
-
-                if ($nguyenLieu) {
-                    $soLuongTru = $chiTiet->so_luong * $chiTiet->he_so_quy_doi;
-
-                    // Đảm bảo không trừ quá số lượng tồn
-                    if ($nguyenLieu->so_luong_ton < $soLuongTru) {
-                        throw new \Exception("Không đủ tồn kho cho nguyên liệu: {$nguyenLieu->ten_nguyen_lieu}");
-                    }
-
-                    $nguyenLieu->so_luong_ton -= $soLuongTru;
-                    $nguyenLieu->save();
-                } else {
-                    throw new \Exception("Không tìm thấy nguyên liệu với ID: {$chiTiet->nguyen_lieu_id}");
+    
+                // Chỉ kiểm tra nguyên liệu bị xoá nếu là phiếu xuất bếp
+                if ($phieu->loai_phieu === 'xuat_bep' && !$nguyenLieu) {
+                    throw new \Exception("Nguyên liệu ID {$chiTiet->nguyen_lieu_id} đã bị xóa hoặc ngừng sử dụng. Không thể duyệt phiếu xuất bếp.");
                 }
+    
+                // Nếu nguyên liệu không tồn tại (nhưng phiếu không phải 'xuat_bep') thì bỏ qua xử lý trừ kho
+                if (!$nguyenLieu) {
+                    continue;
+                }
+    
+                $soLuongTru = $chiTiet->so_luong * $chiTiet->he_so_quy_doi;
+    
+                if ($nguyenLieu->so_luong_ton < $soLuongTru) {
+                    throw new \Exception("Không đủ tồn kho cho nguyên liệu: {$nguyenLieu->ten_nguyen_lieu}");
+                }
+    
+                $nguyenLieu->so_luong_ton -= $soLuongTru;
+                $nguyenLieu->save();
             }
-
+    
             $phieu->trang_thai = 'da_duyet';
             $phieu->save();
-
+    
             DB::commit();
             return redirect()->back()->with('success', 'Phiếu xuất đã được duyệt thành công.');
         } catch (\Exception $e) {
@@ -384,6 +389,8 @@ class PhieuXuatKhoController extends Controller
             return redirect()->back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }
+    
+    
 
     public function huy($id)
     {

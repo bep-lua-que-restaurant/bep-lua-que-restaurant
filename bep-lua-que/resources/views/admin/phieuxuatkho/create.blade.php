@@ -3,6 +3,16 @@
 @section('title', 'Tạo Phiếu Xuất Kho')
 
 @section('content')
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <strong>Đã xảy ra lỗi:</strong>
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <form action="{{ route('phieu-xuat-kho.store') }}" method="POST">
         @csrf
 
@@ -136,10 +146,13 @@
                                         @foreach ($nguyenLieus as $nl)
                                             <option value="{{ $nl->id }}" data-loai="{{ $nl->loai_nguyen_lieu_id }}"
                                                 data-don-gia="{{ $nl->don_gia }}"
+                                                data-deleted="{{ $nl->deleted_at ? '1' : '0' }}"
+                                                class="{{ $nl->deleted_at ? 'text-danger bg-light' : '' }}"
                                                 {{ old("nguyen_lieu_ids.$index") == $nl->id ? 'selected' : '' }}>
-                                                {{ $nl->ten_nguyen_lieu }}
+                                                {{ $nl->ten_nguyen_lieu }}{{ $nl->deleted_at ? ' (Đã xóa)' : '' }}
                                             </option>
                                         @endforeach
+
                                     </select>
                                     @error("nguyen_lieu_ids.$index")
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -228,15 +241,20 @@
                 }
             }
 
-            $('#loai_phieu').on('change', function() {
-                toggleDonGiaColumn();
-                toggleFieldsByLoaiPhieu();
-            });
+            function handleNguyenLieuDisabled() {
+                const isXuatBep = $('#loai_phieu').val() === 'xuat_bep';
 
-            toggleDonGiaColumn();
-            toggleFieldsByLoaiPhieu();
+                $('#nguyen-lieu-body select[name="nguyen_lieu_ids[]"]').each(function() {
+                    const select = $(this);
+                    select.find('option').each(function() {
+                        const isDeleted = $(this).data('deleted') === 1 || $(this).data(
+                            'deleted') === '1';
+                        $(this).prop('disabled', isXuatBep && isDeleted);
+                    });
+                });
+            }
 
-            $('#add-row').on('click', function() {
+            function addNewRow() {
                 const lastRow = $('#nguyen-lieu-body tr:last');
                 const newRow = lastRow.clone();
 
@@ -248,6 +266,12 @@
 
                 $('#nguyen-lieu-body').append(newRow);
                 updateRowIndex();
+                handleNguyenLieuDisabled();
+            }
+
+            // Bind 1 lần duy nhất
+            $('#add-row').on('click', function() {
+                addNewRow();
             });
 
             $('#nguyen-lieu-body').on('click', '.remove-row', function() {
@@ -257,41 +281,59 @@
                 }
             });
 
-            // Lọc danh sách nguyên liệu theo loại nguyên liệu
             $('#nguyen-lieu-body').on('change', 'select[name="loai_nguyen_lieu_ids[]"]', function() {
                 const selectedLoaiId = $(this).val();
                 const nguyenLieuSelect = $(this).closest('tr').find('select[name="nguyen_lieu_ids[]"]');
 
                 nguyenLieuSelect.find('option').each(function() {
                     const loaiId = $(this).data('loai');
-                    if (!$(this).val() || loaiId == selectedLoaiId) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
-                    }
+                    $(this).toggle(!$(this).val() || loaiId == selectedLoaiId);
                 });
 
                 nguyenLieuSelect.val('');
             });
 
-            // Cập nhật đơn giá khi chọn nguyên liệu
             $('#nguyen-lieu-body').on('change', 'select[name="nguyen_lieu_ids[]"]', function() {
                 const selectedOption = $(this).find('option:selected');
+                const selectedValue = $(this).val();
                 const donGia = parseFloat(selectedOption.data('don-gia')) || 0;
 
-                // console.log('Đơn giá lấy được:', donGia);
-
-                const loaiPhieu = $('#loai_phieu').val();
-                if (loaiPhieu === 'xuat_tra_hang') {
+                if ($('#loai_phieu').val() === 'xuat_tra_hang') {
                     const donGiaInput = $(this).closest('tr').find('input[name="don_gias[]"]');
                     donGiaInput.val(donGia.toFixed(2));
+                }
+
+                // ✅ Kiểm tra trùng nguyên liệu
+                let isDuplicate = false;
+                const currentRow = $(this).closest('tr');
+
+                $('select[name="nguyen_lieu_ids[]"]').not(this).each(function() {
+                    if ($(this).val() === selectedValue) {
+                        isDuplicate = true;
+                        return false; // break
+                    }
+                });
+
+                if (isDuplicate) {
+                    alert('Nguyên liệu đã được chọn ở dòng khác!');
+                    $(this).val('').trigger('change'); // reset lại chọn
                 }
             });
 
 
+            $('#loai_phieu').on('change', function() {
+                toggleDonGiaColumn();
+                toggleFieldsByLoaiPhieu();
+                handleNguyenLieuDisabled();
+            });
 
+            // Lúc load lần đầu
+            toggleDonGiaColumn();
+            toggleFieldsByLoaiPhieu();
+            handleNguyenLieuDisabled();
         });
     </script>
+
 
 
 @endsection

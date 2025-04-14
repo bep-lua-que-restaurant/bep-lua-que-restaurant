@@ -284,7 +284,7 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('/nguyen-lieu/export', [NguyenLieuController::class, 'exportNguyenLieu']);
     // Route::post('/nguyen-lieu/import', [NguyenLieuController::class, 'importNguyenLieu']);
 
-    Route::get('/nguyen-lieu/kiem-tra-ton-kho', [NguyenLieuController::class, 'kiemTraTonKhoTrongNgay'])->name('nguyen-lieu.kiemtra');
+    Route::get('/nguyen-lieu/kiem-tra-ton-kho', [NguyenLieuController::class, 'viewTonKhoXuatDung'])->name('nguyen-lieu.kiemtra');
     Route::resource('nguyen-lieu', NguyenLieuController::class);
     Route::post('nguyen-lieu/restore/{id}', [NguyenLieuController::class, 'restore'])->name('nguyen-lieu.restore');
     Route::get('export-nguyen-lieu', [NguyenLieuController::class, 'export'])->name('nguyen-lieu.export');

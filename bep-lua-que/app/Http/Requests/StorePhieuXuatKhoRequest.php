@@ -12,31 +12,31 @@ class StorePhieuXuatKhoRequest extends FormRequest
     }
 
     public function rules(): array
-{
-    return [
-        'ngay_xuat' => 'required|date',
-        'nhan_vien_id' => 'required|exists:nhan_viens,id',
-        'loai_phieu' => 'required|in:xuat_bep,xuat_tra_hang,xuat_huy',
+    {
+        return [
+            'ngay_xuat' => 'required|date',
+            'nhan_vien_id' => 'required|exists:nhan_viens,id',
+            'loai_phieu' => 'required|in:xuat_bep,xuat_tra_hang,xuat_huy',
 
-        // Người nhận: bắt buộc với mọi loại trừ khi null, nhưng cụ thể hơn:
-        'nguoi_nhan' => 'required_if:loai_phieu,xuat_bep|required_if:loai_phieu,xuat_huy|required_if:loai_phieu,xuat_tra_hang|string|max:255',
+            'nguoi_nhan' => 'required_if:loai_phieu,xuat_bep|required_if:loai_phieu,xuat_huy|required_if:loai_phieu,xuat_tra_hang|string|max:255',
 
-        // Nhà cung cấp: chỉ bắt buộc khi là trả hàng
-        'nha_cung_cap_id' => 'required_if:loai_phieu,xuat_tra_hang|exists:nha_cung_caps,id',
+            // Fix ở đây:
+            'nha_cung_cap_id' => 'required_if:loai_phieu,xuat_tra_hang|nullable|exists:nha_cung_caps,id',
 
-        'nguyen_lieu_ids' => 'required|array|min:1',
-        'nguyen_lieu_ids.*' => 'required|exists:nguyen_lieus,id',
+            'nguyen_lieu_ids' => 'required|array|min:1',
+            'nguyen_lieu_ids.*' => 'required|exists:nguyen_lieus,id',
 
-        'loai_nguyen_lieu_ids' => 'required|array|min:1',
-        'loai_nguyen_lieu_ids.*' => 'required|exists:loai_nguyen_lieus,id',
+            'loai_nguyen_lieu_ids' => 'required|array|min:1',
+            'loai_nguyen_lieu_ids.*' => 'required|exists:loai_nguyen_lieus,id',
 
-        'don_vi_xuats.*' => 'required|string|min:1|max:255',
-        'he_so_quy_dois.*' => 'required|numeric|min:0.01',
-        'so_luong_xuats.*' => 'required|numeric|min:0.01',
-        'don_gias.*' => 'nullable|numeric|min:0',
-        'ghi_chus.*' => 'nullable|string|max:255',
-    ];
-}
+            'don_vi_xuats.*' => 'required|string|min:1|max:255',
+            'he_so_quy_dois.*' => 'required|numeric|min:0.01',
+            'so_luong_xuats.*' => 'required|numeric|min:0.01',
+            'don_gias.*' => 'nullable|numeric|min:0',
+            'ghi_chus.*' => 'nullable|string|max:255',
+        ];
+    }
+
 
 
     public function messages(): array
@@ -79,4 +79,3 @@ class StorePhieuXuatKhoRequest extends FormRequest
         ];
     }
 }
-
