@@ -6,8 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\Luong;
 use Carbon\Carbon;
 use App\Models\NhanVien;
+
 use App\Models\BangTinhLuong; 
 use App\Models\LichSuLuong;// <--- Thêm dòng này
+
 
 class LuongController extends Controller
 {
@@ -84,6 +86,7 @@ class LuongController extends Controller
 
         // return redirect()->route('luong.luong')->with('success', 'Lương đã được tính!');
     }
+
     public function capNhatLuong(Request $request, $idNhanVien)
     {
         $request->validate([
@@ -125,4 +128,5 @@ class LuongController extends Controller
 
         return response()->json($luong);
     }
+
 }

@@ -191,7 +191,7 @@
                         <li><a href="{{ route('danh-muc-mon-an.index') }}">Danh mục</a></li>
                         <li><a href="{{ route('mon-an.index') }}">Món ăn</a></li>
                         {{-- <li><a href="{{ route('dich-vu.index') }}">Dịch vụ</a></li> --}}
-                        <li><a href="{{ route('com-bo.index') }}">Combo - đóng gói</a></li>
+                        {{-- <li><a href="{{ route('com-bo.index') }}">Combo - đóng gói</a></li> --}}
                         <li><a href="{{ route('ma-giam-gia.index') }}">Mã giảm giá</a></li>
                     </ul>
                 </li>

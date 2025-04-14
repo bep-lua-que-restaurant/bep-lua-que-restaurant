@@ -21,7 +21,27 @@
         </div>
         <!-- row -->
         <div class="row">
-            @include('admin.filter')
+            {{-- @include('admin.filter') --}}
+            <div class="col-lg-12 my-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <!-- Ô tìm kiếm mã giảm giá -->
+                    <div class="input-group">
+                        <input style="height: 45px; margin-right: 10px" type="text" id="searchInput"
+                            class="form-control border-1" placeholder="Tìm kiếm theo mã" onkeyup="filterDiscountCodes()">
+                    </div>
+
+                    <!-- Lựa chọn trạng thái -->
+                    <div>
+                        <select style="padding: 11px 0 11px 0; width: 142px" id="statusFilter"
+                            class="btn btn-primary btn-sm" onchange="filterDiscountCodes()">
+                            <option value="" hidden>Lọc theo trạng thái</option>
+                            <option value="Đang hoạt động">Đang hoạt động</option>
+                            <option value="Đã ngừng hoạt động">Ngừng hoạt động</option>
+                            <option value="Tất cả">Tất cả</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="row">
@@ -34,7 +54,6 @@
                             <a href="{{ route('ma-giam-gia.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
-                            <!-- Nút Nhập file sẽ hiển thị Modal -->
                             <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
                                 data-target=".bd-example-modal-lg">
                                 <i class="fa fa-upload"></i> Nhập file
@@ -53,34 +72,84 @@
                             <table class="table table-responsive-md">
                                 <thead>
                                     <tr>
-                                        <th style="width:50px;">
-                                            <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
-                                                <input type="checkbox" class="custom-control-input" id="checkAll"
-                                                    required="">
-                                                <label class="custom-control-label" for="checkAll"></label>
-                                            </div>
-                                        </th>
-                                        {{-- <tr style="border: 40px;;">
                                         <th>ID</th>
                                         <th>Mã</th>
                                         <th>Loại</th>
                                         <th>Giá trị</th>
                                         <th>Hiệu lực</th>
                                         <th>Số lượt đã dùng</th>
+                                        <th>Trạng thái</th>
                                         <th>Hành động</th>
-                                    </tr> --}}
                                     </tr>
                                 </thead>
-                                <tbody id="{{ $tableId }}">
-                                    @include('admin.magiamgia.body-list')
-                                </tbody>
+                                <tbody id="magiamgia">
+                                    @foreach ($data as $index => $item)
+                                        <tr class="ma-giam-gia-row">
+                                            <td>{{ $item->id }}</td>
+                                            <td class="ma-giam-gia-code">{{ $item->code }}</td>
+                                            <td>{{ $item->type == 'percentage' ? 'Phần trăm' : 'Tiền' }}</td>
+                                            <td>
+                                                @if ($item->type == 'percentage')
+                                                    {{ number_format($item->value, 0, ',', '.') . '%' }}
+                                                @else
+                                                    {{ number_format($item->value, 0, ',', '.') . 'VND' }}
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if ($item->start_date && $item->end_date)
+                                                    Từ: {{ \Carbon\Carbon::parse($item->start_date)->format('d/m/Y') }}<br>
+                                                    Đến: {{ \Carbon\Carbon::parse($item->end_date)->format('d/m/Y') }}
+                                                @else
+                                                    Không xác định
+                                                @endif
+                                            </td>
+                                            <td>{{ $item->usage_count ?? 0 }}</td>
+                                            <td class="ma-giam-gia-status">
+                                                {{ $item->deleted_at ? 'Đã ngừng hoạt động' : 'Đang hoạt động' }}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <a href="{{ route('ma-giam-gia.show', $item->id) }}"
+                                                        class="btn btn-info btn-sm m-1">
+                                                        <i class="fa fa-eye"></i>
+                                                    </a>
+                                                    <a href="{{ route('ma-giam-gia.edit', $item->id) }}"
+                                                        class="btn btn-warning btn-sm m-1">
+                                                        <i class="fa fa-edit"></i>
+                                                    </a>
+                                                    @if ($item->deleted_at)
+                                                        <form action="{{ route('ma-giam-gia.restore', $item->id) }}"
+                                                            method="POST" class="d-inline" style="margin: 0;">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                onclick="return confirm('Bạn có chắc muốn khôi phục mục này không?')"
+                                                                class="btn btn-success btn-sm m-1" title="Khôi phục">
+                                                                <i class="fa fa-recycle"></i>
+                                                            </button>
+                                                        </form>
+                                                    @else
+                                                        <form action="{{ route('ma-giam-gia.destroy', $item->id) }}"
+                                                            method="POST" class="d-inline" style="margin: 0;">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit"
+                                                                onclick="return confirm('Bạn muốn ngừng mã giảm này chứ?')"
+                                                                class="btn btn-danger btn-sm m-1" title="Xóa">
+                                                                <i class="fa fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                </div>
 
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -94,7 +163,6 @@
                         aria-label="Close"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    {{-- ///Form nhập file --> --}}
                     <form action="{{ route('ma-giam-gia.import') }}" method="POST" enctype="multipart/form-data"
                         id="importFileForm">
                         @csrf
@@ -113,6 +181,35 @@
     </div>
 
     @include('admin.search-srcip')
+
     <!-- Hiển thị phân trang -->
     {{ $data->links('pagination::bootstrap-5') }}
 @endsection
+
+<script>
+    function filterDiscountCodes() {
+        // Get the values from the filter inputs
+        let searchInput = document.getElementById("searchInput").value.toLowerCase();
+        let statusFilter = document.getElementById("statusFilter").value;
+        let rows = document.querySelectorAll("#magiamgia tr"); // Select all rows in the table
+
+        rows.forEach(row => {
+            // Get the relevant data from the row
+            let code = row.querySelector(".ma-giam-gia-code")?.textContent.toLowerCase(); // For "Mã"
+            let status = row.querySelector(".ma-giam-gia-status")?.textContent.trim()
+                .toLowerCase(); // For "Trạng thái"
+
+            // Check if the row matches the search input and the selected status filter
+            let matchesSearch = (code && code.includes(searchInput));
+            let matchesStatus = (statusFilter === "" || statusFilter === "Tất cả" || status === statusFilter
+                .toLowerCase());
+
+            // Show or hide the row based on the conditions
+            if (matchesSearch && matchesStatus) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+</script>

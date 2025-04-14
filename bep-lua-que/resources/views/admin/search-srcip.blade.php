@@ -10,7 +10,10 @@
             const status = row.querySelector(".trang-thai-nha-cung-cap").textContent.trim();
 
             const matchesSearch = name.includes(input) || id.includes(input);
-            const matchesStatus = statusFilter === "Tất cả" || statusFilter === "" || status.includes(statusFilter);
+
+            const matchesStatus = statusFilter === "Tất cả" || statusFilter === "" || status.includes(
+                statusFilter);
+
 
             if (matchesSearch && matchesStatus) {
                 row.style.display = "";

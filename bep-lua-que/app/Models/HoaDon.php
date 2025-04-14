@@ -40,4 +40,10 @@ class HoaDon extends Model
     {
         return $this->hasOne(HoaDonBan::class, 'hoa_don_id', 'id');
     }
+   // Trong model HoaDon
+    public function maGiamGia()
+    {
+    return $this->belongsTo(MaGiamGia::class, 'id_ma_giam', 'id');
+    }
+
 }

@@ -19,36 +19,29 @@ class CaLamController extends Controller
      */
     public function index(Request  $request)
     {
+        $searchInput = $request->input('searchInput');
+        $statusFilter = $request->input('statusFilter');
+    
         $query = CaLam::query();
-
-        if ($request->has('ten') && $request->ten != '') {
-            $query->where('ten_ca', 'like', '%' . $request->ten . '%');
+    
+        // Apply search filter
+        if ($searchInput) {
+            $query->where('ten_ca', 'like', '%' . $searchInput . '%');
         }
-
-        if ($request->has('statusFilter') && $request->statusFilter != '') {
-            if ($request->statusFilter == 'Đang kinh doanh') {
+    
+        // Apply status filter
+        if ($statusFilter && $statusFilter !== 'Tất cả') {
+            if ($statusFilter === 'Đang hoạt động') {
                 $query->whereNull('deleted_at');
-            } elseif ($request->statusFilter == 'Ngừng kinh doanh') {
+            } else if ($statusFilter === 'Đã ngừng hoạt động') {
                 $query->whereNotNull('deleted_at');
             }
         }
-
-        $data = $query->withTrashed()->latest('id')->paginate(15);
-
-        // Xử lý trả về khi yêu cầu là Ajax
-        if ($request->ajax()) {
-            return response()->json([
-                'html' => view('admin.calam.body-list', compact('data'))->render(),
-            ]);
-        }
-
-        return view('admin.calam.list', [
-            'data' => $data,
-            'route' => route('ca-lam.index'), // URL route cho AJAX
-            'tableId' => 'list-container', // ID của bảng
-            'searchInputId' => 'search-name', // ID của ô tìm kiếm
-        ]);
+        $data = $query->withTrashed()->latest('id')->paginate(10);
+        return view('admin.calam.list', compact('data'));
     }
+        
+    
 
     /**
      * Show the form for creating a new resource.

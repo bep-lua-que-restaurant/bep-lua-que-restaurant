@@ -21,7 +21,28 @@
         </div>
         <!-- row -->
         <div class="row">
-            @include('admin.filter')
+            {{-- @include('admin.filter') --}}
+            <div class="col-lg-12 my-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <!-- Ô tìm kiếm mã giảm giá -->
+                    <div class="input-group">
+                        <input style="height: 45px; margin-right: 10px" type="text" id="searchInput"
+                            class="form-control border-1" placeholder="Tìm kiếm theo chức vụ"
+                            onkeyup="filterDiscountCodes()">
+                    </div>
+
+                    <!-- Lựa chọn trạng thái -->
+                    <div>
+                        <select style="padding: 11px 0 11px 0; width: 142px" id="statusFilter"
+                            class="btn btn-primary btn-sm" onchange="filterDiscountCodes()">
+                            <option value="" hidden>Lọc theo trạng thái</option>
+                            <option value="Đang hoạt động">Đang hoạt động</option>
+                            <option value="Đã ngừng hoạt động">Ngừng hoạt động</option>
+                            <option value="Tất cả">Tất cả</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="row">
@@ -67,8 +88,75 @@
                                         <th><strong>Hành động</strong></th>
                                     </tr>
                                 </thead>
-                                <tbody id="{{ $tableId }}">
-                                    @include('admin.chucvu.body-list')
+                                <tbody id="chucvu">
+                                    @foreach ($data as $index => $item)
+                                        <tr data-toggle="collapse" data-target="#detail{{ $index }}"
+                                            class="clickable-row">
+                                            <td>
+                                                <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
+                                                    <input type="checkbox" class="custom-control-input" id="customCheckBox2"
+                                                        required="">
+                                                    <label class="custom-control-label" for="customCheckBox2"></label>
+                                                </div>
+                                            </td>
+                                            <td><strong>{{ $item->id }}</strong></td>
+                                            <td class="ten-chuc-vu">
+                                                <div class="d-flex align-items-center"><span
+                                                        class="w-space-no">{{ $item->ten_chuc_vu }}</span></div>
+                                            </td>
+
+                                            <td class="trang-thai">
+                                                @if ($item->deleted_at != null)
+                                                    <div class="d-flex align-items-center"><i
+                                                            class="fa fa-circle text-danger mr-1"></i> Đã ngừng hoạt
+                                                    </div>
+                                                @else
+                                                    <div class="d-flex align-items-center"><i
+                                                            class="fa fa-circle text-success mr-1"></i> Đang hoạt động
+                                                    </div>
+                                                    {{ $item->deleted_at }}
+                                                @endif
+
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    {{-- <a href="{{ route('dich-vu.show', $item->id) }}" class="btn btn-info btn-sm p-2 m-2">
+                                                    <i class="fa fa-eye"></i>
+                                                    </a> --}}
+                                                    <a href="{{ route('chuc-vu.edit', $item->id) }}"
+                                                        class="btn btn-warning btn-sm m-1">
+                                                        <i class="fa fa-edit "></i>
+                                                    </a>
+                                                    @if ($item->deleted_at)
+                                                        <form action="{{ route('chuc-vu.restore', $item->id) }}"
+                                                            method="POST" class="d-inline" style="margin: 0;">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                onclick="return confirm('Bạn có chắc muốn khôi phục mục này không?')"
+                                                                class="btn btn-success btn-sm m-1" title="Khôi phục">
+                                                                <i class="fa fa-recycle"></i>
+                                                            </button>
+                                                        </form>
+                                                    @else
+                                                        <form action="{{ route('chuc-vu.destroy', $item->id) }}"
+                                                            method="POST" class="d-inline" style="margin: 0;">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit"
+                                                                onclick="return confirm('Bạn muốn ngừng hoạt động chức vụ này chứ?')"
+                                                                class="btn btn-danger btn-sm m-1" title="Xóa">
+                                                                <i class="fa fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                </div>
+
+                                            </td>
+
+
+                                        </tr>
+                                    @endforeach
+
                                 </tbody>
 
                             </table>
@@ -112,3 +200,30 @@
     <!-- Hiển thị phân trang -->
     {{ $data->links('pagination::bootstrap-5') }}
 @endsection
+<script>
+    function filterDiscountCodes() {
+        // Get the values from the filter inputs
+        let searchInput = document.getElementById("searchInput").value.toLowerCase();
+        let statusFilter = document.getElementById("statusFilter").value;
+        let rows = document.querySelectorAll("#chucvu tr"); // Select all rows in the "chucvu" table
+
+        rows.forEach(row => {
+            // Get the relevant data from the row
+            let tenChucVu = row.querySelector(".ten-chuc-vu")?.textContent.toLowerCase(); // For "Tên chức vụ"
+            let trangThai = row.querySelector(".trang-thai")?.textContent.trim()
+                .toLowerCase(); // For "Trạng thái"
+
+            // Check if the row matches the search input and the selected status filter
+            let matchesSearch = (tenChucVu && tenChucVu.includes(searchInput));
+            let matchesStatus = (statusFilter === "" || statusFilter === "Tất cả" || trangThai.includes(
+                statusFilter.toLowerCase()));
+
+            // Show or hide the row based on the conditions
+            if (matchesSearch && matchesStatus) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+</script>
