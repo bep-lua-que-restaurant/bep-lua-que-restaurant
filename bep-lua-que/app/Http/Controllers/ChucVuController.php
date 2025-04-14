@@ -17,27 +17,26 @@ class ChucVuController extends Controller
      */
     public function index(Request $request)
     {
+        $searchInput = $request->input('searchInput');
+        $statusFilter = $request->input('statusFilter');
+    
         $query = ChucVu::query();
-
-        if ($request->has('ten') && $request->ten != '') {
-            $query->where('ten_chuc_vu', 'like', '%' . $request->ten . '%');
+    
+        // Apply search filter
+        if ($searchInput) {
+            $query->where('ten_chuc_vu', 'like', '%' . $searchInput . '%');
         }
-
-        $data = $query->withTrashed()->latest('id')->paginate(15);
-
-        // Xử lý trả về khi yêu cầu là Ajax
-        if ($request->ajax()) {
-            return response()->json([
-                'html' => view('admin.chucvu.body-list', compact('data'))->render(),
-            ]);
+    
+        // Apply status filter
+        if ($statusFilter && $statusFilter !== 'Tất cả') {
+            if ($statusFilter === 'Đang hoạt động') {
+                $query->whereNull('deleted_at');
+            } else if ($statusFilter === 'Đã ngừng hoạt động') {
+                $query->whereNotNull('deleted_at');
+            }
         }
-
-        return view('admin.chucvu.list', [
-            'data' => $data,
-            'route' => route('chuc-vu.index'), // URL route cho AJAX
-            'tableId' => 'list-container', // ID của bảng'
-            'searchInputId' => 'search-name', // ID của ô tìm kiếm
-        ]);  
+        $data = $query->withTrashed()->latest('id')->paginate(10);
+        return view('admin.chucvu.list', compact('data')); 
     }
 
     /**

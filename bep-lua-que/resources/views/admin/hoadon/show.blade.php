@@ -28,7 +28,8 @@
                 <p><strong>Mã hóa đơn:</strong> {{ $hoaDon->ma_hoa_don }}</p>
                 <p><strong>Khách hàng:</strong> {{ $hoaDon->ten_khach_hang }}</p>
                 <p><strong>Số điện thoại:</strong> {{ $hoaDon->so_dien_thoai }}</p>
-                <p><strong>Mã giảm giá:</strong> {{ $hoaDon->maGiamGia->code }}</p>
+                <p><strong>Mã giảm giá:</strong> {{ $hoaDon->maGiamGia ? $hoaDon->maGiamGia->code : 'Không có' }}</p>
+
                 <p><strong>Phương thức thanh toán:</strong>
                     {{ $hoaDon->phuong_thuc_thanh_toan == 'tien_mat'
                         ? 'Tiền mặt'

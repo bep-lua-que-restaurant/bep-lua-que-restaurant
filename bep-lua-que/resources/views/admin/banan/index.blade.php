@@ -31,8 +31,8 @@
             <div class="col-md-4">
                 <select id="filter-status" class="form-control">
                     <option value="">-- Tất cả trạng thái --</option>
-                    <option value="Đang kinh doanh">Đang hoạt động</option>
-                    <option value="Ngừng kinh doanh">Ngừng hoạt động</option>
+                    <option value="Đang kinh doanh">Đang kinh doanh</option>
+                    <option value="Ngừng kinh doanh">Ngừng kinh doanh</option>
                 </select>
             </div>
             <div class="col-md-4">

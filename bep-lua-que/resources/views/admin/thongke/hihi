@@ -1,0 +1,341 @@
+@extends('layouts.admin') @section('content')
+<h2 style="text-align: center; margin-bottom: 20px">
+    Thống kê món ăn bán chạy nhất
+</h2>
+
+<div
+    style="
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        align-items: center;
+        margin-bottom: 20px;
+    "
+>
+    <div style="display: flex; align-items: center; gap: 10px">
+        <label for="timeFilter"><strong>Hiển thị:</strong></label>
+        <select
+            id="timeFilter"
+            style="
+                padding: 8px 12px;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+            "
+        >
+            <option value="day">Theo Ngày</option>
+            <option value="month">Theo Tháng</option>
+            <option value="year">Theo Năm</option>
+        </select>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 10px">
+        <label for="startDate"><strong>Từ:</strong></label>
+        <input
+            type="date"
+            id="startDate"
+            style="
+                padding: 8px 12px;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+            "
+        />
+        <label for="endDate"><strong>Đến:</strong></label>
+        <input
+            type="date"
+            id="endDate"
+            style="
+                padding: 8px 12px;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+            "
+        />
+
+        <button
+            id="filterBtn"
+            style="
+                padding: 8px 15px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            "
+        >
+            Lọc
+        </button>
+    </div>
+</div>
+<div id="chartContainer">@include('admin.thongke.listthongkemonan')</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const timeFilter = document.getElementById("timeFilter");
+        const startDate = document.getElementById("startDate");
+        const endDate = document.getElementById("endDate");
+        const filterBtn = document.getElementById("filterBtn");
+
+        function fetchData(filterType, start = "", end = "") {
+            let url = `/thong-ke-mon-an?filter=${filterType}&start=${start}&end=${end}`;
+
+            fetch(url)
+                .then((response) => response.text())
+                .then((data) => {
+                    const tempDiv = document.createElement("div");
+                    tempDiv.innerHTML = data;
+
+                    // Xử lý lại phần cập nhật biểu đồ
+                    const newChart = tempDiv.querySelector("#chartCanvas");
+                    const chartContainer =
+                        document.querySelector("#chartContainer"); // Cập nhật đúng container
+
+                    if (newChart) {
+                        // Clear current chart and append the new one
+                        chartContainer.innerHTML = ""; // Xóa nội dung cũ
+                        chartContainer.appendChild(newChart); // Thêm biểu đồ mới vào
+                    }
+                })
+                .catch((error) => console.error("Error loading data:", error));
+        }
+
+        // Khi thay đổi bộ lọc bên trái
+        timeFilter.addEventListener("change", function () {
+            fetchData(this.value);
+        });
+
+        // Khi nhấn nút lọc theo khoảng ngày
+        filterBtn.addEventListener("click", function () {
+            let start = startDate.value;
+            let end = endDate.value;
+            if (start && end) {
+                fetchData("custom", start, end);
+            } else {
+                alert("Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc.");
+            }
+        });
+    });
+</script>
+@endsection
+
+<canvas id="thongKeChart"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById("thongKeChart").getContext("2d");
+
+        let chartInstance = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: @json($thongKeMonAn->pluck('ten')),
+                datasets: [{
+                    label: "Số lượng bán",
+                    data: @json($thongKeMonAn->pluck('tong_ban')),
+                    backgroundColor: "rgba(54, 162, 235, 0.6)",
+                    borderColor: "rgba(54, 162, 235, 1)",
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: "Món ăn"
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Số lượng bán"
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+public function thongKeMonAn(Request $request) { $startDate =
+$request->input('startDate'); $endDate = $request->input('endDate'); $filterType
+= $request->input('filterType'); $query = DB::table('chi_tiet_hoa_dons')
+->join('hoa_dons', 'chi_tiet_hoa_dons.hoa_don_id', '=', 'hoa_dons.id')
+->join('mon_ans', 'chi_tiet_hoa_dons.mon_an_id', '=', 'mon_ans.id') ->select(
+DB::raw('DATE(hoa_dons.created_at) as ngay_ban'), 'mon_ans.ten',
+DB::raw('SUM(chi_tiet_hoa_dons.so_luong) as tong_so_luong') )
+->groupBy('ngay_ban', 'mon_ans.ten') ->orderBy('ngay_ban', 'asc')
+->orderByDesc('tong_so_luong'); if (!empty($startDate) && !empty($endDate)) {
+$query->whereBetween('hoa_dons.created_at', [$startDate, $endDate]); } elseif
+($filterType === 'month') { $query->whereRaw("DATE_FORMAT(hoa_dons.created_at,
+'%Y-%m') = ?", [date('Y-m')]); } elseif ($filterType === 'year') {
+$query->whereRaw("YEAR(hoa_dons.created_at) = ?", [date('Y')]); } $thongKeMonAn
+= $query->get(); return view('admin.thongke.thongkemonan',
+compact('thongKeMonAn')); }
+
+
+///hihi 2
+@extends('layouts.admin')
+
+@section('content')
+    <h2 style="text-align: center; margin-bottom: 20px;">Thống kê món ăn bán chạy nhất</h2>
+
+    <form id="filterForm">
+        <div style="display: flex; justify-content: center; gap: 20px; align-items: center; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label for="timeFilter"><strong>Hiển thị:</strong></label>
+                <select name="filterType" id="timeFilter"
+                    style="padding: 8px 12px; border-radius: 5px; border: 1px solid #ccc;">
+                    <option value="day" {{ $filterType == 'day' ? 'selected' : '' }}>Theo Ngày</option>
+                    <option value="month" {{ $filterType == 'month' ? 'selected' : '' }}>Theo Tháng</option>
+                    <option value="year" {{ $filterType == 'year' ? 'selected' : '' }}>Theo Năm</option>
+                </select>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label for="startDate"><strong>Từ:</strong></label>
+                <input type="date" name="fromDate" id="startDate" value="{{ $fromDate }} "
+                    style="padding: 8px 12px; border-radius: 5px; border: 1px solid #ccc;">
+                <label for="endDate"><strong>Đến:</strong></label>
+                <input type="date" name="toDate" id="endDate" value="{{ $toDate }}"
+                    style="padding: 8px 12px; border-radius: 5px; border: 1px solid #ccc;">
+                <button type="button" id="filterBtn"
+                    style="padding: 8px 12px; border-radius: 5px; background-color: #28a745; color: white; border: none; cursor: pointer;">
+                    Lọc
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div id="chartContainer">
+        @include('admin.thongke.listthongkemonan')
+    </div>
+@endsection
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Đảm bảo sự kiện click được lắng nghe
+        $('#filterBtn').click(function() {
+            let formData = $('#filterForm').serialize(); // Lấy dữ liệu form
+            alert('Đang thực hiện lọc với dữ liệu: ' + formData); // Hiển thị alert với dữ liệu form
+
+            $.ajax({
+                url: "/thong-ke-mon-an", // Đường dẫn AJAX
+                type: "GET",
+                data: formData, // Gửi dữ liệu từ form
+                beforeSend: function() {
+                    $('#chartContainer').html(
+                        '<p style="text-align: center;">Đang tải dữ liệu...</p>' // Trước khi gửi yêu cầu
+                    );
+                },
+                success: function(response) {
+                    // Kiểm tra xem response có chứa labels và datasets không
+                    if (response.labels && response.datasets) {
+                        // Nếu có dữ liệu hợp lệ, vẽ biểu đồ
+                        renderChart(response.labels, response.datasets);
+                    } else {
+                        console.error('Dữ liệu trả về không hợp lệ', response);
+                        // Dữ liệu không hợp lệ, vẽ biểu đồ mặc định
+                        renderChart(['Không có dữ liệu'], [0]);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Lỗi khi gọi API:', error);
+                    $('#chartContainer').html(
+                        '<p style="text-align: center;">Có lỗi xảy ra khi tải dữ liệu.</p>'
+                    );
+                }
+            });
+        });
+    });
+
+    function renderChart(labels, data) {
+        $('#chartContainer').html('<canvas id="myChart"></canvas>'); // Reset lại canvas trước khi vẽ
+
+        let ctx = document.getElementById('myChart').getContext('2d');
+
+        // Kiểm tra nếu không có dữ liệu hợp lệ
+        if (!Array.isArray(labels) || !Array.isArray(data) || labels.length === 0 || data.length === 0) {
+            // Nếu dữ liệu không hợp lệ, gán dữ liệu mặc định
+            labels = ['Không có dữ liệu'];
+            data = [0]; // Thay đổi thành 1 thay vì 0 để tránh biểu đồ trống hoàn toàn
+        }
+
+        // Vẽ biểu đồ
+        new Chart(ctx, {
+            type: 'bar', // Loại biểu đồ
+            data: {
+                labels: labels, // Sử dụng dữ liệu labels
+                datasets: [{
+                    label: 'Số lượng món ăn',
+                    data: data, // Dữ liệu cho biểu đồ
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)', // Màu nền của cột
+                    borderColor: 'rgba(54, 162, 235, 1)', // Màu viền của cột
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true, // Biểu đồ tự động điều chỉnh kích thước
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Thời gian' // Thêm tiêu đề cho trục X
+                        },
+                        ticks: {
+                            maxRotation: 45, // Xoay nhãn trục X nếu quá dài
+                            minRotation: 0,
+                            autoSkip: true, // Tự động bỏ qua nhãn nếu trục X quá dài
+                        },
+                        grid: {
+                            display: false // Ẩn lưới trục X nếu không cần thiết
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Số lượng' // Thêm tiêu đề cho trục Y
+                        },
+                        beginAtZero: true, // Đảm bảo trục Y bắt đầu từ 0
+                        ticks: {
+                            min: 0, // Đảm bảo trục y bắt đầu từ 0
+                            stepSize: 1, // Chia bước đều trên trục y
+                            callback: function(value) { // Định dạng lại các giá trị trên trục Y
+                                return value % 1 === 0 ? value : ''; // Chỉ hiển thị giá trị nguyên
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)', // Màu lưới trục Y
+                            borderColor: 'rgba(0, 0, 0, 0.1)' // Màu viền lưới trục Y
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        enabled: true, // Hiển thị tooltip khi hover vào các cột
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)', // Màu nền tooltip
+                        titleColor: 'white', // Màu chữ của tiêu đề tooltip
+                        bodyColor: 'white', // Màu chữ của body tooltip
+                        borderColor: 'rgba(54, 162, 235, 1)', // Màu viền của tooltip
+                        borderWidth: 1
+                    },
+                    legend: {
+                        position: 'top', // Đặt legend ở trên
+                        labels: {
+                            font: {
+                                size: 14, // Kích thước chữ của legend
+                                family: 'Arial', // Kiểu chữ của legend
+                                weight: 'bold' // Chữ đậm cho legend
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1000, // Thời gian hoạt ảnh khi vẽ biểu đồ
+                    easing: 'easeOutBounce' // Kiểu hoạt ảnh
+                }
+            }
+        });
+    }
+</script>

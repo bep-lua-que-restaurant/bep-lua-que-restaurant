@@ -304,9 +304,9 @@ class DatBanController extends Controller
                 $danhSachBanDat[] = $datBan;
                 $tenBanList[] = $banAnList[$banAnId]->ten_ban ?? 'Không xác định';
                 // Cập nhật trạng thái bàn ăn
-                if (isset($banAnList[$banAnId])) {
-                    $banAnList[$banAnId]->update(['trang_thai' => 'da_dat_truoc']);
-                }
+                // if (isset($banAnList[$banAnId])) {
+                //     $banAnList[$banAnId]->update(['trang_thai' => 'da_dat_truoc']);
+                // }
             }
 
             // Sau khi kết thúc vòng lặp, thêm tên bàn vào từng đặt bàn

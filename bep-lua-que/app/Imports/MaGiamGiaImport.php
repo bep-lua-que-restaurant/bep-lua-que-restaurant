@@ -14,16 +14,23 @@ class MaGiamGiaImport implements ToModel, WithHeadingRow
      * @param array $row
      * @return \Illuminate\Database\Eloquent\Model|null
      */
-    public function model(array $row)
+    public function headingRow(): int
     {
-        return new MaGiamGia([
-            'code'            => $row['code'], // Tên cột trong file Excel phải là code
-            'type'            => $row['type'], // Tên cột trong file Excel phải là type
-            'value'           => $row['value'],
-            'min_order_value' => $row['min_order_value'] ?? 0,
-            'start_date'      => $row['start_date'],
-            'end_date'        => $row['end_date'],
-            'usage_limit'     => $row['usage_limit'] ?? 0,
-        ]);
+        return 2; // Bắt đầu từ dòng 2
     }
+    public function model(array $row)
+{
+    return new MaGiamGia([
+        'code'            => $row['ma'],
+        'type'            => $row['loai'] === 'Phần trăm' ? 'percentage' : 'fixed',
+        'value'           => $row['gia_tri'],
+        'min_order_value' => $row['don_toi_thieu'], // Chỗ này hình như nhầm, min_order_value là giá trị, không phải ngày
+        'start_date'      => $row['ngay_bat_dau'], // Không format nữa
+        'end_date'        => $row['ngay_ket_thuc'], // Không format nữa
+        'usage_limit'     => $row['so_luot_da_dung'],
+        'created_at'      => $row['ngay_tao'], // Không format nữa
+        'deleted_at'      => $row['trang_thai_hoat_dong'] === 'Ngừng hoạt động' ? now() : null,
+    ]);
+}
+
 }
