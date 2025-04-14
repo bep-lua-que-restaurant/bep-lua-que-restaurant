@@ -417,6 +417,7 @@ $(document).ready(function () {
         });
     }
 
+    // render mã giảm giá
     function renderDiscountCodes(discounts, ma_hoa_don) {
         console.log(discounts);
         let discountListHtml = "";
@@ -432,32 +433,36 @@ $(document).ready(function () {
             const isDisabled = isApplied ? "disabled" : "";
 
             discountListHtml += `
-                <li class="list-group-item d-flex justify-content-between align-items-center ${
-                    isApplied ? "applied" : ""
-                }">
-                    <div>
-                        <span class="fw-bold text-primary">${
-                            discount.code
-                        }</span>
-                        <p class="mb-0 text-muted" style="font-size: 0.85rem;">
-                            Giảm ${discount.value}% cho đơn từ ${
-                discount.min_order_value
-            } VNĐ
-                        </p>
-                    </div>
-                    <button class="btn ${buttonClass} btn-sm apply-discount"  data-ma-hoa-don="${ma_hoa_don}"  data-id="${
-                discount.id
-            }" ${isDisabled}>
-                        ${buttonText}
-                    </button>
-                </li>
-            `;
+            <li class="list-group-item d-flex justify-content-between align-items-center ${
+                isApplied ? "applied" : ""
+            }">
+                <div>
+                    <span class="fw-bold text-primary">${
+                        discount.code
+                    }</span>
+                    <p class="mb-0 text-muted" style="font-size: 0.85rem;">
+                        Giảm ${Math.round(discount.value)}% cho đơn từ ${
+                        parseFloat(discount.min_order_value).toLocaleString("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                        })
+                    }
+                    </p>
+                </div>
+                <button class="btn ${buttonClass} btn-sm apply-discount"  data-ma-hoa-don="${ma_hoa_don}"  data-id="${
+                    discount.id
+                }" ${isDisabled}>
+                    ${buttonText}
+                </button>
+            </li>
+        `;
         });
 
         document.querySelector(".discount-list .list-group").innerHTML =
             discountListHtml;
     }
 
+    // áp mã
     $(document).on("click", ".apply-discount", function () {
         const $btn = $(this);
         const idCode = $(this).data("id");
@@ -531,46 +536,3 @@ window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (data) => {
     }
 });
 
-// // Lấy các phần tử
-// const applyButtons = document.querySelectorAll('.apply-discount');
-// const appliedCodeDiv = document.getElementById('applied-code');
-// const appliedCodeText = document.getElementById('applied-code-text');
-// const cancelButton = document.querySelector('.cancel-discount');
-
-// // Hàm khôi phục trạng thái ban đầu
-// function resetDiscount() {
-//     applyButtons.forEach(button => {
-//         button.innerHTML = '<i class="bi bi-ticket-perforated me-1"></i><span style="font-size: 0.8rem;">Áp dụng</span>';
-//         button.classList.remove('btn-applied');
-//         button.disabled = false;
-//     });
-//     appliedCodeDiv.style.display = 'none';
-//     appliedCodeText.textContent = '';
-// }
-
-// // Xử lý nút áp dụng
-// applyButtons.forEach(button => {
-//     button.addEventListener('click', function() {
-//         const code = this.getAttribute('data-code');
-
-//         // Chọn mã
-//         resetDiscount(); // Xóa trạng thái cũ
-//         this.innerHTML = '<i class="bi bi-check-circle me-1"></i><span style="font-size: 0.8rem;">Đã dùng</span>';
-//         this.classList.add('btn-applied');
-//         this.disabled = true;
-
-//         // Vô hiệu hóa các nút khác
-//         applyButtons.forEach(otherButton => {
-//             if (otherButton !== this) {
-//                 otherButton.disabled = true;
-//             }
-//         });
-
-//         // Hiển thị trạng thái
-//         appliedCodeText.textContent = code;
-//         appliedCodeDiv.style.display = 'block';
-//     });
-// });
-
-// // Xử lý nút hủy
-// cancelButton.addEventListener('click', resetDiscount);

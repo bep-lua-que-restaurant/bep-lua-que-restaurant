@@ -18,11 +18,13 @@ use App\Events\XoaMonAn;
 use App\Models\ChiTietHoaDon;
 use App\Models\DatBan;
 use App\Models\MaGiamGia;
+use App\Models\MonBiHuy;
 use App\Models\NguyenLieu;
 use App\Models\NguyenLieuMonAn;
 use PhpParser\Node\Expr\FuncCall;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
+
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
@@ -720,41 +722,63 @@ class ThuNganController extends Controller
     //xóa món ăn
     public function deleteMonAn(Request $request)
     {
-        $monAnId = $request->mon_an_id; // Lấy ID món ăn cần xóa
+        // Lấy chi_tiet_hoa_don_id từ request
+        $chiTietId = $request->mon_an_id; // Đây là id của chi_tiet_hoa_dons
+        $lyDoHuy = $request->ly_do ?? 'Không rõ lý do';
 
-        // Tìm món ăn trong chi tiết hóa đơn
-        $chiTietHoaDon = ChiTietHoaDon::where('id', $monAnId)->first();
+        // 1. Lấy chi tiết hóa đơn
+        $chiTiet = ChiTietHoaDon::find($chiTietId);
+        if (!$chiTiet) {
+            return response()->json(['error' => 'Chi tiết hóa đơn không tồn tại!'], 404);
+        }
+        
 
-        if (!$chiTietHoaDon) {
+        // Lấy thông tin món ăn từ bảng mon_ans để dự phòng
+        $monAn = MonAn::find($chiTiet->mon_an_id);
+        if (!$monAn) {
             return response()->json(['error' => 'Món ăn không tồn tại!'], 404);
         }
 
-        // Lấy ID hóa đơn từ chi tiết món ăn
-        $hoaDonId = $chiTietHoaDon->hoa_don_id;
+        // 2. Lấy hóa đơn
+        $hoaDon = HoaDon::find($chiTiet->hoa_don_id);
+        if (!$hoaDon) {
+            return response()->json(['error' => 'Hóa đơn không tồn tại!'], 404);
+        }
 
-        // Xóa món ăn khỏi chi tiết hóa đơn
-        broadcast(new XoaMonAn($chiTietHoaDon));
-        $chiTietHoaDon->forceDelete();
+        // 3. Kiểm tra trạng thái hóa đơn
+        if ($hoaDon->trang_thai === 'cho_xac_nhan') {
+            // Trạng thái chờ xác nhận → Xóa luôn
+            broadcast(new XoaMonAn($chiTiet));
+            $chiTiet->forceDelete();
+        } else {
+            // Đã xác nhận hoặc đang xử lý → Lưu vào bảng mon_bi_huys
+            MonBiHuy::create([
+                'mon_an_id' => $chiTiet->mon_an_id,
+                'ten_mon' => $chiTiet->ten ?? $monAn->ten ?? 'Tên món mặc định', // Ưu tiên chi_tiet_hoa_dons, sau đó mon_ans
+                'ly_do' => $lyDoHuy,
+                'so_luong' => $chiTiet->so_luong,
+                'ngay_huy' => Carbon::now(),
+            ]);
 
-        // Lấy lại tổng tiền của hóa đơn sau khi xóa món ăn
-        $tongTien = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
-            ->get()
-            ->map(fn($item) => $item->so_luong * $item->don_gia)
-            ->sum();
+            broadcast(new XoaMonAn($chiTiet));
+            $chiTiet->forceDelete();
+        }
 
-        // Cập nhật lại tổng tiền của hóa đơn
-        $hoaDon = HoaDon::find($hoaDonId);
+        // 4. Cập nhật tổng tiền
+        $tongTien = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)
+            ->sum(DB::raw('so_luong * don_gia')); // Tính tổng tiền trên database
+
         $hoaDon->update(['tong_tien' => $tongTien]);
+        $hoaDon->load('chiTietHoaDons');
 
-        // 🔥 Phát sự kiện cập nhật hóa đơn
-        $hoaDon->load('chiTietHoaDons'); // Nạp lại dữ liệu chi tiết hóa đơn
         broadcast(new HoaDonUpdated($hoaDon))->toOthers();
+
         return response()->json([
             'success' => true,
-            'hoa_don_id' => $hoaDonId,
             'tong_tien' => $tongTien,
         ]);
     }
+
 
     public function getOrders(Request $request)
     {
@@ -913,7 +937,7 @@ class ThuNganController extends Controller
                 return $maGiamGia;
             });
 
-        
+
         return response()->json([
             'data' => $maHoaDon,
             'chi_tiet_hoa_don' => $chiTietHoaDon,
@@ -963,56 +987,55 @@ class ThuNganController extends Controller
     }
 
     public function applyDiscount(Request $request)
-{
-    $code = $request->input('code');
-    $maHoaDon = $request->input('ma_hoa_don');
+    {
+        $code = $request->input('code');
+        $maHoaDon = $request->input('ma_hoa_don');
 
-    // Lấy mã giảm giá và hóa đơn
-    $maGiamGia = MaGiamGia::where('id', $code)->first();
-    $hoaDon = HoaDon::where('ma_hoa_don', $maHoaDon)->first();
+        // Lấy mã giảm giá và hóa đơn
+        $maGiamGia = MaGiamGia::where('id', $code)->first();
+        $hoaDon = HoaDon::where('ma_hoa_don', $maHoaDon)->first();
 
-    if (!$maGiamGia || !$hoaDon) {
+        if (!$maGiamGia || !$hoaDon) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy mã giảm giá hoặc hóa đơn.'
+            ]);
+        }
+
+        // Nếu hóa đơn chưa có tổng tiền trước khi giảm, gán tổng tiền hiện tại vào
+        if (is_null($hoaDon->tong_tien_truoc_khi_giam)) {
+            $hoaDon->tong_tien_truoc_khi_giam = $hoaDon->tong_tien;
+            $hoaDon->save(); // Cập nhật tổng tiền trước khi giảm
+        }
+
+        // Lấy tổng tiền trước khi giảm (sẽ không thay đổi khi đã có mã giảm giá)
+        $tongTienTruocKhiGiam = $hoaDon->tong_tien_truoc_khi_giam;
+
+        $tongTienSauGiam = $tongTienTruocKhiGiam; // Dựa trên tổng tiền trước khi giảm
+
+        // Tính giảm giá
+        if ($maGiamGia->type === 'percentage') {
+            $tongTienSauGiam -= ($tongTienTruocKhiGiam * $maGiamGia->value / 100);
+        } elseif ($maGiamGia->type === 'fixed') {
+            $tongTienSauGiam -= $maGiamGia->value;
+        }
+
+        // Đảm bảo tổng tiền không âm
+        $tongTienSauGiam = max($tongTienSauGiam, 0);
+
+        // Cập nhật mã giảm và tổng tiền mới vào hóa đơn
+        $hoaDon->update([
+            'id_ma_giam' => $code, // Cập nhật mã giảm giá mới
+            'tong_tien' => $tongTienSauGiam, // Cập nhật tổng tiền mới
+            'updated_at' => now()
+        ]);
+
         return response()->json([
-            'success' => false,
-            'message' => 'Không tìm thấy mã giảm giá hoặc hóa đơn.'
+            'success' => true,
+            'code' => $code,
+            'ma_hoa_don' => $maHoaDon,
+            'tong_tien_truoc_khi_giam' => $tongTienTruocKhiGiam,
+            'tong_tien_sau_giam' => $tongTienSauGiam,
         ]);
     }
-
-    // Nếu hóa đơn chưa có tổng tiền trước khi giảm, gán tổng tiền hiện tại vào
-    if (is_null($hoaDon->tong_tien_truoc_khi_giam)) {
-        $hoaDon->tong_tien_truoc_khi_giam = $hoaDon->tong_tien;
-        $hoaDon->save(); // Cập nhật tổng tiền trước khi giảm
-    }
-
-    // Lấy tổng tiền trước khi giảm (sẽ không thay đổi khi đã có mã giảm giá)
-    $tongTienTruocKhiGiam = $hoaDon->tong_tien_truoc_khi_giam;
-
-    $tongTienSauGiam = $tongTienTruocKhiGiam; // Dựa trên tổng tiền trước khi giảm
-
-    // Tính giảm giá
-    if ($maGiamGia->type === 'percentage') {
-        $tongTienSauGiam -= ($tongTienTruocKhiGiam * $maGiamGia->value / 100);
-    } elseif ($maGiamGia->type === 'fixed') {
-        $tongTienSauGiam -= $maGiamGia->value;
-    }
-
-    // Đảm bảo tổng tiền không âm
-    $tongTienSauGiam = max($tongTienSauGiam, 0);
-
-    // Cập nhật mã giảm và tổng tiền mới vào hóa đơn
-    $hoaDon->update([
-        'id_ma_giam' => $code, // Cập nhật mã giảm giá mới
-        'tong_tien' => $tongTienSauGiam, // Cập nhật tổng tiền mới
-        'updated_at' => now()
-    ]);
-
-    return response()->json([
-        'success' => true,
-        'code' => $code,
-        'ma_hoa_don' => $maHoaDon,
-        'tong_tien_truoc_khi_giam' => $tongTienTruocKhiGiam,
-        'tong_tien_sau_giam' => $tongTienSauGiam,
-    ]);
-}
-
 }
