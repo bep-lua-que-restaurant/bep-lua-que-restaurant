@@ -31,50 +31,56 @@
                             {{-- <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#importModal">
                                 <i class="fa fa-upload"></i> Import
                             </button> --}}
-                        
+
                             <!-- Export -->
                             <a href="{{ route('nguyen-lieu.export') }}" class="btn btn-success">
                                 <i class="fa fa-download"></i> Export
                             </a>
-                        
+
                             <!-- Kiểm tra tồn kho -->
                             <a href="{{ route('nguyen-lieu.kiemtra') }}" class="btn btn-warning">
                                 <i class="bi bi-bar-chart-line"></i> Kiểm tra tồn kho
                             </a>
-                        
+
                             <!-- Danh sách -->
-                            <a href="#" class="btn btn-sm btn-info">
+                            {{-- <a href="#" class="btn btn-sm btn-info">
                                 <i class="fa fa-list"></i> Danh sách
-                            </a>
+                            </a> --}}
                         </div>
-                        
+
                         <!-- Modal import -->
-                        <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+                        <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel"
+                            aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content border-0 shadow-lg rounded-4">
                                     <div class="modal-header bg-primary text-white">
                                         <h5 class="modal-title" id="importModalLabel">
                                             <i class="fa fa-upload"></i> Import Nguyên Liệu
                                         </h5>
-                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
                                     </div>
-                                    <form action="{{ route('tools.nguyen-lieu.import') }}" method="POST" enctype="multipart/form-data">
+                                    <form action="{{ route('tools.nguyen-lieu.import') }}" method="POST"
+                                        enctype="multipart/form-data">
                                         @csrf
                                         <div class="modal-body">
                                             <div class="mb-3">
-                                                <label for="file" class="form-label">Chọn file Excel (*.xlsx, *.csv):</label>
-                                                <input type="file" name="file" class="form-control" required accept=".xlsx,.csv">
+                                                <label for="file" class="form-label">Chọn file Excel (*.xlsx,
+                                                    *.csv):</label>
+                                                <input type="file" name="file" class="form-control" required
+                                                    accept=".xlsx,.csv">
                                             </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="submit" class="btn btn-success">Import</button>
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Hủy</button>
                                         </div>
                                     </form>
                                 </div>
                             </div>
                         </div>
-                        
+
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -105,7 +111,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -116,15 +122,37 @@
                 processing: true,
                 serverSide: true,
                 ajax: '{{ $route }}',
-                columns: [
-                    { data: 'id', name: 'id' },
-                    { data: 'ten_nguyen_lieu', name: 'ten_nguyen_lieu' },
-                    { data: 'loai_nguyen_lieu', name: 'loai_nguyen_lieu.ten_loai' },
-                    { data: 'don_vi_ton', name: 'don_vi_ton' },
-                    { data: 'so_luong_ton', name: 'so_luong_ton' },
-                    
-                    { data: 'trang_thai', name: 'deleted_at' },
-                    { data: 'action', name: 'action', orderable: false, searchable: false }
+                columns: [{
+                        data: 'id',
+                        name: 'id'
+                    },
+                    {
+                        data: 'ten_nguyen_lieu',
+                        name: 'ten_nguyen_lieu'
+                    },
+                    {
+                        data: 'loai_nguyen_lieu',
+                        name: 'loai_nguyen_lieu.ten_loai'
+                    },
+                    {
+                        data: 'don_vi_ton',
+                        name: 'don_vi_ton'
+                    },
+                    {
+                        data: 'so_luong_ton',
+                        name: 'so_luong_ton'
+                    },
+
+                    {
+                        data: 'trang_thai',
+                        name: 'deleted_at'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
+                    }
                 ],
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json'
@@ -135,13 +163,14 @@
                 pageLength: 10
             });
 
-            $(document).on('submit', 'form', function (e) {
+            $(document).on('submit', 'form', function(e) {
                 e.preventDefault();
                 var form = $(this);
                 var isDelete = form.find('button[title="Xóa"]').length > 0;
 
                 Swal.fire({
-                    title: isDelete ? 'Bạn muốn ngừng sử dụng nguyên liệu này?' : 'Bạn muốn khôi phục nguyên liệu này?',
+                    title: isDelete ? 'Bạn muốn ngừng sử dụng nguyên liệu này?' :
+                        'Bạn muốn khôi phục nguyên liệu này?',
                     text: "Hành động này sẽ thay đổi trạng thái nguyên liệu!",
                     icon: 'warning',
                     showCancelButton: true,
@@ -155,16 +184,18 @@
                             url: form.attr('action'),
                             method: form.attr('method'),
                             data: form.serialize(),
-                            success: function (response) {
+                            success: function(response) {
                                 Swal.fire(
                                     'Thành công!',
-                                    isDelete ? 'Đã ngừng sử dụng nguyên liệu.' : 'Đã khôi phục nguyên liệu.',
+                                    isDelete ? 'Đã ngừng sử dụng nguyên liệu.' :
+                                    'Đã khôi phục nguyên liệu.',
                                     'success'
                                 );
                                 table.ajax.reload();
                             },
-                            error: function (xhr) {
-                                Swal.fire('Lỗi!', 'Có lỗi xảy ra, vui lòng thử lại!', 'error');
+                            error: function(xhr) {
+                                Swal.fire('Lỗi!', 'Có lỗi xảy ra, vui lòng thử lại!',
+                                    'error');
                             }
                         });
                     }

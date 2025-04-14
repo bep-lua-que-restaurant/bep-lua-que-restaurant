@@ -212,32 +212,38 @@ class HoaDonController extends Controller
 
 
     public function show($id)
-{
-    $hoaDon = HoaDon::with([
-            'chiTietHoaDons.monAn' => function($query) {
-                $query->withTrashed(); // Lấy luôn món ăn đã bị xóa
-            },
-            'banAns' => function($query) {
-                $query->withTrashed(); // Lấy luôn bàn ăn đã bị xóa
-            }
-        ])
-        ->leftJoin('hoa_don_bans', 'hoa_don_bans.hoa_don_id', '=', 'hoa_dons.id')
-        ->leftJoin('ban_ans', 'ban_ans.id', '=', 'hoa_don_bans.ban_an_id')
-        ->leftJoin('dat_bans', function ($join) {
-            $join->on('dat_bans.ban_an_id', '=', 'ban_ans.id')
-                ->whereNotNull('dat_bans.khach_hang_id');
-        })
-        ->leftJoin('khach_hangs', 'khach_hangs.id', '=', 'dat_bans.khach_hang_id')
-        ->select(
-            'hoa_dons.*',
-            'khach_hangs.ho_ten as ten_khach_hang',
-            'khach_hangs.so_dien_thoai'
-        )
-        ->where('hoa_dons.id', $id)
-        ->firstOrFail();
-
-    return view('admin.hoadon.show', compact('hoaDon'));
-}
+    {
+        $hoaDon = HoaDon::with([
+                'chiTietHoaDons.monAn' => function($query) {
+                    $query->withTrashed(); // Lấy luôn món ăn đã bị xóa
+                },
+                'banAns' => function($query) {
+                    $query->withTrashed(); // Lấy luôn bàn ăn đã bị xóa
+                }
+            ])
+            ->leftJoin('hoa_don_bans', 'hoa_don_bans.hoa_don_id', '=', 'hoa_dons.id')
+            ->leftJoin('ban_ans', 'ban_ans.id', '=', 'hoa_don_bans.ban_an_id')
+            ->leftJoin('dat_bans', function ($join) {
+                $join->on('dat_bans.ban_an_id', '=', 'ban_ans.id')
+                    ->whereNotNull('dat_bans.khach_hang_id');
+            })
+            ->leftJoin('khach_hangs', 'khach_hangs.id', '=', 'dat_bans.khach_hang_id')
+            ->leftJoin('ma_giam_gias', 'hoa_dons.id_ma_giam', '=', 'ma_giam_gias.id')
+            ->select(
+                'hoa_dons.*',
+                'khach_hangs.ho_ten as ten_khach_hang',
+                'khach_hangs.so_dien_thoai',
+                'ma_giam_gias.id as id_ma_giam',
+                'ma_giam_gias.code as code'
+            )
+            ->where('hoa_dons.id', $id)
+            ->withTrashed() // Không lấy bản ghi của `hoa_dons` dù đã bị xóa mềm
+            ->firstOrFail();
+    
+        return view('admin.hoadon.show', compact('hoaDon'));
+    }
+    
+    
 
     //in hóa đơn
     //     public function printInvoice($id)

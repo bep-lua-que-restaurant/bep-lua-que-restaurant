@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-    Mã giảm
+    Mã giảm giá
 @endsection
 
 @section('content')
@@ -15,7 +15,7 @@
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
-                    <li class="breadcrumb-item active"><a href="javascript:void(0)">MaGiaGia</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Mã giám giá </a></li>
                 </ol>
             </div>
         </div>
@@ -62,9 +62,9 @@
                             <a href="{{ route('ma-giam-gia.export') }}" class="btn btn-sm btn-success">
                                 <i class="fa fa-download"></i> Xuất file
                             </a>
-                            <a href="#" class="btn btn-sm btn-info">
+                            {{-- <a href="#" class="btn btn-sm btn-info">
                                 <i class="fa fa-list"></i> Danh sách
-                            </a>
+                            </a> --}}
                         </div>
                     </div>
                     <div class="card-body">

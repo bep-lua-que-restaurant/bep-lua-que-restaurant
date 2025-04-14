@@ -89,7 +89,8 @@ class BangTinhLuongController extends Controller
     'luong', 'chamCongs' => function ($query) use ($thangChon) {
     $query->whereYear('ngay_cham_cong', date('Y', strtotime($thangChon)))
     ->whereMonth('ngay_cham_cong', date('m', strtotime($thangChon)))
-    ->with('caLam'); } ]) ->get(); foreach ($nhanViens as $nhanVien) {
+    ->with('caLam'); } ]) ->paginate(10);;
+     foreach ($nhanViens as $nhanVien) {
          // Lấy tất cả bản lương của nhân viên, sắp xếp ngày áp dụng tăng dần 
          $luongs =$nhanVien->luong()->orderBy('ngay_ap_dung', 'asc')->get(); $luongCu = null;
     $luongMoi = null; foreach ($luongs as $luong) { $ngayApDung =

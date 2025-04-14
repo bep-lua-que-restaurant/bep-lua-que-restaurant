@@ -28,7 +28,7 @@
                 <p><strong>Mã hóa đơn:</strong> {{ $hoaDon->ma_hoa_don }}</p>
                 <p><strong>Khách hàng:</strong> {{ $hoaDon->ten_khach_hang }}</p>
                 <p><strong>Số điện thoại:</strong> {{ $hoaDon->so_dien_thoai }}</p>
-                <p><strong>Mã giảm giá:</strong> {{ $hoaDon->maGiamGia ? $hoaDon->maGiamGia->code : 'Không có' }}</p>
+                <p><strong>Mã giảm giá:</strong> {{ $hoaDon->code ?: 'Không có' }}</p>
 
                 <p><strong>Phương thức thanh toán:</strong>
                     {{ $hoaDon->phuong_thuc_thanh_toan == 'tien_mat'
@@ -38,10 +38,13 @@
                             : 'Tài khoản') }}
                 </p>
 
-                <p><strong>Mô tả:</strong> {{ $hoaDon->mo_ta }}</p>
-                <p><strong>Tổng tiền trước khi giảm:</strong> {{ $hoaDon->tong_tien_truoc_khi_giam }}</p>
+                <p><strong>Mô tả:</strong> {{ $hoaDon->mo_ta ?: 'Không có' }}</p>
+                <p><strong>Tổng tiền trước khi giảm:</strong>
+                    {{ number_format($hoaDon->tong_tien_truoc_khi_giam, 0, ',', '.') }}VND</p>
+
                 <p><strong>Tiền thanh toán: </strong> {{ number_format($hoaDon->tong_tien, 0, ',', '.') }} VND</p>
-                <p><strong>Ngày tạo:</strong> {{ $hoaDon->created_at ? $hoaDon->created_at->format('d/m/Y H:i') : 'N/A' }}
+                <p><strong>Ngày tạo:</strong>
+                    {{ $hoaDon->created_at ? $hoaDon->created_at->format('d/m/Y H:i') : 'Không có' }}
                 </p>
             </div>
         </div>

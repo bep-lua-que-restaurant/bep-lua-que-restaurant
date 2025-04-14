@@ -133,11 +133,11 @@
 
             <hr style="border-top: 1px dashed #000;">
             <p style="text-align: right; font-size: 18px; font-weight: bold; color: #000;">
-                Tổng tiền trước áp mã giảm giá: {{ number_format($hoa_dons->tong_tien_truoc_khi_giam, 0, ',', '.') }} VNĐ
+                Tổng tiền trước áp mã giảm giá: {{ number_format($hoa_dons->tong_tien_truoc_khi_giam, 0, ',', '.') }} VND
             </p>
             <!-- Tổng cộng -->
             <p style="text-align: right; font-size: 18px; font-weight: bold; color: #000;">
-                Tiền thanh toán: {{ number_format($hoa_dons->tong_tien, 0, ',', '.') }} VNĐ
+                Tiền thanh toán: {{ number_format($hoa_dons->tong_tien, 0, ',', '.') }} VND
             </p>
 
             <p style="text-align: center; font-style: italic; margin-top: 15px; color: #000;">

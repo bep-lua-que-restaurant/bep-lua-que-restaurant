@@ -98,7 +98,9 @@
         @endif --}}
         </form>
     </div>
+    {{ $nhanViens->links('pagination::bootstrap-5') }}
 @endsection
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         function calculateTotal() {
