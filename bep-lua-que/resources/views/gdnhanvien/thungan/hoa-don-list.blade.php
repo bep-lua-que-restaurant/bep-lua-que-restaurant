@@ -299,13 +299,12 @@
                 </select>
             </div>
 
-            
+
         </div>
 
         <div class="flex-fill me-2">
             <label for="totalAmount" class="form-label">Khách cần trả</label>
-            <input type="text" class="form-control form-control-lg" id="khach_can_tra" value=""
-                readonly>
+            <input type="text" class="form-control form-control-lg" id="khach_can_tra" value="" readonly>
         </div>
 
         <div id="qrCodeContainer" class="text-center mt-3" style="display: none;">
@@ -324,8 +323,8 @@
         <div class="d-flex mb-3 align-items-stretch">
             <div class="flex-fill me-2">
                 <label class="form-label">Số tiền khách đưa</label>
-                <input type="number" class="form-control form-control-lg" id="amountGiven"
-                    placeholder="Nhập số tiền khách đưa" oninput="calculateChange()">
+                <input type="text" class="form-control form-control-lg" id="amountGiven"
+                    placeholder="Nhập số tiền khách đưa" oninput="formatAmountGiven(this); calculateChange()">
             </div>
             <div class="flex-fill ms-2">
                 <label class="form-label">Tiền thừa trả khách</label>
@@ -619,13 +618,57 @@
         });
     });
 
+    function formatAmountGiven(input) {
+        // Lấy giá trị hiện tại, loại bỏ tất cả ký tự không phải số
+        let value = input.value.replace(/\D/g, "");
+
+        // Nếu rỗng, đặt lại giá trị
+        if (!value) {
+            input.value = "";
+            return;
+        }
+
+        // Chuyển thành số và định dạng
+        let number = parseInt(value) || 0;
+        input.value = number.toLocaleString("vi-VN");
+    }
 
     function calculateChange() {
-        let totalAmount = parseInt(document.getElementById("totalAmount").value.replace(/\D/g, "")) || 0;
-        let amountGiven = parseInt(document.getElementById("amountGiven").value) || 0;
-        let change = amountGiven - totalAmount;
+        let khachCanTraElement = document.getElementById("khach_can_tra");
+        let amountGivenElement = document.getElementById("amountGiven");
+        let changeToReturnElement = document.getElementById("changeToReturn");
 
-        document.getElementById("changeToReturn").value = change > 0 ? change.toLocaleString() + " VND" : "0 VND";
+        // Kiểm tra phần tử tồn tại
+        if (!khachCanTraElement || !amountGivenElement || !changeToReturnElement) {
+            console.error("Một hoặc nhiều phần tử không tồn tại!");
+            return;
+        }
+
+        // Thoát nếu amountGiven không hiển thị (ví dụ: khi chọn phương thức khác tiền mặt)
+        if (amountGivenElement.parentElement.style.display === "none") {
+            return;
+        }
+
+        // Lấy giá trị và xử lý
+        let khachCanTraValue = khachCanTraElement.value.replace(/\./g, "");
+        if (!khachCanTraValue) {
+            changeToReturnElement.value = "0 VND";
+            console.warn("Số tiền khách cần trả chưa được cập nhật!");
+            return;
+        }
+
+        let khachCanTra = parseInt(khachCanTraValue) || 0;
+        let amountGivenValue = amountGivenElement.value.replace(/\./g, "");
+        let amountGiven = parseInt(amountGivenValue) || 0;
+        let change = amountGiven - khachCanTra;
+
+        // Cập nhật giá trị tiền thừa
+        if (change < 0) {
+            changeToReturnElement.value = "0 VND";
+            console.warn("Số tiền khách đưa không đủ!");
+        } else {
+            changeToReturnElement.value = change.toLocaleString("vi-VN") + " VND";
+        }
     }
 
     $(document).ready(function() {
@@ -939,6 +982,8 @@
                         var maHoaDonElement = document.getElementById("maHoaDon");
                         maHoaDonElement.innerText = "Chưa có hóa đơn";
                         maHoaDonElement.style.color = "red";
+                        document.getElementById("amountGiven").value = "";
+                        document.getElementById("changeToReturn").value = "0 VND";
                     } else {
                         showToast("Thanh toán không thành công.", "danger");
 
