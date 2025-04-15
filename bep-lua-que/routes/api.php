@@ -51,6 +51,8 @@ Route::get('/ton-kho/xuat-dung', [NguyenLieuController::class, 'tonKhoXuatDung']
 
 
 
+
+
 Route::get('/update-datban', function () {
     $now = Carbon::now();
     $limitTime = $now->subMinutes(30);

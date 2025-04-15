@@ -29,7 +29,8 @@ class StorePhieuXuatKhoRequest extends FormRequest
             'loai_nguyen_lieu_ids' => 'required|array|min:1',
             'loai_nguyen_lieu_ids.*' => 'required|exists:loai_nguyen_lieus,id',
 
-            'don_vi_xuats.*' => 'required|string|min:1|max:255',
+            'don_vi_xuats.*' => ['required', 'string', 'min:1', 'max:255', 'regex:/^[^\d]*$/'],
+
             'he_so_quy_dois.*' => 'required|numeric|min:0.01',
             'so_luong_xuats.*' => 'required|numeric|min:0.01',
             'don_gias.*' => 'nullable|numeric|min:0',
@@ -58,6 +59,7 @@ class StorePhieuXuatKhoRequest extends FormRequest
             'don_vi_xuats.*.string' => 'Đơn vị xuất phải là một chuỗi.',
             'don_vi_xuats.*.min' => 'Đơn vị xuất phải có ít nhất 1 ký tự.',
             'don_vi_xuats.*.max' => 'Đơn vị xuất không được vượt quá 255 ký tự.',
+            'don_vi_xuats.*.regex' => 'Đơn vị xuất không được chứa số.',
 
             'he_so_quy_dois.*.required' => 'Vui lòng nhập hệ số quy đổi.',
             'he_so_quy_dois.*.min' => 'Hệ số quy đổi phải lớn hơn 0.',

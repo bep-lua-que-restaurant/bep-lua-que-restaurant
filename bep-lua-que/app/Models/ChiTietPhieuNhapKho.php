@@ -41,7 +41,7 @@ class ChiTietPhieuNhapKho extends Model
      */
     public function nguyenLieu()
     {
-        return $this->belongsTo(NguyenLieu::class, 'nguyen_lieu_id');
+        return $this->belongsTo(NguyenLieu::class, 'nguyen_lieu_id')->withTrashed();
     }
 
     /**

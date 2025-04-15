@@ -277,6 +277,8 @@ Route::middleware(['auth'])->group(function () {
     // nguyên liệu 
     // Route::get('/nguyen-lieu/export', [NguyenLieuController::class, 'exportNguyenLieu']);
     // Route::post('/nguyen-lieu/import', [NguyenLieuController::class, 'importNguyenLieu']);
+    Route::get('/nguyen-lieu/hansudung', [NguyenLieuController::class, 'HanSuDung'])->name('nguyen-lieu.hansudung');
+
 
     Route::get('/nguyen-lieu/kiem-tra-ton-kho', [NguyenLieuController::class, 'viewTonKhoXuatDung'])->name('nguyen-lieu.kiemtra');
     Route::resource('nguyen-lieu', NguyenLieuController::class);

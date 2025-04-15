@@ -20,6 +20,7 @@ use App\Models\ChiTietPhieuNhapKho;
 use App\Models\CongThucMonAn;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 class NguyenLieuController extends Controller
@@ -85,12 +86,12 @@ class NguyenLieuController extends Controller
     {
         $ngay = $request->input('ngay') ? Carbon::parse($request->input('ngay')) : Carbon::today();
         $loaiId = $request->input('loai_nguyen_lieu_id');
-    
+
         // 1. Lấy ID nguyên liệu theo loại (có thể đã bị xóa mềm)
         $nguyenLieuIdsTheoLoai = NguyenLieu::withTrashed()
             ->when($loaiId, fn($q) => $q->where('loai_nguyen_lieu_id', $loaiId))
             ->pluck('id');
-    
+
         // 2. Lấy thêm nguyên liệu đã bị xoá nhưng vẫn có dữ liệu xuất trong ngày VÀ cùng loại
         $nguyenLieuXuatTrongNgayIds = DB::table('chi_tiet_phieu_xuat_khos')
             ->join('phieu_xuat_khos', 'chi_tiet_phieu_xuat_khos.phieu_xuat_kho_id', '=', 'phieu_xuat_khos.id')
@@ -100,48 +101,48 @@ class NguyenLieuController extends Controller
             ->when($loaiId, fn($q) => $q->where('nguyen_lieus.loai_nguyen_lieu_id', $loaiId))
             ->pluck('chi_tiet_phieu_xuat_khos.nguyen_lieu_id')
             ->unique();
-    
+
         // 3. Kết hợp tất cả nguyên liệu cần hiển thị
         $nguyenLieuIds = $nguyenLieuIdsTheoLoai
             ->merge($nguyenLieuXuatTrongNgayIds)
             ->unique();
-    
+
         $nguyenLieus = NguyenLieu::withTrashed()->whereIn('id', $nguyenLieuIds)->get();
-    
+
         // 4. Phần tính toán dữ liệu như bạn đã có
         $duLieuTonKho = $nguyenLieus->map(function ($nl) use ($ngay) {
             $nguyenLieuId = $nl->id;
-    
+
             $tinhSoLuongTheoLoai = function ($loaiPhieu = null) use ($nguyenLieuId, $ngay) {
                 $query = DB::table('chi_tiet_phieu_xuat_khos')
                     ->join('phieu_xuat_khos', 'chi_tiet_phieu_xuat_khos.phieu_xuat_kho_id', '=', 'phieu_xuat_khos.id')
                     ->where('phieu_xuat_khos.trang_thai', 'da_duyet')
                     ->whereDate('phieu_xuat_khos.ngay_xuat', $ngay)
                     ->where('chi_tiet_phieu_xuat_khos.nguyen_lieu_id', $nguyenLieuId);
-    
+
                 if ($loaiPhieu) {
                     $query->where('phieu_xuat_khos.loai_phieu', $loaiPhieu);
                 }
-    
+
                 return $query->sum(DB::raw('so_luong * COALESCE(he_so_quy_doi, 1)'));
             };
-    
+
             $soLuongXuatBep = $tinhSoLuongTheoLoai('xuat_bep');
             $soLuongTraHang = $tinhSoLuongTheoLoai('xuat_tra_hang');
             $soLuongXuatHuy = $tinhSoLuongTheoLoai('xuat_huy');
             $tongSoLuongXuat = $tinhSoLuongTheoLoai();
-    
+
             $hoaDonIds = HoaDonBan::where('trang_thai', 'da_thanh_toan')
                 ->whereDate('created_at', $ngay)
                 ->pluck('hoa_don_id');
-    
+
             $soLuongDung = ChiTietHoaDon::whereIn('hoa_don_id', $hoaDonIds)->get()->sum(function ($cthd) use ($nguyenLieuId) {
                 $ct = CongThucMonAn::where('mon_an_id', $cthd->mon_an_id)
                     ->where('nguyen_lieu_id', $nguyenLieuId)
                     ->first();
                 return $ct ? $cthd->so_luong * $ct->so_luong : 0;
             });
-    
+
             return [
                 'id' => $nguyenLieuId,
                 'nguyen_lieu' => $nl->ten_nguyen_lieu,
@@ -157,10 +158,10 @@ class NguyenLieuController extends Controller
                 'da_ngung_su_dung' => $nl->trashed(),
             ];
         });
-    
+
         return response()->json($duLieuTonKho);
     }
-    
+
 
 
 
@@ -202,39 +203,92 @@ class NguyenLieuController extends Controller
         return response()->json($duLieu);
     }
 
-    public function canhBaoHanSuDung(Request $request)
+
+
+    public function HanSuDung()
     {
-        $ngay = Carbon::today();
-        $loaiId = $request->input('loai_nguyen_lieu_id');
+        try {
+            $today = Carbon::now();
 
-        $duLieu = ChiTietPhieuNhapKho::with('nguyenLieu')
-            ->whereNotNull('han_su_dung')
-            ->when($loaiId, fn($q) => $q->whereHas('nguyenLieu', fn($q2) => $q2->where('loai_nguyen_lieu_id', $loaiId)))
-            ->get()
-            ->map(function ($ct) use ($ngay) {
-                $daysLeft = Carbon::parse($ct->han_su_dung)->diffInDays($ngay, false);
-                $trangThai = null;
+            $hanSuDungList = ChiTietPhieuNhapKho::with('nguyenLieu')
+                ->where('so_luong_nhap', '>', 0)
+                ->whereNotNull('han_su_dung')
+                ->get()
+                ->groupBy('nguyen_lieu_id');
 
-                if ($daysLeft < 0) {
-                    $trangThai = 'Hết hạn';
-                } elseif ($daysLeft <= 3) {
-                    $trangThai = 'Dưới 3 ngày';
-                } elseif ($daysLeft <= 7) {
-                    $trangThai = 'Dưới 7 ngày';
+            $results = [];
+
+            foreach ($hanSuDungList as $nguyenLieuId => $items) {
+                $firstItem = $items->first();
+
+                if (!$firstItem || !$firstItem->nguyenLieu) {
+                    continue;
                 }
 
-                return $trangThai ? [
-                    'nguyen_lieu' => $ct->nguyenLieu->ten_nguyen_lieu ?? 'N/A',
-                    'ngay_san_xuat' => $ct->ngay_san_xuat,
-                    'han_su_dung' => $ct->han_su_dung,
-                    'so_luong' => $ct->so_luong,
-                    'don_vi' => $ct->nguyenLieu->don_vi_ton ?? '',
-                    'trang_thai' => $trangThai,
-                ] : null;
-            })->filter()->values();
+                $nguyenLieu = $firstItem->nguyenLieu;
+                $tenNguyenLieu = $nguyenLieu->ten_nguyen_lieu;
+                $soLuongTon = $nguyenLieu->so_luong_ton ?? 0;
+                $donVi = $items->pluck('don_vi_nhap')->filter()->first() ?? '';
 
-        return response()->json($duLieu);
+                $conHan = 0;
+                $sapHetHan = 0;
+                $hetHan = 0;
+
+                $hanGanNhat = null;
+
+                foreach ($items as $item) {
+                    if (!$item->han_su_dung) continue;
+
+                    $han = Carbon::parse($item->han_su_dung);
+
+                    if ($han->gt($today->copy()->addDays(7))) {
+                        $conHan += $item->so_luong_nhap;
+                    } elseif ($han->between($today, $today->copy()->addDays(7))) {
+                        $sapHetHan += $item->so_luong_nhap;
+                    } elseif ($han->lt($today)) {
+                        $hetHan += $item->so_luong_nhap;
+                    }
+
+                    // Cập nhật hạn gần nhất còn hiệu lực
+                    if ($han->gte($today)) {
+                        if (!$hanGanNhat || $han->lt($hanGanNhat)) {
+                            $hanGanNhat = $han;
+                        }
+                    }
+                }
+
+                $ngayConLai = $hanGanNhat ? $today->diffInDays($hanGanNhat) : 'Đã hết hạn';
+
+                $results[] = [
+                    'nguyen_lieu' => $tenNguyenLieu,
+                    'so_luong_ton' => $soLuongTon,
+                    'so_ngay_con_lai' => $ngayConLai,
+                    'con_han' => $conHan,
+                    'sap_het_han' => $sapHetHan,
+                    'het_han' => $hetHan,
+                    'don_vi' => $donVi,
+                    
+                ];
+            }
+
+            return response()->json(['data' => $results]);
+        } catch (\Exception $e) {
+            Log::error('Lỗi khi xử lý HanSuDung: ' . $e->getMessage(), [
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ]);
+
+            return response()->json([
+                'error' => 'Lỗi server khi kiểm tra hạn sử dụng.'
+            ], 500);
+        }
     }
+
+
+
+
+
+
 
 
 
