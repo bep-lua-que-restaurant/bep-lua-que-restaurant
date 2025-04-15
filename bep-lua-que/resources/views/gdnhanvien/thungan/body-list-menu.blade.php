@@ -432,56 +432,120 @@
                 );
             }
 
-            function deleteMonAn(monAnId, xoaTr) {
-                if (isRequesting) return;
+            function deleteMonAn(monAnId, xoaTr = null) {
+    if (isRequesting) return;
 
+    isRequesting = true;
+    $.ajax({
+        url: apiUrlXoaMon,
+        method: "POST",
+        data: {
+            mon_an_id: monAnId,
+            check_status_only: true,
+            _token: $('meta[name="csrf-token"]').attr("content"),
+        },
+        success: function (response) {
+            isRequesting = false;
+
+            if (!response.success) {
+                Swal.fire("Lỗi!", response.error || "Không thể lấy trạng thái món ăn.", "error");
+                return;
+            }
+
+            const { trang_thai, message } = response;
+
+            if (trang_thai === "cho_xac_nhan") {
                 Swal.fire({
                     title: "Bạn có chắc chắn?",
-                    text: "Món ăn này sẽ bị xóa khỏi hóa đơn!",
-                    icon: "warning",
+                    text: "Bạn muốn xóa món này?",
+                    icon: "question",
                     showCancelButton: true,
-                    confirmButtonColor: "#d33",
-                    cancelButtonColor: "#6c757d",
-                    confirmButtonText: "Xóa ngay",
-                    cancelButtonText: "Hủy",
+                    confirmButtonText: "Xóa",
+                    cancelButtonText: "Thoát",
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        isRequesting = true;
-                        $.ajax({
-                            url: '/hoa-don/delete',
-                            method: "POST",
-                            data: {
-                                mon_an_id: monAnId,
-                                _token: $('meta[name="csrf-token"]').attr("content"),
-                            },
-                            success: function(response) {
-                                isRequesting = false;
-                                // Xóa dòng món ăn khỏi bảng
-                                xoaTr.remove();
-
-                                // Cập nhật tổng tiền
-                                $("#tong-tien").text(
-                                    response.tong_tien.toLocaleString("vi-VN", {
-                                        style: "currency",
-                                        currency: "VND",
-                                    })
-                                );
-
-                                // Hiển thị thông báo thành công
-                                Swal.fire(
-                                    "Đã xóa!",
-                                    "Món ăn đã được xóa khỏi hóa đơn.",
-                                    "success"
-                                );
-                            },
-                            error: function() {
-                                isRequesting = false;
-                                Swal.fire("Lỗi!", "Không thể xóa món ăn.", "error");
-                            },
+                        sendDeleteRequest(monAnId, null, true, xoaTr);
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: "Xác nhận hủy món",
+                    text: message,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Hủy món",
+                    cancelButtonText: "Thoát",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: "Lý do hủy món:",
+                            input: "text",
+                            inputLabel: "Ghi chú lý do hủy món",
+                            inputPlaceholder: "VD: Khách đổi ý...",
+                            inputValidator: (value) => (!value ? "Vui lòng nhập lý do!" : null),
+                            showCancelButton: true,
+                            confirmButtonText: "Xác nhận",
+                            cancelButtonText: "Thoát",
+                        }).then((inputResult) => {
+                            if (inputResult.isConfirmed) {
+                                sendDeleteRequest(monAnId, inputResult.value, true, xoaTr);
+                            }
                         });
                     }
                 });
             }
+        },
+        error: function (xhr) {
+            isRequesting = false;
+            Swal.fire("Lỗi!", "Không thể lấy trạng thái món ăn.", "error");
+            console.error("Lỗi khi lấy trạng thái món:", xhr);
+        },
+    });
+}
+
+function sendDeleteRequest(monAnId, lyDo = null, forceDelete = false, xoaTr = null) {
+    if (isRequesting) return;
+
+    isRequesting = true;
+    $.ajax({
+        url: apiUrlXoaMon,
+        method: "POST",
+        data: {
+            mon_an_id: monAnId,
+            ly_do: lyDo,
+            force_delete: forceDelete,
+            _token: $('meta[name="csrf-token"]').attr("content"),
+        },
+        success: function (response) {
+            isRequesting = false;
+
+            if (response.requires_confirmation) return;
+
+            // Xóa dòng món ăn khỏi bảng
+            if (xoaTr) {
+                xoaTr.remove();
+            } else {
+                $(`#mon-${monAnId}`).remove();
+            }
+
+            // Cập nhật tổng tiền
+            $("#tong-tien").text(
+                response.tong_tien.toLocaleString("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                })
+            );
+
+            // Thông báo thành công
+            Swal.fire("OK!", lyDo ? "Món đã được hủy." : "Món đã bị xóa.", "success");
+        },
+        error: function (xhr) {
+            isRequesting = false;
+            Swal.fire("Lỗi!", "Không thể xử lý món ăn.", "error");
+            console.error("Lỗi AJAX:", xhr.responseText);
+        },
+    });
+}
 
 
         });

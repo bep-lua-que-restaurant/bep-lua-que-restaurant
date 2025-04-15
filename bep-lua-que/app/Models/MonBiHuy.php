@@ -15,7 +15,6 @@ class MonBiHuy extends Model
     // Cập nhật mảng $fillable để loại bỏ các cột đã xóa
     protected $fillable = [
         'mon_an_id',
-        'ten_mon',
         'ly_do',
         'so_luong',
         'ngay_huy',

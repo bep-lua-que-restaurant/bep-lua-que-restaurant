@@ -302,40 +302,78 @@ $(document).ready(function () {
 function deleteMonAn(monAnId) {
     if (isRequesting) return;
 
-    Swal.fire({
-        title: "Bạn có chắc chắn?",
-        text: "Bạn muốn xóa hay hủy món này? Hệ thống sẽ xử lý tự động theo trạng thái hóa đơn.",
-        icon: "question",
-        showDenyButton: true,
-        showCancelButton: true,
-        confirmButtonText: "Xóa luôn",
-        denyButtonText: "Hủy món (nhập lý do)",
-        cancelButtonText: "Thoát",
-    }).then((result) => {
-        if (result.isConfirmed) {
-            sendDeleteRequest(monAnId, null);
-        } else if (result.isDenied) {
-            Swal.fire({
-                title: "Lý do hủy món:",
-                input: "text",
-                inputLabel: "Ghi chú lý do hủy món",
-                inputPlaceholder: "VD: Khách đổi ý...",
-                inputValidator: (value) => {
-                    if (!value) return "Vui lòng nhập lý do!";
-                },
-                showCancelButton: true,
-                confirmButtonText: "Xác nhận",
-                cancelButtonText: "Thoát",
-            }).then((inputResult) => {
-                if (inputResult.isConfirmed) {
-                    sendDeleteRequest(monAnId, inputResult.value);
-                }
-            });
-        }
+    isRequesting = true;
+    $.ajax({
+        url: apiUrlXoaMon,
+        method: "POST",
+        data: {
+            mon_an_id: monAnId,
+            check_status_only: true,
+            _token: $('meta[name="csrf-token"]').attr("content"),
+        },
+        success: function (response) {
+            isRequesting = false;
+
+            if (!response.success) {
+                Swal.fire("Lỗi!", response.error || "Không thể lấy trạng thái món ăn.", "error");
+                return;
+            }
+
+            const trangThai = response.trang_thai;
+            const message = response.message;
+
+            if (trangThai === "cho_xac_nhan") {
+                Swal.fire({
+                    title: "Bạn có chắc chắn?",
+                    text: "Bạn muốn xóa món này?",
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonText: "Xóa",
+                    cancelButtonText: "Thoát",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        sendDeleteRequest(monAnId, null, true);
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: "Xác nhận hủy món",
+                    text: message,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Hủy món",
+                    cancelButtonText: "Thoát",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: "Lý do hủy món:",
+                            input: "text",
+                            inputLabel: "Ghi chú lý do hủy món",
+                            inputPlaceholder: "VD: Khách đổi ý...",
+                            inputValidator: (value) => {
+                                if (!value) return "Vui lòng nhập lý do!";
+                            },
+                            showCancelButton: true,
+                            confirmButtonText: "Xác nhận",
+                            cancelButtonText: "Thoát",
+                        }).then((inputResult) => {
+                            if (inputResult.isConfirmed) {
+                                sendDeleteRequest(monAnId, inputResult.value, true);
+                            }
+                        });
+                    }
+                });
+            }
+        },
+        error: function (xhr) {
+            isRequesting = false;
+            console.error("Lỗi khi lấy trạng thái món:", xhr);
+            Swal.fire("Lỗi!", "Không thể lấy trạng thái món ăn.", "error");
+        },
     });
 }
 
-function sendDeleteRequest(monAnId, lyDo) {
+function sendDeleteRequest(monAnId, lyDo, forceDelete = false) {
     isRequesting = true;
     $.ajax({
         url: apiUrlXoaMon,
@@ -343,10 +381,16 @@ function sendDeleteRequest(monAnId, lyDo) {
         data: {
             mon_an_id: monAnId,
             ly_do: lyDo,
+            force_delete: forceDelete,
             _token: $('meta[name="csrf-token"]').attr("content"),
         },
         success: function (response) {
             isRequesting = false;
+
+            if (response.requires_confirmation) {
+                return;
+            }
+
             $(`#mon-${monAnId}`).remove();
 
             $("#tong-tien").text(
@@ -364,18 +408,15 @@ function sendDeleteRequest(monAnId, lyDo) {
         },
         error: function (xhr, status, error) {
             isRequesting = false;
-        
             console.error("Lỗi AJAX:");
             console.error("Status:", status);
             console.error("Error:", error);
-            console.error("Response:", xhr.responseText); // ← chi tiết lỗi từ server
-        
+            console.error("Response:", xhr.responseText);
+
             Swal.fire("Lỗi!", "Không thể xử lý món ăn.", "error");
         },
-        
     });
 }
-
 
 window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (e) => {
     // Tìm phần tử <span> trong hàng <tr> chứa món ăn

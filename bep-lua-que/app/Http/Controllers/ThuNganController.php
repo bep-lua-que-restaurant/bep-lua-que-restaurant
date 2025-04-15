@@ -719,60 +719,78 @@ class ThuNganController extends Controller
     }
 
 
+    
     //xóa món ăn
     public function deleteMonAn(Request $request)
     {
         // Lấy chi_tiet_hoa_don_id từ request
         $chiTietId = $request->mon_an_id; // Đây là id của chi_tiet_hoa_dons
         $lyDoHuy = $request->ly_do ?? 'Không rõ lý do';
-
+        $forceDelete = $request->force_delete ?? false;
+        $checkStatusOnly = $request->check_status_only ?? false;
+    
         // 1. Lấy chi tiết hóa đơn
         $chiTiet = ChiTietHoaDon::find($chiTietId);
         if (!$chiTiet) {
             return response()->json(['error' => 'Chi tiết hóa đơn không tồn tại!'], 404);
         }
-        
-
+    
         // Lấy thông tin món ăn từ bảng mon_ans để dự phòng
         $monAn = MonAn::find($chiTiet->mon_an_id);
         if (!$monAn) {
             return response()->json(['error' => 'Món ăn không tồn tại!'], 404);
         }
-
+    
         // 2. Lấy hóa đơn
         $hoaDon = HoaDon::find($chiTiet->hoa_don_id);
         if (!$hoaDon) {
             return response()->json(['error' => 'Hóa đơn không tồn tại!'], 404);
         }
-
-        // 3. Kiểm tra trạng thái hóa đơn
-        if ($hoaDon->trang_thai === 'cho_xac_nhan') {
-            // Trạng thái chờ xác nhận → Xóa luôn
-            broadcast(new XoaMonAn($chiTiet));
-            $chiTiet->forceDelete();
-        } else {
-            // Đã xác nhận hoặc đang xử lý → Lưu vào bảng mon_bi_huys
-            MonBiHuy::create([
-                'mon_an_id' => $chiTiet->mon_an_id,
-                'ten_mon' => $chiTiet->ten ?? $monAn->ten ?? 'Tên món mặc định', // Ưu tiên chi_tiet_hoa_dons, sau đó mon_ans
-                'ly_do' => $lyDoHuy,
-                'so_luong' => $chiTiet->so_luong,
-                'ngay_huy' => Carbon::now(),
-            ]);
-
-            broadcast(new XoaMonAn($chiTiet));
-            $chiTiet->forceDelete();
+    
+        // 3. Nếu chỉ kiểm tra trạng thái (lần gọi đầu tiên)
+        if ($checkStatusOnly) {
+            return response()->json([
+                'success' => true,
+                'trang_thai' => $chiTiet->trang_thai,
+                'message' => $chiTiet->trang_thai === 'dang_nau' ? 'Món này đang được nấu, bạn có chắc chắn muốn hủy không?' : ($chiTiet->trang_thai === 'hoan_thanh' ? 'Món này đã hoàn thành, bạn có chắc chắn muốn hủy không?' : 'Món này đang chờ xác nhận.'),
+            ], 200);
         }
-
-        // 4. Cập nhật tổng tiền
+    
+        // 4. Xử lý xóa món (khi người dùng đã xác nhận)
+        if ($chiTiet->trang_thai === 'cho_xac_nhan' || $forceDelete) {
+            // Lưu trạng thái ban đầu trước khi xóa
+            $trangThaiBanDau = $chiTiet->trang_thai;
+    
+            // Gửi broadcast và xóa bản ghi
+            broadcast(new XoaMonAn($chiTiet));
+            $chiTiet->forceDelete();
+    
+            // Nếu trạng thái ban đầu không phải "cho_xac_nhan", lưu vào bảng mon_bi_huys
+            if ($trangThaiBanDau !== 'cho_xac_nhan') {
+                MonBiHuy::create([
+                    'mon_an_id' => $chiTiet->mon_an_id,
+                    'ly_do' => $lyDoHuy,
+                    'so_luong' => $chiTiet->so_luong,
+                    'ngay_huy' => Carbon::now(),
+                ]);
+            }
+        } else {
+            return response()->json([
+                'requires_confirmation' => true,
+                'trang_thai' => $chiTiet->trang_thai,
+                'message' => $chiTiet->trang_thai === 'dang_nau' ? 'Món này đang được nấu, bạn có chắc chắn muốn hủy không?' : ($chiTiet->trang_thai === 'hoan_thanh' ? 'Món này đã hoàn thành, bạn có chắc chắn muốn hủy không?' : 'Món này đang chờ xác nhận.'),
+            ], 200);
+        }
+    
+        // 5. Cập nhật tổng tiền
         $tongTien = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)
-            ->sum(DB::raw('so_luong * don_gia')); // Tính tổng tiền trên database
-
+            ->sum(DB::raw('so_luong * don_gia'));
+    
         $hoaDon->update(['tong_tien' => $tongTien]);
         $hoaDon->load('chiTietHoaDons');
-
+    
         broadcast(new HoaDonUpdated($hoaDon))->toOthers();
-
+    
         return response()->json([
             'success' => true,
             'tong_tien' => $tongTien,
