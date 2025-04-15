@@ -317,20 +317,20 @@ $(document).ready(function () {
                 maHoaDon: maHoaDon,
             },
             success: function (response) {
-                console.log("tien trc giam" + response.tong_tien);
+                // console.log("tien trc giam" + response.tong_tien);
                 let ma_hoa_don = response.data;
                 let divMaGiamGia = document.querySelector(".wrap-ma-giam-gia");
                 let maGiamGia = response.ma_giam_gia; // chứa thông tin mã giảm
-                // if (maGiamGia.length == 0) {
-                //     divMaGiamGia.style.display = "none";
-                // }
-                // console.log("Mã giảm giá:", maGiamGia);
+                    if (maGiamGia.length === 0) {
+                        divMaGiamGia.style.display = "none";
+                    }
+                    // console.log("Mã giảm giá:", maGiamGia);
                 renderDiscountCodes(maGiamGia, ma_hoa_don);
                 if (
                     response.chi_tiet_hoa_don == null ||
                     response.chi_tiet_hoa_don.length == 0
                 ) {
-                    alert("Không có món nào trong hóa đơn này!");
+                    showToast("Hóa đơn này chưa được thông báo cho bếp, hãy thông báo cho bếp trước!", "warning");
                     return;
                 }
 
@@ -417,9 +417,10 @@ $(document).ready(function () {
         });
     }
 
+    
     // render mã giảm giá
     function renderDiscountCodes(discounts, ma_hoa_don) {
-        console.log(discounts);
+        // console.log(discounts);
         let discountListHtml = "";
 
         discounts.forEach((discount) => {
