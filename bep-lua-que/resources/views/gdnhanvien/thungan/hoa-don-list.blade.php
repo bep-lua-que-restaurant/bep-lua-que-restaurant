@@ -294,7 +294,7 @@
                 <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
                 <select class="form-select form-select-lg" id="paymentMethod">
                     <option value="tien_mat">Tiền mặt</option>
-                    <option value="the">Thẻ tín dụng</option>
+
                     <option value="tai_khoan">Chuyển khoản</option>
                 </select>
             </div>
@@ -324,7 +324,10 @@
             <div class="flex-fill me-2">
                 <label class="form-label">Số tiền khách đưa</label>
                 <input type="text" class="form-control form-control-lg" id="amountGiven"
-                    placeholder="Nhập số tiền khách đưa" oninput="formatAmountGiven(this); calculateChange()">
+                    placeholder="Nhập số tiền khách đưa">
+                <div class="invalid-feedback">
+                    Vui lòng nhập số tiền hợp lệ!
+                </div>
             </div>
             <div class="flex-fill ms-2">
                 <label class="form-label">Tiền thừa trả khách</label>
@@ -522,32 +525,36 @@
 
 <script>
     // Sự kiện khi thay đổi phương thức thanh toán
-    document.getElementById('paymentMethod').addEventListener('change', function() {
-        const method = this.value;
-        const amountGiven = document.getElementById('amountGiven');
-        const changeToReturn = document.getElementById('changeToReturn');
-        const qrContainer = document.getElementById('qrCodeContainer');
-        const qrCodeDiv = document.getElementById('qrCode');
-        const qrResult = document.getElementById('qrResult');
+    $('#paymentMethod').on('change', function() {
+        let method = this.value;
+        let amountGiven = $('#amountGiven');
+        let changeToReturn = $('#changeToReturn');
+        let qrContainer = $('#qrCodeContainer');
+        let qrCodeDiv = $('#qrCode');
+        let qrResult = $('#qrResult');
 
         if (method === 'tien_mat') {
-            // Hiện 2 ô khách đưa và tiền trả
-            amountGiven.parentElement.style.display = 'block';
-            changeToReturn.parentElement.style.display = 'block';
-            qrContainer.style.display = 'none';
-            qrCodeDiv.innerHTML = '';
+            amountGiven.parent().show();
+            changeToReturn.parent().show();
+            qrContainer.hide();
+            qrCodeDiv.empty();
+            amountGiven.prop('disabled', false);
+            amountGiven.attr('placeholder', 'Nhập số tiền khách đưa');
         } else {
-            // Ẩn 2 ô khách đưa và tiền trả
-            amountGiven.parentElement.style.display = 'none';
-            changeToReturn.parentElement.style.display = 'none';
+            amountGiven.parent().hide();
+            changeToReturn.parent().hide();
+            qrContainer.show();
+            amountGiven.val('');
+            changeToReturn.val('0 VND');
         }
 
+        amountGiven.removeClass('is-invalid'); // Xóa lỗi validation
+
         if (method === 'tai_khoan') {
-            // Gọi AJAX tạo mã QR
-            const maHoaDon = document.getElementById('maHoaDonInFo').textContent.trim();
+            const maHoaDon = $('#maHoaDonInFo').text().trim();
             if (!maHoaDon || maHoaDon === 'Chưa có hóa đơn') {
-                qrResult.innerHTML = `<div class="text-danger">Vui lòng tạo hóa đơn trước khi tạo mã QR.</div>`;
-                qrContainer.style.display = 'none';
+                qrResult.html('<div class="text-danger">Vui lòng tạo hóa đơn trước khi tạo mã QR.</div>');
+                qrContainer.hide();
                 return;
             }
 
@@ -555,21 +562,26 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        qrCodeDiv.innerHTML =
-                            `<img src="${data.qr_url}" alt="QR Code" style="max-width: 200px;">`;
-                        qrContainer.style.display = 'block';
-                        qrResult.innerHTML = '';
+                        qrCodeDiv.html(
+                            `<img src="${data.qr_url}" alt="QR Code" style="max-width: 200px;">`);
+                        qrContainer.show();
+                        qrResult.empty();
                     } else {
-                        qrResult.innerHTML = `<div class="text-danger">${data.message}</div>`;
-                        qrContainer.style.display = 'none';
+                        qrResult.html(`<div class="text-danger">${data.message}</div>`);
+                        qrContainer.hide();
                     }
                 })
                 .catch(error => {
-                    qrResult.innerHTML = `<div class="text-danger">Lỗi tạo mã QR: ${error}</div>`;
-                    qrContainer.style.display = 'none';
+                    qrResult.html(`<div class="text-danger">Lỗi tạo mã QR: ${error}</div>`);
+                    qrContainer.hide();
                 });
-
         }
+    });
+
+    $('#amountGiven').on('input', function() {
+        formatAmountGiven(this);
+        calculateChange();
+        $(this).removeClass('is-invalid');
     });
 
     // Gọi lại khi trang mở (ẩn 2 ô nếu không phải tiền mặt)
@@ -671,6 +683,7 @@
         }
     }
 
+
     $(document).ready(function() {
         $("#customerSelect").change(function() {
             if ($(this).val() === "new") {
@@ -752,9 +765,43 @@
         });
     });
 
+    function validateAmountGiven() {
+        let method = $('#paymentMethod').val();
+        let amountGiven = $('#amountGiven').val().replace(/\./g, '').trim();
+        let khachCanTra = $('#khach_can_tra').val().replace(/\./g, '').replace(' VND', '').trim();
+
+        amountGiven = parseFloat(amountGiven) || 0;
+        khachCanTra = parseFloat(khachCanTra) || 0;
+
+        if (method === 'tien_mat') {
+            if (!amountGiven) {
+
+                $('#amountGiven').addClass('is-invalid');
+                return false;
+            }
+            if (amountGiven < 0) {
+
+                $('#amountGiven').addClass('is-invalid');
+                return false;
+            }
+            if (amountGiven < khachCanTra) {
+
+                $('#amountGiven').addClass('is-invalid');
+                return false;
+            }
+        }
+
+        $('#amountGiven').removeClass('is-invalid');
+        return true;
+    }
 
     // xác nhận thanh toán
     $('#btnThanhToan').on('click', function() {
+
+        // Kiểm tra validation
+        if (!validateAmountGiven()) {
+            return; // Dừng nếu validation thất bại
+        }
         var banId = $('#ten-ban').data('currentBan');
         var soNguoi = $(".so-nguoi").data("soNguoi") || 1;
         var khachHangId = $("#customerSelect").val();
