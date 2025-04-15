@@ -42,10 +42,12 @@ class StorePhieuNhapKhoRequest extends FormRequest
             'nguyen_lieu_ids.*' => 'nullable|exists:nguyen_lieus,id',
 
             'don_vi_nhaps' => 'required|array',
-            'don_vi_nhaps.*' => 'required|string',
+            'don_vi_nhaps.*' => ['required', 'string', 'regex:/^[^\d]*$/'],
+
+
 
             'don_vi_tons' => 'required|array',
-            'don_vi_tons.*' => 'required|string',
+            'don_vi_tons.*' => ['required', 'string', 'regex:/^[^\d]*$/'],
 
             'so_luong_nhaps' => 'required|array',
             'so_luong_nhaps.*' => 'required|numeric|min:0.01',
@@ -133,6 +135,9 @@ class StorePhieuNhapKhoRequest extends FormRequest
 
             'don_vi_nhaps.required' => 'Đơn vị nhập là bắt buộc.',
             'don_vi_nhaps.*.required' => 'Đơn vị nhập không được để trống.',
+            'don_vi_nhaps.*.regex' => 'Đơn vị nhập không được chứa số.',
+            
+            'don_vi_tons.*.regex' => 'Đơn vị tồn không được chứa số.',
 
             'don_vi_tons.*.required' => 'Đơn vị tồn là bắt buộc.',
             'don_vi_tons.*.string' => 'Đơn vị tồn phải là chuỗi.',
