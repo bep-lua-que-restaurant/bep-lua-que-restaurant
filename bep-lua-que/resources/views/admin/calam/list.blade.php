@@ -80,7 +80,7 @@
                                                 <label class="custom-control-label" for="checkAll"></label>
                                             </div>
                                         </th>
-                                        <th><strong>ID.</strong></th>
+                                        <th><strong>STT</strong></th>
                                         <th><strong>Ca làm việc </strong></th>
                                         <th><strong>Thời gian </strong></th>
 
