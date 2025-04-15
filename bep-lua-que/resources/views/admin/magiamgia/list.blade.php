@@ -72,7 +72,7 @@
                             <table class="table table-responsive-md">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
+                                        <th>STT</th>
                                         <th>Mã</th>
                                         <th>Loại</th>
                                         <th>Giá trị</th>
@@ -85,7 +85,7 @@
                                 <tbody id="magiamgia">
                                     @foreach ($data as $index => $item)
                                         <tr class="ma-giam-gia-row">
-                                            <td>{{ $item->id }}</td>
+                                            <td>{{ $loop->iteration }}</td>
                                             <td class="ma-giam-gia-code">{{ $item->code }}</td>
                                             <td>{{ $item->type == 'percentage' ? 'Phần trăm' : 'Tiền' }}</td>
                                             <td class="text-center">

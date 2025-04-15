@@ -81,7 +81,7 @@
                                                 <label class="custom-control-label" for="checkAll"></label>
                                             </div>
                                         </th>
-                                        <th><strong>ID.</strong></th>
+                                        <th><strong>STT</strong></th>
                                         <th><strong>Tên chức vụ </strong></th>
 
                                         <th><strong>Trạng thái</strong></th>

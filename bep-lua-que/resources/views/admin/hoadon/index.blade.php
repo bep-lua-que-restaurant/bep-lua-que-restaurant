@@ -44,7 +44,7 @@
                             <table class="table table-bordered table-hover align-middle">
                                 <thead class="table-dark text-center">
                                     <tr>
-                                        <th style="vertical-align: middle;">ID</th>
+                                        <th style="vertical-align: middle;">STT</th>
                                         <th style="vertical-align: middle;">Mã Hóa Đơn</th>
                                         <th style="vertical-align: middle;">Khách Hàng</th>
                                         <th style="vertical-align: middle;">Số điện thoại</th>
