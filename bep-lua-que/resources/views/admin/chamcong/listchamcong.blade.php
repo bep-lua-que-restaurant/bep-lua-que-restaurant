@@ -1,43 +1,5 @@
     {{-- PHẦN CHẤM CÔNG NHANH --}}
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <label for="dateSelect" class="form-label">📅 Ngày chấm công</label>
-            <input type="date" id="dateSelect" name="ngay_cham_cong_nhanh" class="form-control">
-        </div>
 
-        <div class="col-md-6">
-            <label for="shiftSelect" class="form-label">🕐 Ca làm</label>
-            <select id="shiftSelect" name="ca_lam_id_nhanh" class="form-control">
-                <option value="">-- Chọn ca làm --</option>
-                @foreach ($caLams as $caLam)
-                    <option value="{{ $caLam->id }}">{{ $caLam->ten_ca }}</option>
-                @endforeach
-            </select>
-        </div>
-    </div>
-
-
-    <div class="mb-3">
-        <label class="form-label">👥 Chọn nhân viên</label>
-        <input type="text" id="searchEmployees" class="form-control mb-3" placeholder="Tìm nhân viên...">
-
-        <div id="employeeList" class="border rounded p-3" style="max-height: 100px; overflow-y: auto;">
-            <!-- Giảm max-height xuống -->
-            <div class="row g-3">
-                @foreach ($nhanViens as $nhanVien)
-                    <div class="col-4 d-flex align-items-center">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="nhan_vien_ids_nhanh[]"
-                                value="{{ $nhanVien->id }}" id="nhanVien{{ $nhanVien->id }}">
-                            <label class="form-check-label" for="nhanVien{{ $nhanVien->id }}">
-                                {{ $nhanVien->ho_ten }}
-                            </label>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
 
     {{-- PHẦN CHẤM CÔNG LẺ --}}
     <table class="min-w-full text-center">

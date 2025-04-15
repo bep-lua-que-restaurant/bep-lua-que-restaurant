@@ -88,7 +88,7 @@
                                             <td>{{ $item->id }}</td>
                                             <td class="ma-giam-gia-code">{{ $item->code }}</td>
                                             <td>{{ $item->type == 'percentage' ? 'Phần trăm' : 'Tiền' }}</td>
-                                            <td>
+                                            <td class="text-center">
                                                 @if ($item->type == 'percentage')
                                                     {{ number_format($item->value, 0, ',', '.') . '%' }}
                                                 @else
@@ -103,7 +103,8 @@
                                                     Không xác định
                                                 @endif
                                             </td>
-                                            <td>{{ $item->usage_count ?? 0 }}</td>
+                                            <td class="text-center">{{ $item->usage_count ?? 0 }}</td>
+
                                             <td class="ma-giam-gia-status">
                                                 {{ $item->deleted_at ? 'Đã ngừng hoạt động' : 'Đang hoạt động' }}
                                             </td>

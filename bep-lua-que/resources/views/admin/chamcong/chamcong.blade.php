@@ -40,11 +40,61 @@
                     </button>
                 </div>
 
+                <div class="d-flex">
+                    <button type="button" class="btn btn-info ms-auto" onclick="toggleQuickCheckin()">
+                        <i class="fas fa-bolt"></i> Chấm công nhanh
+                    </button>
+                </div>
 
+
+                {{-- Form chấm công nhanh --}}
+                <div id="quickCheckinForm" class="border p-3 rounded shadow-sm mt-4 d-none bg-light">
+                    <h5 class="mb-3 text-primary"><i class="fas fa-stopwatch me-2"></i> Chấm Công Nhanh</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="dateSelect" class="form-label">📅 Ngày chấm công</label>
+                            <input type="date" id="dateSelect" name="ngay_cham_cong_nhanh" class="form-control">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="shiftSelect" class="form-label">🕐 Ca làm</label>
+                            <select id="shiftSelect" name="ca_lam_id_nhanh" class="form-control">
+                                <option value="">-- Chọn ca làm --</option>
+                                @foreach ($caLams as $caLam)
+                                    <option value="{{ $caLam->id }}">{{ $caLam->ten_ca }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">👥 Chọn nhân viên</label>
+                        <input type="text" id="searchEmployees" class="form-control mb-3" placeholder="Tìm nhân viên...">
+
+                        <div id="employeeList" class="border rounded p-3" style="max-height: 100px; overflow-y: auto;">
+                            <div class="row g-3">
+                                @foreach ($nhanViens as $nhanVien)
+                                    <div class="col-4 d-flex align-items-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="nhan_vien_ids_nhanh[]"
+                                                value="{{ $nhanVien->id }}" id="nhanVien{{ $nhanVien->id }}">
+                                            <label class="form-check-label" for="nhanVien{{ $nhanVien->id }}">
+                                                {{ $nhanVien->ho_ten }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 {{-- Include bảng chấm công --}}
                 @include('admin.chamcong.listchamcong')
-
+                {{-- <div class="mt-3">
+                    {!! $nhanViens->links() !!}
+                </div> --}}
                 <div class="d-flex gap-2 mt-3 ml-2">
                     <button type="button" id="btnEdit" class="btn btn-warning px-4 fw-bold shadow-sm">
                         Sửa
@@ -147,6 +197,21 @@
 
         $(document).ready(function() {
             updateMonthTitle();
+        });
+
+        function toggleQuickCheckin() {
+            const form = document.getElementById('quickCheckinForm');
+            form.classList.toggle('d-none');
+        }
+
+        // Tìm kiếm nhân viên trong danh sách
+        document.getElementById('searchEmployees').addEventListener('input', function() {
+            const keyword = this.value.toLowerCase();
+            document.querySelectorAll('#employeeList .form-check-label').forEach(label => {
+                const container = label.closest('.col-4');
+                const name = label.textContent.toLowerCase();
+                container.style.display = name.includes(keyword) ? 'flex' : 'none';
+            });
         });
     </script>
 @endsection
