@@ -25,40 +25,54 @@
                         <div>
                             @csrf
 
-                            <div class="mb-3">
-                                <p><strong>ID:</strong> {{ $maGiamGia->id }}</p>
-                                <p><strong>Mã:</strong> {{ $maGiamGia->code }}</p>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <p><strong>ID:</strong> {{ $maGiamGia->id }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Mã:</strong> {{ $maGiamGia->code }}</p>
+                                </div>
+                            </div>
 
-                                <p><strong>Giá Trị:</strong>
-                                    <span class="discount-value">
-                                        @if ($maGiamGia->type == 'percentage')
-                                            {{ number_format($maGiamGia->value, 0, ',', '.') . '%' }}
-                                        @else
-                                            {{ number_format($maGiamGia->value, 0, ',', '.') . 'VND' }}
-                                        @endif
-                                    </span>
-                                </p>
-                                <p>
-                                    <strong>Đơn Hàng Tối Thiểu:</strong>
-                                    <span class="min-order-value">
-                                        @if ($maGiamGia->min_order_value)
-                                            {{ number_format($maGiamGia->min_order_value, 0, ',', '.') }} VND
-                                        @else
-                                            Không yêu cầu
-                                        @endif
-                                    </span>
-                                </p>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <p><strong>Giá Trị:</strong>
+                                        <span class="discount-value">
+                                            @if ($maGiamGia->type == 'percentage')
+                                                {{ number_format($maGiamGia->value, 0, ',', '.') . '%' }}
+                                            @else
+                                                {{ number_format($maGiamGia->value, 0, ',', '.') . ' VND' }}
+                                            @endif
+                                        </span>
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Đơn Hàng Tối Thiểu:</strong>
+                                        <span class="min-order-value">
+                                            @if ($maGiamGia->min_order_value)
+                                                {{ number_format($maGiamGia->min_order_value, 0, ',', '.') }} VND
+                                            @else
+                                                Không yêu cầu
+                                            @endif
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
 
-                                <p>
-                                    <strong>Hiệu Lực:</strong>
-                                    <span class="date-range">
-                                        {{ \Carbon\Carbon::parse($maGiamGia->start_date)->format('d/m/Y') }} đến
-                                        {{ \Carbon\Carbon::parse($maGiamGia->end_date)->format('d/m/Y') }}
-                                    </span>
-                                </p>
-
-                                <p><strong>Số Lượt Sử Dụng:</strong> {{ $maGiamGia->used }}
-                                    {{ $maGiamGia->usage_limit == 0 ? 'Không giới hạn' : $maGiamGia->usage_limit }}</p>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <p><strong>Hiệu Lực:</strong>
+                                        <span class="date-range">
+                                            {{ \Carbon\Carbon::parse($maGiamGia->start_date)->format('d/m/Y') }} đến
+                                            {{ \Carbon\Carbon::parse($maGiamGia->end_date)->format('d/m/Y') }}
+                                        </span>
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Số Lượt Sử Dụng:</strong> {{ $maGiamGia->used }}
+                                        {{ $maGiamGia->usage_limit == 0 ? 'Không giới hạn' : $maGiamGia->usage_limit }}
+                                    </p>
+                                </div>
                             </div>
                             <!-- Trạng thái -->
                             <div class="form-group">

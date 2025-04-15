@@ -112,7 +112,7 @@
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                        <button id="clearButton" class="btn btn-danger">clearButton</button>
+                        {{-- <button id="clearButton" class="btn btn-danger"></button> --}}
                         <button type="submit" id="confirmButton" class="btn btn-primary">Xác nhận đặt bàn</button>
 
                     </div>
@@ -899,8 +899,8 @@
 
 
         /* .btn-success .btn-danger {
-                                                                                                                                                                                                                                                                                                                            pointer-events: none;
-                                                                                                                                                                                                                                                                                                                        } */
+                                                                                                                                                                                                                                                                                                                                pointer-events: none;
+                                                                                                                                                                                                                                                                                                                            } */
 
         .border-left-rounded {
             border-top-left-radius: 10px;
