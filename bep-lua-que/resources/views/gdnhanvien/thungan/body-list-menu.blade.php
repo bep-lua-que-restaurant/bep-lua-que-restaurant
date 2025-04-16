@@ -414,7 +414,10 @@
                             tongTien += parseInt(tongTienMon);
                         });
                         $("#tong-tien").text(
-                            tongTien.toLocaleString("vi-VN") + " VNĐ"
+                            parseFloat(tongTien).toLocaleString("vi-VN", {
+                                style: "currency",
+                                currency: "VND",
+                            })
                         );
                     },
                     error: function(xhr) {
@@ -431,8 +434,12 @@
                     tongTien += parseInt(tongTienMon);
                 });
 
+                // Đảm bảo định dạng lại số tiền đúng cách
                 $("#tong-tien").text(
-                    tongTien.toLocaleString("vi-VN") + " VNĐ"
+                    parseFloat(tongTien).toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                    })
                 );
             }
 

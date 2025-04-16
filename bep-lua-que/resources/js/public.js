@@ -210,7 +210,13 @@ function loadChiTietHoaDon(hoaDonId) {
                 offcanvasBody.html(emptyRow);
             }
 
-            $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
+            // Đảm bảo định dạng lại số tiền đúng cách
+            $("#tong-tien").text(
+                parseFloat(tongTien).toLocaleString("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                })
+            );
             $(".so-nguoi").text(`👥 ${soNguoi}`);
             $("#totalAmount").val(tongTien.toLocaleString() + " VND"); // Cập nhật tổng tiền trong offcanvas
 
@@ -270,8 +276,13 @@ function loadChiTietHoaDon(hoaDonId) {
                                 .replace(/[^0-9]/g, "");
                             tongTien += parseInt(tongTienMon);
                         });
+
+                        // Đảm bảo định dạng lại số tiền đúng cách
                         $("#tong-tien").text(
-                            tongTien.toLocaleString("vi-VN") + " VNĐ"
+                            parseFloat(tongTien).toLocaleString("vi-VN", {
+                                style: "currency",
+                                currency: "VND",
+                            })
                         );
                     },
                     error: function (xhr) {
@@ -315,7 +326,11 @@ function deleteMonAn(monAnId) {
             isRequesting = false;
 
             if (!response.success) {
-                Swal.fire("Lỗi!", response.error || "Không thể lấy trạng thái món ăn.", "error");
+                Swal.fire(
+                    "Lỗi!",
+                    response.error || "Không thể lấy trạng thái món ăn.",
+                    "error"
+                );
                 return;
             }
 
@@ -358,7 +373,11 @@ function deleteMonAn(monAnId) {
                             cancelButtonText: "Thoát",
                         }).then((inputResult) => {
                             if (inputResult.isConfirmed) {
-                                sendDeleteRequest(monAnId, inputResult.value, true);
+                                sendDeleteRequest(
+                                    monAnId,
+                                    inputResult.value,
+                                    true
+                                );
                             }
                         });
                     }
@@ -393,6 +412,7 @@ function sendDeleteRequest(monAnId, lyDo, forceDelete = false) {
 
             $(`#mon-${monAnId}`).remove();
 
+            // Đảm bảo định dạng lại số tiền đúng cách
             $("#tong-tien").text(
                 parseFloat(response.tong_tien).toLocaleString("vi-VN", {
                     style: "currency",

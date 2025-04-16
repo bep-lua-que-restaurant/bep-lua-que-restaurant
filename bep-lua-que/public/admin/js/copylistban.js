@@ -81,7 +81,7 @@ $(document).ready(function () {
                     maHoaDonElement.innerText = "Chưa có hóa đơn";
                     maHoaDonElement.style.color = "red";
 
-                    $("#tong-tien").text("0 VNĐ");
+                    $("#tong-tien").text("0 đ");
                     $(".so-nguoi").text("👥 0");
                 }
             },
@@ -216,9 +216,22 @@ $(document).ready(function () {
                     $("#ten-ban").text(response.ten_ban_an.join(" + "));
                 }
 
-                $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
+
+                $("#tong-tien").text(
+                    tongTien.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                    })
+                );
                 $(".so-nguoi").text(`👥 ${soNguoi}`);
-                $("#totalAmount").val(tongTien.toLocaleString() + " VND"); // Cập nhật tổng tiền trong offcanvas
+          
+                
+                $("#totalAmount").val(
+                    tongTien.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                    })
+                );// Cập nhật tổng tiền trong offcanvas
 
                 if (response.ten_ban) {
                     $("#tableInfo").text(`Bàn ${response.ten_ban}`);
@@ -279,8 +292,12 @@ $(document).ready(function () {
                                     .replace(/[^0-9]/g, "");
                                 tongTien += parseInt(tongTienMon);
                             });
+
                             $("#tong-tien").text(
-                                tongTien.toLocaleString("vi-VN") + " VNĐ"
+                                tongTien.toLocaleString("vi-VN", {
+                                    style: "currency",
+                                    currency: "VND",
+                                })
                             );
                         },
                         error: function (xhr) {
