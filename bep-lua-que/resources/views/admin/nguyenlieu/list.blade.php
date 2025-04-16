@@ -34,7 +34,7 @@
 
                             <!-- Export -->
                             <a href="{{ route('nguyen-lieu.export') }}" class="btn btn-success">
-                                <i class="fa fa-download"></i> Export
+                                <i class="fa fa-download"></i> Xuất file
                             </a>
 
                             <!-- Kiểm tra tồn kho -->

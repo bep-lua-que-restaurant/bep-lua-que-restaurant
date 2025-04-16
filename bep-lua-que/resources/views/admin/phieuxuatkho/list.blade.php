@@ -39,7 +39,7 @@
 
                         <div class="btn-group">
                             <a href="{{ route('phieu-xuat-kho.export') }}" class="btn btn-success">
-                                <i class="fa fa-file-excel"></i> Export Excel
+                                <i class="fa fa-file-excel"></i> Xuất file
                             </a>
 
                             <a href="{{ route('phieu-xuat-kho.create') }}" class="btn btn-sm btn-primary">
