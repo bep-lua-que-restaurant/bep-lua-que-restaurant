@@ -415,14 +415,20 @@ $(document).ready(function () {
                     hoaDonThanhToan.html(emptyRow);
                 }
 
-                // $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
-                // $(".so-nguoi").text(`👥 ${soNguoi}`);
-                $("#tong_tien_hang").val(tongTien.toLocaleString() + " VND");
+                $("#tong_tien_hang").val(
+                    tongTien.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                    })
+                );
+                
                 let khach_can_tra = parseFloat(response.tong_tien_sau_giam);
-
-
+                
                 $("#khach_can_tra").val(
-                    khach_can_tra.toLocaleString() + " VND"
+                    khach_can_tra.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                    })
                 );
             },
             error: function (xhr) {
