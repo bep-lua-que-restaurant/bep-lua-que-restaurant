@@ -394,7 +394,7 @@ function sendDeleteRequest(monAnId, lyDo, forceDelete = false) {
             $(`#mon-${monAnId}`).remove();
 
             $("#tong-tien").text(
-                response.tong_tien.toLocaleString("vi-VN", {
+                parseFloat(response.tong_tien).toLocaleString("vi-VN", {
                     style: "currency",
                     currency: "VND",
                 })
