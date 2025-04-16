@@ -133,7 +133,8 @@ class NhanVienController extends Controller
         'dia_chi' => 'nullable|string|max:255',
         'hinh_thuc_luong' => 'required|in:ca,thang,gio',
         'muc_luong' => 'required|numeric|min:0',
-        'ngay_ap_dung' => 'required|date|after:today|unique:luongs,ngay_ap_dung,NULL,id,nhan_vien_id,' . $id,
+      'ngay_ap_dung' => 'nullable|date|after:today',
+
         'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
     ], [
         'ho_ten.required' => 'Họ tên là bắt buộc.',
@@ -151,8 +152,7 @@ class NhanVienController extends Controller
         'hinh_anh.image' => 'Hình ảnh phải là file ảnh.',
         'hinh_anh.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg, gif, hoặc webp.',
         'hinh_anh.max' => 'Hình ảnh không được vượt quá 2MB.',
-        'ngay_ap_dung.required' => 'Ngày áp dụng không được để trống.',
-        'ngay_ap_dung.after' => 'Ngày áp dụng phải lớn hơn ngày hôm nay.',
+      
     ]);
 
     $nhanVien = NhanVien::findOrFail($id);
@@ -188,13 +188,21 @@ class NhanVienController extends Controller
     // Cập nhật thông tin nhân viên
     $nhanVien->update($data);
 
-    // Tạo lương mới cho nhân viên (giữ lương cũ)
-    $nhanVien->luong()->create([
-    'nhan_vien_id' => $nhanVien->id,
-    'hinh_thuc' => $request->hinh_thuc_luong,
-    'muc_luong' => $request->muc_luong,
-    'ngay_ap_dung' => $request->ngay_ap_dung, // <-- bạn tự truyền vào từ form
-    ]);
+    $existingLuong = $nhanVien->luong()->where([
+        'hinh_thuc' => $request->hinh_thuc_luong,
+        'muc_luong' => $request->muc_luong,
+        'ngay_ap_dung' => $request->ngay_ap_dung,
+    ])->first();
+    
+    if (!$existingLuong) {
+        $nhanVien->luong()->create([
+            'nhan_vien_id' => $nhanVien->id,
+            'hinh_thuc' => $request->hinh_thuc_luong,
+            'muc_luong' => $request->muc_luong,
+            'ngay_ap_dung' => $request->ngay_ap_dung,
+        ]);
+    }
+    
 
 
     return redirect()->route('nhan-vien.index')->with('success', 'Cập nhật nhân viên thành công!');

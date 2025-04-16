@@ -121,11 +121,15 @@
                     @enderror
                 </div>
 
+                @php
+                    $luongGanNhat = $nhanVien->luong->sortByDesc('ngay_ap_dung')->first();
+                @endphp
+
                 <div class="col-md-6 mb-3">
                     <label>Mức lương</label>
                     <div class="input-group">
                         <input type="number" name="muc_luong" class="form-control" id="mucLuong"
-                            value="{{ optional($nhanVien->luong)->muc_luong ?? '' }}">
+                            value="{{ old('muc_luong', $luongGanNhat?->muc_luong) }}" required>
                         <div class="input-group-append">
                             <span class="input-group-text" id="donViLuong">VNĐ / Ca</span>
                         </div>
@@ -135,15 +139,19 @@
                         <div class="text-danger">{{ $message }}</div>
                     @enderror
                 </div>
+
                 <div class="col-md-6 mb-3">
                     <label>Ngày áp dụng</label>
                     <input type="date" id="ngay_ap_dung" name="ngay_ap_dung" class="form-control"
-                        value="{{ old('ngay_ap_dung', optional($nhanVien->luong->first())->ngay_ap_dung ? \Carbon\Carbon::parse(optional($nhanVien->luong->first())->ngay_ap_dung)->toDateString() : '') }}">
+                        value="{{ old('ngay_ap_dung', $luongGanNhat?->ngay_ap_dung ? \Carbon\Carbon::parse($luongGanNhat->ngay_ap_dung)->toDateString() : '') }}"
+                        $existingValue>
 
                     @error('ngay_ap_dung')
                         <div class="text-danger">{{ $message }}</div>
                     @enderror
                 </div>
+
+
 
                 <div class="col-12 mb-3">
                     <button type="submit" class="btn btn-primary">Cập nhật</button>

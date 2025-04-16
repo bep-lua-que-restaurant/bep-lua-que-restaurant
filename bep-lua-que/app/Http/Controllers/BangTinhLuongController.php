@@ -59,7 +59,7 @@ class BangTinhLuongController extends Controller
     }
 
     // 🔹 Lấy dữ liệu phân trang
-    $data = $query->latest('bang_tinh_luongs.id')->paginate(15);
+    $data = $query->latest('bang_tinh_luongs.id')->paginate(10);
 
     // Nếu là AJAX request, trả về partial view
     if ($request->ajax()) {
