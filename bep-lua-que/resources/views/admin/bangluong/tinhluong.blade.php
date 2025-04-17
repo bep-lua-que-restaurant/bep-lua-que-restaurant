@@ -20,7 +20,9 @@
                     <th>Số ngày làm</th>
                     --}}
                         <th>Hình thức tính lương</th>
-                        <th>Lương chính (VND)</th>
+                        <th>Lương chính/Ca (VND)</th>
+                        <th>Thưởng/Phạt</th>
+                        <th>Lý do</th>
                         <th>Tổng lương (VND)</th>
                         {{--
                     <th>Hành động</th>
@@ -51,13 +53,28 @@
                                 <input type="number" class="form-control luong-chinh" value="{{ intval($luong) }}"
                                     min="0" readonly style="text-align: center" />
                             </td>
+                            <td>
+                                <input name="thuong_phat[]" type="number"
+                                    class="form-control input-same-size thuong-phat-input" />
+                            </td>
+                            <td>
+                                <input name="ly_do[]" type="text" class="form-control input-same-size" />
+                            </td>
                             <td class="tong-luong">
                                 @php
                                     $tongLuong = $luong * $so_ca_lam;
                                 @endphp
-                                <input type="hidden" name="tong_luong[]" value="{{ $tongLuong }}" />
-                                <span>{{ number_format($tongLuong, 0, ',', '.') }}</span>
+                                <input type="hidden" name="tong_luong[]" value="{{ $tongLuong }}"
+                                    class="tong-luong-hidden" />
+                                <span class="tong-luong-span">{{ number_format($tongLuong, 0, ',', '.') }}</span>
+
+                                <!-- Dùng hidden để lưu dữ liệu gốc -->
+                                <input type="hidden" class="luong-co-ban" value="{{ $luong }}" />
+                                <input type="hidden" class="so-ca-lam" value="{{ $so_ca_lam }}" />
                             </td>
+
+
+
                         </tr>
                     @endforeach
                 </tbody>
@@ -65,7 +82,7 @@
                     <tr>
                         <tfoot>
                             <tr>
-                                <th colspan="5" class="text-right">Tổng cộng:</th>
+                                <th colspan="7" class="text-right">Tổng cộng:</th>
                                 <th id="tongCong">
                                     {{ number_format(
                                         $nhanViens->sum(function ($nv) {
@@ -106,26 +123,12 @@
         function calculateTotal() {
             let totalSalary = 0;
             document.querySelectorAll("#salaryTable tr").forEach((row) => {
-                let luongChinh =
-                    parseFloat(row.querySelector(".luong-chinh").value) || 0;
-                let soCaLam =
-                    parseFloat(row.querySelector(".so-ca-lam").textContent) ||
-                    0;
-                let soNgayLam =
-                    parseFloat(row.querySelector(".so-ngay-lam").textContent) ||
-                    0;
-                let hinhThuc = row
-                    .querySelector(".hinh-thuc")
-                    .textContent.trim();
+                let luongChinh = parseFloat(row.querySelector(".luong-chinh").value) || 0;
+                let soCaLam = parseFloat(row.querySelector(".so-ca-lam").textContent) || 0;
+                let thuongPhat = parseFloat(row.querySelector(".thuong-phat-input").value) ||
+                    0; // Lấy giá trị thưởng/phạt
 
-                let total = 0;
-
-                // Tính lương theo hình thức
-                // if (hinhThuc === 'Theo tháng' && soNgayLam > 0) {
-                //     total = (luongChinh / 26) * soNgayLam; // Chia trung bình cho 26 ngày công chuẩn
-                // } else if (hinhThuc === 'Theo ca' && soCaLam > 0) {
-                //     total = luongChinh * soCaLam;
-                // }
+                let total = (luongChinh * soCaLam) + thuongPhat; // Tính tổng lương với thưởng/phạt
 
                 // Cập nhật giá trị vào input và hiển thị
                 row.querySelector('input[name="tong_luong[]"]').value = total;
@@ -138,30 +141,42 @@
                 totalSalary.toLocaleString("vi-VN");
         }
 
+        // Gọi hàm tính tổng khi trang được tải
         calculateTotal();
 
+        // Thêm sự kiện khi người dùng thay đổi lương chính hoặc thưởng/phạt
         document.querySelectorAll(".luong-chinh").forEach((input) => {
             input.addEventListener("input", calculateTotal);
         });
 
-        document.querySelectorAll(".remove-row").forEach((btn) => {
-            btn.addEventListener("click", function() {
-                this.closest("tr").remove();
+        document.querySelectorAll('.thuong-phat-input').forEach(function(input) {
+            input.addEventListener('input', function() {
+                const row = input.closest('tr'); // tìm dòng hiện tại
+
+                // Cập nhật lại tổng lương khi thưởng/phạt thay đổi
+                const luong = parseFloat(row.querySelector('.luong-co-ban').value) || 0;
+                const soCa = parseFloat(row.querySelector('.so-ca-lam').value) || 0;
+                const thuongPhat = parseFloat(input.value) || 0;
+
+                const tongLuong = (luong * soCa) + thuongPhat;
+
+                // Cập nhật giá trị tổng lương vào cả input hidden và span hiển thị
+                row.querySelector('.tong-luong-hidden').value = tongLuong;
+                row.querySelector('.tong-luong-span').textContent = tongLuong.toLocaleString(
+                    'vi-VN');
+
+                // Tính lại tổng lương toàn bộ bảng
                 calculateTotal();
             });
         });
+
+
+
     });
 
     function confirmChotLuong(event) {
-        var confirmAction = confirm("Bạn có muốn chốt lương tháng này không?");
-        if (confirmAction) {
-            // Nếu người dùng xác nhận, cho phép gửi form
-            return true;
-        } else {
-            // Nếu người dùng từ chối, ngừng hành động mặc định (ngừng gửi form)
-            event.preventDefault();
-            alert("Chốt lương bị hủy.");
-            return false;
+        if (!confirm('Bạn có chắc chắn muốn chốt lương?')) {
+            event.preventDefault(); // Ngừng gửi form nếu người dùng không xác nhận
         }
     }
 </script>

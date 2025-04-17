@@ -5,7 +5,7 @@
 @endsection
 
 @section('content')
-    @if (session('error'))
+    {{-- @if (session('error'))
         <script>
             Swal.fire({
                 icon: 'error',
@@ -14,7 +14,7 @@
                 confirmButtonText: 'Đóng'
             });
         </script>
-    @endif
+    @endif --}}
 
     <div class="container-fluid">
         <div class="row page-titles mx-0">

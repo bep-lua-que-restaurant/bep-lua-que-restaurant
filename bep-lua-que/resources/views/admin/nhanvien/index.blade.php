@@ -26,7 +26,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <!-- Ô tìm kiếm nhân viên -->
                     <div class="input-group">
-                        <input type="text" id="searchInput" class="form-control border-0"
+                        <input style="height: 45px" type="text" id="searchInput" class="form-control border-1"
                             placeholder="Tìm kiếm theo tên..." onkeyup="filterEmployees()">
                     </div>
 
