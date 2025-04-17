@@ -5,6 +5,43 @@
 @endsection
 
 @section('content')
+    <style>
+        .highcharts-data-table table {
+            font-family: Verdana, sans-serif;
+            border-collapse: collapse;
+            border: 1px solid #ebebeb;
+            margin: 10px auto;
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .highcharts-data-table caption {
+            padding: 1em 0;
+            font-size: 1.2em;
+            color: #555;
+        }
+
+        .highcharts-data-table th {
+            font-weight: 600;
+            padding: 0.5em;
+        }
+
+        .highcharts-data-table td,
+        .highcharts-data-table th,
+        .highcharts-data-table caption {
+            padding: 0.5em;
+        }
+
+        .highcharts-data-table thead tr,
+        .highcharts-data-table tbody tr:nth-child(even) {
+            background: #f8f8f8;
+        }
+
+        .highcharts-data-table tr:hover {
+            background: #f1f7ff;
+        }
+    </style>
     <div class="container">
         <div class="card">
             <div class="card-body">
@@ -56,50 +93,122 @@
                 </form>
 
                 <!-- Biểu đồ -->
-                <canvas id="thongKeTopDoanhThu" height="100"></canvas>
+{{--                <canvas id="thongKeTopDoanhThu" height="100"></canvas>--}}
+                <figure class="highcharts-figure">
+                    <div id="thongKeTopDoanhThu" style="height: 430px;"></div>
+                </figure>
             </div>
         </div>
     </div>
 
     <!-- Nhúng Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{--    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>--}}
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/series-label.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
-            let chart;
+            // let chart;
             let isCustomFilterApplied = false; // Biến kiểm tra xem có đang dùng bộ lọc tùy chỉnh không
 
             function updateChart(labels, data) {
-                if (chart) {
-                    chart.destroy();
-                }
-                let ctx = document.getElementById('thongKeTopDoanhThu').getContext('2d');
-                chart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Doanh thu (VND)',
-                            data: data,
-                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1,
-                        }]
+
+                data = data.map(d => parseFloat(d) || 0);
+                // if (chart) {
+                //     chart.destroy();
+                // }
+                // let ctx = document.getElementById('thongKeTopDoanhThu').getContext('2d');
+                // chart = new Chart(ctx, {
+                //     type: 'bar',
+                //     data: {
+                //         labels: labels,
+                //         datasets: [{
+                //             label: 'Doanh thu (VND)',
+                //             data: data,
+                //             backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                //             borderColor: 'rgba(54, 162, 235, 1)',
+                //             borderWidth: 1,
+                //         }]
+                //     },
+                //     options: {
+                //         responsive: true,
+                //         scales: {
+                //             x: {
+                //                 title: {
+                //                     display: true,
+                //                     text: 'Thời gian (Giờ)'
+                //                 }
+                //             },
+                //             y: {
+                //                 beginAtZero: true
+                //             }
+                //         }
+                //     }
+                // });
+
+                Highcharts.setOptions({
+                    lang: {
+                        contextButtonTitle: "Tùy chọn biểu đồ",
+                        downloadJPEG: "Tải xuống JPEG",
+                        downloadPDF: "Tải xuống PDF",
+                        downloadPNG: "Tải xuống PNG",
+                        downloadSVG: "Tải xuống SVG",
+                        downloadCSV: "Tải xuống CSV",
+                        downloadXLS: "Tải xuống Excel",
+                        viewData: "Xem bảng dữ liệu",
+                        hideData: "Ẩn bảng dữ liệu",
+                        openInCloud: "Mở bằng Highcharts Cloud",
+                        printChart: "In biểu đồ",
+                        viewFullscreen: "Xem toàn màn hình",
+                        exitFullscreen: "Thoát toàn màn hình",
+                        loading: "Đang tải...",
+                        noData: "Không có dữ liệu để hiển thị"
                     },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Thời gian (Giờ)'
-                                }
-                            },
-                            y: {
-                                beginAtZero: true
+                });
+
+                Highcharts.chart('thongKeTopDoanhThu', {
+                    chart: { type: 'column',
+                        style: {
+                            fontFamily: 'Arial, sans-serif' // <- Font bạn muốn
+                        }},
+                    title: { text: ' ' },
+                    xAxis: {
+                        categories: labels,
+                        title: {
+                            text: 'Thời gian (Giờ)'
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: { text: 'Doanh thu (VND)' },
+                        labels: {
+                            formatter: function () {
+                                let value = this.value;
+                                if (value >= 1_000_000_000) return (value / 1_000_000_000) + ' tỷ';
+                                if (value >= 1_000_000) return (value / 1_000_000) + ' triệu';
+                                if (value >= 1_000) return (value / 1_000) + 'k';
+                                return value;
                             }
                         }
-                    }
+                    },
+                    tooltip: {
+                        pointFormat: '{series.name}: <b>{point.y:,.0f} VND</b>'
+                    },
+                    plotOptions: {
+                        column: {
+                            pointPadding: 0.2,
+                            borderWidth: 0
+                        }
+                    },
+                    series: [{
+                        name: 'Doanh thu',
+                        data: data,
+                        color: '#36A2EB'
+                    }],
+                    credits: { enabled: false }
                 });
             }
 
@@ -110,7 +219,7 @@
 
             function updateTitle(fromDate = null, toDate = null) {
                 let chartType = $('#chartType').val();
-                let title = chartType === 'gioBanChay' ? 'TOP DOANH THU CAO NHẤT' : 'TOP DOANH THU ÍT NHẤT';
+                let title = chartType === 'gioBanChay' ? 'TOP DOANH THU CAO NHẤT THEO GIỜ' : 'TOP DOANH THU ÍT NHẤT THEO GIỜ';
 
                 if (isCustomFilterApplied && fromDate && toDate) {
                     $('#timeRange').text(`TỪ ${formatDate(fromDate)} ĐẾN ${formatDate(toDate)}`);

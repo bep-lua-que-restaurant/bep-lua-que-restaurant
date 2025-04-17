@@ -5,6 +5,52 @@
 @endsection
 
 @section('content')
+    <style>
+        /*.highcharts-figure,*/
+        /*.highcharts-data-table table {*/
+        /*    min-width: 360px;*/
+        /*    max-width: 800px;*/
+        /*    margin: 1em auto;*/
+        /*}*/
+
+        .highcharts-data-table table {
+            /*font-family: Verdana, sans-serif;*/
+            border-collapse: collapse;
+            border: 1px solid #ebebeb;
+            margin: 10px auto;
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .highcharts-data-table caption {
+            padding: 1em 0;
+            font-size: 1.2em;
+            color: #555;
+        }
+
+        .highcharts-data-table th {
+            font-weight: 600;
+            padding: 0.5em;
+        }
+
+        .highcharts-data-table td,
+        .highcharts-data-table th,
+        .highcharts-data-table caption {
+            padding: 0.5em;
+        }
+
+        .highcharts-data-table thead tr,
+        .highcharts-data-table tbody tr:nth-child(even) {
+            background: #f8f8f8;
+        }
+
+        .highcharts-data-table tr:hover {
+            background: #f1f7ff;
+        }
+
+
+    </style>
     <div class="container">
         <div class="card">
             <div class="card-body">
@@ -36,49 +82,143 @@
                     </div>
                 </form>
                 <!-- Biểu đồ -->
-                <canvas id="thongKeSoLuongKhach" height="100"></canvas>
+{{--                <canvas id="thongKeSoLuongKhach" height="100"></canvas>--}}
+                <figure class="highcharts-figure">
+                    <div id="thongKeSoLuongKhach" style="height: 430px;"></div>
+                </figure>
             </div>
         </div>
     </div>
 
-    <!-- Nhúng Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/series-label.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
-            let chart;
+            // let chart;
 
             function updateChart(labels, data, formatType) {
-                if (chart) {
-                    chart.destroy();
-                }
-                let ctx = document.getElementById('thongKeSoLuongKhach').getContext('2d');
-                chart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Số lượng khách',
-                            data: data,
-                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.1 // Làm mượt đường
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: formatType === 'day' ? 'Ngày' : formatType === 'month' ? 'Tháng' : formatType === 'year' ? 'Năm' : 'Tuần'
-                                }
-                            },
-                            y: { beginAtZero: true }
-                        }
+                data = data.map(d => parseFloat(d) || 0);
+                // if (chart) {
+                //     chart.destroy();
+                // }
+                // let ctx = document.getElementById('thongKeSoLuongKhach').getContext('2d');
+                // chart = new Chart(ctx, {
+                //     type: 'line',
+                //     data: {
+                //         labels: labels,
+                //         datasets: [{
+                //             label: 'Số lượng khách',
+                //             data: data,
+                //             backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                //             borderColor: 'rgba(54, 162, 235, 1)',
+                //             borderWidth: 2,
+                //             fill: true,
+                //             tension: 0.1 // Làm mượt đường
+                //         }]
+                //     },
+                //     options: {
+                //         responsive: true,
+                //         scales: {
+                //             x: {
+                //                 title: {
+                //                     display: true,
+                //                     text: formatType === 'day' ? 'Ngày' : formatType === 'month' ? 'Tháng' : formatType === 'year' ? 'Năm' : 'Tuần'
+                //                 }
+                //             },
+                //             y: { beginAtZero: true }
+                //         }
+                //     }
+                // });
+
+                Highcharts.setOptions({
+                    lang: {
+                        contextButtonTitle: "Tùy chọn biểu đồ",
+                        downloadJPEG: "Tải xuống JPEG",
+                        downloadPDF: "Tải xuống PDF",
+                        downloadPNG: "Tải xuống PNG",
+                        downloadSVG: "Tải xuống SVG",
+                        downloadCSV: "Tải xuống CSV",
+                        downloadXLS: "Tải xuống Excel",
+                        viewData: "Xem bảng dữ liệu",
+                        hideData: "Ẩn bảng dữ liệu",
+                        openInCloud: "Mở bằng Highcharts Cloud",
+                        printChart: "In biểu đồ",
+                        viewFullscreen: "Xem toàn màn hình",
+                        exitFullscreen: "Thoát toàn màn hình",
+                        loading: "Đang tải...",
+                        noData: "Không có dữ liệu để hiển thị"
                     }
+                });
+
+
+                Highcharts.chart('thongKeSoLuongKhach', {
+                    chart: {
+                        style: {
+                            fontFamily: 'Arial, sans-serif' // 👈 Đổi tên font tùy ý
+                        }
+                    },
+
+                    title: {
+                        text: ' ',
+                        align: 'left'
+                    },
+
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Số lượng khách'
+                        }
+                    },
+
+                    xAxis: {
+                        categories: labels,
+                        title: {
+                            text: formatType === 'day' ? 'Ngày' : formatType === 'month' ? 'Tháng' : formatType === 'week' ? 'Tuần' : 'Năm'
+                        },
+                    },
+
+                    legend: {
+                        layout: 'vertical',
+                        // align: 'right',
+                        verticalAlign: 'top'
+                    },
+
+                    plotOptions: {
+                        series: {
+                            label: {
+                                enabled: false
+                            },
+                            connectorAllowed: false
+                        }
+                    },
+
+                    series: [{
+                        name: 'Số lượng khách',
+                        data: data,
+                        color: '#36A2EB'
+                    }],
+                    credits: { enabled: false },
+
+                    // responsive: {
+                    //     rules: [{
+                    //         condition: {
+                    //             maxWidth: 500
+                    //         },
+                    //         chartOptions: {
+                    //             legend: {
+                    //                 layout: 'horizontal',
+                    //                 align: 'center',
+                    //                 verticalAlign: 'bottom'
+                    //             }
+                    //         }
+                    //     }]
+                    // }
+
                 });
             }
 

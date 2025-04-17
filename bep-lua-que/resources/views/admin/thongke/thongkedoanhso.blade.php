@@ -1,14 +1,52 @@
 @extends('layouts.admin')
 
 @section('title')
-    Thống kê doanh số
+    Thống kê doanh thu
 @endsection
 
 @section('content')
+    <style>
+
+        .highcharts-data-table table {
+            font-family: Verdana, sans-serif;
+            border-collapse: collapse;
+            border: 1px solid #ebebeb;
+            margin: 10px auto;
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .highcharts-data-table caption {
+            padding: 1em 0;
+            font-size: 1.2em;
+            color: #555;
+        }
+
+        .highcharts-data-table th {
+            font-weight: 600;
+            padding: 0.5em;
+        }
+
+        .highcharts-data-table td,
+        .highcharts-data-table th,
+        .highcharts-data-table caption {
+            padding: 0.5em;
+        }
+
+        .highcharts-data-table thead tr,
+        .highcharts-data-table tbody tr:nth-child(even) {
+            background: #f8f8f8;
+        }
+
+        .highcharts-data-table tr:hover {
+            background: #f1f7ff;
+        }
+    </style>
     <div class="container">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title fw-bold">DOANH SỐ <span id="phamViLoc">
+                <h5 class="card-title fw-bold">DOANH THU <span id="phamViLoc">
                     @if ($boLoc == 'year') TRONG NĂM @elseif ($boLoc == 'month') TRONG THÁNG @elseif ($boLoc == 'week') TRONG TUẦN @else TRONG NGÀY @endif
                 </span></h5>
 
@@ -36,51 +74,138 @@
                     </div>
                 </form>
                 <!-- Biểu đồ -->
-                <canvas id="thongKeDoanhSo" height="100"></canvas>
+{{--                <canvas id="thongKeDoanhSo" height="100"></canvas>--}}
+
+                <figure class="highcharts-figure">
+                    <div id="thongKeDoanhSo" style="height: 430px;"></div>
+                </figure>
             </div>
         </div>
     </div>
 
     <!-- Nhúng Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{--    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>--}}
+    <!-- Thay thế Chart.js bằng Highcharts -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/series-label.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
-            let chart;
-
             function capNhatBieuDo(labels, data, dinhDang) {
-                if (chart) {
-                    chart.destroy();
-                }
-                let ctx = document.getElementById('thongKeDoanhSo').getContext('2d');
-                chart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Doanh thu (VND)',
-                            data: data,
-                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1
-                        }]
+                // Ép kiểu sang số
+                data = data.map(d => parseFloat(d) || 0);
+
+                Highcharts.setOptions({
+                    lang: {
+                        contextButtonTitle: "Tùy chọn biểu đồ",
+                        downloadJPEG: "Tải xuống JPEG",
+                        downloadPDF: "Tải xuống PDF",
+                        downloadPNG: "Tải xuống PNG",
+                        downloadSVG: "Tải xuống SVG",
+                        downloadCSV: "Tải xuống CSV",
+                        downloadXLS: "Tải xuống Excel",
+                        viewData: "Xem bảng dữ liệu",
+                        hideData: "Ẩn bảng dữ liệu",
+                        openInCloud: "Mở bằng Highcharts Cloud",
+                        printChart: "In biểu đồ",
+                        viewFullscreen: "Xem toàn màn hình",
+                        exitFullscreen: "Thoát toàn màn hình",
+                        loading: "Đang tải...",
+                        noData: "Không có dữ liệu để hiển thị"
                     },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: dinhDang === 'day' ? 'Ngày' : dinhDang === 'month' ? 'Tháng' : dinhDang === 'year' ? 'Năm' : 'Tuần'
-                                }
-                            },
-                            y: { beginAtZero: true }
+                });
+
+                Highcharts.chart('thongKeDoanhSo', {
+                    data: {
+                        enabled: true
+                    },
+                    exportData: {
+                        tableFormatter: function (items) {
+                            const columns = this.getDataRows(true); // true để lấy cả header
+                            const html = [];
+
+                            html.push('<table class="highcharts-data-table"><thead><tr>');
+                            columns[0].forEach(header => {
+                                html.push('<th>' + header + '</th>');
+                            });
+                            html.push('</tr></thead><tbody>');
+
+                            for (let i = 1; i < columns.length; i++) {
+                                html.push('<tr>');
+                                columns[i].forEach((val, j) => {
+                                    if (j === 0) {
+                                        // Cột đầu tiên là "Thời gian"
+                                        html.push('<td>' + val + '</td>');
+                                    } else {
+                                        // Cột Doanh thu: định dạng tiền
+                                        const formatted = Highcharts.numberFormat(Number(val), 0, ',', '.') + ' VNĐ';
+                                        html.push('<td style="text-align:right;">' + formatted + '</td>');
+                                    }
+                                });
+                                html.push('</tr>');
+                            }
+
+                            html.push('</tbody></table>');
+                            return html.join('');
                         }
-                    }
+                    },
+
+                    exporting: {
+                        enabled: true
+                    },
+
+
+                    chart: { type: 'column',
+                        style: {
+                            fontFamily: 'Arial, sans-serif' // <- Font bạn muốn
+                        }},
+                    title: { text: ' ' },
+                    xAxis: {
+                        categories: labels,
+                        title: {
+                            text: dinhDang === 'day' ? 'Ngày' : dinhDang === 'month' ? 'Tháng' : dinhDang === 'year' ? 'Năm' : 'Tuần'
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: { text: 'Doanh thu (VND)' },
+                        labels: {
+                            formatter: function () {
+                                let value = this.value;
+                                if (value >= 1_000_000_000) return (value / 1_000_000_000) + ' tỷ';
+                                if (value >= 1_000_000) return (value / 1_000_000) + ' triệu';
+                                if (value >= 1_000) return (value / 1_000) + 'k';
+                                return value;
+                            }
+                        }
+                    },
+                    tooltip: {
+                        pointFormat: '{series.name}: <b>{point.y:,.0f} VND</b>',
+                    },
+
+                    legend: {
+                        verticalAlign: 'top'
+                    },
+
+                    plotOptions: {
+                        column: {
+                            pointPadding: 0.2,
+                            borderWidth: 0
+                        }
+                    },
+                    series: [{
+                        name: 'Doanh thu',
+                        data: data,
+                        color: '#36A2EB'
+                    }],
+                    credits: { enabled: false }
                 });
             }
 
-            // Xử lý tự động khi thay đổi bộ lọc năm/tháng/tuần/ngày
+
             $('#boLoc').on('change', function () {
                 let boLoc = $(this).val();
 
@@ -99,7 +224,6 @@
                 });
             });
 
-            // Xử lý lọc theo khoảng ngày tháng năm
             $('#btnFilter').on('click', function () {
                 let ngayBatDau = $('#ngayBatDau').val();
                 let ngayKetThuc = $('#ngayKetThuc').val();
@@ -113,43 +237,24 @@
                 let ngayKetThucObj = new Date(ngayKetThuc);
                 let ngayHienTai = new Date();
 
-                // Loại bỏ phần giờ, phút, giây
                 ngayHienTai.setHours(0, 0, 0, 0);
                 ngayBatDauObj.setHours(0, 0, 0, 0);
                 ngayKetThucObj.setHours(0, 0, 0, 0);
 
-                // Kiểm tra năm bắt đầu không lớn hơn năm kết thúc
-                if (ngayBatDauObj.getFullYear() > ngayKetThucObj.getFullYear()) {
-                    alert("Năm của ngày bắt đầu không thể lớn hơn năm của ngày kết thúc!");
-                    return;
-                }
-
-                // Nếu cùng năm, kiểm tra tháng
-                if (ngayBatDauObj.getFullYear() === ngayKetThucObj.getFullYear() &&
-                    ngayBatDauObj.getMonth() > ngayKetThucObj.getMonth()) {
-                    alert("Tháng của ngày bắt đầu không thể lớn hơn tháng của ngày kết thúc!");
-                    return;
-                }
-
-                // Nếu cùng năm và tháng, kiểm tra ngày
-                if (ngayBatDauObj.getFullYear() === ngayKetThucObj.getFullYear() &&
-                    ngayBatDauObj.getMonth() === ngayKetThucObj.getMonth() &&
-                    ngayBatDauObj.getDate() > ngayKetThucObj.getDate()) {
+                if (ngayBatDauObj > ngayKetThucObj) {
                     alert("Ngày bắt đầu không thể lớn hơn ngày kết thúc!");
                     return;
                 }
 
-                // Kiểm tra ngày không lớn hơn ngày hiện tại
                 if (ngayBatDauObj > ngayHienTai || ngayKetThucObj > ngayHienTai) {
                     alert("Chỉ lọc đến ngày hiện tại! Vui lòng chọn đến ngày " +
                         ngayHienTai.toLocaleDateString('vi-VN') + ".");
                     return;
                 }
 
-                // Format lại ngày thành DD-MM-YYYY
                 function dinhDangNgay(dateString) {
-                    let parts = dateString.split(/[-\/]/); // Tách theo cả '-' và '/'
-                    return `${parts[2]}-${parts[1]}-${parts[0]}`; // Định dạng DD-MM-YYYY
+                    let parts = dateString.split(/[-\/]/);
+                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
                 }
 
                 $.ajax({
@@ -174,8 +279,9 @@
                 });
             });
 
-            // Cập nhật biểu đồ ban đầu
+            // Load biểu đồ ban đầu
             capNhatBieuDo(@json($labels), @json($data), 'day');
         });
     </script>
+
 @endsection
