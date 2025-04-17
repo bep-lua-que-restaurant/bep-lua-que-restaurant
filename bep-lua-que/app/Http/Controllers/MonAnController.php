@@ -142,7 +142,7 @@ class MonAnController extends Controller
 
 
     public function show($id)
-{
+    {
     $monAn = MonAn::withTrashed()->findOrFail($id);
 
     $monAn->load([
@@ -154,7 +154,7 @@ class MonAnController extends Controller
     ]);
 
     return view('admin.monan.detail', compact('monAn'));
-}
+    }
 
 
 
