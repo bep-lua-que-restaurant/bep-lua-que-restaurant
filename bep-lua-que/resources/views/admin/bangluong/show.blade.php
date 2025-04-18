@@ -34,7 +34,9 @@
                                         <th class="text-center">Tên nhân viên</th>
                                         <th class="text-center">Số ca làm</th>
                                         {{-- <th>Số ngày công</th> --}}
-                                        <th class="text-center">Lương chính (VND)</th>
+                                        <th class="text-center">Lương chính/Ca (VND)</th>
+                                        <th class="text-center">Thưởng/Phạt</th>
+                                        <th class="text-center">Lý do</th>
                                         <th class="text-center">Tổng lương (VND)</th>
                                     </tr>
                                 </thead>
@@ -55,8 +57,13 @@
                                                 {{-- <td>{{ $soNgayCong > 0 ? sprintf('%02d', $soNgayCong) . ' ngày' : '-' }} --}}
                                                 </td> <!-- Hiển thị số ngày công -->
                                                 <td class="text-center">
-                                                    {{ isset($luong->muc_luong) ? number_format($luong->muc_luong) : '0' }}
+                                                    {{ isset($luong->muc_luong) ? number_format($luong->muc_luong, 0, ',', '.') : '0' }}
                                                 </td>
+
+                                                <td class="text-center">
+                                                    {{ number_format($luong->thuong_phat, 0, ',', '.') }}</td>
+
+                                                <td class="text-center">{{ $luong->ghi_chu }}</td>
                                                 <td class="text-center">
                                                     {{ number_format($luong->tong_luong ?? 0, 0, ',', '.') }} VND</td>
                                             </tr>

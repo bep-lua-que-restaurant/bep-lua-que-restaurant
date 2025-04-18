@@ -12,13 +12,13 @@
         <td>{{ $item->ten_nhan_vien }}</td>
 
         <!-- Số công -->
-        <td>{{ $item->so_cong ?? '0' }}</td>
+        <td class="text-center">{{ $item->so_cong ?? '0' }}</td>
 
         <!-- Mức lương -->
-        <td>{{ number_format($item->muc_luong ?? 0, 0, ',', '.') }} VNĐ</td>
+        <td class="text-center">{{ number_format($item->muc_luong ?? 0, 0, ',', '.') }} VNĐ</td>
 
         <!-- Tổng lương -->
-        <td>{{ number_format($item->tong_luong ?? 0, 0, ',', '.') }} VNĐ</td>
+        <td class="text-center">{{ number_format($item->tong_luong ?? 0, 0, ',', '.') }} VNĐ</td>
 
         <!-- Khoảng thời gian tháng -->
         <td>
@@ -28,7 +28,7 @@
         </td>
 
         <!-- Hành động -->
-        <td>
+        <td class="text-center">
             <a href="{{ route('luong.show', $item->id) }}" class="btn btn-info btn-sm p-2 m-2">
                 <i class="fa fa-eye"></i>
             </a>

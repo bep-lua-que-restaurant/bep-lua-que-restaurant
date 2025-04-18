@@ -26,7 +26,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <!-- Ô tìm kiếm nhân viên -->
                     <div class="input-group">
-                        <input type="text" id="searchInput" class="form-control border-0"
+                        <input style="height: 45px" type="text" id="searchInput" class="form-control border-1"
                             placeholder="Tìm kiếm theo tên..." onkeyup="filterEmployees()">
                     </div>
 
@@ -67,13 +67,13 @@
                             <table class="table table-responsive-md">
                                 <thead>
                                     <tr>
-                                        <th style="width:50px;">
+                                        {{-- <th style="width:50px;">
                                             <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
                                                 <input type="checkbox" class="custom-control-input" id="checkAll"
                                                     required="">
                                                 <label class="custom-control-label" for="checkAll"></label>
                                             </div>
-                                        </th>
+                                        </th> --}}
                                         <th><strong>Mã NV</strong></th>
                                         <th><strong>Họ tên</strong></th>
                                         <th><strong>Email</strong></th>
@@ -86,14 +86,14 @@
                                 <tbody id="employeeTable">
                                     @foreach ($nhanViens as $nhanVien)
                                         <tr class="employee-row">
-                                            <td>
+                                            {{-- <td>
                                                 <div class="custom-control custom-checkbox checkbox-success">
                                                     <input type="checkbox" class="custom-control-input"
                                                         id="checkbox{{ $nhanVien->id }}">
                                                     <label class="custom-control-label"
                                                         for="checkbox{{ $nhanVien->id }}"></label>
                                                 </div>
-                                            </td>
+                                            </td> --}}
                                             <td>{{ $nhanVien->ma_nhan_vien }}</td>
                                             <td class="employee-name">{{ $nhanVien->ho_ten }}</td>
                                             <td>{{ $nhanVien->email }}</td>
