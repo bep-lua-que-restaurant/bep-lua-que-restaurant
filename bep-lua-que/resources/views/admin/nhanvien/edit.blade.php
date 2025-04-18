@@ -141,15 +141,15 @@
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <label>Ngày áp dụng</label>
-                    <input type="date" id="ngay_ap_dung" name="ngay_ap_dung" class="form-control"
-                        value="{{ old('ngay_ap_dung', $luongGanNhat?->ngay_ap_dung ? \Carbon\Carbon::parse($luongGanNhat->ngay_ap_dung)->toDateString() : '') }}"
-                        $existingValue>
+                    <label>Tháng áp dụng</label>
+                    <input type="month" id="ngay_ap_dung" name="ngay_ap_dung" class="form-control"
+                        value="{{ old('ngay_ap_dung', $luongGanNhat?->ngay_ap_dung ? \Carbon\Carbon::parse($luongGanNhat->ngay_ap_dung)->format('Y-m') : '') }}">
 
                     @error('ngay_ap_dung')
                         <div class="text-danger">{{ $message }}</div>
                     @enderror
                 </div>
+
 
 
 
@@ -183,8 +183,19 @@
 
         input.addEventListener('change', function() {
             const date = new Date(this.value);
-            if (date.getDate() !== 1) {
-                alert('Vui lòng chọn ngày đầu tiên của tháng!');
+            const currentDate = new Date();
+
+            // // Kiểm tra xem ngày có phải là ngày đầu tiên của tháng không
+            // if (date.getDate() !== 1) {
+            //     alert('Vui lòng chọn ngày đầu tiên của tháng!');
+            //     this.value = ''; // Xóa giá trị sai
+            //     return;
+            // }
+
+            // Kiểm tra tháng được chọn có sau tháng hiện tại không
+            if (date.getFullYear() < currentDate.getFullYear() ||
+                (date.getFullYear() === currentDate.getFullYear() && date.getMonth() < currentDate.getMonth())) {
+                alert('Vui lòng chọn tháng sau tháng hiện tại!');
                 this.value = ''; // Xóa giá trị sai
             }
         });
