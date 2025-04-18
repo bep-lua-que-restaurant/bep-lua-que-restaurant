@@ -38,11 +38,6 @@ class MonMoiDuocThem implements ShouldBroadcast
         return "mon-moi-duoc-them";
     }
 
-    // public function broadcastWith()
-    // {
-    //     return ['monAns' => $this->monAns];
-    // }
-
 
     public function broadcastWith()
     {

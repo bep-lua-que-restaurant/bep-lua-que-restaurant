@@ -87,10 +87,6 @@ class HoaDonController extends Controller
         return view('admin.hoadon.index', compact('hoa_don'));
     }
 
-
-
-
-
     private function generateMaHoaDon()
     {
         // Lấy ngày hiện tại theo định dạng YYYYMMDD
@@ -243,42 +239,4 @@ class HoaDonController extends Controller
         return view('admin.hoadon.show', compact('hoaDon'));
     }
     
-    
-
-    //in hóa đơn
-    //     public function printInvoice($id)
-    // {
-    //     $hoaDon = HoaDon::with(['banAns']) // Chỉ lấy thông tin hóa đơn, tránh dữ liệu lặp
-    //     ->leftJoin('hoa_don_bans', 'hoa_don_bans.hoa_don_id', '=', 'hoa_dons.id')
-    //     ->leftJoin('ban_ans', 'ban_ans.id', '=', 'hoa_don_bans.ban_an_id')
-    //     ->leftJoin('dat_bans', function ($join) {
-    //         $join->on('dat_bans.ban_an_id', '=', 'ban_ans.id')
-    //              ->whereNotNull('dat_bans.khach_hang_id'); 
-    //     })
-    //     ->leftJoin('khach_hangs', 'khach_hangs.id', '=', 'dat_bans.khach_hang_id')
-    //     ->select(
-    //         'hoa_dons.*',
-    //         'khach_hangs.ho_ten as ten_khach_hang',
-    //         'khach_hangs.so_dien_thoai'
-    //     )
-    //     ->where('hoa_dons.id', $id)
-    //     ->firstOrFail(); // Lấy một bản ghi hóa đơn duy nhất
-    //     $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $id)
-    //     ->join('mon_ans', 'mon_ans.id', '=', 'chi_tiet_hoa_dons.mon_an_id')
-    //     ->select(
-    //         'mon_ans.ten as ten_mon',
-    //         'chi_tiet_hoa_dons.so_luong',
-    //         'chi_tiet_hoa_dons.don_gia',
-    //         'mon_ans.gia' // Lấy thêm giá bán từ bảng mon_ans
-    //     )
-    //     ->get(); // Lấy danh sách món ăn
-
-
-
-    //     $pdf = Pdf::loadView('admin.hoadon.pdf', compact('hoaDon', 'chiTietHoaDon'));
-
-    //     return $pdf->stream('hoa_don_' . $hoaDon->id . '.pdf');
-
-    // }
-
 }
