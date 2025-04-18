@@ -126,6 +126,7 @@ function loadChiTietHoaDon(hoaDonId) {
             hoa_don_id: hoaDonId,
         },
         success: function (response) {
+           
             let hoaDonBody = $("#hoa-don-body");
             hoaDonBody.empty();
             let offcanvasBody = $(".offcanvas-body tbody"); // Lấy phần bảng trong offcanvas
@@ -179,14 +180,15 @@ function loadChiTietHoaDon(hoaDonId) {
             currency: "VND",
         })}
     </td>
-    <!-- Nút xóa với icon -->
-    <td class="text-center">
-        <button class="btn btn-sm btn-outline-danger xoa-mon" data-id="${
-            item.id
-        }">
-            <i class="bi bi-trash"></i> <!-- Biểu tượng xóa -->
-        </button>
-    </td>
+        ${
+            item.trang_thai === "cho_xac_nhan"
+                ? `<td class="text-center">
+                    <button class="btn btn-sm btn-outline-danger xoa-mon" data-id="${item.id}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>`
+                : `<td class="text-center"></td>`
+        }
 </tr>
 `;
                     hoaDonBody.append(row);
@@ -454,7 +456,8 @@ window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (e) => {
         if (trangThai === "cho_che_bien") {
             statusSpan.addClass("text-danger");
         } else if (trangThai === "dang_nau") {
-            var message = "Món ăn " + ten_mon + " (" + ten_ban + ") đã bắt đầu nấu";
+            var message =
+                "Món ăn " + ten_mon + " (" + ten_ban + ") đã bắt đầu nấu";
             showToast(message, "success"); // Display success toast
             statusSpan.addClass("text-warning");
         } else if (trangThai === "hoan_thanh") {
@@ -466,7 +469,8 @@ window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (e) => {
     if (trangThai === "hoan_thanh") {
         var dingSound = new Audio(dingSoundUrl);
         dingSound.play();
-        var message = "Món ăn " + ten_mon + " (" + ten_ban + ") đã được cung ứng";
+        var message =
+            "Món ăn " + ten_mon + " (" + ten_ban + ") đã được cung ứng";
         showToast(message, "success"); // Display success toast
     }
 });

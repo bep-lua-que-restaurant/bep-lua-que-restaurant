@@ -346,8 +346,6 @@ class ThuNganController extends Controller
         return response()->json(['success' => true]);
     }
 
-
-
     public function updateBanStatus(Request $request)
     {
         $banAnId = $request->input('ban_an_id');
@@ -718,8 +716,6 @@ class ThuNganController extends Controller
         ]);
     }
 
-
-    
     //xóa món ăn
     public function deleteMonAn(Request $request)
     {
@@ -797,7 +793,6 @@ class ThuNganController extends Controller
         ]);
     }
 
-
     public function getOrders(Request $request)
     {
         // Lấy tất cả mã đặt bàn có trạng thái 'dang_xu_ly'
@@ -824,7 +819,6 @@ class ThuNganController extends Controller
 
         return response()->json($orders);
     }
-
 
     public function thongTinHoaDon(Request $request)
     {
