@@ -96,7 +96,40 @@
             </div>
         </div>
 
+<!-- Ảnh hóa đơn -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h4>Ảnh hóa đơn</h4>
+    </div>
+    <div class="card-body">
+        @if (!empty($hoaDon->billImages) && $hoaDon->billImages->isNotEmpty())
+            <div class="row">
+                @foreach ($hoaDon->billImages as $image)
+                    <div class="col-md-4 mb-3">
+                        <a href="{{ asset('storage/' . $image->image_path) }}" 
+                           data-lightbox="bill-images" 
+                           data-title="Ảnh hóa đơn {{ $hoaDon->ma_hoa_don }}">
+                            <img src="{{ asset('storage/' . $image->image_path) }}" 
+                                 alt="Ảnh hóa đơn {{ $hoaDon->ma_hoa_don }}" 
+                                 class="img-fluid rounded" 
+                                 style="max-height: 200px; object-fit: cover;">
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <p>Hóa đơn này chưa tải ảnh bill lên.</p>
+        @endif
+    </div>
+</div>
+
         <!-- Nút quay lại -->
         <a href="{{ route('hoa-don.index') }}" class="btn btn-secondary mt-3">Quay lại</a>
     </div>
+
+        <!-- Lightbox2 CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" integrity="sha512-ZKX+BvQihRJPA8CROKBhDNvoc2aDMOdAlcm7TUQY+35XYtrd3yh95QOOhsPDQY9QnKE0Wqag9y38OIgEvb88cA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+        <!-- Lightbox2 JS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js" integrity="sha512-k2GFCTbp9rQU412BStrcD/rlwv1PYec9SNrkbQlo6RZCf75l6KcC3Uwjo9o6v5Z0QmYwXIOuQue4ElaaYwXwkfg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 @endsection
