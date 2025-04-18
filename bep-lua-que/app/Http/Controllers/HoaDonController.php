@@ -215,7 +215,8 @@ class HoaDonController extends Controller
                 },
                 'banAns' => function($query) {
                     $query->withTrashed(); // Lấy luôn bàn ăn đã bị xóa
-                }
+                },
+                'billImages' // Thêm quan hệ billImages để lấy ảnh
             ])
             ->leftJoin('hoa_don_bans', 'hoa_don_bans.hoa_don_id', '=', 'hoa_dons.id')
             ->leftJoin('ban_ans', 'ban_ans.id', '=', 'hoa_don_bans.ban_an_id')
