@@ -12,6 +12,7 @@ use App\Models\BanAn;
 use App\Models\ChiTietHoaDon;
 use App\Models\DatBan;
 use App\Models\HoaDonBan;
+use App\Models\MonAn;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -64,7 +65,7 @@ class HoaDonController extends Controller
             "Không có số") as so_dien_thoai'),
                 DB::raw('IFNULL(GROUP_CONCAT(DISTINCT ban_ans.ten_ban ORDER BY ban_ans.ten_ban ASC SEPARATOR ", "), "Chưa có bàn") as ten_ban')
             )
-            ->groupBy('hoa_dons.id', 'hoa_dons.ma_hoa_don', 'hoa_dons.tong_tien','hoa_dons.tong_tien_truoc_khi_giam', 'hoa_dons.phuong_thuc_thanh_toan', 'hoa_dons.created_at')
+            ->groupBy('hoa_dons.id', 'hoa_dons.ma_hoa_don', 'hoa_dons.tong_tien', 'hoa_dons.tong_tien_truoc_khi_giam', 'hoa_dons.phuong_thuc_thanh_toan', 'hoa_dons.created_at')
             ->orderByDesc('hoa_dons.created_at');
 
         if ($request->has('search') && !empty($request->search)) {
@@ -109,6 +110,11 @@ class HoaDonController extends Controller
 
         if (!$banAnId || !$monAnId || !$giaMon) {
             return response()->json(['error' => 'Thiếu thông tin đầu vào!'], 400);
+        }
+
+        $tenMon = MonAn::where('id', $monAnId)->select('ten')->first();
+        if (!$tenMon) {
+            return response()->json(['error' => 'Món ăn không tồn tại!'], 404);
         }
 
         // Kiểm tra xem bàn này đã có hóa đơn nào chưa thanh toán hay không
@@ -206,7 +212,8 @@ class HoaDonController extends Controller
         broadcast(new HoaDonUpdated($hoaDon))->toOthers();
         // event(new HoaDonUpdated($hoaDon));
         return response()->json([
-            'data' => $hoaDon
+            'data' => $hoaDon,
+            'ten_mon' => $tenMon->ten,
         ], 200);
     }
 
@@ -214,14 +221,14 @@ class HoaDonController extends Controller
     public function show($id)
     {
         $hoaDon = HoaDon::with([
-                'chiTietHoaDons.monAn' => function($query) {
-                    $query->withTrashed(); // Lấy luôn món ăn đã bị xóa
-                },
-                'banAns' => function($query) {
-                    $query->withTrashed(); // Lấy luôn bàn ăn đã bị xóa
-                },
-                'billImages' // Thêm quan hệ billImages để lấy ảnh
-            ])
+            'chiTietHoaDons.monAn' => function ($query) {
+                $query->withTrashed(); // Lấy luôn món ăn đã bị xóa
+            },
+            'banAns' => function ($query) {
+                $query->withTrashed(); // Lấy luôn bàn ăn đã bị xóa
+            },
+            'billImages' // Thêm quan hệ billImages để lấy ảnh
+        ])
             ->leftJoin('hoa_don_bans', 'hoa_don_bans.hoa_don_id', '=', 'hoa_dons.id')
             ->leftJoin('ban_ans', 'ban_ans.id', '=', 'hoa_don_bans.ban_an_id')
             ->leftJoin('dat_bans', function ($join) {
@@ -240,8 +247,7 @@ class HoaDonController extends Controller
             ->where('hoa_dons.id', $id)
             ->withTrashed() // Không lấy bản ghi của `hoa_dons` dù đã bị xóa mềm
             ->firstOrFail();
-    
+
         return view('admin.hoadon.show', compact('hoaDon'));
     }
-    
 }

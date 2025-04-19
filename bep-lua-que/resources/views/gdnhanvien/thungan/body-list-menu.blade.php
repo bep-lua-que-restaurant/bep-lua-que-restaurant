@@ -1,3 +1,4 @@
+
 {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" /> --}}
 <style>
     /* Thêm một chút kiểu dáng để "ô chữ" hiển thị lơ lửng */
@@ -165,6 +166,7 @@
     <button id="prevBtn" class="btn btn-primary btn-sm px-4">⬅ </button>
     <button id="nextBtn" class="btn btn-primary btn-sm px-4"> ➡</button>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
     var swiper = new Swiper(".mySwiper", {
@@ -200,7 +202,40 @@
     // Cập nhật số trang ban đầu
     updatePageIndicator();
 
+    toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "newestOnTop": true, // Toast mới nhất hiển thị ở trên
+        "progressBar": true,
+        "positionClass": "toast-top-right", // Vị trí: góc trên bên phải
+        "preventDuplicates": false,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000", // Toast tự ẩn sau 5 giây
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    };
 
+    function showToast(message, type) {
+        switch (type) {
+            case 'success':
+                toastr.success(message);
+                break;
+            case 'danger':
+                toastr.error(message);
+                break;
+            case 'warning':
+                toastr.warning(message);
+                break;
+            default:
+                toastr.info(message);
+                break;
+        }
+    }
     // tạo hóa đơn 
     window.luuIdHoaDon = null;
     $(document).ready(function() {
@@ -229,11 +264,14 @@
                     gia: giaMon
                 },
                 success: function(response) {
+                    let tenMon = response.ten_mon
+                    console.log(response)
                     window.luuIdHoaDon = response.data.id;
                     var maHoaDonElement = document.getElementById("maHoaDon");
                     maHoaDonElement.innerText = response.data.ma_hoa_don;
                     maHoaDonElement.style.color = "#28a745";
                     nutHoaDon.style.display = "block";
+                    showToast("🍽️ Đã thêm món " + tenMon + " vào hóa đơn", "success");
                     // Tìm ID chi tiết hóa đơn tương ứng với món ăn
                     let timMon = response.data.chi_tiet_hoa_dons.find(item => item
                         .mon_an_id == monAnId);
