@@ -74,7 +74,7 @@
 
                         <div id="employeeList" class="border rounded p-3" style="max-height: 100px; overflow-y: auto;">
                             <div class="row g-3">
-                                @foreach ($nhanViens as $nhanVien)
+                                @foreach ($nhanViensAll as $nhanVien)
                                     <div class="col-4 d-flex align-items-center">
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" name="nhan_vien_ids_nhanh[]"
@@ -88,13 +88,15 @@
                             </div>
                         </div>
                     </div>
+
+
                 </div>
 
                 {{-- Include bảng chấm công --}}
                 @include('admin.chamcong.listchamcong')
-                {{-- <div class="mt-3">
+                <div class="mt-3">
                     {!! $nhanViens->links() !!}
-                </div> --}}
+                </div>
                 <div class="d-flex gap-2 mt-3 ml-2">
                     <button type="button" id="btnEdit" class="btn btn-warning px-4 fw-bold shadow-sm">
                         Sửa
@@ -117,45 +119,74 @@
     <script>
         let currentMonth = moment();
         moment.locale('vi');
+        let page = 1;
 
         function capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);
         }
 
+
         function updateMonthTitle() {
             const monthTitle = capitalizeFirstLetter(currentMonth.format('MMMM')) + ' - ' + currentMonth.format('YYYY');
             $('#monthTitle').text(monthTitle);
-            loadChamCongData(currentMonth.format('YYYY-MM'));
+            loadChamCongData(currentMonth.format('YYYY-MM'), page);
         }
 
 
-        function loadChamCongData(month) {
+        function loadChamCongData(month, pageNumber = 1) {
+            page = pageNumber; // Cập nhật lại biến toàn cục luôn
             $.ajax({
                 url: "{{ route('cham-cong.index') }}",
                 method: 'GET',
                 data: {
-                    selected_month: month
+                    selected_month: month,
+                    page: page
                 },
                 success: function(response) {
                     $('#chamcongTable').html($(response.html).find('#chamcongTable').html());
+                    $('.pagination-links').html($(response.html).find('.pagination-links').html());
+                    // Cập nhật lại danh sách nhân viên trong phần "Chấm Công Nhanh"
+                    updateNhanVienList(response.nhanViens);
+                    // Gọi lại updateMonthTitle để cập nhật tiêu đề tháng
+                    updateMonthTitle();
                 }
             });
         }
 
+
+
+        $(document).on('click', '.pagination a', function(e) {
+            e.preventDefault();
+            const url = $(this).attr('href');
+            if (!url) return;
+
+            const params = new URLSearchParams(url.split('?')[1]);
+            const pageNumber = params.get('page');
+
+            if (pageNumber) {
+                page = pageNumber;
+                updateMonthTitle();
+            }
+        });
+
+
         function prevMonth() {
             currentMonth.subtract(1, 'month');
+            page = 1;
             updateMonthTitle();
         }
 
         function nextMonth() {
             currentMonth.add(1, 'month');
+            page = 1;
             updateMonthTitle();
         }
 
         function filterByMonth() {
             const selected = $('#monthFilter').val(); // yyyy-mm
             if (selected) {
-                currentMonth = moment(selected, 'YYYY-MM'); // Cập nhật lại biến tháng hiện tại
+                currentMonth = moment(selected, 'YYYY-MM'); // Cập nhật lại biến tháng hiện tại.
+                page = 1;
                 updateMonthTitle(); // Cập nhật tiêu đề + load dữ liệu
             }
         }

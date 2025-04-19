@@ -30,9 +30,11 @@ class NhanVienController extends Controller
 
     public function store(Request $request)
     {
-
+        $request->merge([
+            'ngay_ap_dung' => $request->ngay_ap_dung . '-01'
+        ]);
        // Validate input data với thông báo lỗi tùy chỉnh
-    $request->validate([
+         $request->validate([
         'ho_ten' => 'required|string|max:255',
         'email' => 'required|email|unique:nhan_viens,email',
         'so_dien_thoai' => 'required|unique:nhan_viens,so_dien_thoai|regex:/^0\d{9}$/',
@@ -44,7 +46,13 @@ class NhanVienController extends Controller
         'dia_chi' => 'nullable|string|max:255',
         'hinh_thuc_luong' => 'required|in:ca,thang,gio',
         'muc_luong' => 'required|numeric|min:0',
-        'ngay_ap_dung' => 'required|date|after:today|unique:luongs,ngay_ap_dung,NULL,id,nhan_vien_id,',
+        'ngay_ap_dung' => [
+         'required',
+         'date',
+        'after_or_equal:' . now()->startOfMonth()->toDateString(),
+        'before_or_equal:' . now()->endOfMonth()->toDateString(),
+         'unique:luongs,ngay_ap_dung,NULL,id,nhan_vien_id,' . ($request->nhan_vien_id ?? 'NULL')
+        ],
         'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         
     ], [
@@ -63,7 +71,7 @@ class NhanVienController extends Controller
         'hinh_anh.image' => 'Hình ảnh phải là file ảnh.',
         'hinh_anh.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg, gif, hoặc webp.',
         'hinh_anh.max' => 'Hình ảnh không được vượt quá 2MB.',
-        'ngay_ap_dung.required' => 'Ngày áp dụng lương là bắt buộc',
+        'ngay_ap_dung.required' => 'Tháng áp dụng lương là bắt buộc',
     ]);
 
 
@@ -120,7 +128,7 @@ class NhanVienController extends Controller
 
 
     public function update(Request $request, $id)
-{
+    {
     $request->validate([
         'ho_ten' => 'required|string|max:255',
         'email' => 'required|email|unique:nhan_viens,email,' . $id,
@@ -133,7 +141,8 @@ class NhanVienController extends Controller
         'dia_chi' => 'nullable|string|max:255',
         'hinh_thuc_luong' => 'required|in:ca,thang,gio',
         'muc_luong' => 'required|numeric|min:0',
-      'ngay_ap_dung' => 'nullable|date|after:today',
+        //  'ngay_ap_dung' => 'nullable|date|after_or_equal:' . now()->addMonth()->startOfMonth()->toDateString(),
+
 
         'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
     ], [
@@ -188,10 +197,14 @@ class NhanVienController extends Controller
     // Cập nhật thông tin nhân viên
     $nhanVien->update($data);
 
+    $ngayApDung = $request->ngay_ap_dung;
+    if (strlen($ngayApDung) === 7) { // nếu là dạng YYYY-MM
+    $ngayApDung .= '-01'; // gán thêm ngày đầu tháng
+    }
     $existingLuong = $nhanVien->luong()->where([
         'hinh_thuc' => $request->hinh_thuc_luong,
         'muc_luong' => $request->muc_luong,
-        'ngay_ap_dung' => $request->ngay_ap_dung,
+       'ngay_ap_dung' => $ngayApDung,
     ])->first();
     
     if (!$existingLuong) {
@@ -199,7 +212,7 @@ class NhanVienController extends Controller
             'nhan_vien_id' => $nhanVien->id,
             'hinh_thuc' => $request->hinh_thuc_luong,
             'muc_luong' => $request->muc_luong,
-            'ngay_ap_dung' => $request->ngay_ap_dung,
+           'ngay_ap_dung' => $ngayApDung,
         ]);
     }
     

@@ -24,7 +24,7 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label>Họ tên</label>
-                    <input type="text" name="ho_ten" class="form-control">
+                    <input type="text" name="ho_ten" class="form-control" value="{{ old('ho_ten') }}">
                     @error('ho_ten')
                         <div class="text-danger">{{ $message }}</div>
                     @enderror
@@ -32,7 +32,7 @@
 
                 <div class="col-md-6 mb-3">
                     <label>Email</label>
-                    <input type="email" name="email" class="form-control">
+                    <input type="email" name="email" class="form-control" value="{{ old('email') }}">
                     @error('email')
                         <div class="text-danger">{{ $message }}</div>
                     @enderror
@@ -40,7 +40,7 @@
 
                 <div class="col-md-6 mb-3">
                     <label>Số điện thoại</label>
-                    <input type="text" name="so_dien_thoai" class="form-control">
+                    <input type="text" name="so_dien_thoai" class="form-control" value="{{ old('so_dien_thoai') }}">
                     @error('so_dien_thoai')
                         <div class="text-danger">{{ $message }}</div>
                     @enderror
@@ -68,17 +68,17 @@
 
                 <div class="col-md-6 mb-3">
                     <label>Ngày sinh</label>
-                    <input type="date" name="ngay_sinh" class="form-control">
+                    <input type="date" name="ngay_sinh" class="form-control" value="{{ old('ngay_sinh') }}">
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Ngày vào làm</label>
-                    <input type="date" name="ngay_vao_lam" class="form-control">
+                    <input type="date" name="ngay_vao_lam" class="form-control"value="{{ old('ngay_vao_lam') }}">
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Địa chỉ</label>
-                    <input type="text" name="dia_chi" class="form-control">
+                    <input type="text" name="dia_chi" class="form-control" value="{{ old('dia_chi') }}">
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -111,7 +111,8 @@
                 <div class="col-md-6 mb-3">
                     <label>Mức lương</label>
                     <div class="input-group">
-                        <input type="number" name="muc_luong" class="form-control" id="mucLuong">
+                        <input type="number" name="muc_luong" class="form-control" id="mucLuong"
+                            value="{{ old('muc_luong') }}">
                         <div class="input-group-append">
                             <span class="input-group-text" id="donViLuong">VNĐ / Ca</span>
                         </div>
@@ -121,8 +122,8 @@
                     @enderror
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label>Ngày áp dụng lương</label>
-                    <input type="date" name="ngay_ap_dung" class="form-control">
+                    <label>Tháng áp dụng lương</label>
+                    <input type="month" name="ngay_ap_dung" class="form-control" value="{{ old('ngay_ap_dung') }}">
                     @error('ngay_ap_dung')
                         <div class="text-danger">{{ $message }}</div>
                     @enderror

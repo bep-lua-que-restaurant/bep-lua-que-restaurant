@@ -59,9 +59,11 @@ class ChamCongController extends Controller
                         $lastDayOfMonth->format('Y-m-d')
                     ]);
                 });
-        })->get();
+        })->paginate(10);
         
-        
+        // Tạo thêm biến chứa toàn bộ nhân viên để dùng riêng cho chấm công nhanh
+$nhanViensAll = NhanVien::where('trang_thai', 'dang_lam_viec')->get();
+
      
          $chamCongs = DB::table('cham_congs')
              ->join('nhan_viens', 'cham_congs.nhan_vien_id', '=', 'nhan_viens.id')
@@ -84,11 +86,12 @@ class ChamCongController extends Controller
          if ($request->ajax()) {
              return response()->json([
                 //  'dates' => $dates->toArray(),
-                 'html' => view('admin.chamcong.listchamcong', compact('dates', 'caLams', 'chamCongs', 'nhanViens'))->render()
+                 'html' => view('admin.chamcong.listchamcong', compact('dates', 'caLams', 'chamCongs', 'nhanViens'))->render(),
+                 'pagination' => (string) $nhanViens->links(), // Trả về phân trang
              ]);
          }
      
-         return view('admin.chamcong.chamcong', compact('dates', 'caLams', 'chamCongs', 'nhanViens'));
+         return view('admin.chamcong.chamcong', compact('dates', 'caLams', 'chamCongs', 'nhanViens','nhanViensAll'));
      }
      
      
