@@ -212,6 +212,7 @@
 </div>
 
 <div class="d-flex justify-content-between align-items-center mt-3">
+
     <!-- Nút bấm -->
     <div class="nut-hoa-don">
         <button class="btn btn-success btn-sm px-4" type="button" id="thanhToan-btn">Thanh toán</button>
@@ -238,7 +239,10 @@
         </div>
     </div>
 </div>
-
+<div class="text-center small alert alert-info alert-dismissible fade show " id="new-dish-alert" style="display: none;">
+    <i class="bi bi-bell-fill me-2"></i>
+    Hóa đơn có món mới! Nhấn 'Thông báo' để báo bếp ngay!
+</div>
 
 <!-- Offcanvas -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel"
@@ -1247,4 +1251,39 @@
             });
         });
     });
+
+    toastr.options = {
+    closeButton: true,
+    debug: false,
+    newestOnTop: true, // Toast mới nhất hiển thị ở trên
+    progressBar: true,
+    positionClass: "toast-top-right", // Vị trí: góc trên bên phải
+    preventDuplicates: false,
+    onclick: null,
+    showDuration: "300",
+    hideDuration: "1000",
+    timeOut: "5000", // Toast tự ẩn sau 5 giây
+    extendedTimeOut: "1000",
+    showEasing: "swing",
+    hideEasing: "linear",
+    showMethod: "fadeIn",
+    hideMethod: "fadeOut",
+};
+
+function showToast(message, type) {
+    switch (type) {
+        case "success":
+            toastr.success(message);
+            break;
+        case "danger":
+            toastr.error(message);
+            break;
+        case "warning":
+            toastr.warning(message);
+            break;
+        default:
+            toastr.info(message);
+            break;
+    }
+}
 </script>

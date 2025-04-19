@@ -25,42 +25,32 @@
 
         .btn-warning:hover {
             background-color: #e68900;
-            /* Màu cam đậm hơn khi hover */
             border-color: #e68900;
         }
 
         .btn-success {
             background-color: #28a745;
-            /* Màu xanh lá đậm */
             border-color: #28a745;
             color: white;
         }
 
         .btn-success:hover {
             background-color: #218838;
-            /* Màu xanh đậm hơn khi hover */
             border-color: #218838;
         }
 
         .status-btn {
             min-width: 100px;
             border-radius: 8px;
-            /* Bo góc mềm hơn */
             transition: all 0.3s ease;
-            /* Hiệu ứng chuyển đổi mượt mà */
             font-weight: bold;
-            /* Chữ đậm hơn */
             text-transform: uppercase;
-            /* Chữ in hoa */
             padding: 8px 15px;
-            /* Tăng padding cho nút lớn hơn */
         }
 
         .status-btn:hover {
             transform: scale(1.05);
-            /* Phóng to nhẹ khi hover */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            /* Thêm bóng */
         }
 
         .navbar-toggler {
@@ -102,15 +92,19 @@
                     <div class="list-group" id="cho-che-bien-list">
                         @foreach ($monAnChoCheBien as $mon)
                             <div id="dish-{{ $mon->id }}"
-                                class="list-group-item d-flex justify-content-between align-items-center">
+                                class="list-group-item d-flex justify-content-between align-items-center"
+                                data-mon-an-id="{{ $mon->mon_an_id ?? $mon->monAn->ten }}"
+                                data-ma-hoa-don="{{ $mon->hoaDon ? $mon->hoaDon->ma_hoa_don : '' }}"
+                                data-ten="{{ $mon->monAn->ten ?? 'Không xác định' }}"
+                                data-so-luong="{{ $mon->so_luong }}"
+                                data-ghi-chu="{{ $mon->ghi_chu ?? '' }}">
                                 <div>
                                     <strong>{{ $mon->monAn->ten ?? 'Không xác định' }}</strong> -
-                                    {{ $mon->hoaDon && $mon->hoaDon->banAns->isNotEmpty()
-                                        ? $mon->hoaDon->banAns->pluck('ten_ban')->join(', ')
-                                        : '<span class="text-danger">Chưa có bàn</span>' }}
+                                    {{ $mon->hoaDon ? $mon->hoaDon->ma_hoa_don ?? 'Không có mã hóa đơn' : '<span class="text-danger">Không có hóa đơn</span>' }}
                                     <br><small>Số lượng: {{ $mon->so_luong }}</small>
+                                    <br><small>Thời gian nấu: {{ number_format($mon->monAn->thoi_gian_nau * $mon->so_luong, 2) }} phút</small>
                                     @if ($mon->ghi_chu)
-                                        <br><small style="color: #ff6347; font-size: 0.8em;">Ghi chú:
+                                        <br><small style="color: #ff6347; font-size: 0.8em;" class="ghi-chu">Ghi chú:
                                             {{ $mon->ghi_chu }}</small>
                                     @endif
                                 </div>
@@ -132,18 +126,21 @@
                     <div class="list-group" id="dang-nau-list">
                         @foreach ($monAnDangNau as $mon)
                             <div id="dish-{{ $mon->id }}"
-                                class="list-group-item d-flex justify-content-between align-items-center">
+                                class="list-group-item d-flex justify-content-between align-items-center"
+                                data-mon-an-id="{{ $mon->mon_an_id ?? $mon->monAn->ten }}"
+                                data-ma-hoa-don="{{ $mon->hoaDon ? $mon->hoaDon->ma_hoa_don : '' }}"
+                                data-ten="{{ $mon->monAn->ten ?? 'Không xác định' }}"
+                                data-so-luong="{{ $mon->so_luong }}"
+                                data-ghi-chu="{{ $mon->ghi_chu ?? '' }}">
                                 <div>
                                     <strong>{{ $mon->monAn->ten ?? 'Không xác định' }}</strong> -
-                                    {{ $mon->hoaDon && $mon->hoaDon->banAns->isNotEmpty()
-                                        ? $mon->hoaDon->banAns->pluck('ten_ban')->join(', ')
-                                        : '<span class="text-danger">Chưa có bàn</span>' }}
+                                    {{ $mon->hoaDon ? $mon->hoaDon->ma_hoa_don ?? 'Không có mã hóa đơn' : '<span class="text-danger">Không có hóa đơn</span>' }}
                                     <br><small>Số lượng: {{ $mon->so_luong }}</small>
+                                    <br><small>Thời gian nấu: {{ number_format($mon->monAn->thoi_gian_nau * $mon->so_luong, 2) }} phút</small>
                                     @if ($mon->ghi_chu)
-                                        <br><small style="color: #ff6347; font-size: 0.8em;">Ghi chú:
+                                        <br><small style="color: #ff6347; font-size: 0.8em;" class="ghi-chu">Ghi chú:
                                             {{ $mon->ghi_chu }}</small>
                                     @endif
-
                                     @if ($mon->thoi_gian_hoan_thanh_du_kien)
                                         <br>
                                         <small id="timer-{{ $mon->id }}" style="color: red; font-size: 10px;"
@@ -152,8 +149,6 @@
                                         </small>
                                     @endif
                                 </div>
-
-
                                 <div class="status-buttons">
                                     <button class="btn btn-success btn-sm status-btn"
                                         onclick="updateStatus({{ $mon->id }}, 'hoan_thanh')">
@@ -173,8 +168,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/laravel-echo/1.11.2/echo.iife.min.js"></script>
 
     <script>
-        var dingSoundUrl = "{{ asset('sounds/ding.mp3') }}"; // Giả lập đường dẫn âm thanh
-        const dingSound = new Audio(dingSoundUrl); // Tạo đối tượng âm thanh
+        var dingSoundUrl = "{{ asset('sounds/ding.mp3') }}";
+        const dingSound = new Audio(dingSoundUrl);
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         const choCheBienList = document.getElementById('cho-che-bien-list');
         const dangNauList = document.getElementById('dang-nau-list');
@@ -212,43 +207,110 @@
             if (!dish) return;
 
             if (status === 'dang_nau') {
-                dish.querySelector('.status-buttons').innerHTML =
-                    `<button class="btn btn-success btn-sm status-btn" onclick="updateStatus(${id}, 'hoan_thanh')">Lên món</button>`;
-                dangNauList.appendChild(dish);
+                const ten = dish.getAttribute('data-ten');
+                const maHoaDon = dish.getAttribute('data-ma-hoa-don');
+                const soLuong = parseInt(dish.getAttribute('data-so-luong'));
+                const ghiChu = dish.getAttribute('data-ghi-chu');
+
+                // Tìm món trùng trong dang-nau-list
+                const existingDish = Array.from(dangNauList.children).find(d =>
+                    d.getAttribute('data-ten') === ten &&
+                    d.getAttribute('data-ma-hoa-don') === maHoaDon
+                );
+
+                if (existingDish) {
+                    // Gộp món: Cộng số lượng và cập nhật ghi chú
+                    const existingSoLuong = parseInt(existingDish.getAttribute('data-so-luong'));
+                    const newSoLuong = existingSoLuong + soLuong;
+                    const existingGhiChu = existingDish.getAttribute('data-ghi-chu');
+                    const newGhiChu = existingGhiChu && ghiChu ? `${existingGhiChu}, ${ghiChu}` :
+                                     existingGhiChu || ghiChu || '';
+
+                    // Cập nhật data attributes
+                    existingDish.setAttribute('data-so-luong', newSoLuong);
+                    existingDish.setAttribute('data-ghi-chu', newGhiChu);
+
+                    // Cập nhật giao diện
+                    const thoiGianNau = parseFloat(dish.querySelector('small:nth-child(3)').textContent.match(/[\d.]+/)[0]) / soLuong;
+                    existingDish.querySelector('div').innerHTML = `
+                        <strong>${ten}</strong> - 
+                        ${maHoaDon ? maHoaDon : '<span class="text-danger">Không có mã hóa đơn</span>'}
+                        <br><small>Số lượng: ${newSoLuong}</small>
+                        <br><small>Thời gian nấu: ${(thoiGianNau * newSoLuong).toFixed(2)} phút</small>
+                        ${newGhiChu ? `<br><small style="color: #ff6347; font-size: 0.8em;" class="ghi-chu">Ghi chú: ${newGhiChu}</small>` : ''}
+                    `;
+
+                    // Xóa món mới vì đã gộp
+                    dish.remove();
+                    console.log(`Gộp món ${ten} (ma_hoa_don: ${maHoaDon}), số lượng mới: ${newSoLuong}`);
+                    showToast(`Gộp ${ten}, số lượng: ${newSoLuong}`, 'success');
+                } else {
+                    // Không có món trùng, thêm món vào dang-nau-list
+                    dish.querySelector('.status-buttons').innerHTML =
+                        `<button class="btn btn-success btn-sm status-btn" onclick="updateStatus(${id}, 'hoan_thanh')">Lên món</button>`;
+                    dangNauList.appendChild(dish);
+                }
             } else if (status === 'hoan_thanh') {
                 dish.remove();
             }
         }
 
-        // Hàm tạo phần tử món ăn (giữ nguyên HTML của bạn và thêm ghi chú với màu chữ nổi bật)
-        function createDishElement(monAn, banAn) {
+        // Hàm tạo phần tử món ăn
+        function createDishElement(monAn, maHoaDon) {
             const div = document.createElement('div');
             div.id = `dish-${monAn.id}`;
             div.className = 'list-group-item d-flex justify-content-between align-items-center';
+            div.setAttribute('data-mon-an-id', monAn.mon_an_id || monAn.ten);
+            div.setAttribute('data-ma-hoa-don', maHoaDon || '');
+            div.setAttribute('data-ten', monAn.ten || 'Không xác định');
+            div.setAttribute('data-so-luong', monAn.so_luong);
+            div.setAttribute('data-ghi-chu', monAn.ghi_chu || '');
 
-            // Kiểm tra xem có ghi chú không, nếu có thì hiển thị và thay đổi màu chữ
             const ghiChu = monAn.ghi_chu ? `
-        <br><small style="color: #ff6347; font-size: 0.8em;">Ghi chú: ${monAn.ghi_chu}</small>
-    ` : '';
+                <br><small style="color: #ff6347; font-size: 0.8em;" class="ghi-chu">Ghi chú: ${monAn.ghi_chu}</small>
+            ` : '';
+
+            // Tính thời gian nấu theo số lượng
+            const thoiGianNauTong = (monAn.thoi_gian_nau * monAn.so_luong).toFixed(2);
 
             div.innerHTML = `
-        <div>
-            <strong>${monAn.ten || 'Không xác định'}</strong> - 
-            ${banAn ? ` ${banAn}` : '<span class="text-danger">Chưa có bàn</span>'}
-            <br><small>Số lượng: ${monAn.so_luong}</small>
-            ${ghiChu} <!-- Thêm ghi chú ở đây -->
-        </div>
-        <div class="status-buttons">
-            <button class="btn btn-warning btn-sm status-btn" 
-                onclick="updateStatus(${monAn.id}, 'dang_nau')">
-                Nấu
-            </button>
-        </div>
-    `;
+                <div>
+                    <strong>${monAn.ten || 'Không xác định'}</strong> - 
+                    ${maHoaDon ? maHoaDon : '<span class="text-danger">Không có mã hóa đơn</span>'}
+                    <br><small>Số lượng: ${monAn.so_luong}</small>
+                    <br><small>Thời gian nấu: ${thoiGianNauTong} phút</small>
+                    ${ghiChu}
+                </div>
+                <div class="status-buttons">
+                    <button class="btn btn-warning btn-sm status-btn" 
+                        onclick="updateStatus(${monAn.id}, 'dang_nau')">
+                        Nấu
+                    </button>
+                </div>
+            `;
             return div;
         }
 
+        // Hàm thay thế món theo mã hóa đơn
+        function replaceDishesByHoaDon(monAns, maHoaDon) {
+            // Xóa tất cả món có ma_hoa_don khớp trong cho-che-bien-list
+            const dishesToRemove = Array.from(choCheBienList.children).filter(dish =>
+                dish.getAttribute('data-ma-hoa-don') === maHoaDon
+            );
+            dishesToRemove.forEach(dish => {
+                console.log(`Removing dish with ma_hoa_don: ${maHoaDon}, id: ${dish.id}`);
+                dish.remove();
+            });
 
+            // Thêm tất cả món mới từ monAns
+            monAns.forEach(monAn => {
+                choCheBienList.appendChild(createDishElement(monAn, maHoaDon));
+                console.log(`Added dish mon_an_id: ${monAn.mon_an_id || monAn.ten}, so_luong: ${monAn.so_luong}, ma_hoa_don: ${maHoaDon}`);
+                showToast(`Cập nhật ${monAn.ten}, số lượng: ${monAn.so_luong}`, 'success');
+            });
+
+            return true;
+        }
 
         // Pusher setup
         window.Pusher = Pusher;
@@ -259,132 +321,74 @@
             forceTLS: true
         });
 
-        // Kiểm tra xem Echo có được khởi tạo chưa
-        console.log(window.Echo);
-        console.log(window.Echo.connector); // Kiểm tra lại
         console.log('Pusher key:', '{{ env('PUSHER_APP_KEY') }}');
         console.log('Pusher cluster:', '{{ env('PUSHER_APP_CLUSTER') }}');
         const channel = window.Echo.channel('bep-channel');
 
-        // Cập nhật sự kiện Pusher để hiển thị toast ngay khi hoàn thành
+        // Xử lý sự kiện trang-thai-cap-nhat
         channel.listen('.trang-thai-cap-nhat', (data) => {
-            moveDish(data.monAn.id, data.monAn.trang_thai);
-            const thoiGianHoanThanhDuKien = new Date(data.monAn.thoi_gian_hoan_thanh_du_kien);
+            console.log('Received trang-thai-cap-nhat:', JSON.stringify(data, null, 2));
+            const monAn = data.monAn;
+            moveDish(monAn.id, monAn.trang_thai);
 
-            const timerElement = document.getElementById(`timer-${data.monAn.id}`);
-            if (!timerElement) {
-                const newTimerElement = document.createElement('div');
-                newTimerElement.id = `timer-${data.monAn.id}`;
-                newTimerElement.style.fontWeight = 'normal';
-                newTimerElement.style.color = 'red';
-                newTimerElement.style.fontSize = '10px';
-                newTimerElement.innerText = 'Đang tính giờ...';
+            if (monAn.thoi_gian_hoan_thanh_du_kien) {
+                const thoiGianHoanThanhDuKien = new Date(monAn.thoi_gian_hoan_thanh_du_kien);
+                const dishElement = document.getElementById(`dish-${monAn.id}`);
+                let timerElement = document.getElementById(`timer-${monAn.id}`);
 
-                const dishInfo = document.getElementById(`dish-${data.monAn.id}`).querySelector('div:first-child');
-                dishInfo.appendChild(newTimerElement);
-            }
-
-            const intervalId = setInterval(() => {
-                const thoiGianHienTai = new Date();
-                const thoiGianConLai = Math.floor((thoiGianHoanThanhDuKien - thoiGianHienTai) / 1000);
-
-                if (thoiGianConLai <= 0) {
-                    clearInterval(intervalId);
-                    const timerElement = document.getElementById(`timer-${data.monAn.id}`);
-                    if (timerElement) {
-                        timerElement.innerText = 'Hoàn thành!';
-
-                        // Lấy tên món ăn
-                        const dishElement = document.getElementById(`dish-${data.monAn.id}`);
-                        const dishNameElement = dishElement.querySelector('strong');
-                        const tenMon = dishNameElement.textContent;
-
-                        // Đổi màu tên món thành đỏ
-                        dishNameElement.style.color = 'red';
-
-                        // Hiển thị toast và phát âm thanh ngay lập tức
-                        showToast(`Món "${tenMon}" đã nấu xong, hãy lên món!`, "success");
-                        dingSound.play().catch(error => console.log("Lỗi phát âm thanh:", error));
-                    }
-                } else {
-                    const thoiGianConLaiPhut = Math.floor(thoiGianConLai / 60);
-                    const thoiGianConLaiGiay = thoiGianConLai % 60;
-                    const thoiGianConLaiFormatted = `${thoiGianConLaiPhut} phút ${thoiGianConLaiGiay} giây`;
-                    const timerElement = document.getElementById(`timer-${data.monAn.id}`);
-                    if (timerElement) {
-                        timerElement.innerText = `Thời gian còn lại: ${thoiGianConLaiFormatted}`;
-                    }
+                if (dishElement && !timerElement) {
+                    timerElement = document.createElement('small');
+                    timerElement.id = `timer-${monAn.id}`;
+                    timerElement.style.color = 'red';
+                    timerElement.style.fontSize = '10px';
+                    timerElement.setAttribute('data-thoi-gian-hoan-thanh-du-kien', monAn.thoi_gian_hoan_thanh_du_kien);
+                    timerElement.textContent = 'Đang tính giờ...';
+                    dishElement.querySelector('div').appendChild(document.createElement('br'));
+                    dishElement.querySelector('div').appendChild(timerElement);
+                    startCountdown(monAn.id, thoiGianHoanThanhDuKien);
                 }
-            }, 1000);
+            }
         });
 
-
-
-        // Lắng nghe sự kiện món mới được thêm
+        // Xử lý sự kiện món mới được thêm
         channel.listen('.mon-moi-duoc-them', (data) => {
-            console.log(data);
-            if (!data?.monAns) {
-                // console.error('Dữ liệu không hợp lệ');
-                return;
-            }
+            console.log('Received mon-moi-duoc-them:', JSON.stringify(data, null, 2));
+            if (!data?.monAns || !data.monAns.length) return;
 
-            // Duyệt qua danh sách món ăn mới và hiển thị chúng
-            data.monAns.forEach(monAn => {
-                const banAn = monAn.ban;
-
-                // Kiểm tra nếu món ăn chưa có trong danh sách
-                if (!document.getElementById(`dish-${monAn.id}`)) {
-                    // Thêm món ăn mới vào danh sách nếu chưa có
-                    choCheBienList.appendChild(createDishElement(monAn, banAn));
-                } else {
-                    // console.log(`Món ${monAn.ten} (ID: ${monAn.id}) đã tồn tại, bỏ qua`);
-                }
-            });
+            const maHoaDon = data.monAns[0].ma_hoa_don; // Lấy ma_hoa_don từ món đầu tiên
+            replaceDishesByHoaDon(data.monAns, maHoaDon);
         });
 
+        // Xử lý sự kiện xóa món
         window.Echo.channel('xoa-mon-an-channel')
             .listen('.xoa-mon-an-event', (e) => {
-                // console.log('Dữ liệu sự kiện:', e);  // Log toàn bộ sự kiện để kiểm tra cấu trúc dữ liệu
-
-                // Kiểm tra xem e.data và e.data.id có tồn tại không trước khi truy cập id
+                console.log('Received xoa-mon-an-event:', JSON.stringify(e, null, 2));
                 if (e && e.data && e.data.id) {
                     const monAnId = e.data.id;
                     const dish = document.getElementById(`dish-${monAnId}`);
-
                     if (dish) {
                         dish.remove();
-                        console.log(`Xóa món: ${e.data.id} (ID: ${monAnId})`);
-
-                        // Xóa món ăn khỏi danh sách tương ứng
-                        if (choCheBienList.contains(dish)) {
-                            choCheBienList.removeChild(dish);
-                        } else if (dangNauList.contains(dish)) {
-                            dangNauList.removeChild(dish);
-                        }
+                        console.log(`Xóa món: ${monAnId}`);
                     } else {
                         console.log(`Không tìm thấy món ăn với ID: ${monAnId}`);
                     }
                 } else {
-                    console.log('Dữ liệu không hợp lệ hoặc thiếu thông tin về món ăn.');
+                    console.log('Dữ liệu xóa món không hợp lệ.');
                 }
             });
 
-        // Khởi tạo bộ đếm thời gian cho các món ăn có sẵn khi trang được tải
+        // Khởi tạo bộ đếm thời gian
         document.addEventListener('DOMContentLoaded', () => {
             const dishes = document.querySelectorAll('[id^="dish-"]');
             dishes.forEach(dish => {
                 const timerElement = dish.querySelector('[id^="timer-"]');
                 if (timerElement) {
                     const monAnId = dish.id.split('-')[1];
-                    const thoiGianHoanThanhDuKien = new Date(timerElement.getAttribute(
-                        'data-thoi-gian-hoan-thanh-du-kien'));
-
-                    // Bắt đầu bộ đếm thời gian
+                    const thoiGianHoanThanhDuKien = new Date(timerElement.getAttribute('data-thoi-gian-hoan-thanh-du-kien'));
                     startCountdown(monAnId, thoiGianHoanThanhDuKien);
                 }
             });
         });
-
 
         // Hàm bắt đầu bộ đếm thời gian
         function startCountdown(monAnId, thoiGianHoanThanhDuKien) {
@@ -397,43 +401,28 @@
 
                 if (thoiGianConLai <= 0) {
                     clearInterval(intervalId);
-                    timerElement.innerText = 'Hoàn thành!';
-
-                    // Lấy tên món ăn
+                    timerElement.textContent = 'Hoàn thành!';
                     const dishElement = document.getElementById(`dish-${monAnId}`);
                     const dishNameElement = dishElement.querySelector('strong');
                     const tenMon = dishNameElement.textContent;
-
-                    // Đổi màu tên món thành đỏ
                     dishNameElement.style.color = 'red';
-
-                    // Hiển thị toast ngay lập tức và phát âm thanh
-                    showToast(`Món "${tenMon}" đã nấu xong, hãy lên món!`, "success");
-                    dingSound.play().catch(error => console.log("Lỗi phát âm thanh:", error));
+                    showToast(`Món "${tenMon}" đã nấu xong, hãy lên món!`, 'success');
+                    dingSound.play().catch(error => console.log('Lỗi phát âm thanh:', error));
                 } else {
                     const thoiGianConLaiPhut = Math.floor(thoiGianConLai / 60);
                     const thoiGianConLaiGiay = thoiGianConLai % 60;
-                    timerElement.innerText =
-                        `Thời gian còn lại: ${thoiGianConLaiPhut} phút ${thoiGianConLaiGiay} giây`;
+                    timerElement.textContent = `Thời gian còn lại: ${thoiGianConLaiPhut} phút ${thoiGianConLaiGiay} giây`;
                 }
             }, 1000);
         }
 
-        // thông báo toast
+        // Hàm hiển thị toast
         function showToast(message, type) {
-            var toastEl = document.getElementById("toastMessage");
-
-            // Xóa các lớp màu cũ
-            toastEl.classList.remove("text-bg-success", "text-bg-danger", "text-bg-warning");
-
-            // Thêm lớp màu mới dựa trên type
-            toastEl.classList.add("text-bg-" + type);
-
-            // Cập nhật nội dung thông báo
-            toastEl.querySelector(".toast-body").textContent = message;
-
-            // Hiển thị Toast
-            var toast = new bootstrap.Toast(toastEl); // Không cần toastEl[0]
+            const toastEl = document.getElementById('toastMessage');
+            toastEl.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning');
+            toastEl.classList.add('text-bg-' + type);
+            toastEl.querySelector('.toast-body').textContent = message;
+            const toast = new bootstrap.Toast(toastEl);
             toast.show();
         }
     </script>
@@ -443,9 +432,7 @@
         <div id="toastMessage" class="toast align-items-center text-bg-danger border-0" role="alert"
             aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
-                <div class="toast-body">
-                    <!-- Nội dung thông báo sẽ được cập nhật bằng JavaScript -->
-                </div>
+                <div class="toast-body"></div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
                     aria-label="Close"></button>
             </div>

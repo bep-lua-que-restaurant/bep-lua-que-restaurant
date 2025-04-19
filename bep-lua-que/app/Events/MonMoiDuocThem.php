@@ -19,9 +19,9 @@ class MonMoiDuocThem implements ShouldBroadcast
         $this->monAns = collect($monAns)->map(function ($monAn) {
             return [
                 'id' => $monAn->id,
-                'ten' => optional($monAn->monAn)->ten ?? 'Không xác định', // 👈 Tránh null
+                'ten' => optional($monAn->monAn)->ten ?? 'Không xác định',
                 'thoi_gian_nau' => optional($monAn->monAn)->thoi_gian_nau,
-                'ban' => optional($monAn->hoaDon)->banAns->pluck('ten_ban')->join(', '),
+                'ma_hoa_don' => optional($monAn->hoaDon)->ma_hoa_don ?? 'Không có mã hóa đơn', // Lấy mã hóa đơn
                 'so_luong' => $monAn->so_luong,
                 'ghi_chu' => $monAn->ghi_chu,
             ];
@@ -47,11 +47,11 @@ class MonMoiDuocThem implements ShouldBroadcast
                     'id' => $monAn['id'],
                     'ten' => $monAn['ten'],
                     'thoi_gian_nau' => $monAn['thoi_gian_nau'],
-                    'ban' => $monAn['ban'],
+                    'ma_hoa_don' => $monAn['ma_hoa_don'], // Trả về mã hóa đơn
                     'so_luong' => $monAn['so_luong'],
                     'ghi_chu' => $monAn['ghi_chu'],
                 ];
-            })
+            })->toArray() // Chuyển thành mảng
         ];
     }
 }
