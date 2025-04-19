@@ -105,7 +105,7 @@ $(document).ready(function () {
         // Hiển thị hộp thoại xác nhận
         Swal.fire({
             title: "Xác nhận thông báo",
-            text: "Khi thông báo cho bếp, bạn sẽ không thể xóa các món ăn trong hóa đơn. Bạn có chắc chắn không?",
+            text: "Khi thông báo cho bếp, bạn sẽ không thể các món ăn đã được gửi tới bếp. Bạn có chắc chắn không?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",

@@ -1,4 +1,3 @@
-
 {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" /> --}}
 <style>
     /* Thêm một chút kiểu dáng để "ô chữ" hiển thị lơ lửng */
@@ -302,72 +301,85 @@
             });
 
             function capNhatHoaDon(monAnId, tenMon, giaMon) {
+                $("#new-dish-alert").fadeIn();
                 let tbody = $("#hoa-don-body");
-                let existingRow = $(`tr[data-id-mon="${monAnId}"]`);
+                let allRows = $(`tr[data-id-mon="${monAnId}"]`); // Lấy tất cả các dòng của món ăn
 
                 // Xóa dòng "Chưa có món nào trong đơn" nếu có
                 if ($(".empty-invoice").length) {
                     $(".empty-invoice").closest("tr").remove();
                 }
 
-                if (existingRow.length) {
-                    // Nếu món đã có, tăng số lượng và cập nhật tổng giá
-                    let soLuongSpan = existingRow.find(".so-luong").first();
+                // Tìm dòng không có class màu (text-danger, text-success, text-warning)
+                let noColorRow = null;
+                allRows.each(function() {
+                    // Kiểm tra nếu dòng không chứa class màu trong bất kỳ phần tử con nào
+                    if ($(this).find(
+                            '.text-danger:not(.giam-soluong), .text-success:not(.tang-soluong, .save-ghi-chu), .text-warning'
+                            ).length === 0) {
+                        noColorRow = $(this);
+                        return false; // Thoát vòng lặp khi tìm thấy dòng không có màu
+                    }
+                });
 
+                // Nếu tìm thấy dòng không có class màu, tăng số lượng
+                if (noColorRow) {
+                    let soLuongSpan = noColorRow.find(".so-luong").first();
                     let soLuongMoi = parseInt(soLuongSpan.text()) + 1;
                     soLuongSpan.text(soLuongMoi);
 
-                    let tongTienCell = existingRow.find(".text-end:last");
+                    let tongTienCell = noColorRow.find(".text-end:last");
                     tongTienCell.text((soLuongMoi * giaMon).toLocaleString("vi-VN") + " VNĐ");
 
-                    existingRow.addClass("table-primary");
+                    noColorRow.addClass("table-primary");
                     setTimeout(() => {
-                        existingRow.removeClass("table-primary");
+                        noColorRow.removeClass("table-primary");
                     }, 400);
-                } else {
-                    // Nếu món chưa có, thêm mới vào bảng hóa đơn
-                    let row = $(`
-            <tr class="table-primary" data-id-mon="${monAnId}">
-                <td class="small">${tbody.children().length + 1}</td>
-                <td class="small">
-                     <i class="bi bi-pencil-square text-primary toggle-ghi-chu" style="cursor: pointer;" data-id="${monAnId}"></i>
-                    ${tenMon}
-                            <!-- Ô nhập ghi chú, ẩn ban đầu -->
-<div class="ghi-chu-wrapper mt-1" style="display: none;">
-    <div class="d-flex align-items-center gap-2">
-        <!-- Ô nhập ghi chú -->
-        <input type="text" class="form-control ghi-chu-input form-control-sm ghi-chu-input"
-               placeholder="Nhập ghi chú..." 
-               value=" ""}" 
-               data-id="${monAnId}" style="flex: 1;">
-        
-        <!-- Nút lưu (biểu tượng V) -->
-        <i class="bi bi-check-circle-fill text-success save-ghi-chu" style="cursor: pointer; font-size: 20px;" data-id="${monAnId}"></i>
-    </div>
-                    </td>
-                <td class="text-center">
-                    <i class="bi bi-dash-circle text-danger giam-soluong" data-id="${monAnId}" style="cursor: pointer; font-size: 20px;"></i>
-                    <span class="so-luong mx-2 small">1</span>
-                    <i class="bi bi-plus-circle text-success tang-soluong" data-id="${monAnId}" style="cursor: pointer; font-size: 20px;"></i>
-                </td>
-<td class="text-end small don-gia">
-    ${giaMon.toLocaleString("vi-VN")} VNĐ
-</td>
-<td class="text-end small thanh-tien">
-    ${(1 * giaMon).toLocaleString("vi-VN")} VNĐ
-</td>
-                <td class="text-center">
-                    <button class="btn btn-sm btn-outline-danger xoa-mon-an" data-id="${monAnId}">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        `);
-                    tbody.append(row);
-                    setTimeout(() => {
-                        row.removeClass("table-primary");
-                    }, 400);
+                    tinhTongHoaDon(); // Cập nhật tổng hóa đơn
+                    return; // Thoát hàm sau khi cập nhật
                 }
+
+                // Nếu không có dòng không màu hoặc món chưa tồn tại, thêm bản ghi mới
+                let row = $(`
+        <tr class="table-primary" data-id-mon="${monAnId}">
+            <td class="small">${tbody.children().length + 1}</td>
+            <td class="small">
+                <i class="bi bi-pencil-square text-primary toggle-ghi-chu" style="cursor: pointer;" data-id="${monAnId}"></i>
+                ${tenMon}
+                <!-- Ô nhập ghi chú, ẩn ban đầu -->
+                <div class="ghi-chu-wrapper mt-1" style="display: none;">
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Ô nhập ghi chú -->
+                        <input type="text" class="form-control ghi-chu-input form-control-sm ghi-chu-input"
+                               placeholder="Nhập ghi chú..." 
+                               value="" 
+                               data-id="${monAnId}" style="flex: 1;">
+                        <!-- Nút lưu (biểu tượng V) -->
+                        <i class="bi bi-check-circle-fill text-success save-ghi-chu" style="cursor: pointer; font-size: 20px;" data-id="${monAnId}"></i>
+                    </div>
+                </td>
+            <td class="text-center">
+                <i class="bi bi-dash-circle text-danger giam-soluong" data-id="${monAnId}" style="cursor: pointer; font-size: 20px;"></i>
+                <span class="so-luong mx-2 small">1</span>
+                <i class="bi bi-plus-circle text-success tang-soluong" data-id="${monAnId}" style="cursor: pointer; font-size: 20px;"></i>
+            </td>
+            <td class="text-end small don-gia">
+                ${giaMon.toLocaleString("vi-VN")} VNĐ
+            </td>
+            <td class="text-end small thanh-tien">
+                ${(1 * giaMon).toLocaleString("vi-VN")} VNĐ
+            </td>
+            <td class="text-center">
+                <button class="btn btn-sm btn-outline-danger xoa-mon-an" data-id="${monAnId}">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `);
+                tbody.append(row);
+                setTimeout(() => {
+                    row.removeClass("table-primary");
+                }, 400);
 
                 tinhTongHoaDon(); // Cập nhật tổng hóa đơn
             }
@@ -576,8 +588,11 @@
                         );
 
                         // Thông báo thành công
-                        Swal.fire("OK!", lyDo ? "Món đã được hủy." : "Món đã bị xóa.",
-                            "success");
+                        Swal.fire({
+                            title: "Xóa món thành công!",
+                            icon: "success",
+                            confirmButtonText: "Đóng",
+                        });
                     },
                     error: function(xhr) {
                         isRequesting = false;

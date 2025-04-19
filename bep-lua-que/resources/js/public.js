@@ -154,17 +154,14 @@ function loadChiTietHoaDon(hoaDonId) {
         </span>
     </td>
 <td class="text-center">
-    <!-- Nút giảm số lượng -->
-    <i class="bi bi-dash-circle text-danger giam-soluong" style="cursor: pointer; font-size: 20px;" data-id="${
-        item.id
-    }"></i>
-    <!-- Hiển thị số lượng -->
-    <span class="so-luong mx-2 small">${item.so_luong}</span>
-    <!-- Nút tăng số lượng -->
-    <i class="bi bi-plus-circle text-success tang-soluong" style="cursor: pointer; font-size: 20px;" data-id="${
-        item.id
-    }"></i>
-</td>
+                                ${item.trang_thai === "cho_xac_nhan" ? `
+                                    <i class="bi bi-dash-circle text-danger giam-soluong" style="cursor: pointer; font-size: 20px;" data-id="${item.id}"></i>
+                                    <span class="so-luong mx-2 small">${item.so_luong}</span>
+                                    <i class="bi bi-plus-circle text-success tang-soluong" style="cursor: pointer; font-size: 20px;" data-id="${item.id}"></i>
+                                ` : `
+                                    <span class="so-luong mx-2 small">${item.so_luong}</span>
+                                `}
+                            </td>
 
 <td class="text-end small don-gia">
     ${parseFloat(item.don_gia).toLocaleString("vi-VN")} VNĐ
@@ -407,11 +404,11 @@ function sendDeleteRequest(monAnId, lyDo, forceDelete = false) {
                 parseFloat(response.tong_tien).toLocaleString("vi-VN") + " VNĐ"
             );
 
-            Swal.fire(
-                "OK!",
-                lyDo ? "Món đã được hủy." : "Món đã bị xóa.",
-                "success"
-            );
+            Swal.fire({
+                title: "Xóa món thành công!",
+                icon: "success",
+                confirmButtonText: "Đóng",
+            });
         },
         error: function (xhr, status, error) {
             isRequesting = false;
@@ -460,37 +457,4 @@ function showToast(message, type) {
     }
 }
 
-window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (e) => {
-    let ten_mon = e.monAn.mon_an.ten;
-    let ten_ban = e.monAn.hoa_don.hoa_don_ban.ban_an.ten_ban;
-    let trangThai = e.monAn.trang_thai;
-    let monAnId = e.monAn.id; // Assuming the ID of the dish in chi_tiet_hoa_don is available
 
-    // Find the row in the table corresponding to the dish
-    let row = $(`#mon-${monAnId}`);
-    if (row.length) {
-        let statusSpan = row.find("td:eq(1) span"); // Target the span in the second column (dish name/status)
-        statusSpan.removeClass("text-danger text-warning text-success"); // Remove existing status classes
-
-        // Update status color based on trang_thai
-        if (trangThai === "cho_che_bien") {
-            statusSpan.addClass("text-danger");
-        } else if (trangThai === "dang_nau") {
-            var message =
-                "Món ăn " + ten_mon + " (" + ten_ban + ") đã bắt đầu nấu";
-            showToast(message, "success"); // Display success toast
-            statusSpan.addClass("text-warning");
-        } else if (trangThai === "hoan_thanh") {
-            statusSpan.addClass("text-success");
-        }
-    }
-
-    // Show notification and play sound for completed dishes
-    if (trangThai === "hoan_thanh") {
-        var dingSound = new Audio(dingSoundUrl);
-        dingSound.play();
-        var message =
-            "Món ăn " + ten_mon + " (" + ten_ban + ") đã được cung ứng";
-        showToast(message, "success"); // Display success toast
-    }
-});

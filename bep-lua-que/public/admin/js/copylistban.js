@@ -156,17 +156,18 @@ $(document).ready(function () {
 
 </td>
 <td class="text-center">
-<!-- Nút giảm số lượng -->
-<i class="bi bi-dash-circle text-danger giam-soluong" style="cursor: pointer; font-size: 20px;" data-id="${
-                            item.id
-                        }"></i>
-<!-- Hiển thị số lượng -->
-<span class="so-luong mx-2 small">${item.so_luong}</span>
-<!-- Nút tăng số lượng -->
-<i class="bi bi-plus-circle text-success tang-soluong" style="cursor: pointer; font-size: 20px;" data-id="${
-                            item.id
-                        }"></i>
-</td>
+                                ${
+                                    item.trang_thai === "cho_xac_nhan"
+                                        ? `
+                                    <i class="bi bi-dash-circle text-danger giam-soluong" style="cursor: pointer; font-size: 20px;" data-id="${item.id}"></i>
+                                    <span class="so-luong mx-2 small">${item.so_luong}</span>
+                                    <i class="bi bi-plus-circle text-success tang-soluong" style="cursor: pointer; font-size: 20px;" data-id="${item.id}"></i>
+                                `
+                                        : `
+                                    <span class="so-luong mx-2 small">${item.so_luong}</span>
+                                `
+                                }
+                            </td>
 
 <td class="text-end small don-gia">
     ${parseFloat(item.don_gia).toLocaleString("vi-VN")} VNĐ
@@ -316,7 +317,6 @@ $(document).ready(function () {
                 maHoaDon: maHoaDon,
             },
             success: function (response) {
-    
                 // console.log("tien trc giam" + response.tong_tien);
                 let ma_hoa_don = response.data;
                 let divMaGiamGia = document.querySelector(".wrap-ma-giam-gia");
@@ -436,11 +436,10 @@ $(document).ready(function () {
                 <div>
                     <span class="fw-bold text-primary">${discount.code}</span>
                     <p class="mb-0 text-muted" style="font-size: 0.85rem;">
-                        Giảm ${Math.round(
-                            discount.value
-                        )}% cho đơn từ ${parseFloat(
-                discount.min_order_value
-            ).toLocaleString("vi-VN") + " VNĐ"}
+                        Giảm ${Math.round(discount.value)}% cho đơn từ ${
+                parseFloat(discount.min_order_value).toLocaleString("vi-VN") +
+                " VNĐ"
+            }
                     </p>
                 </div>
                 <button class="btn ${buttonClass} btn-sm apply-discount"  data-ma-hoa-don="${ma_hoa_don}"  data-id="${
@@ -472,8 +471,6 @@ $(document).ready(function () {
             },
             success: function (response) {
                 if (response.success) {
-               
-
                     showToast("Đã áp dụng mã giảm giá!", "success");
 
                     // 👉 Reset lại tất cả các nút về mặc định
@@ -498,7 +495,8 @@ $(document).ready(function () {
                     $btn.closest("li").addClass("applied");
 
                     $("#khach_can_tra").val(
-                        response.tong_tien_sau_giam.toLocaleString("vi-VN") + " VNĐ"
+                        response.tong_tien_sau_giam.toLocaleString("vi-VN") +
+                            " VNĐ"
                     );
                 } else {
                     alert(response.message || "Không áp dụng được mã giảm.");
@@ -512,34 +510,327 @@ $(document).ready(function () {
 });
 
 window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (data) => {
+    console.log("Received data:", JSON.stringify(data, null, 2));
+    if (!data.monAn || !data.monAn.id || !data.monAn.trang_thai || !data.monAn.mon_an_id) {
+        console.error("Dữ liệu sự kiện không đầy đủ:", data);
+        return;
+    }
+
     let monAnId = data.monAn.id;
     let trangThaiMoi = data.monAn.trang_thai;
     let monAn = data.monAn.mon_an_id;
-    // console.log(monAnId,trangThaiMoi,monAn)
-    let row = $(`tr[data-id-mon="${monAn}"]`);
-    if (row.length) {
-        let tenMonElement = row.find("td:nth-child(2)"); // Cột chứa tên món ăn
+    let soLuong = parseInt(data.monAn.so_luong) || 1;
+    let donGia = parseFloat(data.monAn.don_gia) || 0; // Lấy don_gia từ server
+    let ten_mon = data.monAn.mon_an?.ten_mon || 'Không xác định';
+    let ten_ban = data.monAn.hoa_don?.hoa_don_ban?.ban_an?.ten_ban || 'Không xác định';
+    console.log("mon_an_id:", monAn, "trang_thai:", trangThaiMoi, "so_luong:", soLuong, "don_gia:", donGia);
 
-        if (trangThaiMoi === "cho_che_bien") {
-            tenMonElement.removeClass().addClass("small text-danger"); // Đỏ
-        } else if (trangThaiMoi === "dang_nau") {
-            tenMonElement.removeClass().addClass("small text-warning"); // Vàng
+    // Hàm định dạng số tiền VNĐ
+    const formatVND = (amount) => {
+        return amount.toFixed(0).replace(/\d(?=(\d{3})+$)/g, '$&.') + ' VNĐ';
+    };
+
+    // Xác định lớp màu
+    let targetColorClass;
+    if (trangThaiMoi === "cho_che_bien") {
+        targetColorClass = "text-danger";
+    } else if (trangThaiMoi === "dang_nau") {
+        targetColorClass = "text-warning";
+    } else if (trangThaiMoi === "hoan_thanh") {
+        targetColorClass = "text-success";
+    }
+    console.log("Target color class:", targetColorClass);
+
+    // Tìm tất cả hàng với mon_an_id
+    let rows = $(`tr[data-id-mon="${monAn}"]`);
+    console.log("Rows found:", rows.length, "monAn:", monAn);
+
+    // Log lớp màu và HTML
+    rows.each(function(index) {
+        let colorClasses = $(this).find("td:nth-child(2) span").attr("class") || $(this).find("td:nth-child(2)").attr("class");
+        let rowHtml = $(this).html();
+        console.log(`Row ${index + 1} with data-id-mon="${monAn}" has color classes:`, colorClasses);
+        console.log(`Row ${index + 1} HTML:`, rowHtml);
+    });
+
+    if (rows.length) {
+        // Hàm gộp các hàng trùng màu
+        const mergeRowsByColor = (color, mainRow, serverSoLuong) => {
+            let targetRows = rows.filter(function() {
+                let colorClasses = $(this).find("td:nth-child(2) span").attr("class") || $(this).find("td:nth-child(2)").attr("class");
+                return colorClasses.includes(color) && this !== mainRow[0];
+            });
+            let mainSoLuongElement = mainRow.find("td:nth-child(3) .so-luong");
+            let mainThanhTienElement = mainRow.find("td.thanh-tien");
+            let totalSoLuong = serverSoLuong; // Bắt đầu với số lượng từ server
+            if (targetRows.length > 0) {
+                targetRows.each(function() {
+                    let soLuong = parseInt($(this).find("td:nth-child(3) .so-luong").text().match(/\d+/)) || 1;
+                    totalSoLuong += soLuong;
+                    $(this).remove();
+                    console.log(`Removed duplicate ${color} row with data-id-mon:`, monAn, "so_luong:", soLuong);
+                });
+                console.log(`Merged ${targetRows.length} ${color} rows with server so_luong:`, totalSoLuong);
+            }
+            mainSoLuongElement.text(totalSoLuong);
+            // Tính và cập nhật thành tiền
+            let thanhTien = totalSoLuong * donGia;
+            mainThanhTienElement.text(formatVND(thanhTien));
+            console.log(`Updated thanh_tien: ${formatVND(thanhTien)} for so_luong: ${totalSoLuong}, don_gia: ${donGia}`);
+            // Cập nhật lại rows
+            rows = $(`tr[data-id-mon="${monAn}"]`);
+            return totalSoLuong;
+        };
+
+        // Tìm hàng phù hợp
+        let selectedRow = null;
+        let tenMonElement = null;
+        let soLuongElement = null;
+
+        // Ưu tiên hàng dựa trên trạng thái
+        if (trangThaiMoi === "dang_nau") {
+            selectedRow = rows.filter(function() {
+                let color = $(this).find("td:nth-child(2) span").attr("class") || $(this).find("td:nth-child(2)").attr("class");
+                console.log(`Checking row ${$(this).index() + 1} for text-danger:`, color);
+                return color.includes("text-danger");
+            }).first();
+
+            if (!selectedRow.length) {
+                selectedRow = rows.filter(function() {
+                    let color = $(this).find("td:nth-child(2) span").attr("class") || $(this).find("td:nth-child(2)").attr("class");
+                    console.log(`Checking row ${$(this).index() + 1} for text-warning:`, color);
+                    return color.includes("text-warning");
+                }).first();
+            }
         } else if (trangThaiMoi === "hoan_thanh") {
-            tenMonElement.removeClass().addClass("small text-success"); // Xanh
+            selectedRow = rows.filter(function() {
+                let color = $(this).find("td:nth-child(2) span").attr("class") || $(this).find("td:nth-child(2)").attr("class");
+                console.log(`Checking row ${$(this).index() + 1} for text-warning:`, color);
+                return color.includes("text-warning");
+            }).first();
+
+            if (!selectedRow.length) {
+                selectedRow = rows.filter(function() {
+                    let color = $(this).find("td:nth-child(2) span").attr("class") || $(this).find("td:nth-child(2)").attr("class");
+                    console.log(`Checking row ${$(this).index() + 1} for text-success:`, color);
+                    return color.includes("text-success");
+                }).first();
+            }
+        } else if (trangThaiMoi === "cho_che_bien") {
+            selectedRow = rows.filter(function() {
+                let color = $(this).find("td:nth-child(2) span").attr("class") || $(this).find("td:nth-child(2)").attr("class");
+                console.log(`Checking row ${$(this).index() + 1} for text-danger or none:`, color);
+                return !color.includes("text-warning") && !color.includes("text-success");
+            }).first();
         }
+
+        if (!selectedRow.length) {
+            selectedRow = rows.filter(function() {
+                let color = $(this).find("td:nth-child(2) span").attr("class") || $(this).find("td:nth-child(2)").attr("class");
+                return !color.includes("text-success");
+            }).first();
+            console.log("No suitable row found, selected non-success row:", selectedRow.length ? selectedRow.html() : "None");
+        }
+
+        if (!selectedRow.length) {
+            selectedRow = rows.first();
+            console.log("No non-success row found, selected first row:", selectedRow.html());
+        }
+
+        tenMonElement = selectedRow.find("td:nth-child(2) span").length ? selectedRow.find("td:nth-child(2) span") : selectedRow.find("td:nth-child(2)");
+        soLuongElement = selectedRow.find("td:nth-child(3) .so-luong");
+        let thanhTienElement = selectedRow.find("td.thanh-tien");
+        console.log("Selected row - color classes:", tenMonElement.attr("class"));
+        console.log("soLuongElement:", soLuongElement.length, soLuongElement.text());
+        console.log("tenMonElement is span:", selectedRow.find("td:nth-child(2) span").length > 0);
+
+        // Xác định trạng thái hiện tại
+        let currentColorClass = tenMonElement.attr("class") || "";
+        let currentTrangThai;
+        if (currentColorClass.includes("text-danger")) {
+            currentTrangThai = "cho_che_bien";
+        } else if (currentColorClass.includes("text-warning")) {
+            currentTrangThai = "dang_nau";
+        } else if (currentColorClass.includes("text-success")) {
+            currentTrangThai = "hoan_thanh";
+        } else {
+            currentTrangThai = "none";
+        }
+        console.log("Current trang_thai:", currentTrangThai);
+
+        // Kiểm tra tính hợp lệ
+        let isValidTransition = false;
+        if (currentTrangThai === "none" || currentTrangThai === trangThaiMoi) {
+            isValidTransition = true;
+        } else if (currentTrangThai === "cho_che_bien" && (trangThaiMoi === "dang_nau" || trangThaiMoi === "hoan_thanh")) {
+            isValidTransition = true;
+        } else if (currentTrangThai === "dang_nau" && trangThaiMoi === "hoan_thanh") {
+            isValidTransition = true;
+        }
+
+        if (!isValidTransition) {
+            console.log("Invalid transition from", currentTrangThai, "to", trangThaiMoi);
+            return;
+        }
+
+        // Gộp hàng trùng màu và cập nhật số lượng từ server
+        if (trangThaiMoi === "cho_che_bien") {
+            mergeRowsByColor("text-danger", selectedRow, soLuong);
+        } else if (trangThaiMoi === "dang_nau") {
+            mergeRowsByColor("text-warning", selectedRow, soLuong);
+        } else if (trangThaiMoi === "hoan_thanh") {
+            if (currentTrangThai === "dang_nau") {
+                let successRow = rows.filter(function() {
+                    let color = $(this).find("td:nth-child(2) span").attr("class") || $(this).find("td:nth-child(2)").attr("class");
+                    return color.includes("text-success") && this !== selectedRow[0];
+                }).first();
+                if (successRow.length) {
+                    successRow.remove(); // Xóa hàng text-success cũ
+                    console.log("Removed existing text-success row");
+                }
+                soLuongElement.text(soLuong); // Đặt số lượng từ server
+                // Tính và cập nhật thành tiền
+                let thanhTien = soLuong * donGia;
+                thanhTienElement.text(formatVND(thanhTien));
+                console.log(`Updated thanh_tien: ${formatVND(thanhTien)} for so_luong: ${soLuong}, don_gia: ${donGia}`);
+            } else {
+                mergeRowsByColor("text-success", selectedRow, soLuong);
+            }
+        }
+
+        // Cập nhật màu sắc và kiểu chữ
+        if (currentTrangThai !== trangThaiMoi) {
+            console.log("Updating color to:", targetColorClass);
+            // Xóa lớp small từ <td> cha
+            selectedRow.find("td:nth-child(2)").removeClass("small");
+            // Cập nhật tenMonElement
+            tenMonElement.removeClass("text-danger text-warning text-success small").addClass(targetColorClass);
+            if (trangThaiMoi === "cho_che_bien" || trangThaiMoi === "dang_nau") {
+                tenMonElement.addClass("small");
+            } else if (trangThaiMoi === "hoan_thanh") {
+                tenMonElement.addClass("small"); // Giữ small theo code bạn gửi
+            }
+        }
+
+        // Hiển thị thông báo
+        if (trangThaiMoi === "dang_nau" && currentTrangThai !== "dang_nau") {
+            var message = "Món ăn " + ten_mon + " (" + ten_ban + ") đã bắt đầu nấu";
+            showToast(message, "success");
+        } else if (trangThaiMoi === "hoan_thanh" && currentTrangThai !== "hoan_thanh") {
+            var dingSound = new Audio(dingSoundUrl);
+            dingSound.play().catch(err => console.error("Audio error:", err));
+            var message = "Món ăn " + ten_mon + " (" + ten_ban + ") đã được cung ứng";
+            showToast(message, "success");
+        }
+
+        // Log trạng thái sau cập nhật
+        console.log("Row after update - color classes:", tenMonElement.attr("class"));
+        console.log("Row after update - HTML:", selectedRow.html());
+        console.log("Row still exists:", selectedRow.length > 0);
+        console.log("Row CSS display:", selectedRow.css("display"));
+        console.log("Row CSS visibility:", selectedRow.css("visibility"));
+
+        // Kiểm tra bảng
+        let updatedRows = $(`tr[data-id-mon="${monAn}"]`);
+        console.log("Rows after processing:", updatedRows.length);
+        updatedRows.each(function(index) {
+            let colorClasses = $(this).find("td:nth-child(2) span").attr("class") || $(this).find("td:nth-child(2)").attr("class");
+            console.log(`Row ${index + 1} after processing has color classes:`, colorClasses);
+        });
+
+        // Kiểm tra DOM
+        console.log("Final DOM check - Row exists:", $(`tr[data-id-mon="${monAn}"]`).length > 0);
+
+        // Giám sát DOM
+        const table = selectedRow.closest("table");
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.removedNodes.length) {
+                    mutation.removedNodes.forEach((node) => {
+                        if (node.nodeName === "TR" && $(node).data("id-mon") === monAn) {
+                            console.log("Row with data-id-mon=" + monAn + " was removed by external code!");
+                            console.log("Mutation details:", mutation);
+                            console.log("Removed node HTML:", $(node).html());
+                            console.log("Caller stack:", new Error().stack);
+                        }
+                    });
+                }
+            });
+        });
+        observer.observe(table[0], { childList: true, subtree: true });
+    } else {
+        console.log(`No row found for monAn: ${monAn}`);
     }
 });
 
 window.Echo.channel("bep-channel").listen(".mon-moi-duoc-them", (data) => {
-    // Tìm tất cả các món có nút xóa trước khi xóa
-    $(".xoa-mon, .xoa-mon-an").each(function () {
-        let row = $(this).closest("tr"); // Lấy dòng (tr) chứa nút xóa
+    // Tìm tất cả các món có nút xóa hoặc nút tăng/giảm trước khi xóa
+    $(".xoa-mon, .xoa-mon-an, .tang-soluong, .giam-soluong").each(function () {
+        let row = $(this).closest("tr"); // Lấy dòng (tr) chứa nút
         let statusCell = row.find("td:eq(1)");
         // Đổi màu trạng thái thành "chờ chế biến"
         statusCell.removeClass("text-danger text-warning text-success");
         statusCell.addClass("text-danger");
     });
 
-    // Xóa nút xóa
+    // Xóa nút xóa và nút tăng/giảm
     $(".xoa-mon, .xoa-mon-an").remove();
+    $(".tang-soluong, .giam-soluong").remove();
+
+    // Gộp các dòng có cùng monAnId và class text-danger
+    let processedMonAnIds = new Set(); // Lưu danh sách monAnId đã xử lý
+    $("tr[data-id-mon]").each(function () {
+        let row = $(this);
+        let monAnId = row.data("id-mon");
+        let hasDangerClass = row.find(".text-danger").length > 0;
+
+        // Chỉ xử lý các dòng có text-danger và chưa được xử lý
+        if (hasDangerClass && !processedMonAnIds.has(monAnId)) {
+            // Tìm tất cả các dòng có cùng monAnId và text-danger
+            let matchingRows = $(`tr[data-id-mon="${monAnId}"]`).filter(
+                function () {
+                    return $(this).find(".text-danger").length > 0;
+                }
+            );
+
+            if (matchingRows.length > 1) {
+                // Tính tổng số lượng
+                let totalQuantity = 0;
+                let giaMon = 0;
+                matchingRows.each(function () {
+                    let soLuong =
+                        parseInt($(this).find(".so-luong").text()) || 0;
+                    totalQuantity += soLuong;
+                    // Lấy đơn giá từ dòng đầu tiên
+                    if (!giaMon) {
+                        giaMon =
+                            parseInt(
+                                $(this)
+                                    .find(".don-gia")
+                                    .text()
+                                    .replace(/[^0-9]/g, "")
+                            ) || 0;
+                    }
+                });
+
+                // Cập nhật dòng đầu tiên
+                let firstRow = matchingRows.first();
+                firstRow.find(".so-luong").text(totalQuantity);
+                firstRow
+                    .find(".thanh-tien")
+                    .text(
+                        (totalQuantity * giaMon).toLocaleString("vi-VN") +
+                            " VNĐ"
+                    );
+
+                // Xóa các dòng còn lại
+                matchingRows.not(firstRow).remove();
+            }
+
+            // Đánh dấu monAnId đã được xử lý
+            processedMonAnIds.add(monAnId);
+        }
+    });
+
+    $("#new-dish-alert").fadeOut();
 });
