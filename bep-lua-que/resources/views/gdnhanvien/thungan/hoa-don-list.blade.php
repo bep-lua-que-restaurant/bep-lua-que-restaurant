@@ -1062,21 +1062,7 @@
         }
     });
 
-    // thông báo toast
-    function showToast(message, type) {
-        var toastEl = $("#toastMessage");
 
-        // Thay đổi màu sắc tùy theo loại thông báo
-        toastEl.removeClass("text-bg-success text-bg-danger text-bg-warning");
-        toastEl.addClass("text-bg-" + type);
-
-        // Cập nhật nội dung thông báo
-        toastEl.find(".toast-body").text(message);
-
-        // Hiển thị Toast
-        var toast = new bootstrap.Toast(toastEl[0]);
-        toast.show();
-    }
 
     function resetGiaoDienHoaDon() {
         $("#hoa-don-body").html('<tr><td colspan="5" class="text-center">Chưa có hóa đơn nào</td></tr>');

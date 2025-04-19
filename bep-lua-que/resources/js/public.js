@@ -210,7 +210,9 @@ function loadChiTietHoaDon(hoaDonId) {
                 parseFloat(tongTien).toLocaleString("vi-VN") + " VNĐ"
             );
             $(".so-nguoi").text(`👥 ${soNguoi}`);
-            $("#totalAmount").val(parseFloat(tongTien).toLocaleString("vi-VN") + " VNĐ");
+            $("#totalAmount").val(
+                parseFloat(tongTien).toLocaleString("vi-VN") + " VNĐ"
+            );
 
             if (response.da_ghep == true) {
                 $("#ten-ban").text(response.ten_ban_an.join(" + "));
@@ -251,9 +253,10 @@ function loadChiTietHoaDon(hoaDonId) {
                     success: function (response) {
                         // Cập nhật tổng tiền
 
-                        let formattedThanhTien = Number(
-                            response.thanh_tien
-                        ).toLocaleString("vi-VN") + " VNĐ";
+                        let formattedThanhTien =
+                            Number(response.thanh_tien).toLocaleString(
+                                "vi-VN"
+                            ) + " VNĐ";
 
                         thanhTien.text(formattedThanhTien);
 
@@ -268,7 +271,8 @@ function loadChiTietHoaDon(hoaDonId) {
 
                         // Đảm bảo định dạng lại số tiền đúng cách
                         $("#tong-tien").text(
-                            parseFloat(tongTien).toLocaleString("vi-VN") + " VNĐ"
+                            parseFloat(tongTien).toLocaleString("vi-VN") +
+                                " VNĐ"
                         );
                     },
                     error: function (xhr) {
@@ -419,6 +423,41 @@ function sendDeleteRequest(monAnId, lyDo, forceDelete = false) {
             Swal.fire("Lỗi!", "Không thể xử lý món ăn.", "error");
         },
     });
+}
+
+toastr.options = {
+    closeButton: true,
+    debug: false,
+    newestOnTop: true, // Toast mới nhất hiển thị ở trên
+    progressBar: true,
+    positionClass: "toast-top-right", // Vị trí: góc trên bên phải
+    preventDuplicates: false,
+    onclick: null,
+    showDuration: "300",
+    hideDuration: "1000",
+    timeOut: "5000", // Toast tự ẩn sau 5 giây
+    extendedTimeOut: "1000",
+    showEasing: "swing",
+    hideEasing: "linear",
+    showMethod: "fadeIn",
+    hideMethod: "fadeOut",
+};
+
+function showToast(message, type) {
+    switch (type) {
+        case "success":
+            toastr.success(message);
+            break;
+        case "danger":
+            toastr.error(message);
+            break;
+        case "warning":
+            toastr.warning(message);
+            break;
+        default:
+            toastr.info(message);
+            break;
+    }
 }
 
 window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (e) => {
