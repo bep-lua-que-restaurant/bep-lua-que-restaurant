@@ -91,7 +91,8 @@ class TachBanController extends Controller
                 'ma_hoa_don' => $maHoaDonMoi,
                 'khach_hang_id' => 0,
                 'phuong_thuc_thanh_toan' => 'tien_mat',
-                'tong_tien' => 0
+                'tong_tien' => 0,
+                'tong_tien_truoc_khi_giam' => 0 // Thêm trường tong_tien_truoc_khi_giam
             ]);
 
             $banAnMoiIds = is_array($banAnMoiIds) ? $banAnMoiIds : [$banAnMoiIds];
@@ -129,7 +130,10 @@ class TachBanController extends Controller
                 ]);
             }
 
-            $newHoaDon->update(['tong_tien' => $tongTienMoi]);
+            $newHoaDon->update([
+                'tong_tien' => $tongTienMoi,
+                'tong_tien_truoc_khi_giam' => $tongTienMoi // Cập nhật cả tong_tien_truoc_khi_giam
+            ]);
 
             foreach ($monTach as $mon) {
                 $idMon = $mon['id_mon'];
@@ -174,7 +178,10 @@ class TachBanController extends Controller
             }
 
             $tongTienGoc = ChiTietHoaDon::where('hoa_don_id', $hoaDonGoc->id)->sum('thanh_tien');
-            $hoaDonGoc->update(['tong_tien' => $tongTienGoc]);
+            $hoaDonGoc->update([
+                'tong_tien' => $tongTienGoc,
+                'tong_tien_truoc_khi_giam' => $tongTienGoc // Cập nhật cả tong_tien_truoc_khi_giam
+            ]);
 
             if ($tongTienGoc == 0) {
                 return response()->json([
@@ -182,12 +189,14 @@ class TachBanController extends Controller
                     'hoa_don_goc' => [
                         'ma_hoa_don' => $hoaDonGoc->ma_hoa_don,
                         'tong_tien' => $hoaDonGoc->tong_tien,
+                        'tong_tien_truoc_khi_giam' => $hoaDonGoc->tong_tien_truoc_khi_giam // Thêm trường này
                     ]
                 ]);
             }
 
             return response()->json([
-                'message' => 'Success'
+                'message' => 'Success',
+                'hoa_don_goc_id' => $hoaDonGoc->id,
             ]);
         });
     }
@@ -228,5 +237,5 @@ class TachBanController extends Controller
             $hoaDon->forceDelete();
         }
         $hoaDon->forceDelete();
-        }
+    }
 }
