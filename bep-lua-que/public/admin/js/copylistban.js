@@ -81,7 +81,7 @@ $(document).ready(function () {
                     maHoaDonElement.innerText = "Chưa có hóa đơn";
                     maHoaDonElement.style.color = "red";
 
-                    $("#tong-tien").text("0 đ");
+                    $("#tong-tien").text("0 VNĐ");
                     $(".so-nguoi").text("👥 0");
                 }
             },
@@ -169,17 +169,11 @@ $(document).ready(function () {
 </td>
 
 <td class="text-end small don-gia">
-    ${parseFloat(item.don_gia).toLocaleString("vi-VN", {
-        style: "currency",
-        currency: "VND",
-    })}
+    ${parseFloat(item.don_gia).toLocaleString("vi-VN")} VNĐ
 </td>
 
 <td class="text-end small thanh-tien">
-    ${(item.so_luong * item.don_gia).toLocaleString("vi-VN", {
-        style: "currency",
-        currency: "VND",
-    })}
+    ${(item.so_luong * item.don_gia).toLocaleString("vi-VN")} VNĐ
 </td>
  ${
      item.trang_thai === "cho_xac_nhan"
@@ -219,19 +213,11 @@ $(document).ready(function () {
                     $("#ten-ban").text(response.ten_ban_an.join(" + "));
                 }
 
-                $("#tong-tien").text(
-                    tongTien.toLocaleString("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                    })
-                );
+                $("#tong-tien").text(tongTien.toLocaleString("vi-VN") + " VNĐ");
                 $(".so-nguoi").text(`👥 ${soNguoi}`);
 
                 $("#totalAmount").val(
-                    tongTien.toLocaleString("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                    })
+                    tongTien.toLocaleString("vi-VN") + " VNĐ"
                 ); // Cập nhật tổng tiền trong offcanvas
 
                 if (response.ten_ban) {
@@ -276,12 +262,10 @@ $(document).ready(function () {
                         success: function (response) {
                             // Cập nhật tổng tiền
 
-                            let formattedThanhTien = Number(
-                                response.thanh_tien
-                            ).toLocaleString("vi-VN", {
-                                style: "currency",
-                                currency: "VND",
-                            });
+                            let formattedThanhTien =
+                                Number(response.thanh_tien).toLocaleString(
+                                    "vi-VN"
+                                ) + " VNĐ";
 
                             thanhTien.text(formattedThanhTien);
 
@@ -295,10 +279,7 @@ $(document).ready(function () {
                             });
 
                             $("#tong-tien").text(
-                                tongTien.toLocaleString("vi-VN", {
-                                    style: "currency",
-                                    currency: "VND",
-                                })
+                                tongTien.toLocaleString("vi-VN") + " VNĐ"
                             );
                         },
                         error: function (xhr) {
@@ -392,18 +373,12 @@ $(document).ready(function () {
                                 item.so_luong
                             }</span>
                         </td>
-                        <td class="text-start small">
-                            ${parseFloat(item.don_gia).toLocaleString("vi-VN", {
-                                style: "currency",
-                                currency: "VND",
-                            })}
+                <td class="text-start small">
+                ${parseFloat(item.don_gia).toLocaleString("vi-VN")} VNĐ
                         </td>
-                        <td class="text-start small">
-                            ${(item.so_luong * item.don_gia).toLocaleString(
-                                "vi-VN",
-                                { style: "currency", currency: "VND" }
-                            )}
-                        </td>
+<td class="text-start small">
+    ${(item.so_luong * item.don_gia).toLocaleString("vi-VN")} VNĐ
+</td>
                     </tr>
                 `;
                         rows.push(row);
@@ -420,19 +395,13 @@ $(document).ready(function () {
                 }
 
                 $("#tong_tien_hang").val(
-                    tongTien.toLocaleString("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                    })
+                    tongTien.toLocaleString("vi-VN") + " VNĐ"
                 );
 
                 let khach_can_tra = parseFloat(response.tong_tien_sau_giam);
 
                 $("#khach_can_tra").val(
-                    khach_can_tra.toLocaleString("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                    })
+                    khach_can_tra.toLocaleString("vi-VN") + " VNĐ"
                 );
             },
             error: function (xhr) {
@@ -470,10 +439,7 @@ $(document).ready(function () {
                             discount.value
                         )}% cho đơn từ ${parseFloat(
                 discount.min_order_value
-            ).toLocaleString("vi-VN", {
-                style: "currency",
-                currency: "VND",
-            })}
+            ).toLocaleString("vi-VN") + " VNĐ"}
                     </p>
                 </div>
                 <button class="btn ${buttonClass} btn-sm apply-discount"  data-ma-hoa-don="${ma_hoa_don}"  data-id="${
@@ -531,7 +497,7 @@ $(document).ready(function () {
                     $btn.closest("li").addClass("applied");
 
                     $("#khach_can_tra").val(
-                        response.tong_tien_sau_giam.toLocaleString() + " VND"
+                        response.tong_tien_sau_giam.toLocaleString("vi-VN") + " VNĐ"
                     );
                 } else {
                     alert(response.message || "Không áp dụng được mã giảm.");

@@ -280,10 +280,7 @@
                     soLuongSpan.text(soLuongMoi);
 
                     let tongTienCell = existingRow.find(".text-end:last");
-                    tongTienCell.text((soLuongMoi * giaMon).toLocaleString("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                    }));
+                    tongTienCell.text((soLuongMoi * giaMon).toLocaleString("vi-VN") + " VNĐ");
 
                     existingRow.addClass("table-primary");
                     setTimeout(() => {
@@ -315,12 +312,12 @@
                     <span class="so-luong mx-2 small">1</span>
                     <i class="bi bi-plus-circle text-success tang-soluong" data-id="${monAnId}" style="cursor: pointer; font-size: 20px;"></i>
                 </td>
-                <td class="text-end small don-gia">
-                    ${giaMon.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
-                </td>
-                <td class="text-end small thanh-tien">
-                    ${(1 * giaMon).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
-                </td>
+<td class="text-end small don-gia">
+    ${giaMon.toLocaleString("vi-VN")} VNĐ
+</td>
+<td class="text-end small thanh-tien">
+    ${(1 * giaMon).toLocaleString("vi-VN")} VNĐ
+</td>
                 <td class="text-center">
                     <button class="btn btn-sm btn-outline-danger xoa-mon-an" data-id="${monAnId}">
                         <i class="bi bi-trash"></i>
@@ -346,10 +343,7 @@
                 });
 
                 $("#tong-tien").text(
-                    tongTien.toLocaleString("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                    })
+                    tongTien.toLocaleString("vi-VN") + " VNĐ"
                 );
             }
             let isRequesting = false;
@@ -398,10 +392,7 @@
 
                         let formattedThanhTien = Number(
                             response.thanh_tien
-                        ).toLocaleString("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                        });
+                        ).toLocaleString("vi-VN") + " VNĐ";
 
                         thanhTien.text(formattedThanhTien);
 
@@ -414,10 +405,7 @@
                             tongTien += parseInt(tongTienMon);
                         });
                         $("#tong-tien").text(
-                            parseFloat(tongTien).toLocaleString("vi-VN", {
-                                style: "currency",
-                                currency: "VND",
-                            })
+                            parseFloat(tongTien).toLocaleString("vi-VN") + " VNĐ"
                         );
                     },
                     error: function(xhr) {
@@ -436,10 +424,7 @@
 
                 // Đảm bảo định dạng lại số tiền đúng cách
                 $("#tong-tien").text(
-                    parseFloat(tongTien).toLocaleString("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                    })
+                    parseFloat(tongTien).toLocaleString("vi-VN") + " VNĐ"
                 );
             }
 
@@ -548,10 +533,8 @@
 
                         // Cập nhật tổng tiền
                         $("#tong-tien").text(
-                            parseFloat(response.tong_tien).toLocaleString("vi-VN", {
-                                style: "currency",
-                                currency: "VND",
-                            })
+                            parseFloat(response.tong_tien).toLocaleString("vi-VN") +
+                            " VNĐ"
                         );
 
                         // Thông báo thành công
