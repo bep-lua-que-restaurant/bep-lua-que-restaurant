@@ -5,7 +5,11 @@
 @section('content')
     <div class="container mt-4">
         <h3 class="mb-4 text-primary">📦 Thống kê tồn kho và hạn sử dụng</h3>
-
+        <div class="text-end mt-4">
+            <a href="{{ route('nguyen-lieu.index') }}" class="btn btn-secondary">
+                ← Quay lại danh sách
+            </a>
+        </div>
         <!-- Tab navigation -->
         <ul class="nav nav-tabs" id="tab-hsd" role="tablist">
             <li class="nav-item" role="presentation">
@@ -179,21 +183,21 @@
                                     '<span class="badge bg-success">Đang SD</span>';
 
                                 tbody.append(`
-                                <tr>
-                                    <td>${index + 1}</td>
-                                    <td>${item.nguyen_lieu}</td>
-                                    <td>${item.don_vi}</td>
-                                    <td>${item.ton_kho_hien_tai}</td>
-                                    <td>${item.nhap_tu_bep}</td>
-                                    <td>${item.nhap_tu_ncc}</td>
-                                    <td class="text-primary fw-bold">${item.tong_nhap}</td>
-                                    <td>${item.xuat_bep}</td>
-                                    <td>${item.xuat_tra_hang}</td>
-                                    <td>${item.xuat_huy}</td>
-                                    <td class="text-danger fw-bold">${item.tong_xuat}</td>
-                                    <td>${trangThai}</td>
-                                </tr>
-                            `);
+                                    <tr>
+                                        <td>${index + 1}</td>
+                                        <td>${item.nguyen_lieu}</td>
+                                        <td>${item.don_vi}</td>
+                                        <td>${item.ton_kho_hien_tai}</td>
+                                        <td>${item.nhap_tu_bep}</td>
+                                        <td>${item.nhap_tu_ncc}</td>
+                                        <td class="text-primary fw-bold">${item.tong_nhap}</td>
+                                        <td>${item.xuat_bep}</td>
+                                        <td>${item.xuat_tra_hang}</td>
+                                        <td>${item.xuat_huy}</td>
+                                        <td class="text-danger fw-bold">${item.tong_xuat}</td>
+                                        <td>${trangThai}</td>
+                                    </tr>
+                                `);
                             });
                         },
                         error: function() {
@@ -201,7 +205,6 @@
                         }
                     });
                 });
-
 
                 // Lọc Hạn Sử Dụng
                 $('#filter-han-su-dung-form').on('submit', function(e) {
@@ -250,30 +253,33 @@
                                     soNgay = `${soNgay} ngày`;
                                 }
 
-                                // Tạo ID cho canvas biểu đồ
                                 let chartId = `chart-${index}`;
 
                                 tbody.append(`
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td class="text-start" title="${item.nguyen_lieu}">${item.nguyen_lieu}</td>
-                            <td>${item.don_vi}</td>
-                            <td>${item.so_luong_ton}</td>
-                            <td>
-                                <span class="badge bg-${badgeClass}" data-bs-toggle="tooltip" title="${status}">
-                                    ${soNgay}
-                                </span>
-                            </td>
-                            <td>
-                                <i class="${icon}" title="${status}" style="font-size: 1.2rem;"></i>
-                            </td>
-                            <td>
-                                <canvas id="${chartId}" class="chart-canvas"></canvas>
-                            </td>
-                        </tr>
-                    `);
+    <tr>
+        <td>${index + 1}</td>
+        <td class="text-start" title="${item.nguyen_lieu}">${item.nguyen_lieu}</td>
+        <td>${item.don_vi}</td>
+        <td>${item.so_luong_ton}</td>
+        <td>
+            <span class="badge bg-${badgeClass}" data-bs-toggle="tooltip" title="${status}">
+                ${soNgay}
+            </span>
+        </td>
+        <td>
+            <span class="d-inline-flex align-items-center gap-1 text-${badgeClass}">
+                <i class="${icon}" style="font-size: 1.2rem;"></i>
+                <span class="fw-semibold">${status}</span>
+            </span>
+        </td>
+        <td>
+            <canvas id="${chartId}" class="chart-canvas"></canvas>
+        </td>
+    </tr>
+`);
 
-                                // Render biểu đồ tròn (pie chart)
+
+                                // Render biểu đồ tròn
                                 setTimeout(() => {
                                     new Chart(document.getElementById(chartId), {
                                         type: 'doughnut',
@@ -282,6 +288,7 @@
                                                 'Sắp hết hạn', 'Hết hạn'
                                             ],
                                             datasets: [{
+                                                label: 'Tình trạng',
                                                 data: [item.con_han,
                                                     item
                                                     .sap_het_han,
@@ -292,7 +299,9 @@
                                                     '#ffc107',
                                                     '#dc3545'
                                                 ],
-                                                borderWidth: 1
+                                                borderWidth: 1,
+                                                dataDetails: item
+                                                    .lo_nhap ?? []
                                             }]
                                         },
                                         options: {
@@ -303,8 +312,29 @@
                                                 },
                                                 tooltip: {
                                                     callbacks: {
-                                                        label: (ctx) =>
-                                                            `${ctx.label}: ${ctx.raw}`
+                                                        label: function(
+                                                            context) {
+                                                            const
+                                                                index =
+                                                                context
+                                                                .dataIndex;
+                                                            const lo =
+                                                                context
+                                                                .dataset
+                                                                .dataDetails
+                                                                ?.[
+                                                                    index];
+
+                                                            if (!lo) {
+                                                                return `Số lượng: ${context.formattedValue}`;
+                                                            }
+
+                                                            return [
+                                                                `Số lượng: ${lo.so_luong}`,
+                                                                `Ngày nhập: ${lo.ngay_nhap}`,
+                                                                `HSD: ${lo.han_su_dung}`
+                                                            ];
+                                                        }
                                                     }
                                                 }
                                             }
@@ -313,9 +343,9 @@
                                 }, 100);
                             });
 
-                            // Kích hoạt tooltip bootstrap
+                            // Kích hoạt tooltip Bootstrap
                             const tooltipTriggerList = [].slice.call(document.querySelectorAll(
-                                '[data-bs-toggle="tooltip"]'))
+                                '[data-bs-toggle="tooltip"]'));
                             tooltipTriggerList.map(t => new bootstrap.Tooltip(t));
                         },
                         error: function() {
@@ -325,9 +355,10 @@
                 });
             });
         </script>
+
         <style>
             .chart-canvas {
-                width:130px !important;
+                width: 130px !important;
                 height: 80px !important;
                 max-width: 130px;
                 max-height: 80px;
