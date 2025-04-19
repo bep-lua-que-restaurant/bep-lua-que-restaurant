@@ -226,16 +226,18 @@ class NguyenLieuController extends Controller
                 $tongTon = 0;
                 $hanGanNhat = null;
 
+                $loNhap = [];
+
                 foreach ($danhSachNhap as $item) {
                     $han = Carbon::parse($item->han_su_dung);
+                    $ngayNhap = Carbon::parse($item->created_at); // hoặc $item->ngay_nhap
                     $soLuongTon = $item->so_luong_nhap;
-
-                    if ($soLuongTon <= 0) {
-                        continue;
-                    }
-
+                
+                    if ($soLuongTon <= 0) continue;
+                
                     $tongTon += $soLuongTon;
-
+                
+                    // Tình trạng
                     if ($han->gt($today->copy()->addDays(7))) {
                         $conHan += $soLuongTon;
                     } elseif ($han->between($today, $today->copy()->addDays(7))) {
@@ -243,24 +245,30 @@ class NguyenLieuController extends Controller
                     } elseif ($han->lt($today)) {
                         $hetHan += $soLuongTon;
                     }
-
-                    if ($han->gte($today)) {
-                        if (!$hanGanNhat || $han->lt($hanGanNhat)) {
-                            $hanGanNhat = $han;
-                        }
-                    }
+                
+                    // Dùng cho biểu đồ
+                    $loNhap[] = [
+                        'so_luong' => $soLuongTon,
+                        'ngay_nhap' => $ngayNhap->format('d/m/Y'),
+                        'han_su_dung' => $han->format('d/m/Y'),
+                    ];
                 }
+                
+               
+                
+                
 
-                $ngayConLai = $hanGanNhat ? $today->diffInDays($hanGanNhat) : 'Đã hết hạn';
+                // $ngayConLai = $hanGanNhat ? $today->diffInDays($hanGanNhat) : 'Đã hết hạn';
 
                 $results[] = [
                     'nguyen_lieu' => $tenNguyenLieu,
                     'so_luong_ton' => $tongTon,
-                    'so_ngay_con_lai' => $ngayConLai,
+                    'so_ngay_con_lai' => $hanGanNhat ? $today->diffInDays($hanGanNhat) : 'Đã hết hạn',
                     'con_han' => $conHan,
                     'sap_het_han' => $sapHetHan,
                     'het_han' => $hetHan,
                     'don_vi' => $donVi,
+                    'lo_nhap' => $loNhap, // 🔥 thêm dữ liệu theo từng lô
                 ];
             }
 
