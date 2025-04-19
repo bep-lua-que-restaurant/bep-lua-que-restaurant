@@ -126,7 +126,6 @@ function loadChiTietHoaDon(hoaDonId) {
             hoa_don_id: hoaDonId,
         },
         success: function (response) {
-           
             let hoaDonBody = $("#hoa-don-body");
             hoaDonBody.empty();
             let offcanvasBody = $(".offcanvas-body tbody"); // Lấy phần bảng trong offcanvas
@@ -167,19 +166,13 @@ function loadChiTietHoaDon(hoaDonId) {
     }"></i>
 </td>
 
-    <td class="text-end small don-gia">
-        ${parseFloat(item.don_gia).toLocaleString("vi-VN", {
-            style: "currency",
-            currency: "VND",
-        })}
-    </td>
+<td class="text-end small don-gia">
+    ${parseFloat(item.don_gia).toLocaleString("vi-VN")} VNĐ
+</td>
 
-    <td class="text-end small thanh-tien">
-        ${(item.so_luong * item.don_gia).toLocaleString("vi-VN", {
-            style: "currency",
-            currency: "VND",
-        })}
-    </td>
+<td class="text-end small thanh-tien">
+    ${(item.so_luong * item.don_gia).toLocaleString("vi-VN")} VNĐ
+</td>
         ${
             item.trang_thai === "cho_xac_nhan"
                 ? `<td class="text-center">
@@ -214,13 +207,10 @@ function loadChiTietHoaDon(hoaDonId) {
 
             // Đảm bảo định dạng lại số tiền đúng cách
             $("#tong-tien").text(
-                parseFloat(tongTien).toLocaleString("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                })
+                parseFloat(tongTien).toLocaleString("vi-VN") + " VNĐ"
             );
             $(".so-nguoi").text(`👥 ${soNguoi}`);
-            $("#totalAmount").val(tongTien.toLocaleString() + " VND"); // Cập nhật tổng tiền trong offcanvas
+            $("#totalAmount").val(parseFloat(tongTien).toLocaleString("vi-VN") + " VNĐ");
 
             if (response.da_ghep == true) {
                 $("#ten-ban").text(response.ten_ban_an.join(" + "));
@@ -263,10 +253,7 @@ function loadChiTietHoaDon(hoaDonId) {
 
                         let formattedThanhTien = Number(
                             response.thanh_tien
-                        ).toLocaleString("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                        });
+                        ).toLocaleString("vi-VN") + " VNĐ";
 
                         thanhTien.text(formattedThanhTien);
 
@@ -281,10 +268,7 @@ function loadChiTietHoaDon(hoaDonId) {
 
                         // Đảm bảo định dạng lại số tiền đúng cách
                         $("#tong-tien").text(
-                            parseFloat(tongTien).toLocaleString("vi-VN", {
-                                style: "currency",
-                                currency: "VND",
-                            })
+                            parseFloat(tongTien).toLocaleString("vi-VN") + " VNĐ"
                         );
                     },
                     error: function (xhr) {
@@ -416,10 +400,7 @@ function sendDeleteRequest(monAnId, lyDo, forceDelete = false) {
 
             // Đảm bảo định dạng lại số tiền đúng cách
             $("#tong-tien").text(
-                parseFloat(response.tong_tien).toLocaleString("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                })
+                parseFloat(response.tong_tien).toLocaleString("vi-VN") + " VNĐ"
             );
 
             Swal.fire(
