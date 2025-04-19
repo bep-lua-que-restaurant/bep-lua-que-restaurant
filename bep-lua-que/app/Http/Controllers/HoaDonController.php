@@ -125,6 +125,7 @@ class HoaDonController extends Controller
                 'ma_hoa_don' => $this->generateMaHoaDon(),
                 'khach_hang_id' => 0,
                 'tong_tien' => 0.00,
+                'tong_tien_truoc_khi_giam' => 0.00,
                 'phuong_thuc_thanh_toan' => 'tien_mat',
                 'mo_ta' => null
             ]);
@@ -163,7 +164,10 @@ class HoaDonController extends Controller
         }
         // Cập nhật tổng tiền trong bảng `hoa_don`
         $tongTien = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)->sum('thanh_tien');
-        $hoaDon->update(['tong_tien' => $tongTien]);
+        $hoaDon->update([
+            'tong_tien' => $tongTien,
+            'tong_tien_truoc_khi_giam' => $tongTien // Cập nhật cả tong_tien_truoc_khi_giam
+        ]);
 
         // 🔥 Nếu hóa đơn có món ăn, đổi trạng thái bàn thành "co_khach"
         $soLuongMon = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)->count();

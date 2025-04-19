@@ -316,6 +316,7 @@ $(document).ready(function () {
                 maHoaDon: maHoaDon,
             },
             success: function (response) {
+    
                 // console.log("tien trc giam" + response.tong_tien);
                 let ma_hoa_don = response.data;
                 let divMaGiamGia = document.querySelector(".wrap-ma-giam-gia");
@@ -323,7 +324,7 @@ $(document).ready(function () {
                 if (maGiamGia.length === 0) {
                     divMaGiamGia.style.display = "none";
                 }
-                // console.log("Mã giảm giá:", maGiamGia);
+
                 renderDiscountCodes(maGiamGia, ma_hoa_don);
                 if (
                     response.chi_tiet_hoa_don == null ||
@@ -471,7 +472,7 @@ $(document).ready(function () {
             },
             success: function (response) {
                 if (response.success) {
-                    console.log(response);
+               
 
                     showToast("Đã áp dụng mã giảm giá!", "success");
 

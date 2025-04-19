@@ -46,12 +46,12 @@ class ThuNganController extends Controller
             }
         }
 
-        // 🔥 Lọc theo vị trí bàn ăn (vi_tri)
-        if ($request->has('vi_tri') && $request->vi_tri != '') {
-            $query->where('vi_tri', $request->vi_tri);
-        }
+        // // 🔥 Lọc theo vị trí bàn ăn (vi_tri)
+        // if ($request->has('vi_tri') && $request->vi_tri != '') {
+        //     $query->where('vi_tri', $request->vi_tri);
+        // }
 
-        $data = $query->latest('id')->get();
+        $data = $query->get();
         $hoaDons = HoaDon::latest('id')->get();
         // Xử lý trả về khi yêu cầu là Ajax
         if ($request->ajax()) {
@@ -226,8 +226,6 @@ class ThuNganController extends Controller
             'maHoaDon' => $hoaDon->ma_hoa_don,
         ]);
     }
-
-
 
     public function getThucDon(Request  $request)
     {
@@ -512,8 +510,6 @@ class ThuNganController extends Controller
         $datban = DatBan::where('ban_an_id', $idBanHienTai)
             ->where('trang_thai', 'xac_nhan')->get();
 
-
-
         $soNguoiHienTai = DatBan::where('ban_an_id', $idBanHienTai)
             ->where('trang_thai', 'xac_nhan')
             ->value('so_nguoi');
@@ -633,7 +629,7 @@ class ThuNganController extends Controller
 
                 // Cập nhật tổng tiền vào bảng HoaDon
                 HoaDon::where('id', $hoaDonHienTaiID)->update([
-                    'tong_tien' => $tongTien
+                    'tong_tien_truoc_khi_giam' => $tongTien
                 ]);
 
                 HoaDon::where('id', $hoaDonMoiID)->delete();

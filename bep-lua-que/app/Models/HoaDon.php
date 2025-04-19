@@ -11,7 +11,7 @@ class HoaDon extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['ma_hoa_don', 'ma_dat_ban', 'tong_tien', 'phuong_thuc_thanh_toan', 'mo_ta', 'id_ma_giam'];
+    protected $fillable = ['ma_hoa_don', 'ma_dat_ban', 'tong_tien', 'phuong_thuc_thanh_toan', 'mo_ta', 'id_ma_giam','tong_tien_truoc_khi_giam'];
 
     public function chiTietHoaDons()
     {

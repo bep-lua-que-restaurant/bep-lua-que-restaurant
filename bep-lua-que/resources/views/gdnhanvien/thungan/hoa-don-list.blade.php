@@ -157,6 +157,17 @@
         background-color: #e6ffe6;
         border-left: 4px solid #28a745;
     }
+
+    /* Viền đỏ khi có lỗi */
+    .form-select.is-invalid {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+    }
+
+    /* Thông báo lỗi */
+    .text-danger {
+        color: #dc3545 !important;
+    }
 </style>
 <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6;">
     <table class="table table-bordered table-sm">
@@ -479,7 +490,10 @@
                                 <select class="form-select" id="banGoc" multiple="multiple" style="width: 100%;">
                                     <option value="" selected hidden>Chọn bàn...</option>
                                 </select>
-
+                                <div id="banGoc-error" class="text-danger"
+                                    style="display: none; font-size: 0.875rem;">
+                                    Vui lòng chọn bàn để tách!
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -502,7 +516,9 @@
                                 </tr>
                             </tbody>
                         </table>
-
+                        <div id="monTach-error" class="text-danger" style="display: none; font-size: 0.875rem;">
+                            Vui lòng chọn ít nhất một món để tách!
+                        </div>
                     </div>
 
                     <div class="text-end mt-3">
