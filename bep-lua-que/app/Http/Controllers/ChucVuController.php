@@ -64,18 +64,22 @@ class ChucVuController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ChucVu $dichVu)
-    {
-        return view('admin.chucvu.detail', compact('chucvu'));
-    }
+    public function show($id)
+{
+    $chucVu = ChucVu::withTrashed()->findOrFail($id);
+    return view('admin.chucvu.detail', compact('chucVu'));
+}
+
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ChucVu $chucVu)
-    {
-        return view('admin.chucvu.edit', compact('chucVu'));
-    }
+    public function edit($id)
+{
+    $chucVu = ChucVu::withTrashed()->findOrFail($id);
+    return view('admin.chucvu.edit', compact('chucVu'));
+}
+
 
     /**
      * Update the specified resource in storage.

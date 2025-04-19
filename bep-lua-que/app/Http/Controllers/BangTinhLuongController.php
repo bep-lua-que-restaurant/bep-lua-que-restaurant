@@ -59,7 +59,7 @@ class BangTinhLuongController extends Controller
     }
 
     // 🔹 Lấy dữ liệu phân trang
-    $data = $query->latest('bang_tinh_luongs.id')->paginate(15);
+    $data = $query->latest('bang_tinh_luongs.id')->paginate(10);
 
     // Nếu là AJAX request, trả về partial view
     if ($request->ajax()) {
@@ -148,7 +148,10 @@ class BangTinhLuongController extends Controller
             $soCaLam = $request->so_ca_lam[$index] ?? 0;
             // $soNgayLam = $request->so_ngay_cong[$index] ?? 0;
             $tongLuong = $request->tong_luong[$index] ?? 0; // Nhận từ form
-    
+      // Không validate, chỉ lấy nếu có
+          $thuongPhat = $request->thuong_phat[$index] ?? 0;
+            $ghiChu = $request->ly_do[$index] ?? null;
+
             // Lưu vào bảng lương
             BangTinhLuong::create([
                 'nhan_vien_id' => $nhan_vien_id,
@@ -156,6 +159,9 @@ class BangTinhLuongController extends Controller
                 'so_ca_lam' => $soCaLam,
                 'so_ngay_cong' => $soNgayLam ?? 0,
                 'tong_luong' => $tongLuong,
+                'thuong_phat'=>$thuongPhat,
+                'ghi_chu'=>$ghiChu,
+
             ]);
         }
     
@@ -178,7 +184,9 @@ class BangTinhLuongController extends Controller
             'luongs.muc_luong', // Lấy mức lương
             'bang_tinh_luongs.so_ca_lam',
             'bang_tinh_luongs.so_ngay_cong',
-            'bang_tinh_luongs.tong_luong' // Lấy t��ng lương
+            'bang_tinh_luongs.tong_luong', // Lấy t��ng lương
+            'bang_tinh_luongs.thuong_phat',
+            'bang_tinh_luongs.ghi_chu',
             )
         ->get();
 

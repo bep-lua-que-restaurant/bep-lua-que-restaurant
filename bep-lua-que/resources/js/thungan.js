@@ -102,27 +102,55 @@ $(document).ready(function () {
             return;
         }
 
-        $.ajax({
-            url: apiUrlThongBaoBep,
+        // Hiển thị hộp thoại xác nhận
+        Swal.fire({
+            title: "Xác nhận thông báo",
+            text: "Khi thông báo cho bếp, bạn sẽ không thể xóa các món ăn trong hóa đơn. Bạn có chắc chắn không?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Xác nhận",
+            cancelButtonText: "Hủy",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Nếu người dùng xác nhận, gửi thông báo
+                $.ajax({
+                    url: apiUrlThongBaoBep,
+                    method: "POST",
+                    data: {
+                        hoa_don_id: hoaDonId,
+                        _token: $("meta[name='csrf-token']").attr("content"),
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            var dingSound = new Audio(dingSoundUrl);
+                            dingSound.play();
+                            showToast("Đã gửi thông báo đến bếp!", "success");
 
-            method: "POST",
-            data: {
-                hoa_don_id: hoaDonId,
-                _token: $("meta[name='csrf-token']").attr("content"),
-            },
-            success: function (response) {
-                if (response.success) {
-                    var dingSound = new Audio(dingSoundUrl);
-                    dingSound.play();
-                    showToast("Đã gửi thông báo đến bếp!", "success");
-                } else {
-                    alert("Có lỗi xảy ra, vui lòng thử lại!");
-                }
-            },
-            error: function (xhr) {
-                console.error("🔥 Lỗi cập nhật trạng thái:", xhr.responseText);
-                alert("Không thể cập nhật trạng thái!");
-            },
+                        } else {
+                            Swal.fire({
+                                title: "Thông báo",
+                                text: "Có vẻ như hóa đơn chưa có gì thay đổi, hãy thử thêm món rồi thông báo.",
+                                icon: "info",
+                                confirmButtonText: "OK",
+                            });
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error(
+                            "🔥 Lỗi cập nhật trạng thái:",
+                            xhr.responseText
+                        );
+                        Swal.fire({
+                            title: "Lỗi",
+                            text: "Không thể cập nhật trạng thái!",
+                            icon: "error",
+                            confirmButtonText: "OK",
+                        });
+                    },
+                });
+            }
         });
     });
 });
@@ -139,3 +167,4 @@ window.Echo.channel("datban-channel").listen("DatBanUpdated", (e) => {
 function capNhatIconBan(danhSachBan) {
     console.log(danhSachBan);
 }
+

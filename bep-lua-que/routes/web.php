@@ -27,6 +27,7 @@ use App\Http\Controllers\CaLamController;
 use App\Http\Controllers\MonAnController;
 use App\Http\Controllers\BepController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BillImageController;
 use App\Http\Controllers\HoaDonController;
 use App\Http\Controllers\QuanLyController;
 use App\Http\Controllers\ThuNganController;
@@ -396,6 +397,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('thu-ngan/luu-ghi-chu-mon', [ThuNganController::class, 'saveNote'])->name('thungan.saveNote');
     Route::get('/thu-ngan/tao-qr/{ma}', [ThuNganController::class, 'taoQr']);
     Route::post('thu-ngan/apply-discount', [ThuNganController::class, 'applyDiscount'])->name('thungan.applyDiscount');
+    Route::get('thu-ngan/upload-bill', [BillImageController::class, 'create'])->name('upload.bill.create');
+    Route::post('thu-ngan/save-bill-image', [BillImageController::class, 'saveBillImage'])->name('upload.bill.save');
     //Chấm công
     Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
     Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('chamcong.store');

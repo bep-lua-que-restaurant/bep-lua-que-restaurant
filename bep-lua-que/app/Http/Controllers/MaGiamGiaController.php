@@ -116,7 +116,7 @@ class MaGiamGiaController extends Controller
     public function edit($id)
 
     {
-        $maGiamGia = MaGiamGia::findOrFail($id);
+        $maGiamGia = MaGiamGia::withTrashed()->findOrFail($id);
         return view('admin.magiamgia.edit', compact('maGiamGia'));
     }
 

@@ -67,18 +67,22 @@ class CaLamController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(CaLam $caLam)
-    {
-        return view('admin.calam.detail', compact('caLam'));
-    }
+    public function show($id)
+{
+    $caLam = CaLam::withTrashed()->findOrFail($id);
+    return view('admin.calam.detail', compact('caLam'));
+}
+
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(CaLam $caLam)
-    {
-        return view('admin.calam.edit', compact('caLam'));
-    }
+    public function edit($id)
+{
+    $caLam = CaLam::withTrashed()->findOrFail($id);
+    return view('admin.calam.edit', compact('caLam'));
+}
+
 
     /**
      * Update the specified resource in storage.

@@ -28,7 +28,7 @@ class BangLuongExport implements FromCollection, WithHeadings, WithMapping, With
     return BangTinhLuong::with(['nhanVien:id,ho_ten'])
         ->whereMonth('thang_nam', $this->month)   // lọc theo tháng
         ->whereYear('thang_nam', $this->year)      // lọc theo năm
-        ->select('id', 'nhan_vien_id', 'so_ca_lam', 'so_ngay_cong', 'tong_luong', 'ghi_chu', 'created_at', 'updated_at') // bỏ 'thang_nam' ở đây
+        ->select('id', 'nhan_vien_id', 'so_ca_lam', 'tong_luong', 'thuong_phat','ghi_chu', 'created_at', 'updated_at') // bỏ 'thang_nam' ở đây
         ->get();
 }
 
@@ -38,7 +38,7 @@ class BangLuongExport implements FromCollection, WithHeadings, WithMapping, With
     {
         return [
             ['Bảng lương'], // Tiêu đề lớn
-            ['ID', 'Tên nhân viên', 'Số ca làm', 'Số ngày công', 'Tổng lương', 'Ghi chú', 'Ngày tạo', 'Ngày cập nhật'],
+            ['ID', 'Tên nhân viên', 'Số ca làm',  'Tổng lương', 'Thưởng/Phạt','Lý do', 'Ngày tạo', 'Ngày cập nhật'],
         ];
     }
 
@@ -49,8 +49,9 @@ class BangLuongExport implements FromCollection, WithHeadings, WithMapping, With
             $bangLuong->nhanVien->ho_ten ?? 'N/A',
             // $bangLuong->thang_nam,
             $bangLuong->so_ca_lam,
-            $bangLuong->so_ngay_cong,
+            // $bangLuong->so_ngay_cong,
             $bangLuong->tong_luong,
+            $bangLuong->thuong_phat,
             $bangLuong->ghi_chu,
             $bangLuong->created_at ? $bangLuong->created_at->format('d/m/Y') : '',
             $bangLuong->updated_at ? $bangLuong->updated_at->format('d/m/Y') : '',

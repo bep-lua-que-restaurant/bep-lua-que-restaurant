@@ -126,6 +126,7 @@ function loadChiTietHoaDon(hoaDonId) {
             hoa_don_id: hoaDonId,
         },
         success: function (response) {
+           
             let hoaDonBody = $("#hoa-don-body");
             hoaDonBody.empty();
             let offcanvasBody = $(".offcanvas-body tbody"); // Lấy phần bảng trong offcanvas
@@ -179,14 +180,15 @@ function loadChiTietHoaDon(hoaDonId) {
             currency: "VND",
         })}
     </td>
-    <!-- Nút xóa với icon -->
-    <td class="text-center">
-        <button class="btn btn-sm btn-outline-danger xoa-mon" data-id="${
-            item.id
-        }">
-            <i class="bi bi-trash"></i> <!-- Biểu tượng xóa -->
-        </button>
-    </td>
+        ${
+            item.trang_thai === "cho_xac_nhan"
+                ? `<td class="text-center">
+                    <button class="btn btn-sm btn-outline-danger xoa-mon" data-id="${item.id}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>`
+                : `<td class="text-center"></td>`
+        }
 </tr>
 `;
                     hoaDonBody.append(row);
@@ -210,7 +212,13 @@ function loadChiTietHoaDon(hoaDonId) {
                 offcanvasBody.html(emptyRow);
             }
 
-            $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
+            // Đảm bảo định dạng lại số tiền đúng cách
+            $("#tong-tien").text(
+                parseFloat(tongTien).toLocaleString("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                })
+            );
             $(".so-nguoi").text(`👥 ${soNguoi}`);
             $("#totalAmount").val(tongTien.toLocaleString() + " VND"); // Cập nhật tổng tiền trong offcanvas
 
@@ -270,8 +278,13 @@ function loadChiTietHoaDon(hoaDonId) {
                                 .replace(/[^0-9]/g, "");
                             tongTien += parseInt(tongTienMon);
                         });
+
+                        // Đảm bảo định dạng lại số tiền đúng cách
                         $("#tong-tien").text(
-                            tongTien.toLocaleString("vi-VN") + " VNĐ"
+                            parseFloat(tongTien).toLocaleString("vi-VN", {
+                                style: "currency",
+                                currency: "VND",
+                            })
                         );
                     },
                     error: function (xhr) {
@@ -315,7 +328,11 @@ function deleteMonAn(monAnId) {
             isRequesting = false;
 
             if (!response.success) {
-                Swal.fire("Lỗi!", response.error || "Không thể lấy trạng thái món ăn.", "error");
+                Swal.fire(
+                    "Lỗi!",
+                    response.error || "Không thể lấy trạng thái món ăn.",
+                    "error"
+                );
                 return;
             }
 
@@ -358,7 +375,11 @@ function deleteMonAn(monAnId) {
                             cancelButtonText: "Thoát",
                         }).then((inputResult) => {
                             if (inputResult.isConfirmed) {
-                                sendDeleteRequest(monAnId, inputResult.value, true);
+                                sendDeleteRequest(
+                                    monAnId,
+                                    inputResult.value,
+                                    true
+                                );
                             }
                         });
                     }
@@ -393,8 +414,9 @@ function sendDeleteRequest(monAnId, lyDo, forceDelete = false) {
 
             $(`#mon-${monAnId}`).remove();
 
+            // Đảm bảo định dạng lại số tiền đúng cách
             $("#tong-tien").text(
-                response.tong_tien.toLocaleString("vi-VN", {
+                parseFloat(response.tong_tien).toLocaleString("vi-VN", {
                     style: "currency",
                     currency: "VND",
                 })
@@ -419,14 +441,36 @@ function sendDeleteRequest(monAnId, lyDo, forceDelete = false) {
 }
 
 window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (e) => {
-    // Tìm phần tử <span> trong hàng <tr> chứa món ăn
     let ten_mon = e.monAn.mon_an.ten;
     let ten_ban = e.monAn.hoa_don.hoa_don_ban.ban_an.ten_ban;
     let trangThai = e.monAn.trang_thai;
-    if (trangThai == "hoan_thanh") {
+    let monAnId = e.monAn.id; // Assuming the ID of the dish in chi_tiet_hoa_don is available
+
+    // Find the row in the table corresponding to the dish
+    let row = $(`#mon-${monAnId}`);
+    if (row.length) {
+        let statusSpan = row.find("td:eq(1) span"); // Target the span in the second column (dish name/status)
+        statusSpan.removeClass("text-danger text-warning text-success"); // Remove existing status classes
+
+        // Update status color based on trang_thai
+        if (trangThai === "cho_che_bien") {
+            statusSpan.addClass("text-danger");
+        } else if (trangThai === "dang_nau") {
+            var message =
+                "Món ăn " + ten_mon + " (" + ten_ban + ") đã bắt đầu nấu";
+            showToast(message, "success"); // Display success toast
+            statusSpan.addClass("text-warning");
+        } else if (trangThai === "hoan_thanh") {
+            statusSpan.addClass("text-success");
+        }
+    }
+
+    // Show notification and play sound for completed dishes
+    if (trangThai === "hoan_thanh") {
         var dingSound = new Audio(dingSoundUrl);
         dingSound.play();
-        var message = "Món ăn " + ten_mon + " " + ten_ban + " đã được cung ứng";
-        showToast(message, "success"); // Hiển thị thông báo thành công
+        var message =
+            "Món ăn " + ten_mon + " (" + ten_ban + ") đã được cung ứng";
+        showToast(message, "success"); // Display success toast
     }
 });

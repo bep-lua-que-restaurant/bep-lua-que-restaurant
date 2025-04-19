@@ -81,7 +81,7 @@ $(document).ready(function () {
                     maHoaDonElement.innerText = "Chưa có hóa đơn";
                     maHoaDonElement.style.color = "red";
 
-                    $("#tong-tien").text("0 VNĐ");
+                    $("#tong-tien").text("0 đ");
                     $(".so-nguoi").text("👥 0");
                 }
             },
@@ -181,12 +181,15 @@ $(document).ready(function () {
         currency: "VND",
     })}
 </td>
-<!-- Nút xóa với icon -->
-<td class="text-center">
-    <button class="btn btn-sm btn-outline-danger xoa-mon" data-id="${item.id}">
-        <i class="bi bi-trash"></i> <!-- Biểu tượng xóa -->
-    </button>
-</td>
+ ${
+     item.trang_thai === "cho_xac_nhan"
+         ? `<td class="text-center">
+                    <button class="btn btn-sm btn-outline-danger xoa-mon" data-id="${item.id}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>`
+         : `<td class="text-center"></td>`
+ }
 </tr>
 
 
@@ -216,9 +219,20 @@ $(document).ready(function () {
                     $("#ten-ban").text(response.ten_ban_an.join(" + "));
                 }
 
-                $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
+                $("#tong-tien").text(
+                    tongTien.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                    })
+                );
                 $(".so-nguoi").text(`👥 ${soNguoi}`);
-                $("#totalAmount").val(tongTien.toLocaleString() + " VND"); // Cập nhật tổng tiền trong offcanvas
+
+                $("#totalAmount").val(
+                    tongTien.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                    })
+                ); // Cập nhật tổng tiền trong offcanvas
 
                 if (response.ten_ban) {
                     $("#tableInfo").text(`Bàn ${response.ten_ban}`);
@@ -279,8 +293,12 @@ $(document).ready(function () {
                                     .replace(/[^0-9]/g, "");
                                 tongTien += parseInt(tongTienMon);
                             });
+
                             $("#tong-tien").text(
-                                tongTien.toLocaleString("vi-VN") + " VNĐ"
+                                tongTien.toLocaleString("vi-VN", {
+                                    style: "currency",
+                                    currency: "VND",
+                                })
                             );
                         },
                         error: function (xhr) {
@@ -321,16 +339,19 @@ $(document).ready(function () {
                 let ma_hoa_don = response.data;
                 let divMaGiamGia = document.querySelector(".wrap-ma-giam-gia");
                 let maGiamGia = response.ma_giam_gia; // chứa thông tin mã giảm
-                    if (maGiamGia.length === 0) {
-                        divMaGiamGia.style.display = "none";
-                    }
-                    // console.log("Mã giảm giá:", maGiamGia);
+                if (maGiamGia.length === 0) {
+                    divMaGiamGia.style.display = "none";
+                }
+                // console.log("Mã giảm giá:", maGiamGia);
                 renderDiscountCodes(maGiamGia, ma_hoa_don);
                 if (
                     response.chi_tiet_hoa_don == null ||
                     response.chi_tiet_hoa_don.length == 0
                 ) {
-                    showToast("Hóa đơn này chưa được thông báo cho bếp, hãy thông báo cho bếp trước!", "warning");
+                    showToast(
+                        "Hóa đơn này chưa được thông báo cho bếp, hãy thông báo cho bếp trước!",
+                        "warning"
+                    );
                     return;
                 }
 
@@ -398,14 +419,20 @@ $(document).ready(function () {
                     hoaDonThanhToan.html(emptyRow);
                 }
 
-                // $("#tong-tien").text(tongTien.toLocaleString() + " VNĐ");
-                // $(".so-nguoi").text(`👥 ${soNguoi}`);
-                $("#tong_tien_hang").val(tongTien.toLocaleString() + " VND");
+                $("#tong_tien_hang").val(
+                    tongTien.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                    })
+                );
+
                 let khach_can_tra = parseFloat(response.tong_tien_sau_giam);
 
-
                 $("#khach_can_tra").val(
-                    khach_can_tra.toLocaleString() + " VND"
+                    khach_can_tra.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                    })
                 );
             },
             error: function (xhr) {
@@ -417,7 +444,6 @@ $(document).ready(function () {
         });
     }
 
-    
     // render mã giảm giá
     function renderDiscountCodes(discounts, ma_hoa_don) {
         // console.log(discounts);
@@ -438,21 +464,21 @@ $(document).ready(function () {
                 isApplied ? "applied" : ""
             }">
                 <div>
-                    <span class="fw-bold text-primary">${
-                        discount.code
-                    }</span>
+                    <span class="fw-bold text-primary">${discount.code}</span>
                     <p class="mb-0 text-muted" style="font-size: 0.85rem;">
-                        Giảm ${Math.round(discount.value)}% cho đơn từ ${
-                        parseFloat(discount.min_order_value).toLocaleString("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                        })
-                    }
+                        Giảm ${Math.round(
+                            discount.value
+                        )}% cho đơn từ ${parseFloat(
+                discount.min_order_value
+            ).toLocaleString("vi-VN", {
+                style: "currency",
+                currency: "VND",
+            })}
                     </p>
                 </div>
                 <button class="btn ${buttonClass} btn-sm apply-discount"  data-ma-hoa-don="${ma_hoa_don}"  data-id="${
-                    discount.id
-                }" ${isDisabled}>
+                discount.id
+            }" ${isDisabled}>
                     ${buttonText}
                 </button>
             </li>
@@ -537,3 +563,16 @@ window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (data) => {
     }
 });
 
+window.Echo.channel("bep-channel").listen(".mon-moi-duoc-them", (data) => {
+    // Tìm tất cả các món có nút xóa trước khi xóa
+    $(".xoa-mon, .xoa-mon-an").each(function () {
+        let row = $(this).closest("tr"); // Lấy dòng (tr) chứa nút xóa
+        let statusCell = row.find("td:eq(1)");
+        // Đổi màu trạng thái thành "chờ chế biến"
+        statusCell.removeClass("text-danger text-warning text-success");
+        statusCell.addClass("text-danger");
+    });
+
+    // Xóa nút xóa
+    $(".xoa-mon, .xoa-mon-an").remove();
+});

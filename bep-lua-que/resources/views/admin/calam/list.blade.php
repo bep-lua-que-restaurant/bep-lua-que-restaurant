@@ -73,13 +73,13 @@
                             <table class="table table-responsive-md">
                                 <thead>
                                     <tr>
-                                        <th style="width:50px;">
+                                        {{-- <th style="width:50px;">
                                             <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
                                                 <input type="checkbox" class="custom-control-input" id="checkAll"
                                                     required="">
                                                 <label class="custom-control-label" for="checkAll"></label>
                                             </div>
-                                        </th>
+                                        </th> --}}
                                         <th><strong>STT</strong></th>
                                         <th><strong>Ca làm việc </strong></th>
                                         <th><strong>Thời gian </strong></th>
@@ -93,13 +93,13 @@
                                     @foreach ($data as $index => $item)
                                         <tr data-toggle="collapse" data-target="#detail{{ $index }}"
                                             class="clickable-row">
-                                            <td>
+                                            {{-- <td>
                                                 <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
                                                     <input type="checkbox" class="custom-control-input" id="customCheckBox2"
                                                         required="">
                                                     <label class="custom-control-label" for="customCheckBox2"></label>
                                                 </div>
-                                            </td>
+                                            </td> --}}
                                             <td><strong>{{ $item->id }}</strong></td>
                                             <td class="ten-ca">
                                                 <div class="d-flex align-items-center"><span
