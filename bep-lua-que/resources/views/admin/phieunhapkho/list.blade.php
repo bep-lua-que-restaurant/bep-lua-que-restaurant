@@ -34,33 +34,28 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h4 class="card-title">Danh sách Phiếu nhập kho</h4>
-
                         <div class="btn-group">
                             <a href="{{ route('phieu-nhap-kho.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
-                            <a href="{{ route('phieu-nhap-kho.export') }}" class="btn btn-sm btn-success ">
+                            <a href="{{ route('phieu-nhap-kho.export') }}" class="btn btn-sm btn-success">
                                 <i class="bi bi-file-earmark-excel"></i> Xuất file
                             </a>
-                            {{-- <a href="#" class="btn btn-sm btn-info">
-                                <i class="fa fa-list"></i> Danh sách
-                            </a> --}}
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-responsive-md" id="{{ $tableId }}">
+                            <table class="table table-striped table-bordered" id="{{ $tableId }}">
                                 <thead>
                                     <tr>
                                         <th><strong>ID</strong></th>
                                         <th><strong>Mã phiếu</strong></th>
-                                        <th><strong>Nhà cung cấp</strong></th>
+                                        <th><strong>Nhân viên</strong></th>
                                         <th><strong>Ngày nhập</strong></th>
-                                        <th><strong>Tổng giá trị</strong></th>
                                         <th><strong>Trạng thái</strong></th>
-                                        <th><strong>Hành động</strong></th>
+                                        <th><strong>Action</strong></th> <!-- Cột Action -->
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -74,17 +69,9 @@
 
     <!-- Script -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
         $(document).ready(function() {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-
             var table = $('#{{ $tableId }}').DataTable({
                 processing: true,
                 serverSide: true,
@@ -98,20 +85,17 @@
                         name: 'ma_phieu'
                     },
                     {
-                        data: 'nhacungcap',
-                        name: 'nhacungcap'
+                        data: 'nhanvien',
+                        name: 'nhanvien'
                     },
                     {
                         data: 'ngay_nhap',
                         name: 'ngay_nhap'
                     },
-                    {
-                        data: 'tong_gia_tri',
-                        name: 'tong_gia_tri'
-                    },
+                    
                     {
                         data: 'trang_thai',
-                        name: 'deleted_at'
+                        name: 'trang_thai',
                     },
                     {
                         data: 'action',
@@ -124,55 +108,64 @@
                     url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json'
                 },
                 pagingType: 'full_numbers',
-                renderer: 'bootstrap',
                 lengthMenu: [5, 10, 25, 50],
                 pageLength: 10
             });
 
-            $(document).on('submit', 'form', function(e) {
-                e.preventDefault();
-                var form = $(this);
-                var isDelete = form.find('button[title="Xóa"]').length > 0;
+            // Toggling row details (Show/Hide)
+            $('#{{ $tableId }}').on('click', 'tr', function() {
+                var row = table.row(this);
+                var rowData = row.data();
 
-                Swal.fire({
-                    title: isDelete ? 'Bạn muốn ngừng sử dụng phiếu nhập kho này?' :
-                        'Bạn muốn khôi phục phiếu nhập kho này?',
-                    text: "Hành động này sẽ thay đổi trạng thái của phiếu nhập kho!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Xác nhận',
-                    cancelButtonText: 'Hủy'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: form.attr('action'),
-                            method: form.attr('method'),
-                            data: form.serialize(),
-                            success: function(response) {
-                                Swal.fire(
-                                    'Thành công!',
-                                    isDelete ? 'Đã ngừng sử dụng phiếu nhập kho.' :
-                                    'Đã khôi phục phiếu nhập kho.',
-                                    'success'
-                                );
-                                table.ajax.reload();
-                            },
-                            error: function(xhr) {
-                                let message = 'Có lỗi xảy ra, vui lòng thử lại!';
-
-                                if (xhr.responseJSON && xhr.responseJSON.message) {
-                                    message = xhr.responseJSON.message;
-                                }
-
-                                Swal.fire('Lỗi!', message, 'error');
-                            }
-
-                        });
-                    }
-                });
+                if (row.child.isShown()) {
+                    row.child.hide();
+                    $(this).removeClass('shown');
+                } else {
+                    row.child(formatDetails(rowData)).show();
+                    $(this).addClass('shown');
+                }
             });
+
+            // Format Row Details
+            function formatDetails(data) {
+                console.log(data);
+                
+                const loaiPhieuText = data.loai_phieu === 'nhap_tu_bep' ? 'Nhập từ bếp' :
+                    data.loai_phieu === 'nhap_tu_ncc' ? 'Nhập từ nhà cung cấp' :
+                    'Không xác định';
+
+                return `
+                    <div class="row p-4 bg-light rounded" style="border-left: 5px solid #007bff; margin-bottom: 20px;">
+                        <h5>Thông tin phiếu nhập kho</h5>
+                       
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Loại phiếu:</th>
+
+                               <td>${loaiPhieuText}</td>
+                            </tr>
+                            <tr>
+                                <th>Nhà cung Cấp:</th>
+                                <td> ${data.nhacungcap ?? '—'}</td>
+                            </tr>
+                           
+                            <tr>
+                                <th>Ngày nhập:</th>
+                                <td>${data.ngay_nhap}</td>
+                            </tr>
+                            <tr>
+                                <th>Ghi chú:</th>
+                                <td>${data.ghi_chu ?? ''} </td>
+                            </tr>  
+                             <tr>
+                                <th>Tổng tiền:</th>
+                                <td>${data.tong_tien ?? 0} VNĐ</td>
+                            </tr>
+
+                        </table>
+                    </div>
+                `;
+            }
         });
     </script>
 
@@ -195,6 +188,51 @@
 
         .dataTables_paginate .page-link:hover {
             background-color: #e9ecef;
+        }
+
+        .badge.bg-warning {
+            background-color: #ffc107 !important;
+            color: #000;
+        }
+
+        .badge.bg-success {
+            background-color: #28a745 !important;
+        }
+
+        .badge.bg-danger {
+            background-color: #dc3545 !important;
+        }
+
+        /* Styling for row details */
+        .table tbody tr.shown {
+            background-color: #f1f1f1;
+        }
+
+        .table tbody tr.shown td {
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        .table .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .table .action-buttons button {
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .table .action-buttons button.approve {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .table .action-buttons button.reject {
+            background-color: #dc3545;
+            color: white;
         }
     </style>
 @endsection

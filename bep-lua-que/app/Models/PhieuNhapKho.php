@@ -20,6 +20,7 @@ class PhieuNhapKho extends Model
         'tong_tien',        // Tổng tiền phiếu nhập
         'ghi_chu',          // Ghi chú
         'trang_thai',       // Trạng thái phiếu nhập
+        'loai_phieu',       // Loại phiếu nhập (nhập từ bếp hoặc nhập từ nhà cung cấp)
     ];
 
     /**

@@ -3,7 +3,7 @@
 @section('title', 'Tạo Phiếu Nhập Kho')
 
 @section('content')
-    {{-- @if ($errors->any())
+    @if ($errors->any())
         <div class="alert alert-danger">
             <strong>Đã xảy ra lỗi:</strong>
             <ul class="mb-0">
@@ -12,7 +12,7 @@
                 @endforeach
             </ul>
         </div>
-    @endif --}}
+    @endif
     <div class="container-fluid mt-4">
         <div class="row mb-3">
             <div class="col">
@@ -47,6 +47,23 @@
                     </div>
 
                     <div class="col-md-4">
+                        <label for="loai_phieu" class="form-label">Loại Phiếu</label>
+                        <select name="loai_phieu" id="loai_phieu"
+                            class="form-select @error('loai_phieu') is-invalid @enderror">
+                            <option value="">-- Chọn --</option>
+                            <option value="nhap_tu_bep" {{ old('loai_phieu') == 'nhap_tu_bep' ? 'selected' : '' }}>Nhập từ
+                                bếp
+                            </option>
+                            <option value="nhap_tu_ncc" {{ old('loai_phieu') == 'nhap_tu_ncc' ? 'selected' : '' }}>Nhập từ
+                                nhà cung
+                                cấp</option>
+                        </select>
+                        @error('loai_phieu')
+                            <div class="invalid-feedback">* {{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-4" id="nha_cung_cap_wrapper">
                         <label for="nha_cung_cap_id" class="form-label">Nhà Cung Cấp</label>
                         <select name="nha_cung_cap_id"
                             class="form-select select2 @error('nha_cung_cap_id') is-invalid @enderror">
@@ -63,21 +80,16 @@
                         @enderror
                     </div>
 
+
                     <div class="col-md-4">
-                        <label for="nhan_vien_id" class="form-label">Nhân Viên</label>
-                        <select name="nhan_vien_id" class="form-select select2 @error('nhan_vien_id') is-invalid @enderror">
-                            <option value="">-- Chọn --</option>
-                            @foreach ($nhanViens as $item)
-                                <option value="{{ $item->id }}"
-                                    {{ old('nhan_vien_id') == $item->id ? 'selected' : '' }}>
-                                    {{ $item->ho_ten }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <label class="form-label">Nhân Viên</label>
+                        <input type="hidden" name="nhan_vien_id" value="{{ auth()->user()->id }}">
+                        <input type="text" class="form-control" value="{{ auth()->user()->ho_ten }}" readonly>
                         @error('nhan_vien_id')
                             <div class="invalid-feedback">* {{ $message }}</div>
                         @enderror
                     </div>
+
 
                     <div class="col-12">
                         <label for="ghi_chu" class="form-label">Ghi chú</label>
@@ -97,6 +109,7 @@
                     <strong>Nguyên Liệu Nhập</strong>
                     <button type="button" id="add-row" class="btn btn-light btn-sm">+ Thêm nguyên liệu</button>
                 </div>
+            
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-bordered align-middle text-center mb-0" id="nguyen-lieu-table">
@@ -106,75 +119,35 @@
                                     <th>Tên nguyên liệu</th>
                                     <th>Loại nguyên liệu</th>
                                     <th>Đơn vị nhập</th>
-                                    <th>Đơn vị tồn</th>
                                     <th>Số lượng nhập</th>
-                                    <th>Hệ số quy đổi</th>
-                                    <th>Đơn giá</th>
-                                    <th>Ngày sản xuất</th>
-                                    <th>Ngày hết hạn</th>
+                                    <th class="th-don-gia">Đơn giá</th>
+                                    <th class="th-ngay-san-xuat">Ngày sản xuất</th>
+                                    <th class="th-ngay-het-han">Ngày hết hạn</th>
                                     <th>Ghi chú</th>
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>
+            
                             <tbody id="nguyen-lieu-body">
-                                @for ($i = 0; $i < count(old('ten_nguyen_lieus', [''])); $i++)
+                                @php $rowCount = count(old('ten_nguyen_lieus', [''])); @endphp
+            
+                                @for ($i = 0; $i < $rowCount; $i++)
                                     <tr>
                                         <td class="row-index text-center align-middle">{{ $i + 1 }}</td>
-
+            
+                                        {{-- Tên nguyên liệu --}}
                                         <td style="min-width: 260px">
-                                            <div class="d-flex flex-column gap-1">
-                                                <!-- Dòng đầu: Checkbox + Label -->
-                                                <div class="form-check form-switch mb-1">
-                                                    <input class="form-check-input toggle-ten-nguyen-lieu" type="checkbox"
-                                                        data-index="{{ $i }}"
-                                                        id="isCustomCheck{{ $i }}"
-                                                        {{ old("is_custom.$i") ? 'checked' : '' }}>
-                                                    <label class="form-check-label small"
-                                                        for="isCustomCheck{{ $i }}">Tự nhập</label>
-                                                </div>
-
-                                                <!-- Chọn nguyên liệu có sẵn -->
-                                                <select name="nguyen_lieu_ids[]"
-                                                    class="form-select form-select-sm nguyen-lieu-select {{ old("is_custom.$i") ? 'd-none' : '' }}"
-                                                    data-index="{{ $i }}"
-                                                    {{ old("is_custom.$i") ? 'disabled' : '' }}>
-                                                    <option value="">-- Chọn nguyên liệu --</option>
-                                                    @foreach ($nguyenLieus as $ng)
-                                                        <option value="{{ $ng->id }}"
-                                                            {{ old("nguyen_lieu_ids.$i") == $ng->id ? 'selected' : '' }}>
-                                                            {{ $ng->ten_nguyen_lieu }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                                @error("nguyen_lieu_ids.$i")
-                                                    @if (!old("is_custom.$i"))
-                                                        <div class="form-text text-danger small">* {{ $message }}</div>
-                                                    @endif
-                                                @enderror
-
-                                                <!-- Tự nhập tên nguyên liệu -->
-                                                <input type="text" name="ten_nguyen_lieus[]"
-                                                    class="form-control form-control-sm ten-nguyen-lieu-input {{ old("is_custom.$i") ? '' : 'd-none' }}"
-                                                    placeholder="Tên nguyên liệu tự nhập"
-                                                    value="{{ old("ten_nguyen_lieus.$i") }}"
-                                                    data-index="{{ $i }}"
-                                                    {{ old("is_custom.$i") ? '' : 'disabled' }}>
-                                                @error("ten_nguyen_lieus.$i")
-                                                    @if (old("is_custom.$i"))
-                                                        <div class="form-text text-danger small">* {{ $message }}</div>
-                                                    @endif
-                                                @enderror
-
-                                                <!-- Hidden is_custom -->
-                                                <input type="hidden" name="is_custom[]"
-                                                    value="{{ old("is_custom.$i") ? 1 : 0 }}" class="is-custom-hidden"
-                                                    data-index="{{ $i }}">
-                                            </div>
+                                            <input type="text" name="ten_nguyen_lieus[]"
+                                                class="form-control form-control-sm ten-nguyen-lieu-input @error("ten_nguyen_lieus.$i") is-invalid @enderror"
+                                                placeholder="Tên nguyên liệu"
+                                                value="{{ old("ten_nguyen_lieus.$i") }}"
+                                                data-index="{{ $i }}">
+                                            @error("ten_nguyen_lieus.$i")
+                                                <div class="form-text text-danger small">* {{ $message }}</div>
+                                            @enderror
                                         </td>
-
-
-
-
+            
+                                        {{-- Loại nguyên liệu --}}
                                         <td>
                                             <select name="loai_nguyen_lieu_ids[]"
                                                 class="form-select form-select-sm @error("loai_nguyen_lieu_ids.$i") is-invalid @enderror"
@@ -188,257 +161,199 @@
                                                 @endforeach
                                             </select>
                                             @error("loai_nguyen_lieu_ids.$i")
-                                                <div class="form-text text-danger small text-truncate w-100">*
-                                                    {{ $message }}</div>
+                                                <div class="form-text text-danger small">* {{ $message }}</div>
                                             @enderror
                                         </td>
-
+            
+                                        {{-- Đơn vị nhập --}}
                                         <td>
-                                            <input type="text" name="don_vi_nhaps[]"
-                                                value="{{ old("don_vi_nhaps.$i") }}"
-                                                class="form-control form-control-sm @error("don_vi_nhaps.$i") is-invalid @enderror"
-                                                placeholder="Đơn vị" style="min-width: 80px">
+                                            <select name="don_vi_nhaps[]"
+                                                class="form-select form-select-sm @error("don_vi_nhaps.$i") is-invalid @enderror"
+                                                style="min-width: 80px">
+                                                <option value="">Chọn đơn vị</option>
+                                                @foreach ($donViNhapOptions as $value => $label)
+                                                    <option value="{{ $value }}"
+                                                        {{ old("don_vi_nhaps.$i") == $value ? 'selected' : '' }}>
+                                                        {{ $label }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
                                             @error("don_vi_nhaps.$i")
-                                                <div class="form-text text-danger small text-truncate w-100">*
-                                                    {{ $message }}</div>
+                                                <div class="form-text text-danger small">* {{ $message }}</div>
                                             @enderror
                                         </td>
-                                        <td>
-                                            <input type="text" name="don_vi_tons[]"
-                                                value="{{ old("don_vi_tons.$i") }}"
-                                                class="form-control form-control-sm @error("don_vi_tons.$i") is-invalid @enderror"
-                                                placeholder="Đơn vị" style="min-width: 80px">
-                                            @error("don_vi_tons.$i")
-                                                <div class="form-text text-danger small text-truncate w-100">*
-                                                    {{ $message }}</div>
-                                            @enderror
-                                        </td>
-
+            
+                                        {{-- Số lượng nhập --}}
                                         <td>
                                             <input type="number" name="so_luong_nhaps[]"
                                                 value="{{ old("so_luong_nhaps.$i") }}"
                                                 class="form-control form-control-sm @error("so_luong_nhaps.$i") is-invalid @enderror"
                                                 placeholder="Số lượng" style="min-width: 80px">
                                             @error("so_luong_nhaps.$i")
-                                                <div class="form-text text-danger small text-truncate w-100">*
-                                                    {{ $message }}</div>
+                                                <div class="form-text text-danger small">* {{ $message }}</div>
                                             @enderror
                                         </td>
-
-                                        <td>
-                                            <input type="number" name="he_so_quy_dois[]"
-                                                value="{{ old("he_so_quy_dois.$i") }}"
-                                                class="form-control form-control-sm @error("he_so_quy_dois.$i") is-invalid @enderror"
-                                                placeholder="Hệ số" style="min-width: 100px">
-                                            @error("he_so_quy_dois.$i")
-                                                <div class="form-text text-danger small text-truncate w-100">*
-                                                    {{ $message }}</div>
-                                            @enderror
-                                        </td>
-
-                                        <td>
-                                            <input type="number" name="don_gias[]" value="{{ old("don_gias.$i") }}"
+            
+                                        {{-- Đơn giá --}}
+                                        <td class="don-gia-wrapper">
+                                            <input type="number" name="don_gias[]"
+                                                value="{{ old("don_gias.$i") }}"
                                                 class="form-control form-control-sm @error("don_gias.$i") is-invalid @enderror"
                                                 placeholder="Đơn giá" style="min-width: 100px">
                                             @error("don_gias.$i")
-                                                <div class="form-text text-danger small text-truncate w-100">*
-                                                    {{ $message }}</div>
+                                                <div class="form-text text-danger small">* {{ $message }}</div>
                                             @enderror
                                         </td>
-
-                                        <td>
+            
+                                        {{-- Ngày sản xuất --}}
+                                        <td class="ngay-san-xuat-wrapper">
                                             <input type="date" name="ngay_san_xuats[]"
                                                 value="{{ old("ngay_san_xuats.$i") }}"
                                                 class="form-control form-control-sm @error("ngay_san_xuats.$i") is-invalid @enderror"
                                                 style="min-width: 120px">
                                             @error("ngay_san_xuats.$i")
-                                                <div class="form-text text-danger small text-truncate w-100">*
-                                                    {{ $message }}</div>
+                                                <div class="form-text text-danger small">* {{ $message }}</div>
                                             @enderror
                                         </td>
-
-                                        <td>
+            
+                                        {{-- Ngày hết hạn --}}
+                                        <td class="ngay-het-han-wrapper">
                                             <input type="date" name="ngay_het_hans[]"
                                                 value="{{ old("ngay_het_hans.$i") }}"
                                                 class="form-control form-control-sm @error("ngay_het_hans.$i") is-invalid @enderror"
                                                 style="min-width: 120px">
                                             @error("ngay_het_hans.$i")
-                                                <div class="form-text text-danger small text-truncate w-100">*
-                                                    {{ $message }}</div>
+                                                <div class="form-text text-danger small">* {{ $message }}</div>
                                             @enderror
                                         </td>
-
+            
+                                        {{-- Ghi chú --}}
                                         <td>
-                                            <input type="text" name="ghi_chus[]" value="{{ old("ghi_chus.$i") }}"
-                                                class="form-control form-control-sm @error("ghi_chus.$i") is-invalid @enderror"
-                                                placeholder="Ghi chú" style="min-width: 140px">
-                                            @error("ghi_chus.$i")
-                                                <div class="form-text text-danger small text-truncate w-100">*
-                                                    {{ $message }}</div>
-                                            @enderror
+                                            <input type="text" name="ghi_chus[]"
+                                                value="{{ old("ghi_chus.$i") }}"
+                                                class="form-control form-control-sm"
+                                                placeholder="Ghi chú..." style="min-width: 120px">
                                         </td>
-
-                                        <td class="text-center">
-                                            <button type="button"
-                                                class="btn btn-sm btn-outline-danger remove-row">🗑️</button>
+            
+                                        {{-- Xóa dòng --}}
+                                        <td>
+                                            <button type="button" class="btn btn-danger btn-sm remove-row">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 @endfor
                             </tbody>
-
-
                         </table>
                     </div>
                 </div>
             </div>
+            
 
-            <!-- SUBMIT -->
-            <div class="text-end mb-5">
-                <button type="submit" class="btn btn-success px-4 py-2 fw-bold">💾 Lưu Phiếu Nhập</button>
+            <!-- NÚT SUBMIT -->
+            <div class="d-flex justify-content-end mb-5">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save me-1"></i> Lưu Phiếu Nhập
+                </button>
             </div>
         </form>
+
     </div>
 
     <!-- JS xử lý -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const body = document.getElementById('nguyen-lieu-body');
-
-            // Hàm toggle hiển thị ô nhập tên nguyên liệu hoặc select
-            function toggleTenNguyenLieu(index, isChecked) {
-                const select = document.querySelector(`select[name="nguyen_lieu_ids[]"][data-index="${index}"]`);
-                const input = document.querySelector(`input[name="ten_nguyen_lieus[]"][data-index="${index}"]`);
-                const hidden = document.querySelector(`input.is-custom-hidden[data-index="${index}"]`);
-
-                if (isChecked) {
-                    select.classList.add('d-none');
-                    select.disabled = true;
-
-                    input.classList.remove('d-none');
-                    input.disabled = false;
-
-                    hidden.value = 1;
-                } else {
-                    select.classList.remove('d-none');
-                    select.disabled = false;
-
-                    input.classList.add('d-none');
-                    input.disabled = true;
-
-                    hidden.value = 0;
+            const addRowButton = document.getElementById('add-row');
+    
+            // Ẩn/hiện các cột tùy theo loại phiếu
+            function toggleNhaCungCap() {
+                const loaiPhieu = document.getElementById('loai_phieu').value;
+                const hide = loaiPhieu === 'nhap_tu_bep';
+    
+                // Ẩn/hiện nhà cung cấp
+                const nhaCungCapWrapper = document.getElementById('nha_cung_cap_wrapper');
+                if (nhaCungCapWrapper) {
+                    nhaCungCapWrapper.style.display = hide ? 'none' : '';
                 }
+    
+                // Ẩn/hiện các trường liên quan
+                const toggleFields = [
+                    ['.don-gia-wrapper', '.th-don-gia'],
+                    ['.ngay-san-xuat-wrapper', '.th-ngay-san-xuat'],
+                    ['.ngay-het-han-wrapper', '.th-ngay-het-han']
+                ];
+    
+                toggleFields.forEach(([tdClass, thClass]) => {
+                    document.querySelectorAll(tdClass).forEach(td => td.style.display = hide ? 'none' : '');
+                    const th = document.querySelector(thClass);
+                    if (th) th.style.display = hide ? 'none' : '';
+                });
             }
-
-            // Cập nhật lại chỉ số dòng
+    
+            // Cập nhật chỉ số dòng
             function updateRowIndex() {
                 const rows = body.querySelectorAll('tr');
                 rows.forEach((row, i) => {
-                    row.querySelector('.row-index').innerText = i + 1;
+                    const indexCell = row.querySelector('.row-index');
+                    if (indexCell) indexCell.textContent = i + 1;
+    
                     row.querySelectorAll('[data-index]').forEach(el => {
                         el.dataset.index = i;
-
-                        // Cập nhật lại id và for cho checkbox + label
-                        if (el.id?.startsWith('isCustomCheck')) {
-                            const newId = `isCustomCheck${i}`;
-                            el.id = newId;
-                            const label = row.querySelector(`label[for^="isCustomCheck"]`);
-                            if (label) label.setAttribute('for', newId);
-                        }
                     });
                 });
             }
-
-            // Gắn sự kiện toggle cho tất cả checkbox đang hiển thị
-            document.querySelectorAll('.toggle-ten-nguyen-lieu').forEach(checkbox => {
-                const index = checkbox.dataset.index;
-                toggleTenNguyenLieu(index, checkbox.checked);
-            });
-
-            // Bắt sự kiện khi thay đổi checkbox "Tự nhập"
-            body.addEventListener('change', function(e) {
-                if (e.target.classList.contains('toggle-ten-nguyen-lieu')) {
-                    const index = e.target.dataset.index;
-                    toggleTenNguyenLieu(index, e.target.checked);
-                }
-            });
-
-            // Xử lý nút thêm dòng mới
-            const addRowButton = document.getElementById('add-row');
+    
+            // Reset các input/select trong dòng clone
+            function resetInputFields(row, newIndex) {
+                row.querySelectorAll('input, select').forEach(el => {
+                    if (el.type !== 'hidden') el.value = '';
+                    el.classList.remove('is-invalid');
+    
+                    const next = el.nextElementSibling;
+                    if (next && next.classList.contains('invalid-feedback')) {
+                        next.remove();
+                    }
+    
+                    if (el.dataset.index !== undefined) el.dataset.index = newIndex;
+                });
+            }
+    
+            // Thêm dòng
             if (addRowButton) {
-                addRowButton.addEventListener('click', function() {
+                addRowButton.addEventListener('click', function () {
                     const rows = body.querySelectorAll('tr');
                     const lastRow = rows[rows.length - 1];
-                    const newRow = lastRow.cloneNode(true);
                     const newIndex = rows.length;
-
-                    // Reset tất cả các input/select trong dòng mới
-                    newRow.querySelectorAll('input, select').forEach(el => {
-                        if (el.type === 'checkbox') {
-                            el.checked = false;
-                        } else {
-                            el.value = '';
-                        }
-
-                        el.classList.remove('is-invalid'); // XÓA trạng thái lỗi nếu có
-                        const nextSibling = el.nextElementSibling;
-                        if (nextSibling && nextSibling.classList.contains('invalid-feedback')) {
-                            nextSibling.remove(); // XÓA thông báo lỗi
-                        }
-
-                        if (el.classList.contains('form-check-input')) {
-                            const newId = `isCustomCheck${newIndex}`;
-                            el.id = newId;
-                        }
-
-                        if (el.name === 'is_custom[]') {
-                            el.value = 0;
-                        }
-
-                        // xử lý toggle lại giữa input và select
-                        if (el.classList.contains('ten-nguyen-lieu-input')) {
-                            el.classList.add('d-none');
-                            el.disabled = true;
-                        }
-
-                        if (el.classList.contains('nguyen-lieu-select')) {
-                            el.classList.remove('d-none');
-                            el.disabled = false;
-                        }
-                    });
-
-
-                    // Cập nhật data-index
-                    newRow.querySelectorAll('[data-index]').forEach(el => {
-                        el.dataset.index = newIndex;
-                    });
-
-                    // Cập nhật lại label for của checkbox
-                    const checkbox = newRow.querySelector('.toggle-ten-nguyen-lieu');
-                    const label = newRow.querySelector('label.form-check-label');
-                    if (checkbox && label) {
-                        checkbox.id = `isCustomCheck${newIndex}`;
-                        label.setAttribute('for', `isCustomCheck${newIndex}`);
-                    }
-
+    
+                    const newRow = lastRow.cloneNode(true);
+                    resetInputFields(newRow, newIndex);
                     body.appendChild(newRow);
+    
                     updateRowIndex();
                 });
             }
-
-            // Xử lý xóa dòng
-            body.addEventListener('click', function(e) {
+    
+            // Xóa dòng
+            body.addEventListener('click', function (e) {
                 if (e.target.classList.contains('remove-row')) {
-                    const row = e.target.closest('tr');
-                    if (body.querySelectorAll('tr').length > 1) {
-                        row.remove();
+                    const rows = body.querySelectorAll('tr');
+                    if (rows.length > 1) {
+                        e.target.closest('tr').remove();
                         updateRowIndex();
                     } else {
-                        alert("Phải có ít nhất 1 dòng nguyên liệu.");
+                        alert('Phải có ít nhất 1 dòng nguyên liệu.');
                     }
                 }
             });
+    
+            // Bắt đầu
+            toggleNhaCungCap();
+            document.getElementById('loai_phieu').addEventListener('change', toggleNhaCungCap);
         });
     </script>
+    
+    
 
 
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />

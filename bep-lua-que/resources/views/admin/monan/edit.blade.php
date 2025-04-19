@@ -86,54 +86,7 @@
                     <div id="previewImages" class="d-flex flex-wrap gap-2 mt-2"></div>
                 </div>
 
-                <!-- Công thức -->
-                <div class="col-12">
-                    <label class="form-label">Công thức món ăn</label>
-                    <div id="cong-thuc-list">
-                        @php
-                            $congThucList =
-                                old('cong_thuc') ??
-                                $monAn->congThuc
-                                    ->map(function ($ct) {
-                                        return [
-                                            'nguyen_lieu_id' => $ct->nguyen_lieu_id,
-                                            'so_luong' => $ct->so_luong,
-                                            'don_vi' => $ct->don_vi,
-                                        ];
-                                    })
-                                    ->toArray();
-                        @endphp
-
-                        @foreach ($congThucList as $i => $ct)
-                            <div class="row mb-2 cong-thuc-item">
-                                <div class="col-md-5">
-                                    <select name="cong_thuc[{{ $i }}][nguyen_lieu_id]"
-                                        class="form-select select-nguyen-lieu">
-                                        <option value="">-- Chọn nguyên liệu --</option>
-                                        @foreach ($nguyenLieus as $nl)
-                                            <option value="{{ $nl->id }}" data-don-vi="{{ $nl->don_vi_ton }}"
-                                                {{ $ct['nguyen_lieu_id'] == $nl->id ? 'selected' : '' }}>
-                                                {{ $nl->ten_nguyen_lieu }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <input type="number" step="0.01" name="cong_thuc[{{ $i }}][so_luong]"
-                                        class="form-control" placeholder="Số lượng" value="{{ $ct['so_luong'] }}">
-                                </div>
-                                <div class="col-md-3">
-                                    <input type="text" name="cong_thuc[{{ $i }}][don_vi]"
-                                        class="form-control" placeholder="Đơn vị" value="{{ $ct['don_vi'] }}" readonly>
-                                </div>
-                                <div class="col-md-1 text-end">
-                                    <button type="button" class="btn btn-danger btn-sm remove-ct">&times;</button>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                    <button type="button" id="add-cong-thuc" class="btn btn-outline-primary btn-sm mt-2">+ Thêm nguyên
-                        liệu</button>
-                </div>
+               
 
                 <div class="col-12 d-flex justify-content-between mt-4">
                     <a href="{{ route('mon-an.index') }}" class="btn btn-secondary">
@@ -147,79 +100,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.select-nguyen-lieu').forEach(select => {
-                select.addEventListener('change', function() {
-                    handleNguyenLieuChange(this);
-                });
-            });
-
-            function handleNguyenLieuChange(selectElement) {
-                const selectedOption = selectElement.options[selectElement.selectedIndex];
-                const donVi = selectedOption.getAttribute('data-don-vi') || '';
-                const donViInput = selectElement.closest('.cong-thuc-item').querySelector(
-                'input[name*="[don_vi]"]');
-                if (donViInput) {
-                    donViInput.value = donVi;
-                }
-
-                // Kiểm tra trùng nguyên liệu
-                const selectedValue = selectElement.value;
-                if (selectedValue) {
-                    let isDuplicate = false;
-                    document.querySelectorAll('.select-nguyen-lieu').forEach(select => {
-                        if (select !== selectElement && select.value === selectedValue) {
-                            isDuplicate = true;
-                        }
-                    });
-
-                    if (isDuplicate) {
-                        alert('Nguyên liệu này đã được chọn. Vui lòng chọn nguyên liệu khác.');
-                        selectElement.value = '';
-                        donViInput.value = '';
-                    }
-                }
-            }
-
-
-            document.getElementById('add-cong-thuc').addEventListener('click', function() {
-                const index = Date.now(); // đảm bảo index duy nhất
-                const html = `
-    <div class="row mb-2 cong-thuc-item">
-        <div class="col-md-5">
-            <select name="cong_thuc[${index}][nguyen_lieu_id]" class="form-select select-nguyen-lieu">
-                <option value="">-- Chọn nguyên liệu --</option>
-                @foreach ($nguyenLieus as $nl)
-                    <option value="{{ $nl->id }}" data-don-vi="{{ $nl->don_vi_ton }}">{{ $nl->ten_nguyen_lieu }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-3">
-            <input type="number" step="0.01" name="cong_thuc[${index}][so_luong]" class="form-control" placeholder="Số lượng">
-        </div>
-        <div class="col-md-3">
-            <input type="text" name="cong_thuc[${index}][don_vi]" class="form-control" placeholder="Đơn vị" readonly>
-        </div>
-        <div class="col-md-1 text-end">
-            <button type="button" class="btn btn-danger btn-sm remove-ct">&times;</button>
-        </div>
-    </div>`;
-                const container = document.getElementById('cong-thuc-list');
-                container.insertAdjacentHTML('beforeend', html);
-
-                // Lấy phần tử select vừa thêm và gắn lại sự kiện
-                const newItem = container.lastElementChild;
-                const newSelect = newItem.querySelector('.select-nguyen-lieu');
-                newSelect.addEventListener('change', function() {
-                    handleNguyenLieuChange(this);
-                });
-            });
-
-
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('remove-ct')) {
-                    e.target.closest('.cong-thuc-item').remove();
-                }
-            });
+        
 
             document.getElementById('hinh_anh')?.addEventListener('change', function(event) {
                 const previewContainer = document.getElementById('previewImages');

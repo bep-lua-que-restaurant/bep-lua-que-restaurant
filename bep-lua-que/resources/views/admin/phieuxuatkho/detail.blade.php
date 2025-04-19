@@ -58,7 +58,6 @@
                             <th>Loại</th>
                             <th>Đơn vị xuất</th>
                             <th>Số lượng</th>
-                            <th>Hệ số QĐ</th>
                             <th>Đơn giá</th>
                             <th>Thành tiền</th>
                             <th>Ghi chú</th>
@@ -72,7 +71,6 @@
                                 <td class="text-secondary">{{ $item->nguyenLieu->loaiNguyenLieu->ten_loai ?? '---' }}</td>
                                 <td>{{ $item->don_vi_xuat }}</td>
                                 <td>{{ $item->so_luong }}</td>
-                                <td>{{ $item->he_so_quy_doi }}</td>
                                 <td>{{ number_format($item->don_gia, 0, ',', '.') }} đ</td>
                                 <td class="text-end text-danger fw-bold">
                                     {{ number_format((float) $item->so_luong * (float) str_replace('.', '', $item->don_gia), 0, ',', '.') }} đ

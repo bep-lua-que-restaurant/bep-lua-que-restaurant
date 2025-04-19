@@ -35,17 +35,12 @@
                     @enderror
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label">Nhân Viên</label>
-                    <select name="nhan_vien_id" class="form-select @error('nhan_vien_id') is-invalid @enderror">
-                        <option value="">-- Chọn --</option>
-                        @foreach ($nhanViens as $nv)
-                            <option value="{{ $nv->id }}" {{ old('nhan_vien_id') == $nv->id ? 'selected' : '' }}>
-                                {{ $nv->ho_ten }}</option>
-                        @endforeach
-                    </select>
+                    <input type="hidden" name="nhan_vien_id" value="{{ auth()->user()->id }}">
+                    <input type="text" class="form-control" value="{{ auth()->user()->ho_ten }}" readonly>
                     @error('nhan_vien_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">* {{ $message }}</div>
                     @enderror
                 </div>
 
@@ -112,7 +107,6 @@
                             <th>Loại nguyên liệu</th>
                             <th>Nguyên liệu</th>
                             <th>Đơn vị xuất</th>
-                            <th>Hệ số quy đổi</th>
                             <th>Số lượng xuất</th>
                             <th class="don-gia-column">Đơn giá</th>
                             <th>Ghi chú</th>
@@ -146,6 +140,10 @@
                                         @foreach ($nguyenLieus as $nl)
                                             <option value="{{ $nl->id }}" data-loai="{{ $nl->loai_nguyen_lieu_id }}"
                                                 data-don-gia="{{ $nl->don_gia }}"
+                                                data-don-vi="{{ $nl->don_vi_ton }}"
+                                                data-ton-kho="{{ $tonKhos[$nl->id] ?? 0 }}"
+
+                                                {{ $nl->deleted_at ? 'disabled' : '' }}
                                                 data-deleted="{{ $nl->deleted_at ? '1' : '0' }}"
                                                 class="{{ $nl->deleted_at ? 'text-danger bg-light' : '' }}"
                                                 {{ old("nguyen_lieu_ids.$index") == $nl->id ? 'selected' : '' }}>
@@ -166,20 +164,15 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </td>
-                                <td>
-                                    <input type="text" name="he_so_quy_dois[]"
-                                        class="form-control form-control-sm @error("he_so_quy_dois.$index") is-invalid @enderror"
-                                        value="{{ old("he_so_quy_dois.$index") }}">
-                                    @error("he_so_quy_dois.$index")
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </td>
+
                                 <td>
                                     <input type="number" step="0.01" min="0.01" name="so_luong_xuats[]"
                                         class="form-control form-control-sm @error("so_luong_xuats.$index") is-invalid @enderror"
                                         value="{{ old("so_luong_xuats.$index") }}">
                                     @error("so_luong_xuats.$index")
                                         <div class="invalid-feedback">{{ $message }}</div>
+                                        <div class="text-danger small d-none ton-kho-warning">Số lượng vượt quá tồn kho!</div>
+
                                     @enderror
                                 </td>
                                 <td class="don-gia-column">
@@ -297,16 +290,27 @@
                 const selectedOption = $(this).find('option:selected');
                 const selectedValue = $(this).val();
                 const donGia = parseFloat(selectedOption.data('don-gia')) || 0;
+                const donVi = selectedOption.data('don-vi'); // Lấy đơn vị
+                const tonKho = parseFloat(selectedOption.data('ton-kho')) || 0;
 
+                const row = $(this).closest('tr');
+
+                // Nếu là phiếu trả hàng thì điền đơn giá
                 if ($('#loai_phieu').val() === 'xuat_tra_hang') {
-                    const donGiaInput = $(this).closest('tr').find('input[name="don_gias[]"]');
+                    const donGiaInput = row.find('input[name="don_gias[]"]');
                     donGiaInput.val(donGia.toFixed(2));
                 }
 
-                // ✅ Kiểm tra trùng nguyên liệu
-                let isDuplicate = false;
-                const currentRow = $(this).closest('tr');
+                // Điền đơn vị
+                const donViInput = row.find('input[name="don_vi_xuats[]"]');
+                donViInput.val(donVi);
 
+                // Gán tồn kho vào hàng và ẩn cảnh báo
+                row.data('ton-kho', tonKho);
+                row.find('.ton-kho-warning').addClass('d-none');
+
+                // Kiểm tra trùng nguyên liệu
+                let isDuplicate = false;
                 $('select[name="nguyen_lieu_ids[]"]').not(this).each(function() {
                     if ($(this).val() === selectedValue) {
                         isDuplicate = true;
@@ -320,6 +324,20 @@
                 }
             });
 
+            // Kiểm tra tồn kho khi nhập số lượng
+            $('#nguyen-lieu-body').on('input', 'input[name="so_luong_xuats[]"]', function() {
+                const row = $(this).closest('tr');
+                const tonKho = parseFloat(row.data('ton-kho')) || 0;
+                const soLuongXuat = parseFloat($(this).val()) || 0;
+
+                if (soLuongXuat > tonKho) {
+                    row.find('.ton-kho-warning').removeClass('d-none');
+                    $(this).addClass('is-invalid');
+                } else {
+                    row.find('.ton-kho-warning').addClass('d-none');
+                    $(this).removeClass('is-invalid');
+                }
+            });
 
             $('#loai_phieu').on('change', function() {
                 toggleDonGiaColumn();

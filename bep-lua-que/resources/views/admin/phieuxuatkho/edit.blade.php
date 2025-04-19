@@ -64,7 +64,7 @@
                             class="form-control @error('nguoi_nhan') is-invalid @enderror"
                             value="{{ old('nguoi_nhan', $phieuXuatKho->nguoi_nhan) }}">
                         @error('nguoi_nhan')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{$message }}</div>
                         @enderror
                     </div>
                 @else
@@ -118,7 +118,6 @@
                             <th>Nguyên liệu</th>
                             <th>Đơn vị</th>
                             <th>Số lượng</th>
-                            <th>Hệ số</th>
                             <th>Đơn giá</th>
                             <th>Ghi chú</th>
                             <th></th>
@@ -151,8 +150,7 @@
                                         value="{{ $ct->don_vi_xuat }}"></td>
                                 <td><input type="number" name="so_luongs[]" class="form-control"
                                         value="{{ $ct->so_luong }}"></td>
-                                <td><input type="number" step="0.01" name="he_so_quy_dois[]" class="form-control"
-                                        value="{{ $ct->he_so_quy_doi }}"></td>
+
                                 <td><input type="number" name="don_gias[]" class="form-control"
                                         value="{{ $ct->don_gia }}"></td>
                                 <td><input type="text" name="ghi_chus[]" class="form-control"
@@ -175,61 +173,81 @@
     </div>
 
     <script>
-        const nguyenLieuOptions = @json($nguyenLieuOptions);
-
-        $('#addRow').click(function() {
-            let options = '';
-            let firstLoaiId = '';
-            let firstDonGia = '';
-
-            // Bỏ qua nguyên liệu bị xoá khi chọn mặc định
-            const validNguyenLieu = nguyenLieuOptions.find(nl => nl.deleted_at === null);
-            if (validNguyenLieu) {
-                firstLoaiId = validNguyenLieu.loai_nguyen_lieu_id;
-                firstDonGia = validNguyenLieu.don_gia;
-            }
-
+        // Biến từ controller
+        const loaiPhieu = @json($phieuXuatKho->loai_phieu); // Ví dụ: 'bep', 'tra_ncc', v.v.
+        const nguyenLieuOptions = @json($nguyenLieuOptions); // Mảng nguyên liệu từ controller
+    
+        // Thêm dòng mới
+        $('#addRow').click(function () {
+            let options = `<option value="" selected>Chọn nguyên liệu</option>`; // Option trống
+    
+            // Duyệt qua danh sách nguyên liệu để tạo options
             nguyenLieuOptions.forEach(opt => {
                 const isDeleted = opt.deleted_at !== null;
                 const deletedLabel = isDeleted ? ' (ĐÃ XOÁ)' : '';
                 const disabledAttr = isDeleted ? 'disabled style="color:red;"' : '';
-
-                options += `<option value="${opt.id}" data-loai="${opt.loai_nguyen_lieu_id}" data-don-gia="${opt.don_gia}" ${disabledAttr}>
+    
+                options += `
+                    <option value="${opt.id}" data-loai="${opt.loai_nguyen_lieu_id}" data-don-gia="${opt.don_gia}" data-don-vi="${opt.don_vi}" ${disabledAttr}>
                         ${opt.text}${deletedLabel}
                     </option>`;
             });
-
+    
             const row = `
-        <tr>
-            <td>
-                <input type="hidden" name="chi_tiet_ids[]" value="">
-                <input type="hidden" name="loai_nguyen_lieu_ids[]" class="loai-id-hidden" value="${firstLoaiId}">
-                <select name="nguyen_lieu_ids[]" class="form-select">${options}</select>
-            </td>
-            <td><input type="text" name="don_vi_xuats[]" class="form-control"></td>
-            <td><input type="number" name="so_luongs[]" class="form-control"></td>
-            <td><input type="number" step="0.01" name="he_so_quy_dois[]" class="form-control"></td>
-            <td><input type="number" name="don_gias[]" class="form-control" value="${firstDonGia}"></td>
-            <td><input type="text" name="ghi_chus[]" class="form-control"></td>
-            <td><button type="button" class="btn btn-outline-danger btn-sm remove-row">Xoá</button></td>
-        </tr>`;
+                <tr>
+                    <td>
+                        <input type="hidden" name="chi_tiet_ids[]" value="">
+                        <input type="hidden" name="loai_nguyen_lieu_ids[]" class="loai-id-hidden" value="">
+                        <select name="nguyen_lieu_ids[]" class="form-select">
+                            ${options}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" name="don_vi_xuats[]" class="form-control" value="" readonly>
+                    </td>
+                    <td>
+                        <input type="number" name="so_luongs[]" class="form-control">
+                    </td>
+                    <td class="don-gia-column ${loaiPhieu === 'bep' ? 'd-none' : ''}">
+                        <input type="number" name="don_gias[]" class="form-control" value="">
+                    </td>
+                    <td>
+                        <input type="text" name="ghi_chus[]" class="form-control">
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-outline-danger btn-sm remove-row">Xoá</button>
+                    </td>
+                </tr>`;
+    
             $('#chiTietTable tbody').append(row);
         });
-
-
-
-        $(document).on('click', '.remove-row', function() {
+    
+        // Khi thay đổi nguyên liệu
+        $(document).on('change', 'select[name="nguyen_lieu_ids[]"]', function () {
+            const selectedOption = $(this).find('option:selected');
+    
+            const donGia = selectedOption.data('don-gia') ?? '';
+            const donVi = selectedOption.data('don-vi') ?? '';
+            const loaiId = selectedOption.data('loai') ?? '';
+    
+            const row = $(this).closest('tr');
+    
+            // Cập nhật hidden loai_id
+            row.find('input.loai-id-hidden').val(loaiId);
+    
+            // Cập nhật đơn vị
+            row.find('input[name="don_vi_xuats[]"]').val(donVi);
+    
+            // Cập nhật đơn giá nếu không phải phiếu bếp
+            if (loaiPhieu !== 'xuat_bep') {
+                row.find('input[name="don_gias[]"]').val(donGia);
+            }
+        });
+    
+        // Xoá dòng
+        $(document).on('click', '.remove-row', function () {
             $(this).closest('tr').remove();
         });
-
-        // Tự động gán đơn giá khi chọn nguyên liệu
-        $(document).on('change', 'select[name="nguyen_lieu_ids[]"]', function() {
-            const selectedOption = $(this).find('option:selected');
-            const loaiId = selectedOption.data('loai');
-            const donGia = selectedOption.data('don-gia');
-
-            $(this).closest('td').find('input.loai-id-hidden').val(loaiId);
-            $(this).closest('tr').find('input[name="don_gias[]"]').val(donGia);
-        });
     </script>
+    
 @endsection

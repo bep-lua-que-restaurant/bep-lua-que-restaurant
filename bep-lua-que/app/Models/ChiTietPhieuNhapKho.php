@@ -18,9 +18,9 @@ class ChiTietPhieuNhapKho extends Model
         'loai_nguyen_lieu_id',
         'nguyen_lieu_id',    // ID của nguyên liệu (có thể null nếu không có)
         'don_vi_nhap',
-        'don_vi_ton',      // Đơn vị tồn kho (có thể khác với đơn vị nhập)
+
         'so_luong_nhap',
-        'he_so_quy_doi',
+
         'don_gia',
         'thanh_tien',
         'ngay_san_xuat',
@@ -51,7 +51,7 @@ class ChiTietPhieuNhapKho extends Model
     {
         return $this->belongsTo(LoaiNguyenLieu::class, 'loai_nguyen_lieu_id', 'id');
     }
-    /**
-     * Quan hệ với bảng `loai_nguyen_lieus` (1 chi tiết thuộc về 1 loại nguyên liệu).
-     */
+    
+   
+
 }

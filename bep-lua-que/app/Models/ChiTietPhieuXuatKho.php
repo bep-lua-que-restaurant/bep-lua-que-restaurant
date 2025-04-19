@@ -17,7 +17,6 @@ class ChiTietPhieuXuatKho extends Model
         'nguyen_lieu_id',     // ID nguyên liệu
         'don_vi_xuat',        // Đơn vị xuất (ví dụ: kg, thùng, chai,...)
         'so_luong',           // Số lượng xuất theo đơn vị xuất
-        'he_so_quy_doi',      // Hệ số quy đổi từ đơn vị xuất sang đơn vị tồn
         'don_gia',            // Giá của 1 đơn vị xuất
         'thanh_tien',         // Tổng tiền = so_luong * don_gia
         'ghi_chu',            // Ghi chú bổ sung

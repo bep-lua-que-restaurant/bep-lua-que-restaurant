@@ -99,57 +99,7 @@
                     <div id="previewImages" class="mt-3 d-flex flex-wrap gap-2"></div>
 
                     <hr class="my-3">
-                    <h5 class="mb-2">Nguyên liệu & Công thức</h5>
-                    <div id="cong-thuc-wrapper">
-                        @php
-                            $oldCongThuc = old('cong_thuc', [
-                                ['nguyen_lieu_id' => '', 'so_luong' => '', 'don_vi' => ''],
-                            ]);
-                        @endphp
-                        @foreach ($oldCongThuc as $index => $item)
-                            <div class="row align-items-end mb-2 cong-thuc-row border-bottom pb-2">
-                                <div class="col-md-5">
-                                    <label class="form-label">Nguyên liệu</label>
-                                    <select name="cong_thuc[{{ $index }}][nguyen_lieu_id]"
-                                        class="form-select nguyenlieu-select" data-index="{{ $index }}">
-                                        <option value="">-- Chọn nguyên liệu --</option>
-                                        @foreach ($nguyenLieus as $nl)
-                                            <option value="{{ $nl->id }}"
-                                                {{ $item['nguyen_lieu_id'] == $nl->id ? 'selected' : '' }}>
-                                                {{ $nl->ten_nguyen_lieu }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error("cong_thuc.$index.nguyen_lieu_id")
-                                        <small class="text-danger d-block">*{{ $message }}</small>
-                                    @enderror
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Số lượng</label>
-                                    <input type="number" step="0.01" name="cong_thuc[{{ $index }}][so_luong]"
-                                        class="form-control" value="{{ $item['so_luong'] }}">
-                                    @error("cong_thuc.$index.so_luong")
-                                        <small class="text-danger d-block">*{{ $message }}</small>
-                                    @enderror
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">Đơn vị</label>
-                                    <input type="text" name="cong_thuc[{{ $index }}][don_vi]"
-                                        class="form-control donvi-input" value="{{ $item['don_vi'] }}" readonly>
-                                    @error("cong_thuc.$index.don_vi")
-                                        <small class="text-danger d-block">*{{ $message }}</small>
-                                    @enderror
-                                </div>
-                                <div class="col-md-2">
-                                    <button type="button" class="btn btn-danger w-100 btn-remove-row mt-4">Xóa</button>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-
-                    <button type="button" class="btn btn-outline-primary btn-sm mb-3" id="btn-add-nguyenlieu">
-                        <i class="fas fa-plus"></i> Thêm nguyên liệu
-                    </button>
+                    
 
 
 
@@ -214,77 +164,7 @@
             $(this).closest("div").remove();
         });
 
-        // Lấy danh sách nguyên liệu (đã keyBy id)
-        const nguyenLieus = @json($nguyenLieus->keyBy('id'));
-
-        // Thêm dòng công thức mới
-        $('#btn-add-nguyenlieu').click(function() {
-            let index = $('.cong-thuc-row').length;
-            let newRow = `
-                <div class="row align-items-end mb-2 cong-thuc-row border-bottom pb-2">
-                    <div class="col-md-5">
-                        <label class="form-label">Nguyên liệu</label>
-                        <select name="cong_thuc[${index}][nguyen_lieu_id]" class="form-select nguyenlieu-select" data-index="${index}">
-                            <option value="">-- Chọn nguyên liệu --</option>
-                            @foreach ($nguyenLieus as $nl)
-                                <option value="{{ $nl->id }}">{{ $nl->ten_nguyen_lieu }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Số lượng</label>
-                        <input type="number" step="0.01" name="cong_thuc[${index}][so_luong]" class="form-control">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Đơn vị</label>
-                        <input type="text" name="cong_thuc[${index}][don_vi]" class="form-control donvi-input" readonly>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="button" class="btn btn-danger w-100 btn-remove-row mt-4">Xóa</button>
-                    </div>
-                </div>
-            `;
-            $('#cong-thuc-wrapper').append(newRow);
-        });
-
-        function isDuplicateNguyenLieu(index, selectedId) {
-            let duplicated = false;
-            $('.nguyenlieu-select').each(function(i) {
-                if (i !== index && $(this).val() == selectedId) {
-                    duplicated = true;
-                    return false; // break
-                }
-            });
-            return duplicated;
-        }
-
-        $(document).on('change', '.nguyenlieu-select', function() {
-            let index = $(this).data('index');
-            let selectedId = $(this).val();
-
-            if (isDuplicateNguyenLieu(index, selectedId)) {
-                alert('Nguyên liệu này đã được chọn ở dòng khác!');
-                $(this).val('');
-                $(this).closest('.cong-thuc-row').find('.donvi-input').val('');
-                return;
-            }
-
-            let donVi = nguyenLieus[selectedId]?.don_vi_ton || '';
-            $(this).closest('.cong-thuc-row').find('.donvi-input').val(donVi);
-        });
-
-
-        // Xoá dòng công thức
-        $(document).on('click', '.btn-remove-row', function() {
-            $(this).closest('.cong-thuc-row').remove();
-        });
-
-        // Khi form được load lại (submit lỗi), cập nhật đơn vị cho các dòng cũ
-        $('.nguyenlieu-select').each(function() {
-            let nguyenLieuId = $(this).val();
-            let donVi = nguyenLieus[nguyenLieuId]?.don_vi_ton || '';
-            $(this).closest('.cong-thuc-row').find('.donvi-input').val(donVi);
-        });
+        
     </script>
     <style>
         .cong-thuc-row {

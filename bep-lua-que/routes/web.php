@@ -293,7 +293,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('tools')->group(function () {
         Route::post('/import-nguyen-lieu', [NguyenLieuController::class, 'importNguyenLieu'])->name('tools.nguyen-lieu.import');
     });
-    
+
     // nhập nkho
     Route::get('/phieu-nhap-kho/export', [PhieuNhapKhoController::class, 'exportDanhSach'])->name('phieu-nhap-kho.export');
 
@@ -301,6 +301,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('phieu-nhap-kho/restore/{id}', [PhieuNhapKhoController::class, 'restore'])->name('phieu-nhap-kho.restore');
     Route::put('phieu-nhap-kho/{id}/duyet', [PhieuNhapKhoController::class, 'duyet'])->name('phieu-nhap-kho.duyet');
     Route::put('/phieu-nhap-kho/{id}/huy', [PhieuNhapKhoController::class, 'huy'])->name('phieu-nhap-kho.huy');
+    // Route riêng cho AJAX lấy chi tiết phiếu nhập
+    Route::get('/phieu-nhap-kho/ajax-chi-tiet/{id}', [PhieuNhapKhoController::class, 'ajaxChiTiet']);
 
     // xuất kho
     Route::resource('phieu-xuat-kho', PhieuXuatKhoController::class);
