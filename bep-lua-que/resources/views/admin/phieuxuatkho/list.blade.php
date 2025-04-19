@@ -45,9 +45,6 @@
                             <a href="{{ route('phieu-xuat-kho.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
-                            {{-- <a href="#" class="btn btn-sm btn-info">
-                                <i class="fa fa-list"></i> Danh sách
-                            </a> --}}
                         </div>
                     </div>
                     <div class="card-body">
@@ -57,8 +54,6 @@
                                     <tr>
                                         <th><strong>ID</strong></th>
                                         <th><strong>Mã phiếu</strong></th>
-                                        <th><strong>Người nhận</strong></th>
-                                        <th><strong>Nhà cung cấp</strong></th>
                                         <th><strong>Ngày xuất</strong></th>
                                         <th><strong>Loại phiếu</strong></th>
                                         <th><strong>Trạng thái</strong></th>
@@ -99,14 +94,8 @@
                         data: 'ma_phieu',
                         name: 'ma_phieu'
                     },
-                    {
-                        data: 'nguoi_nhan',
-                        name: 'nguoi_nhan'
-                    },
-                    {
-                        data: 'nha_cung_cap',
-                        name: 'nha_cung_cap'
-                    },
+
+                    
                     {
                         data: 'ngay_xuat',
                         name: 'ngay_xuat'
@@ -129,7 +118,7 @@
                     },
                     {
                         data: 'trang_thai',
-                        name: 'deleted_at'
+                        name: 'trang_thai'
                     },
                     {
                         data: 'action',
@@ -146,6 +135,65 @@
                 lengthMenu: [5, 10, 25, 50],
                 pageLength: 10
             });
+
+            // Tính năng Row Details khi click vào dòng
+            $('#{{ $tableId }}').on('click', 'tbody tr', function() {
+                var tr = $(this);
+                var row = table.row(tr);
+
+                if (row.child.isShown()) {
+                    // Nếu dòng con đang mở, đóng lại
+                    row.child.hide();
+                    tr.removeClass('shown');
+                } else {
+                    // Mở dòng con để hiển thị chi tiết
+                    row.child(format(row.data())).show();
+                    tr.addClass('shown');
+                }
+            });
+
+            // Định dạng chi tiết của phiếu xuất kho
+            function format(d) {
+                return `
+                           
+                          <div class="container">
+                        <h5>Thông tin phiếu xuất kho</h5>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Người nhận:</th>
+                                <td>${d.nguoi_nhan}</td>
+                            </tr>
+                             <tr> 
+                                <th>Nhân viên:</th>
+                               <td>${d.nhanvien}</td>
+                            </tr>
+                               
+                            <tr> 
+                                <th>Nhà cung cấp:</th>
+                               <td>${d.nha_cung_cap}</td>
+                            </tr>
+                            <tr>
+                                <th>Ngày xuất:</th>
+                                <td>${d.ngay_xuat}</td>
+                            </tr>
+                           
+                            <tr>
+                                <th>Trạng thái:</th>
+                                <td>${d.trang_thai}</td>
+                            </tr>
+                            <tr>
+                                <th>Ghi chú:</th>
+                                <td>${d.ghi_chu}</td>
+                            </tr>  
+                             <tr>
+                                <th>Tổng tiền:</th>
+                                <td>${d.tong_tien} VNĐ</td>
+                            </tr>
+
+                        </table>
+                    </div>
+                `;
+            }
 
             $(document).on('submit', 'form', function(e) {
                 e.preventDefault();
@@ -213,6 +261,10 @@
 
         .dataTables_paginate .page-link:hover {
             background-color: #e9ecef;
+        }
+
+        .shown td {
+            background-color: #f8f9fa;
         }
     </style>
 @endsection

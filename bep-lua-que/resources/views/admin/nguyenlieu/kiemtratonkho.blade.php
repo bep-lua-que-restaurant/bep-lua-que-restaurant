@@ -1,316 +1,338 @@
 @extends('layouts.admin')
 
-@section('title', 'Kiểm Tra Tồn Kho')
+@section('title', 'Kiểm Tra Tồn Kho và Hạn Sử Dụng')
 
 @section('content')
-    <div class="container py-4">
-        <h4 class="mb-4">📦 Kiểm tra tồn kho</h4>
-        <p class="fst-italic text-danger small">* Nguyên liệu hiển thị màu đỏ là đã ngưng sử dụng</p>
+    <div class="container mt-4">
+        <h3 class="mb-4 text-primary">📦 Thống kê tồn kho và hạn sử dụng</h3>
 
-        <ul class="nav nav-tabs mb-3" id="tonKhoTabs">
-            <li class="nav-item">
-                <a class="nav-link active" data-bs-toggle="tab" href="#tab-xuat-dung">Xuất - Dùng</a>
+        <!-- Tab navigation -->
+        <ul class="nav nav-tabs" id="tab-hsd" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="ton-kho-tab" data-bs-toggle="tab" href="#ton-kho" role="tab"
+                    aria-controls="ton-kho" aria-selected="true">Tồn Kho</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#tab-han-su-dung">Hạn sử dụng</a>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="han-su-dung-tab" data-bs-toggle="tab" href="#han-su-dung" role="tab"
+                    aria-controls="han-su-dung" aria-selected="false">Hạn Sử Dụng</a>
             </li>
         </ul>
 
-        <div class="tab-content">
-            {{-- Tab xuất dùng --}}
-            <div class="tab-pane fade show active" id="tab-xuat-dung">
-                <div class="row mb-3">
-                    <div class="col-md-3">
-                        <label for="ngay">Ngày:</label>
-                        <input type="date" id="ngay" class="form-control" value="{{ now()->toDateString() }}">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="loai_nguyen_lieu">Loại nguyên liệu:</label>
-                        <select id="loai_nguyen_lieu" class="form-select">
-                            <option value="">-- Tất cả --</option>
-                            @foreach ($loaiNguyenLieus as $loai)
-                                <option value="{{ $loai->id }}">{{ $loai->ten_loai }}</option>
-                            @endforeach
-                        </select>
+        <!-- Tab content -->
+        <div class="tab-content" id="tab-hsd-content">
+
+            <!-- Tồn Kho Tab -->
+            <div class="tab-pane fade show active" id="ton-kho" role="tabpanel" aria-labelledby="ton-kho-tab">
+                <!-- Bộ lọc Tồn Kho -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <form id="filter-ton-kho-form" class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label for="ngay-ton-kho" class="form-label">Chọn ngày</label>
+                                <input type="date" id="ngay-ton-kho" name="ngay" class="form-control"
+                                    value="{{ \Carbon\Carbon::today()->toDateString() }}">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="loai_nguyen_lieu_id" class="form-label">Loại nguyên liệu</label>
+                                <select id="loai_nguyen_lieu_id" name="loai_nguyen_lieu_id" class="form-select">
+                                    <option value="">-- Tất cả --</option>
+                                    @foreach ($loaiNguyenLieus as $loai)
+                                        <option value="{{ $loai->id }}">{{ $loai->ten_loai }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-funnel"></i> Lọc dữ liệu
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
-                <div class="table-responsive">
-                    <table id="tonKhoTable" class="table table-hover table-bordered table-striped align-middle">
-                        <thead class="table-dark text-center">
-                            <tr>
-                                <th>Nguyên liệu</th>
-                                <th>Tồn kho</th>
-                                <th>Đã xuất (Tất cả)</th>
-                                <th>Đã xuất (bếp)</th>
-                                <th>Đã xuất (trả hàng)</th>
-                                <th>Đã xuất (hủy)</th>
-                                <th>Đã dùng (theo món)</th>
-                                <th>Chênh lệch (Xuất - Dùng)</th>
-                                <th>Cảnh báo</th>
-                            </tr>
-                        </thead>
-                        <tbody id="data-body" class="text-center"></tbody>
-                        <tfoot class="table-light fw-bold text-center">
-                            <tr>
-                                <td>Tổng</td>
-                                <td id="sum-ton-kho"></td>
-                                <td id="sum-tong-xuat"></td>
-                                <td id="sum-xuat-bep"></td>
-                                <td id="sum-xuat-tra"></td>
-                                <td id="sum-xuat-huy"></td>
-                                <td id="sum-da-dung"></td>
-                                <td id="sum-chenh-lech"></td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                <!-- Bảng dữ liệu Tồn Kho -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle text-center" id="table-ton-kho">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th>STT</th>
+                                        <th>Nguyên liệu</th>
+                                        <th>Đơn vị</th>
+                                        <th>Tồn kho</th>
+                                        <th>Nhập từ Bếp</th>
+                                        <th>Nhập từ NCC</th>
+                                        <th>Tổng Nhập</th>
+                                        <th>Xuất Bếp</th>
+                                        <th>Xuất Trả Hàng</th>
+                                        <th>Xuất Hủy</th>
+                                        <th>Tổng Xuất</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="data-body-ton-kho">
+                                    <tr>
+                                        <td colspan="12">🔄 Vui lòng chọn bộ lọc để hiển thị dữ liệu...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {{-- Tab hạn sử dụng --}}
-            <div class="tab-pane fade" id="tab-han-su-dung">
-                <canvas id="hanSuDungChart" height="250" style="max-width: 400px; margin: 0 auto;"></canvas>
+            <!-- Hạn Sử Dụng Tab -->
+            <div class="tab-pane fade" id="han-su-dung" role="tabpanel" aria-labelledby="han-su-dung-tab">
+                <!-- Bộ lọc -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <form id="filter-han-su-dung-form" class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label for="ngay-hsd" class="form-label">Chọn ngày</label>
+                                <input type="date" id="ngay-hsd" name="ngay" class="form-control"
+                                    value="{{ \Carbon\Carbon::today()->toDateString() }}">
+                            </div>
 
-                <div class="table-responsive mt-4">
-                    <table class="table table-bordered table-hover text-center align-middle">
-                        <thead class="table-secondary">
-                            <tr>
-                                <th>Nguyên liệu</th>
-                                <th>Số lượng</th>
-                                <th>Đơn vị</th>
-                                <th>Hạn sử dụng còn lại (ngày)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="hanSuDungTableBody">
-                            {{-- Dữ liệu sẽ được đổ bằng JS --}}
-                        </tbody>
-                    </table>
+                            <div class="col-md-4">
+                                <label for="loai_nguyen_lieu_id_hsd" class="form-label">Loại nguyên liệu</label>
+                                <select id="loai_nguyen_lieu_id_hsd" name="loai_nguyen_lieu_id" class="form-select">
+                                    <option value="">-- Tất cả --</option>
+                                    @foreach ($loaiNguyenLieus as $loai)
+                                        <option value="{{ $loai->id }}">{{ $loai->ten_loai }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-funnel"></i> Lọc dữ liệu
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
 
+                <!-- Bảng hiển thị -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle text-center table-sm">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th>STT</th>
+                                        <th>Nguyên liệu</th>
+                                        <th>Đơn vị</th>
+                                        <th>Tồn kho</th>
+                                        <th>Hạn sử dụng</th>
+                                        <th>Tình trạng</th>
+                                        <th>Biểu đồ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="data-body-han-su-dung">
+                                    <tr>
+                                        <td colspan="7">🔄 Vui lòng chọn bộ lọc để hiển thị dữ liệu...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="text-end mt-4">
-            <a href="{{ route('nguyen-lieu.index') }}" class="btn btn-secondary">
-                ← Quay lại danh sách
-            </a>
-        </div>
-    </div>
 
-    {{-- Scripts --}}
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <!-- jQuery + Bootstrap Icons -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script>
-        let dataTable;
+        <script>
+            // Lọc Tồn Kho
+            $(function() {
+                $('#filter-ton-kho-form').on('submit', function(e) {
+                    e.preventDefault();
 
-        function formatNumber(num) {
-            return num ? parseFloat(num).toLocaleString('vi-VN', {
-                maximumFractionDigits: 2
-            }) : '0';
-        }
+                    let ngay = $('#ngay-ton-kho').val();
+                    let loaiId = $('#loai_nguyen_lieu_id').val();
 
-        function loadTonKho() {
-            let ngay = $('#ngay').val();
-            let loaiId = $('#loai_nguyen_lieu').val();
-
-            $.get('/api/ton-kho/xuat-dung', {
-                ngay: ngay,
-                loai_nguyen_lieu_id: loaiId
-            }, function(data) {
-                let html = '';
-                let tongTonKho = 0,
-                    tongXuat = 0,
-                    tongXuatBep = 0,
-                    tongXuatTra = 0,
-                    tongXuatHuy = 0,
-                    tongDung = 0,
-                    tongChenhLech = 0;
-
-                data.forEach(item => {
-                    let warning = item.chenh_lech_xuat_dung < 0 ? '⚠️' : '';
-                    let rowClass = item.chenh_lech_xuat_dung < 0 ? 'table-danger' : '';
-                    let style = item.da_ngung_su_dung ?
-                        'color: #dc3545; font-style: italic; opacity: 0.7;' : '';
-
-                    let tonKho = parseFloat(item.ton_kho_hien_tai) || 0;
-                    let tongXuatItem = parseFloat(item.tong_da_xuat) || 0;
-                    let xuatBep = parseFloat(item.xuat_bep) || 0;
-                    let xuatTra = parseFloat(item.xuat_tra_hang) || 0;
-                    let xuatHuy = parseFloat(item.xuat_huy) || 0;
-                    let daDung = parseFloat(item.da_dung) || 0;
-                    let chenhLech = parseFloat(item.chenh_lech_xuat_dung) || 0;
-
-                    tongTonKho += tonKho;
-                    tongXuat += tongXuatItem;
-                    tongXuatBep += xuatBep;
-                    tongXuatTra += xuatTra;
-                    tongXuatHuy += xuatHuy;
-                    tongDung += daDung;
-                    tongChenhLech += chenhLech;
-
-                    html += `
-                    <tr class="${rowClass}">
-                        <td style="${style}">${item.nguyen_lieu}</td>
-                        <td style="${style}">${formatNumber(tonKho)}</td>
-                        <td style="${style}">${formatNumber(tongXuatItem)}</td>
-                        <td style="${style}">${formatNumber(xuatBep)}</td>
-                        <td style="${style}">${formatNumber(xuatTra)}</td>
-                        <td style="${style}">${formatNumber(xuatHuy)}</td>
-                        <td style="${style}">${formatNumber(daDung)}</td>
-                        <td style="${style}">${formatNumber(chenhLech)}</td>
-                        <td style="${style}">${warning} ${item.can_nhap_them}</td>
-                    </tr>`;
-                });
-
-                if (dataTable) {
-                    dataTable.destroy();
-                    $('#tonKhoTable tbody').remove();
-                    $('#tonKhoTable').append('<tbody id="data-body" class="text-center"></tbody>');
-                }
-
-                $('#data-body').html(html);
-                $('#sum-ton-kho').text(formatNumber(tongTonKho));
-                $('#sum-tong-xuat').text(formatNumber(tongXuat));
-                $('#sum-xuat-bep').text(formatNumber(tongXuatBep));
-                $('#sum-xuat-tra').text(formatNumber(tongXuatTra));
-                $('#sum-xuat-huy').text(formatNumber(tongXuatHuy));
-                $('#sum-da-dung').text(formatNumber(tongDung));
-                $('#sum-chenh-lech').text(formatNumber(tongChenhLech));
-
-                dataTable = $('#tonKhoTable').DataTable({
-                    paging: true,
-                    searching: true,
-                    ordering: true,
-                    language: {
-                        search: "🔍 Tìm kiếm:",
-                        lengthMenu: "Hiển thị _MENU_ dòng",
-                        info: "Hiển thị _START_ đến _END_ của _TOTAL_ dòng",
-                        paginate: {
-                            first: "Đầu",
-                            last: "Cuối",
-                            next: "›",
-                            previous: "‹"
+                    $.ajax({
+                        url: '/api/ton-kho/xuat-dung',
+                        type: 'GET',
+                        data: {
+                            ngay: ngay,
+                            loai_nguyen_lieu_id: loaiId
                         },
-                        emptyTable: "Không có dữ liệu tồn kho"
-                    }
+                        success: function(res) {
+                            let tbody = $('#data-body-ton-kho');
+                            tbody.empty();
+
+                            if (res.length === 0) {
+                                tbody.append(`<tr><td colspan="12">🚫 Không có dữ liệu</td></tr>`);
+                                return;
+                            }
+
+                            $.each(res, function(index, item) {
+                                let trangThai = item.da_ngung_su_dung ?
+                                    '<span class="badge bg-danger">Ngưng SD</span>' :
+                                    '<span class="badge bg-success">Đang SD</span>';
+
+                                tbody.append(`
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${item.nguyen_lieu}</td>
+                                    <td>${item.don_vi}</td>
+                                    <td>${item.ton_kho_hien_tai}</td>
+                                    <td>${item.nhap_tu_bep}</td>
+                                    <td>${item.nhap_tu_ncc}</td>
+                                    <td class="text-primary fw-bold">${item.tong_nhap}</td>
+                                    <td>${item.xuat_bep}</td>
+                                    <td>${item.xuat_tra_hang}</td>
+                                    <td>${item.xuat_huy}</td>
+                                    <td class="text-danger fw-bold">${item.tong_xuat}</td>
+                                    <td>${trangThai}</td>
+                                </tr>
+                            `);
+                            });
+                        },
+                        error: function() {
+                            alert('❌ Lỗi khi lấy dữ liệu tồn kho!');
+                        }
+                    });
                 });
-            });
-        }
 
-        $(document).ready(function() {
-            loadTonKho();
-            $('#ngay, #loai_nguyen_lieu').change(loadTonKho);
-        });
 
-        // Biểu đồ hạn sử dụng mới - Pie Chart + Bảng nguyên liệu
-        let chartLoaded = false;
+                // Lọc Hạn Sử Dụng
+                $('#filter-han-su-dung-form').on('submit', function(e) {
+                    e.preventDefault();
 
-        $(document).ready(function() {
-            $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
-                if (e.target.getAttribute('href') === '#tab-han-su-dung' && !chartLoaded) {
-                    $.get("{{ route('nguyen-lieu.hansudung') }}", function(res) {
-                        const pieData = {
-                            conHan: 0,
-                            sapHetHan: 0,
-                            hetHan: 0
-                        };
+                    let ngay = $('#ngay-hsd').val();
+                    let loaiId = $('#loai_nguyen_lieu_id_hsd').val();
+                    let tbody = $('#data-body-han-su-dung');
+                    tbody.html(`<tr><td colspan="7">⏳ Đang tải dữ liệu...</td></tr>`);
 
-                        // Đếm tổng số nguyên liệu mỗi loại
-                        res.data.forEach(item => {
-                            pieData.conHan += item.con_han > 0 ? 1 : 0;
-                            pieData.sapHetHan += item.sap_het_han > 0 ? 1 : 0;
-                            pieData.hetHan += item.het_han > 0 ? 1 : 0;
-                        });
+                    $.ajax({
+                        url: '{{ route('nguyen-lieu.hansudung') }}',
+                        type: 'GET',
+                        data: {
+                            ngay: ngay,
+                            loai_nguyen_lieu_id: loaiId
+                        },
+                        success: function(res) {
+                            tbody.empty();
 
-                        // Pie chart
-                        const ctx = document.getElementById('hanSuDungChart').getContext('2d');
-                        new Chart(ctx, {
-                            type: 'doughnut',
-                            data: {
-                                labels: ['Còn hạn', 'Sắp hết hạn', 'Hết hạn'],
-                                datasets: [{
-                                    data: [
-                                        res.data.reduce((sum, i) => sum + i
-                                            .con_han, 0),
-                                        res.data.reduce((sum, i) => sum + i
-                                            .sap_het_han, 0),
-                                        res.data.reduce((sum, i) => sum + i
-                                            .het_han, 0),
-                                    ],
-                                    backgroundColor: [
-                                        'rgba(75, 192, 192, 0.7)', // Còn hạn
-                                        'rgba(255, 206, 86, 0.7)', // Sắp hết hạn
-                                        'rgba(255, 99, 132, 0.7)', // Hết hạn
-                                    ],
-                                    hoverOffset: 10
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                plugins: {
-                                    legend: {
-                                        position: 'bottom'
-                                    },
-                                    tooltip: {
-                                        callbacks: {
-                                            label: function(context) {
-                                                let total = context.chart._metasets[0]
-                                                    .total;
-                                                let value = context.raw;
-                                                let percent = ((value / total) * 100)
-                                                    .toFixed(1);
-                                                return `${context.label}: ${value} (${percent}%)`;
+                            if (!res.data || res.data.length === 0) {
+                                tbody.append(`<tr><td colspan="7">🚫 Không có dữ liệu</td></tr>`);
+                                return;
+                            }
+
+                            $.each(res.data, function(index, item) {
+                                let badgeClass = '',
+                                    icon = '',
+                                    status = '';
+                                let soNgay = item.so_ngay_con_lai;
+
+                                if (typeof soNgay === 'string') {
+                                    badgeClass = 'danger';
+                                    icon = 'bi bi-x-circle-fill text-danger';
+                                    status = 'Đã hết hạn';
+                                    soNgay = 'Đã hết hạn';
+                                } else if (soNgay <= 7) {
+                                    badgeClass = 'warning';
+                                    icon = 'bi bi-exclamation-triangle-fill text-warning';
+                                    status = 'Sắp hết hạn';
+                                    soNgay = `${soNgay} ngày`;
+                                } else {
+                                    badgeClass = 'success';
+                                    icon = 'bi bi-check-circle-fill text-success';
+                                    status = 'Còn hạn';
+                                    soNgay = `${soNgay} ngày`;
+                                }
+
+                                // Tạo ID cho canvas biểu đồ
+                                let chartId = `chart-${index}`;
+
+                                tbody.append(`
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td class="text-start" title="${item.nguyen_lieu}">${item.nguyen_lieu}</td>
+                            <td>${item.don_vi}</td>
+                            <td>${item.so_luong_ton}</td>
+                            <td>
+                                <span class="badge bg-${badgeClass}" data-bs-toggle="tooltip" title="${status}">
+                                    ${soNgay}
+                                </span>
+                            </td>
+                            <td>
+                                <i class="${icon}" title="${status}" style="font-size: 1.2rem;"></i>
+                            </td>
+                            <td>
+                                <canvas id="${chartId}" class="chart-canvas"></canvas>
+                            </td>
+                        </tr>
+                    `);
+
+                                // Render biểu đồ tròn (pie chart)
+                                setTimeout(() => {
+                                    new Chart(document.getElementById(chartId), {
+                                        type: 'doughnut',
+                                        data: {
+                                            labels: ['Còn hạn',
+                                                'Sắp hết hạn', 'Hết hạn'
+                                            ],
+                                            datasets: [{
+                                                data: [item.con_han,
+                                                    item
+                                                    .sap_het_han,
+                                                    item.het_han
+                                                ],
+                                                backgroundColor: [
+                                                    '#198754',
+                                                    '#ffc107',
+                                                    '#dc3545'
+                                                ],
+                                                borderWidth: 1
+                                            }]
+                                        },
+                                        options: {
+                                            cutout: '70%',
+                                            plugins: {
+                                                legend: {
+                                                    display: false
+                                                },
+                                                tooltip: {
+                                                    callbacks: {
+                                                        label: (ctx) =>
+                                                            `${ctx.label}: ${ctx.raw}`
+                                                    }
+                                                }
                                             }
                                         }
-                                    },
-                                    title: {
-                                        display: true,
-                                        text: 'Tình trạng hạn sử dụng (phần trăm)'
-                                    }
-                                }
-                            }
-                        });
-
-
-                        // Hiển thị danh sách nguyên liệu bên dưới
-                        let tableHtml = '';
-                        res.data.forEach(item => {
-                            tableHtml += `
-                                            <tr>
-                                                <td>${item.nguyen_lieu}</td>
-                                                <td>${formatNumber(item.so_luong_ton)} </td>
-                                                <td>${item.don_vi}</td>
-                                                <td>${item.so_ngay_con_lai}</td>
-                                            </tr>
-                                                `;
-                        });
-                        $('#hanSuDungTableBody').html(tableHtml);
-
-
-                      
-
-                        // Lọc bảng
-                        $('#filter-hsd').on('change', function() {
-                            let val = $(this).val();
-                            $('#table-hsd tbody tr').each(function() {
-                                let status = $(this).data('status');
-                                if (val === '' || status === val) {
-                                    $(this).show();
-                                } else {
-                                    $(this).hide();
-                                }
+                                    });
+                                }, 100);
                             });
-                        });
 
-                        chartLoaded = true;
-                    }).fail(function() {
-                        console.error("Lỗi khi lấy dữ liệu hạn sử dụng từ server.");
+                            // Kích hoạt tooltip bootstrap
+                            const tooltipTriggerList = [].slice.call(document.querySelectorAll(
+                                '[data-bs-toggle="tooltip"]'))
+                            tooltipTriggerList.map(t => new bootstrap.Tooltip(t));
+                        },
+                        error: function() {
+                            alert('❌ Lỗi khi lấy dữ liệu hạn sử dụng!');
+                        }
                     });
-                }
+                });
             });
-        });
-    </script>
-@endsection
+        </script>
+        <style>
+            .chart-canvas {
+                width:130px !important;
+                height: 80px !important;
+                max-width: 130px;
+                max-height: 80px;
+                display: block;
+                margin: 0 auto;
+            }
+        </style>
+    @endsection

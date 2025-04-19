@@ -23,7 +23,7 @@ class PhieuXuatKhoController extends Controller
     {
         if ($request->ajax()) {
             $query = PhieuXuatKho::query()
-                ->with(['nhaCungCap'])
+                ->with(['nhaCungCap','nhanVien'])
                 ->withTrashed();
 
             return DataTables::of($query)
@@ -42,6 +42,9 @@ class PhieuXuatKhoController extends Controller
                 })
                 ->addColumn('nha_cung_cap', function ($row) {
                     return $row->nhaCungCap ? $row->nhaCungCap->ten_nha_cung_cap : 'Không có';
+                })
+                ->addColumn('nhanvien', function ($row) {
+                    return $row->nhanvien ? $row->nhanVien->ho_ten : 'Chưa có';
                 })
                 ->addColumn('action', function ($row) {
                     $html = '<div class="d-flex align-items-center">';
@@ -84,7 +87,7 @@ class PhieuXuatKhoController extends Controller
         $nguyenLieus = NguyenLieu::withTrashed()
             ->with(['loaiNguyenLieu', 'chiTietNhapKhoMoiNhat'])
             ->get(); // Bỏ điều kiện so_luong_ton nếu muốn lấy tất cả
-    
+            $tonKhos = $nguyenLieus->pluck('so_luong_ton', 'id');
         // Lấy danh sách loại nguyên liệu, nhà cung cấp và nhân viên
         $loaiNguyenLieus = LoaiNguyenLieu::all();
         $nhaCungCaps = NhaCungCap::all(); // Chỉ dùng nếu loại phiếu là trả hàng
@@ -98,7 +101,8 @@ class PhieuXuatKhoController extends Controller
             'loaiNguyenLieus',
             'nhaCungCaps',
             'nhanViens',
-            'nextCode'
+            'nextCode',
+            'tonKhos'
         ));
     }
     
@@ -148,7 +152,6 @@ class PhieuXuatKhoController extends Controller
                 $phieu->chiTietPhieuXuatKhos()->create([
                     'nguyen_lieu_id' => $nguyenLieuId,
                     'don_vi_xuat' => $request->don_vi_xuats[$index] ?? '',
-                    'he_so_quy_doi' => $request->he_so_quy_dois[$index] ?? 1,
                     'so_luong' => $soLuong,
                     'don_gia' => $donGia,
                     'ghi_chu' => $request->ghi_chus[$index] ?? null,
@@ -212,17 +215,19 @@ class PhieuXuatKhoController extends Controller
             'nhaCungCap'
         ]);
 
+        $loaiPhieu = $phieuXuatKho->loai_phieu;
         $loaiNguyenLieus = LoaiNguyenLieu::with(['nguyenLieus' => function ($query) {
             $query->withTrashed();
         }])->get();
 
         $nguyenLieuOptions = collect($loaiNguyenLieus)->flatMap(function ($loai) {
             return $loai->nguyenLieus
-                ->filter(fn($nl) => $nl->so_luong_ton > 5000)
+                ->filter(fn($nl) => $nl->so_luong_ton > 5)
                 ->map(fn($nl) => [
                     'id' => $nl->id,
                     'text' => $loai->ten_loai . ' - ' . $nl->ten_nguyen_lieu,
                     'don_gia' => $nl->don_gia,
+                    'don_vi' => $nl->don_vi_ton,
                     'loai_nguyen_lieu_id' => $nl->loai_nguyen_lieu_id,
                     'deleted_at' => $nl->deleted_at,
                 ]);
@@ -234,7 +239,8 @@ class PhieuXuatKhoController extends Controller
             'phieuXuatKho',
             'nhanViens',
             'loaiNguyenLieus',
-            'nguyenLieuOptions'
+            'nguyenLieuOptions',
+            'loaiPhieu',
         ));
     }
 
@@ -273,7 +279,6 @@ class PhieuXuatKhoController extends Controller
                     'nguyen_lieu_id'    => $nguyenLieuId,
                     'don_vi_xuat'       => $request->don_vi_xuats[$index],
                     'so_luong'          => $request->so_luongs[$index],
-                    'he_so_quy_doi'     => $request->he_so_quy_dois[$index],
                     'don_gia'           => $request->don_gias[$index],
                     'ghi_chu'           => $request->ghi_chus[$index],
                 ];
@@ -369,7 +374,7 @@ class PhieuXuatKhoController extends Controller
                     continue;
                 }
     
-                $soLuongTru = $chiTiet->so_luong * $chiTiet->he_so_quy_doi;
+                $soLuongTru = $chiTiet->so_luong ;
     
                 if ($nguyenLieu->so_luong_ton < $soLuongTru) {
                     throw new \Exception("Không đủ tồn kho cho nguyên liệu: {$nguyenLieu->ten_nguyen_lieu}");
@@ -408,7 +413,7 @@ class PhieuXuatKhoController extends Controller
                     $nguyenLieu = NguyenLieu::find($chiTiet->nguyen_lieu_id);
 
                     if ($nguyenLieu) {
-                        $nguyenLieu->so_luong_ton += $chiTiet->so_luong * $chiTiet->he_so_quy_doi;
+                        $nguyenLieu->so_luong_ton += $chiTiet->so_luong;
                         $nguyenLieu->save();
                     }
                 }

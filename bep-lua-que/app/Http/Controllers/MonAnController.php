@@ -78,11 +78,11 @@ class MonAnController extends Controller
         $danhMucs = DanhMucMonAn::whereNull('deleted_at')->get();
 
         // Lấy tất cả nguyên liệu, bao gồm cả đã bị soft delete
-        $nguyenLieus = NguyenLieu::withTrashed()
-            ->select('id', 'ten_nguyen_lieu', 'don_vi_ton')
-            ->get();
+        // $nguyenLieus = NguyenLieu::withTrashed()
+        //     ->select('id', 'ten_nguyen_lieu', 'don_vi_ton')
+        //     ->get();
 
-        return view('admin.monan.create', compact('danhMucs', 'nguyenLieus'));
+        return view('admin.monan.create', compact('danhMucs', ));
     }
 
 
@@ -114,19 +114,19 @@ class MonAnController extends Controller
                 }
             }
 
-            $nguyenLieus = $request->input('cong_thuc', []);
-            foreach ($nguyenLieus as $index => $ct) {
-                if (!isset($ct['nguyen_lieu_id'], $ct['so_luong']) || $ct['nguyen_lieu_id'] == '' || $ct['so_luong'] == '') {
-                    continue;
-                }
+            // $nguyenLieus = $request->input('cong_thuc', []);
+            // foreach ($nguyenLieus as $index => $ct) {
+            //     if (!isset($ct['nguyen_lieu_id'], $ct['so_luong']) || $ct['nguyen_lieu_id'] == '' || $ct['so_luong'] == '') {
+            //         continue;
+            //     }
 
-                CongThucMonAn::create([
-                    'mon_an_id' => $monAn->id,
-                    'nguyen_lieu_id' => $ct['nguyen_lieu_id'],
-                    'so_luong' => $ct['so_luong'],
-                    'don_vi' => $ct['don_vi'] ?? null
-                ]);
-            }
+            //     CongThucMonAn::create([
+            //         'mon_an_id' => $monAn->id,
+            //         'nguyen_lieu_id' => $ct['nguyen_lieu_id'],
+            //         'so_luong' => $ct['so_luong'],
+            //         'don_vi' => $ct['don_vi'] ?? null
+            //     ]);
+            // }
 
             DB::commit();
 
@@ -143,37 +143,34 @@ class MonAnController extends Controller
 
     public function show($id)
     {
-    $monAn = MonAn::withTrashed()->findOrFail($id);
-
-    $monAn->load([
-        'danhMuc',
-        'hinhAnhs',
-        'congThuc.nguyenLieu' => function ($query) {
-            $query->withTrashed();
-        },
-    ]);
+        $monAn->load([
+            'danhMuc',
+            'hinhAnhs'=> function ($query) {
+                $query->withTrashed();
+            },
+        ]);
 
     return view('admin.monan.detail', compact('monAn'));
     }
-
-
 
 
     public function edit($id)
     {
     $monAn = MonAn::withTrashed()->findOrFail($id);
 
-    $danhMucs = DanhMucMonAn::whereNull('deleted_at')->get();
 
-    $nguyenLieus = NguyenLieu::select('id', 'ten_nguyen_lieu', 'don_vi_ton')->get();
+        // Chỉ load nguyên liệu chưa bị xoá cho dropdown chọn nguyên liệu
+        // $nguyenLieus = NguyenLieu::select('id', 'ten_nguyen_lieu', 'don_vi_ton')->get();
 
-    $monAn->load([
-        'congThuc.nguyenLieu' => function ($query) {
-            $query->withTrashed();
-        }
-    ]);
+        // Load công thức kèm nguyên liệu đã bị soft delete
+        // $monAn->load([
+        //     'congThuc.nguyenLieu' => function ($query) {
+        //         $query->withTrashed();
+        //     }
+        // ]);
 
-    return view('admin.monan.edit', compact('monAn', 'danhMucs', 'nguyenLieus'));
+        return view('admin.monan.edit', compact('monAn', 'danhMucs', ));
+
     }
 
 
@@ -209,19 +206,19 @@ class MonAnController extends Controller
         }
 
         // ✅ Cập nhật công thức món ăn
-        $monAn->congThuc()->delete(); // Xoá toàn bộ công thức cũ
+        // $monAn->congThuc()->delete(); // Xoá toàn bộ công thức cũ
 
-        if ($request->has('cong_thuc')) {
-            foreach ($request->cong_thuc as $ct) {
-                if (!empty($ct['nguyen_lieu_id']) && isset($ct['so_luong'], $ct['don_vi'])) {
-                    $monAn->congThuc()->create([
-                        'nguyen_lieu_id' => $ct['nguyen_lieu_id'],
-                        'so_luong' => $ct['so_luong'],
-                        'don_vi' => $ct['don_vi'],
-                    ]);
-                }
-            }
-        }
+        // if ($request->has('cong_thuc')) {
+        //     foreach ($request->cong_thuc as $ct) {
+        //         if (!empty($ct['nguyen_lieu_id']) && isset($ct['so_luong'], $ct['don_vi'])) {
+        //             $monAn->congThuc()->create([
+        //                 'nguyen_lieu_id' => $ct['nguyen_lieu_id'],
+        //                 'so_luong' => $ct['so_luong'],
+        //                 'don_vi' => $ct['don_vi'],
+        //             ]);
+        //         }
+        //     }
+        // }
 
         // Broadcast event
         broadcast(new ThucDonUpdated($monAn))->toOthers();

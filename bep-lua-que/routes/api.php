@@ -46,7 +46,7 @@ Route::get('/get-so-luong-ban', [BanAnController::class, 'getSoLuongBan']);
 Route::get('/chat/tin-nhan', [ChatController::class, 'layTinNhan']);
 Route::post('/chat/gui', [ChatController::class, 'guiTinNhan']);
 
-Route::get('/ton-kho/xuat-dung', [NguyenLieuController::class, 'tonKhoXuatDung']);
+Route::get('/ton-kho/xuat-dung', [NguyenLieuController::class, 'tonKhoXuatNhap']);
 
 
 

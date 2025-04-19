@@ -30,11 +30,7 @@ class StoreMonAnRequest extends FormRequest
             'thoi_gian_nau' => 'required|integer|min:1',
             'hinh_anh.*' => 'nullable|image|max:2048',
 
-            // validate công thức
-            'cong_thuc' => 'required|array|min:1',
-            'cong_thuc.*.nguyen_lieu_id' => 'required|exists:nguyen_lieus,id',
-            'cong_thuc.*.so_luong' => 'required|numeric|min:0.01',
-            'cong_thuc.*.don_vi' => 'nullable|string|max:50',
+            
         ];
     }
 
@@ -55,14 +51,7 @@ class StoreMonAnRequest extends FormRequest
             'hinh_anh.*.image' => 'Tệp tải lên phải là hình ảnh.',
             'hinh_anh.*.max' => 'Hình ảnh không được vượt quá 2MB.',
 
-            // công thức
-            'cong_thuc.required' => 'Cần ít nhất một dòng công thức.',
-            'cong_thuc.*.nguyen_lieu_id.required' => 'Vui lòng chọn nguyên liệu cho từng dòng.',
-            'cong_thuc.*.nguyen_lieu_id.exists' => 'Nguyên liệu không hợp lệ.',
-            'cong_thuc.*.so_luong.required' => 'Vui lòng nhập số lượng cho từng nguyên liệu.',
-            'cong_thuc.*.so_luong.numeric' => 'Số lượng phải là một số.',
-            'cong_thuc.*.so_luong.min' => 'Số lượng phải lớn hơn 0.',
-            'cong_thuc.*.don_vi.max' => 'Đơn vị không được dài quá 50 ký tự.',
+          
         ];
     }
 }

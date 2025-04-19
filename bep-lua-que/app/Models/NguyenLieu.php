@@ -55,8 +55,5 @@ class NguyenLieu extends Model
     {
         return $this->hasMany(ChiTietPhieuXuatKho::class, 'nguyen_lieu_id', 'id');
     }
-    public function congThucMonAn()
-    {
-        return $this->hasMany(CongThucMonAn::class, 'nguyen_lieu_id');
-    }
+
 }

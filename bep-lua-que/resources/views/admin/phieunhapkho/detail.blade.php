@@ -28,6 +28,19 @@
                 <p><strong>👤 Nhân viên nhập:</strong> {{ $phieuNhapKho->nhanVien->ho_ten ?? 'N/A' }}</p>
                 <p><strong>📅 Ngày nhập:</strong> {{ \Carbon\Carbon::parse($phieuNhapKho->ngay_nhap)->format('d/m/Y') }}</p>
                 <p><strong>📝 Ghi chú:</strong> {{ $phieuNhapKho->ghi_chu ?? 'Không có' }}</p>
+                <p><strong>📋 Loại phiếu:</strong>
+                    @switch($phieuNhapKho->loai_phieu)
+                        @case('nhap_tu_ncc')
+                            <span class="badge bg-primary">Nhập từ NCC</span>
+                        @break
+
+                        @case('nhap_tu_bep')
+                            <span class="badge bg-info text-dark">Nhập Từ bếp</span>
+                        @break
+
+                        @default
+                            <span class="badge bg-secondary">Khác</span>
+                    @endswitch
                 <p><strong>⚙️ Trạng thái:</strong>
 
                     @switch($phieuNhapKho->trang_thai)
@@ -58,15 +71,7 @@
                     @case('da_duyet')
                         <span class="badge bg-success">Đã duyệt</span>
 
-                        {{-- Cho phép hủy nếu đã duyệt --}}
-                        <form action="{{ route('phieu-nhap-kho.huy', $phieuNhapKho->id) }}" method="POST" class="d-inline ms-2"
-                            onsubmit="return confirm('Bạn có chắc muốn hủy phiếu này không?');">
-                            @csrf
-                            @method('PUT')
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fa fa-times-circle"></i> Hủy phiếu
-                            </button>
-                        </form>
+                        
                     @break
 
                     @case('da_huy')
@@ -91,9 +96,7 @@
                             <th>Tên nguyên liệu</th>
                             <th>Loại</th>
                             <th>Đơn vị nhập</th>
-                            <th>Đơn vị tồn</th>
                             <th>Số lượng</th>
-                            <th>Hệ số QĐ</th>
                             <th>Đơn giá</th>
                             <th>Thành tiền</th>
                             <th>NSX</th>
@@ -108,9 +111,7 @@
                                 <td>{{ $chiTiet->ten_nguyen_lieu }}</td>
                                 <td>{{ $chiTiet->loaiNguyenLieu->ten_loai ?? 'Không rõ' }}</td>
                                 <td>{{ $chiTiet->don_vi_nhap }}</td>
-                                <td>{{ $chiTiet->don_vi_ton }}</td>
                                 <td>{{ $chiTiet->so_luong_nhap }}</td>
-                                <td>{{ $chiTiet->he_so_quy_doi }}</td>
                                 <td>{{ number_format($chiTiet->don_gia, 0, ',', '.') }} đ</td>
                                 <td class="text-end">{{ number_format($chiTiet->thanh_tien, 0, ',', '.') }} đ</td>
                                 <td>{{ $chiTiet->ngay_san_xuat ?? '-' }}</td>

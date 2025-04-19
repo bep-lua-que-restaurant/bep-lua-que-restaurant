@@ -64,7 +64,7 @@
                 </a>
             </div>
         </div>
-        <div class="col-12 mb-4">
+        {{-- <div class="col-12 mb-4">
             <label class="form-label fw-bold">Công thức món ăn:</label>
 
             @if ($monAn->congThuc->isEmpty())
@@ -91,7 +91,7 @@
                     </tbody>
                 </table>
             @endif
-        </div>
+        </div> --}}
     </div>
 
 

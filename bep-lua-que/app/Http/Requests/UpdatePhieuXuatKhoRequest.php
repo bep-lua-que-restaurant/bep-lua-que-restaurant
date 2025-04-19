@@ -32,8 +32,7 @@ class UpdatePhieuXuatKhoRequest extends FormRequest
             'don_vi_xuats' => 'required|array|min:1',
             'don_vi_xuats.*' => 'required|string|min:1|max:255',
         
-            'he_so_quy_dois' => 'required|array|min:1',
-            'he_so_quy_dois.*' => 'required|numeric|min:0.01',
+          
         
             'so_luongs' => 'required|array|min:1',
             'so_luongs.*' => 'required|numeric|min:0.01',
@@ -71,8 +70,7 @@ class UpdatePhieuXuatKhoRequest extends FormRequest
             'don_vi_xuats.*.min' => 'Đơn vị xuất phải có ít nhất 1 ký tự.',
             'don_vi_xuats.*.max' => 'Đơn vị xuất không được vượt quá 255 ký tự.',
 
-            'he_so_quy_dois.*.required' => 'Vui lòng nhập hệ số quy đổi.',
-            'he_so_quy_dois.*.min' => 'Hệ số quy đổi phải lớn hơn 0.',
+           
 
             'so_luong_xuats.*.required' => 'Vui lòng nhập số lượng.',
             'so_luong_xuats.*.min' => 'Số lượng phải lớn hơn 0.',
