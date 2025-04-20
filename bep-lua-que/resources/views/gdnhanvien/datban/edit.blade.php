@@ -5,100 +5,83 @@
         use Carbon\Carbon;
 
     @endphp
-    <div class="container">
+    <div class="container-fluid">
         <h1 class="text-center my-4">Xác nhận Bàn</h1>
-        {{-- {{ dd($maDatBan) }} --}}
-
-        <!-- Bảng đặt bàn -->
         <div id="ngay-content" class="table-responsive">
-            <div class="table-responsive">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover text-center align-middle">
-                        <thead class="table-dark">
-                            <tr>
-                                <!-- Cố định cột "Bàn / Giờ" -->
-                                <th class="sticky-col">Bàn / Giờ</th>
-                                @for ($i = 8; $i <= 22; $i++)
-                                    <th>{{ sprintf('%02d', $i) }}:00</th>
-                                    <th>{{ sprintf('%02d', $i) }}:30</th>
-                                @endfor
-                            </tr>
-                        </thead>
+            <table class="table table-bordered table-hover text-center align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="sticky-col text-nowrap">Bàn / Giờ</th>
+                        @for ($i = 8; $i <= 22; $i++)
+                            <th>{{ sprintf('%02d', $i) }}:00</th>
+                            <th>{{ sprintf('%02d', $i) }}:30</th>
+                        @endfor
+                    </tr>
+                </thead>
 
-                        <tbody>
-                            @foreach ($banAns as $banAn)
-                                @php
-                                    // Lấy ngày đặt bàn đầu tiên từ danh sách DatBansOther nếu có
-                                    $date = $datBanCurrent->first()
-                                        ? \Carbon\Carbon::parse($datBanCurrent->first()->thoi_gian_den)->format('Y-m-d')
-                                        : $date;
-                                @endphp
-                                <tr class="{{ $banAn->trang_thai == 'co_khach' ? 'bg-info' : '' }}"
-                                    data-ban-id="{{ $banAn->id }}">
-                                    <td class="fw-bold sticky-col">{{ $banAn->ten_ban }}</td>
+                <tbody>
+                    @foreach ($banAns as $banAn)
+                        @php
+                            // Lấy ngày đặt bàn đầu tiên từ danh sách DatBansOther nếu có
+                            $date = $datBanCurrent->first()
+                                ? \Carbon\Carbon::parse($datBanCurrent->first()->thoi_gian_den)->format('Y-m-d')
+                                : $date;
+                        @endphp
+                        <tr class="{{ $banAn->trang_thai == 'co_khach' ? 'bg-info' : '' }}" data-ban-id="{{ $banAn->id }}">
+                            <td class="fw-bold sticky-col">{{ $banAn->ten_ban }}</td>
 
-                                    @for ($i = 8; $i <= 22; $i++)
-                                        @foreach ([0, 30] as $minute)
-                                            @php
-                                                $timeSlot = sprintf('%02d:%02d', $i, $minute);
-                                                $class = 'bg-light';
-                                                $maDatBan = '';
-                                                foreach ($datBansOther as $datBan) {
-                                                    if ($datBan->ban_an_id == $banAn->id) {
-                                                        $start = \Carbon\Carbon::parse($datBan->thoi_gian_den)->format(
-                                                            'H:i',
-                                                        );
-                                                        $end = \Carbon\Carbon::parse($datBan->gio_du_kien)->format(
-                                                            'H:i',
-                                                        );
+                            @for ($i = 8; $i <= 22; $i++)
+                                @foreach ([0, 30] as $minute)
+                                    @php
+                                        $timeSlot = sprintf('%02d:%02d', $i, $minute);
+                                        $class = 'bg-light';
+                                        $maDatBan = '';
+                                        foreach ($datBansOther as $datBan) {
+                                            if ($datBan->ban_an_id == $banAn->id) {
+                                                $start = \Carbon\Carbon::parse($datBan->thoi_gian_den)->format('H:i');
+                                                $end = \Carbon\Carbon::parse($datBan->gio_du_kien)->format('H:i');
 
-                                                        if ($timeSlot >= $start && $timeSlot <= $end) {
-                                                            // Kiểm tra trạng thái đặt bàn
-                                                            if ($datBan->trang_thai === 'dang_xu_ly') {
-                                                                $class = 'btn-danger';
-                                                            } elseif ($datBan->trang_thai === 'xac_nhan') {
-                                                                $class = 'btn-success';
-                                                            }
-                                                            break; // Thoát vòng lặp sau khi tìm thấy đặt bàn phù hợp
-                                                        }
+                                                if ($timeSlot >= $start && $timeSlot <= $end) {
+                                                    // Kiểm tra trạng thái đặt bàn
+                                                    if ($datBan->trang_thai === 'dang_xu_ly') {
+                                                        $class = 'btn-danger';
+                                                    } elseif ($datBan->trang_thai === 'xac_nhan') {
+                                                        $class = 'btn-success';
                                                     }
+                                                    break; // Thoát vòng lặp sau khi tìm thấy đặt bàn phù hợp
                                                 }
+                                            }
+                                        }
 
-                                                foreach ($datBanCurrent as $datBan) {
-                                                    if ($datBan->ban_an_id == $banAn->id) {
-                                                        $start = \Carbon\Carbon::parse($datBan->thoi_gian_den)->format(
-                                                            'H:i',
-                                                        );
-                                                        $end = \Carbon\Carbon::parse($datBan->gio_du_kien)->format(
-                                                            'H:i',
-                                                        );
+                                        foreach ($datBanCurrent as $datBan) {
+                                            if ($datBan->ban_an_id == $banAn->id) {
+                                                $start = \Carbon\Carbon::parse($datBan->thoi_gian_den)->format('H:i');
+                                                $end = \Carbon\Carbon::parse($datBan->gio_du_kien)->format('H:i');
 
-                                                        if ($timeSlot >= $start && $timeSlot <= $end) {
-                                                            $class = 'btn-warning';
-                                                            $maDatBan = $datBan->ma_dat_ban;
-                                                            break;
-                                                        }
-                                                    }
+                                                if ($timeSlot >= $start && $timeSlot <= $end) {
+                                                    $class = 'btn-warning';
+                                                    $maDatBan = $datBan->ma_dat_ban;
+                                                    break;
                                                 }
-                                            @endphp
+                                            }
+                                        }
+                                    @endphp
 
-                                            <td class="text-center {{ $banAn->trang_thai == 'co_khach' ? 'bg-info' : '' }}"
-                                                data-ban-id="{{ $banAn->id }}">
-                                                <button class="btn btn-sm text-dark {{ $class }} selectable-slot"
-                                                    data-ma-dat-ban="{{ $maDatBan }}" data-ban-id="{{ $banAn->id }}"
-                                                    data-ten-ban="{{ $banAn->ten_ban }}"
-                                                    data-time-slot="{{ $timeSlot }}" data-date="{{ $date }}">
-                                                    +
-                                                </button>
-                                            </td>
-                                        @endforeach
-                                    @endfor
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                    <td class="text-center {{ $banAn->trang_thai == 'co_khach' ? 'bg-info' : '' }}"
+                                        data-ban-id="{{ $banAn->id }}">
+                                        <button class="btn btn-sm text-dark {{ $class }} selectable-slot"
+                                            data-ma-dat-ban="{{ $maDatBan }}" data-ban-id="{{ $banAn->id }}"
+                                            data-ten-ban="{{ $banAn->ten_ban }}" data-time-slot="{{ $timeSlot }}"
+                                            data-date="{{ $date }}">
+                                            +
+                                        </button>
+                                    </td>
+                                @endforeach
+                            @endfor
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
 
         </div>
 
@@ -205,100 +188,6 @@
                 const gioDuKienInput = document.getElementById("gioDuKien");
                 const ngayDenInput = document.getElementById("ngay_den");
 
-                // document.querySelectorAll(".selectable-slot").forEach((button) => {
-                //     const banId = button.getAttribute("data-ban-id");
-                //     const tenBan = button.getAttribute("data-ten-ban");
-                //     const timeSlot = button.getAttribute("data-time-slot");
-                //     const maDatBan = button.getAttribute("data-ma-dat-ban");
-                //     const date = button.getAttribute("data-date");
-
-                //     const slotKey = `${banId}-${timeSlot}-${date}`;
-
-                //     // Nếu button có class btn-warning => Thêm vào danh sách đã chọn ngay từ đầu
-                //     if (button.classList.contains("btn-warning")) {
-                //         selectedSlots.set(slotKey, {
-                //             banId,
-                //             tenBan,
-                //             timeSlot,
-                //             maDatBan,
-                //             date
-                //         });
-                //     }
-
-                //     // Xử lý chọn / hủy chọn khi click
-                //     button.addEventListener("click", function() {
-                //         if (button.classList.contains("btn-danger") || button.classList.contains(
-                //                 "btn-success"))
-                //             return; // Không chọn được btn-danger
-
-                //         if (!button.classList.contains("btn-warning")) {
-                //             // Kiểm tra thời gian trong quá khứ nếu button chưa được chọn
-                //             const now = new Date();
-                //             const currentHour = now.getHours();
-                //             const currentMinute = now.getMinutes();
-                //             const formattedCurrentTime =
-                //                 `${String(currentHour).padStart(2, "0")}:${String(currentMinute).padStart(2, "0")}`;
-                //             const todayDate = now.toISOString().split("T")[0];
-
-                //             if (date === todayDate && timeSlot < formattedCurrentTime) {
-                //                 alert("Không thể chọn thời gian trong quá khứ!");
-                //                 return;
-                //             }
-
-                //             // Kiểm tra hơn kém nhau 30 phút trong cùng bàn
-                //             const selectedTimes = [...selectedSlots.values()]
-                //                 .filter(slot => slot.banId === banId)
-                //                 .map(slot => slot.timeSlot)
-                //                 .sort();
-
-                //             if (selectedTimes.length > 0) {
-                //                 const [hour, minute] = timeSlot.split(":").map(Number);
-                //                 const newSlotMinutes = hour * 60 + minute;
-                //                 let isValid = false;
-
-                //                 for (const selectedTime of selectedTimes) {
-                //                     const [selectedHour, selectedMinute] = selectedTime.split(":").map(
-                //                         Number);
-                //                     const selectedSlotMinutes = selectedHour * 60 + selectedMinute;
-
-                //                     if (Math.abs(newSlotMinutes - selectedSlotMinutes) === 30) {
-                //                         isValid = true;
-                //                         break;
-                //                     }
-                //                 }
-
-                //                 if (!isValid) {
-                //                     alert(
-                //                         "Chỉ có thể chọn giờ hơn kém nhau 30 phút trong cùng một bàn!"
-                //                     );
-                //                     return;
-                //                 }
-                //             }
-                //         }
-
-                //         if (button.classList.contains("btn-warning")) {
-                //             // Hủy chọn
-                //             button.classList.remove("btn-warning");
-                //             button.classList.add("bg-light");
-                //             selectedSlots.delete(slotKey);
-                //         } else {
-                //             // Chọn
-                //             button.classList.remove("bg-light");
-                //             button.classList.add("btn-warning");
-                //             selectedSlots.set(slotKey, {
-                //                 banId,
-                //                 tenBan,
-                //                 timeSlot,
-                //                 maDatBan,
-                //                 date
-                //             });
-                //         }
-
-                //         updateModal();
-                //     });
-                // });
-
-
 
                 document.querySelectorAll(".selectable-slot").forEach((button) => {
                     const parentRow = button.closest("tr"); // Lấy thẻ <tr> chứa button
@@ -375,7 +264,7 @@
                                 if (!isValid) {
                                     alert(
                                         "Chỉ có thể chọn giờ hơn kém nhau 30 phút trong cùng một bàn!"
-                                        );
+                                    );
                                     return;
                                 }
                             }
@@ -533,8 +422,6 @@
 
             });
         </script>
-
-
 
         <script>
             document.getElementById('datBanForm').addEventListener('submit', function(event) {
