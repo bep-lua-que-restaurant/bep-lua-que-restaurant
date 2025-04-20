@@ -1,8 +1,8 @@
 function capNhatBieuDoTronSoLuongKhach(namNay, namTruoc) {
     const ctx = document.getElementById('bieuDoTronSoLuongKhachHangNam').getContext('2d');
 
-    // const total = namNay + namTruoc;
-    const tiLe = namTruoc > 0 ? ((namNay - namTruoc) / namTruoc * 100).toFixed(1) : 0;
+    const chenhLech = namNay - namTruoc;
+    const tiLe = namTruoc > 0 ? (chenhLech / namTruoc * 100).toFixed(1) : 0;
 
     new Chart(ctx, {
         type: 'doughnut',
@@ -28,14 +28,13 @@ function capNhatBieuDoTronSoLuongKhach(namNay, namTruoc) {
 
     // Cập nhật phần trăm nâng cao
     let chenhLechText = '';
-    if (namNay > namTruoc) {
+    if (chenhLech > 0) {
         chenhLechText = `Tăng ${tiLe}% so với năm trước`;
-    } else if (namNay < namTruoc) {
+    } else if (chenhLech < 0) {
         chenhLechText = `Giảm ${Math.abs(tiLe)}% so với năm trước`;
     } else {
         chenhLechText = 'Không thay đổi so với năm trước';
     }
-    // const chenhLechText = tiLe >= 0 ? `Tăng ${tiLe}%` : `Giảm ${Math.abs(tiLe)}%`;
-    // console.log(chenhLechText)
+
     document.getElementById('phanTramChenhLechSoLuongKhachHang').innerText = chenhLechText;
 }
