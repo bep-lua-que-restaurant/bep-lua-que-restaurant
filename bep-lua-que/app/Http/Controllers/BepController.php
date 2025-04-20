@@ -131,10 +131,15 @@ class BepController extends Controller
                 $monTrung->so_luong += $mon->so_luong;
                 $monTrung->save();
 
-                // Gửi sự kiện real-time trước khi xóa
+                // Gửi sự kiện cho món gộp
                 Log::info("Gộp món id: {$id} vào món id: {$monTrung->id}, số lượng mới: {$monTrung->so_luong}, trạng thái: {$trangThaiMoi}");
-                Log::info("Dữ liệu sự kiện:", $monTrung->toArray());
+                Log::info("Dữ liệu sự kiện (monTrung):", $monTrung->toArray());
                 event(new TrangThaiCapNhat($monTrung));
+
+                // Gửi sự kiện cho món bị xóa
+                $mon->trang_thai = $trangThaiMoi;
+                Log::info("Gửi sự kiện cho món bị xóa id: {$id}, trạng thái: {$trangThaiMoi}");
+                event(new TrangThaiCapNhat($mon));
 
                 // Xóa món hiện tại
                 $mon->forceDelete();
