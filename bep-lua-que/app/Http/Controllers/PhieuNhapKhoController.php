@@ -108,9 +108,12 @@ class PhieuNhapKhoController extends Controller
         // Tạo đơn vị
         $donViNhapOptions = [
             'kg' => 'Kilogram',
-            // 'g' => 'Gram',
+            'gam' => 'Gram',
+            'ml' => 'Milliliter',
+            'bao' => 'Bao',
+            'ket' => 'Két',
             'l' => 'Lít',
-            // 'ml' => 'Mililít',
+            'thung' => 'Thùng',
             'chai' => 'Chai',
             'hop' => 'Hộp',
             'cai' => 'Cái',

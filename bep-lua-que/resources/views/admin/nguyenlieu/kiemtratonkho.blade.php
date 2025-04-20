@@ -151,15 +151,17 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <!-- Chart.js -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/vi.min.js"></script>
+        <script>
+            moment.locale('vi');
+        </script>
 
         <script>
-            // Lọc Tồn Kho
             $(function() {
-                $('#filter-ton-kho-form').on('submit', function(e) {
-                    e.preventDefault();
-
-                    let ngay = $('#ngay-ton-kho').val();
-                    let loaiId = $('#loai_nguyen_lieu_id').val();
+                function loadTonKho() {
+                    const ngay = $('#ngay-ton-kho').val();
+                    const loaiId = $('#loai_nguyen_lieu_id').val();
 
                     $.ajax({
                         url: '/api/ton-kho/xuat-dung',
@@ -169,7 +171,7 @@
                             loai_nguyen_lieu_id: loaiId
                         },
                         success: function(res) {
-                            let tbody = $('#data-body-ton-kho');
+                            const tbody = $('#data-body-ton-kho');
                             tbody.empty();
 
                             if (res.length === 0) {
@@ -178,7 +180,7 @@
                             }
 
                             $.each(res, function(index, item) {
-                                let trangThai = item.da_ngung_su_dung ?
+                                const trangThai = item.da_ngung_su_dung ?
                                     '<span class="badge bg-danger">Ngưng SD</span>' :
                                     '<span class="badge bg-success">Đang SD</span>';
 
@@ -204,25 +206,26 @@
                             alert('❌ Lỗi khi lấy dữ liệu tồn kho!');
                         }
                     });
-                });
+                }
 
-                // Lọc Hạn Sử Dụng
-                $('#filter-han-su-dung-form').on('submit', function(e) {
-                    e.preventDefault();
+                function loadHanSuDung() {
+                    const ngay = $('#ngay-hsd').val();
+                    const loaiId = $('#loai_nguyen_lieu_id_hsd').val();
+                    const tbody = $('#data-body-han-su-dung');
 
-                    let ngay = $('#ngay-hsd').val();
-                    let loaiId = $('#loai_nguyen_lieu_id_hsd').val();
-                    let tbody = $('#data-body-han-su-dung');
                     tbody.html(`<tr><td colspan="7">⏳ Đang tải dữ liệu...</td></tr>`);
 
+                    let params = {};
+                    if (ngay) params.ngay = ngay;
+                    if (loaiId) params.loai_nguyen_lieu_id = loaiId;
+                    console.log('Gọi AJAX...');
                     $.ajax({
                         url: '{{ route('nguyen-lieu.hansudung') }}',
                         type: 'GET',
-                        data: {
-                            ngay: ngay,
-                            loai_nguyen_lieu_id: loaiId
-                        },
+                        data: params,
                         success: function(res) {
+                            console.log(res);
+
                             tbody.empty();
 
                             if (!res.data || res.data.length === 0) {
@@ -231,139 +234,254 @@
                             }
 
                             $.each(res.data, function(index, item) {
-                                let badgeClass = '',
-                                    icon = '',
-                                    status = '';
-                                let soNgay = item.so_ngay_con_lai;
+                                const conHanLo = [],
+                                    sapHetLo = [],
+                                    hetHanLo = [];
 
-                                if (typeof soNgay === 'string') {
+                                item.lo_nhap.forEach(lo => {
+                                    const han = moment(lo.han_su_dung, 'DD/MM/YYYY').endOf(
+                                        'day');
+                                    const now = moment().startOf('day');
+                                    const next7 = moment().add(7, 'days').endOf('day');
+                                    const sl = parseFloat(lo.so_luong) || 0;
+
+                                    if (han.isBefore(now)) {
+                                        hetHanLo.push({
+                                            ...lo,
+                                            so_luong: sl
+                                        });
+                                    } else if (han.isSameOrBefore(next7)) {
+                                        sapHetLo.push({
+                                            ...lo,
+                                            so_luong: sl
+                                        });
+                                    } else {
+                                        conHanLo.push({
+                                            ...lo,
+                                            so_luong: sl
+                                        });
+                                    }
+                                });
+
+                                const conHan = conHanLo.reduce((sum, lo) => sum + lo.so_luong, 0);
+                                const sapHetHan = sapHetLo.reduce((sum, lo) => sum + lo.so_luong,
+                                    0);
+                                const hetHan = hetHanLo.reduce((sum, lo) => sum + lo.so_luong, 0);
+                                const ton = conHan + sapHetHan + hetHan;
+
+                                const tiLeSapHetHan = ton > 0 ? ((sapHetHan / ton) * 100).toFixed(
+                                    0) : 0;
+                                const tiLeHetHan = ton > 0 ? ((hetHan / ton) * 100).toFixed(0) : 0;
+                                const tiLeConHan = ton > 0 ? ((conHan / ton) * 100).toFixed(0) : 0;
+
+                                let badgeClass = 'success';
+                                let status = 'Còn nhiều hạn';
+                                let icon = 'bi bi-check-circle';
+                                let soNgay = '-';
+
+                                if (hetHan > 0 && hetHan === ton) {
                                     badgeClass = 'danger';
-                                    icon = 'bi bi-x-circle-fill text-danger';
-                                    status = 'Đã hết hạn';
-                                    soNgay = 'Đã hết hạn';
-                                } else if (soNgay <= 7) {
+                                    status = 'Hết hạn';
+                                    icon = 'bi bi-x-circle';
+                                } else if (sapHetHan > 0) {
                                     badgeClass = 'warning';
-                                    icon = 'bi bi-exclamation-triangle-fill text-warning';
                                     status = 'Sắp hết hạn';
-                                    soNgay = `${soNgay} ngày`;
-                                } else {
-                                    badgeClass = 'success';
-                                    icon = 'bi bi-check-circle-fill text-success';
-                                    status = 'Còn hạn';
-                                    soNgay = `${soNgay} ngày`;
+                                    icon = 'bi bi-exclamation-circle';
                                 }
 
-                                let chartId = `chart-${index}`;
+                                const chartId = `chart-${index}`;
+                                const rowClass = hetHan === ton ? 'table-danger' :
+                                    sapHetHan > 0 ? 'table-warning' : 'table-success';
 
                                 tbody.append(`
-    <tr>
-        <td>${index + 1}</td>
-        <td class="text-start" title="${item.nguyen_lieu}">${item.nguyen_lieu}</td>
-        <td>${item.don_vi}</td>
-        <td>${item.so_luong_ton}</td>
-        <td>
-            <span class="badge bg-${badgeClass}" data-bs-toggle="tooltip" title="${status}">
-                ${soNgay}
-            </span>
-        </td>
-        <td>
-            <span class="d-inline-flex align-items-center gap-1 text-${badgeClass}">
-                <i class="${icon}" style="font-size: 1.2rem;"></i>
-                <span class="fw-semibold">${status}</span>
-            </span>
-        </td>
-        <td>
-            <canvas id="${chartId}" class="chart-canvas"></canvas>
-        </td>
-    </tr>
-`);
+            <tr class="${rowClass}">
+                <td>${index + 1}</td>
+                <td class="text-start" title="${item.nguyen_lieu}">${item.nguyen_lieu}</td>
+                <td>${item.don_vi}</td>
+                <td>${ton}</td>
+                <td>
+                    <span class="badge bg-${badgeClass}" data-bs-toggle="tooltip" title="${status}">
+                        ${soNgay}
+                    </span>
+                </td>
+                <td>
+                    <span class="d-inline-flex align-items-center gap-1 text-${badgeClass}">
+                        <i class="${icon}" style="font-size: 1.2rem;"></i>
+                        <span class="fw-semibold">${status}</span>
+                    </span>
+                </td>
+                <td>
+                    <div class="d-flex flex-column align-items-center">
+                        <canvas id="${chartId}" class="chart-canvas mb-1" ></canvas>
+                        <div style="font-size: 0.75rem;">
+                            <span class="text-success">${tiLeConHan}%</span> - 
+                            <span class="text-warning">${tiLeSapHetHan}%</span> - 
+                            <span class="text-danger">${tiLeHetHan}%</span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+                                `);
 
-
-                                // Render biểu đồ tròn
                                 setTimeout(() => {
-                                    new Chart(document.getElementById(chartId), {
-                                        type: 'doughnut',
-                                        data: {
-                                            labels: ['Còn hạn',
-                                                'Sắp hết hạn', 'Hết hạn'
-                                            ],
-                                            datasets: [{
-                                                label: 'Tình trạng',
-                                                data: [item.con_han,
-                                                    item
-                                                    .sap_het_han,
-                                                    item.het_han
+                                    const ctx = document.getElementById(chartId);
+                                    if (ctx) {
+                                        new Chart(ctx, {
+                                            type: 'doughnut',
+                                            data: {
+                                                labels: ['Còn hạn', 'Sắp hết hạn',
+                                                    'Hết hạn'
                                                 ],
-                                                backgroundColor: [
-                                                    '#198754',
-                                                    '#ffc107',
-                                                    '#dc3545'
-                                                ],
-                                                borderWidth: 1,
-                                                dataDetails: item
-                                                    .lo_nhap ?? []
-                                            }]
-                                        },
-                                        options: {
-                                            cutout: '70%',
-                                            plugins: {
-                                                legend: {
-                                                    display: false
-                                                },
-                                                tooltip: {
-                                                    callbacks: {
-                                                        label: function(
+                                                datasets: [{
+                                                    data: [conHan,
+                                                        sapHetHan,
+                                                        hetHan
+                                                    ],
+                                                    backgroundColor: [
+                                                        '#198754',
+                                                        '#ffc107',
+                                                        '#dc3545'
+                                                    ],
+                                                    borderWidth: 1,
+                                                    dataDetails: [conHanLo,
+                                                        sapHetLo,
+                                                        hetHanLo
+                                                    ]
+                                                }]
+                                            },
+                                            options: {
+                                                cutout: '70%',
+                                                plugins: {
+                                                    legend: {
+                                                        display: false
+                                                    },
+                                                    tooltip: {
+                                                        callbacks: {
+                                                            label: function(
                                                             context) {
-                                                            const
-                                                                index =
-                                                                context
-                                                                .dataIndex;
-                                                            const lo =
-                                                                context
-                                                                .dataset
-                                                                .dataDetails
-                                                                ?.[
+                                                                const index =
+                                                                    context
+                                                                    .dataIndex;
+                                                                const loList =
+                                                                    context
+                                                                    .dataset
+                                                                    .dataDetails
+                                                                    ?.[index];
+                                                                const value =
+                                                                    context
+                                                                    .dataset
+                                                                    .data[
                                                                     index];
+                                                                const label =
+                                                                    context
+                                                                    .label;
 
-                                                            if (!lo) {
-                                                                return `Số lượng: ${context.formattedValue}`;
+                                                                // Tính phần trăm (nếu có biến `ton`)
+                                                                const percent =
+                                                                    value > 0 &&
+                                                                    typeof ton !==
+                                                                    'undefined' ?
+                                                                    ((value /
+                                                                            ton
+                                                                            ) *
+                                                                        100)
+                                                                    .toFixed(
+                                                                    0) + '%' :
+                                                                    '0%';
+
+                                                                let labelStr =
+                                                                    `${label}: ${value} (${percent})`;
+
+                                                                if (!loList ||
+                                                                    loList
+                                                                    .length ===
+                                                                    0)
+                                                            return labelStr;
+
+                                                                // Dòng lô hàng chi tiết (mỗi dòng riêng)
+                                                                const
+                                                                    loDetails =
+                                                                    loList.map(
+                                                                        lo =>
+                                                                        `• SL: ${lo.so_luong} | Nhập: ${lo.ngay_nhap} `
+                                                                    );
+
+                                                                return [
+                                                                        labelStr]
+                                                                    .concat(
+                                                                        loDetails
+                                                                        );
                                                             }
-
-                                                            return [
-                                                                `Số lượng: ${lo.so_luong}`,
-                                                                `Ngày nhập: ${lo.ngay_nhap}`,
-                                                                `HSD: ${lo.han_su_dung}`
-                                                            ];
-                                                        }
+                                                        },
+                                                        // Bạn có thể thêm style để dễ đọc hơn
+                                                        bodyFont: {
+                                                            size: 12
+                                                        },
+                                                        titleFont: {
+                                                            size: 13,
+                                                            weight: 'bold'
+                                                        },
+                                                        displayColors: false, // Ẩn màu ô vuông nếu không cần
+                                                        padding: 10
                                                     }
+
                                                 }
                                             }
-                                        }
-                                    });
+                                        });
+                                    }
                                 }, 100);
                             });
 
-                            // Kích hoạt tooltip Bootstrap
-                            const tooltipTriggerList = [].slice.call(document.querySelectorAll(
-                                '[data-bs-toggle="tooltip"]'));
-                            tooltipTriggerList.map(t => new bootstrap.Tooltip(t));
+                            // Kích hoạt tooltip sau khi dữ liệu đã render
+                            setTimeout(() => {
+                                const tooltipTriggerList = [].slice.call(document.querySelectorAll(
+                                    '[data-bs-toggle="tooltip"]'));
+                                tooltipTriggerList.map(t => new bootstrap.Tooltip(t));
+                            }, 200);
                         },
                         error: function() {
-                            alert('❌ Lỗi khi lấy dữ liệu hạn sử dụng!');
+                            tbody.html(`<tr><td colspan="7">❌ Lỗi khi lấy dữ liệu hạn sử dụng!</td></tr>`);
                         }
                     });
+                }
+
+                // Load mặc định
+                loadTonKho();
+
+                $('#filter-ton-kho-form').on('submit', function(e) {
+                    e.preventDefault();
+                    loadTonKho();
+                });
+
+                $('#filter-han-su-dung-form').on('submit', function(e) {
+                    e.preventDefault();
+                    loadHanSuDung();
+                });
+
+                $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
+                    const target = $(e.target).attr('href');
+                    if (target === '#han-su-dung') {
+                        setTimeout(loadHanSuDung, 300);
+                    }
+                    console.log(`Tab ${$(e.target).text()} được chọn`);
+
                 });
             });
         </script>
 
+
+
+
+
+
         <style>
             .chart-canvas {
-                width: 130px !important;
-                height: 80px !important;
-                max-width: 130px;
-                max-height: 80px;
-                display: block;
-                margin: 0 auto;
+                max-width: 200px;
+                /* Hoặc cao hơn nếu cần */
+                white-space: normal !important;
+                word-wrap: break-word;
+                /* z-index: 9999; */
+                /* Đảm bảo hiển thị trên */
             }
         </style>
     @endsection
