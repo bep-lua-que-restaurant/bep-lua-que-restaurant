@@ -210,10 +210,7 @@
             });
         }
 
-        // function setMessage(text) {
-        //     $("#messageInput").val(text);
-        //     sendMessage();
-        // }
+       
         function setMessage(text) {
             $("#messageInput").val(text);
             sendMessage();
