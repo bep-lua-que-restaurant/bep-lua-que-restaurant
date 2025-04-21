@@ -90,10 +90,12 @@ class ChatController extends Controller
             if ($monAnYeuThich->isEmpty()) {
                 $phanHoi = "Hiện tại chưa có dữ liệu món ăn yêu thích!";
             } else {
-                $phanHoi = "Top món ăn được đặt nhiều nhất:\n";
+                $phanHoi = "Top món ăn được đặt nhiều nhất (tính từ trước đến nay):\n";
+
                 foreach ($monAnYeuThich as $mon) {
                     $phanHoi .= "- " . $mon->ten . " (Đã đặt: " . $mon->tong_so_luong . " lần)\n";
                 }
+                
             }
         }
 

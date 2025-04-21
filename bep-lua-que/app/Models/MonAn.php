@@ -43,11 +43,12 @@ class MonAn extends Model
     }
     public static function getMonAnYeuThich($limit = 3)
     {
-        return self::withCount(['chiTietHoaDons as tong_so_luong' => function ($query) {
-            $query->select(DB::raw('SUM(so_luong)'));
-        }])
+        return DB::table('chi_tiet_hoa_dons')
+            ->join('mon_ans', 'chi_tiet_hoa_dons.mon_an_id', '=', 'mon_ans.id')
+            ->select('mon_ans.ten as ten', DB::raw('SUM(chi_tiet_hoa_dons.so_luong) as tong_so_luong'))
+            ->groupBy('mon_ans.id', 'mon_ans.ten')
             ->orderByDesc('tong_so_luong')
             ->limit($limit)
-            ->get(['id', 'ten_mon_an']);
+            ->get();
     }
 }
