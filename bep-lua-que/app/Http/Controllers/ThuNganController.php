@@ -282,18 +282,34 @@ class ThuNganController extends Controller
 
     public function updateStatus(Request $request)
     {
-        $hoaDonId = $request->hoa_don_id;
+        $maHoaDon = $request->ma_hoa_don;
 
-        if (!$hoaDonId) {
-            return response()->json(['success' => false, 'message' => 'Hóa đơn không hợp lệ.']);
+        if (!$maHoaDon) {
+            return response()->json(['success' => false, 'message' => 'Mã hóa đơn không hợp lệ.']);
         }
 
+        // Tìm hóa đơn dựa trên ma_hoa_don
+        $hoaDon = HoaDon::where('ma_hoa_don', $maHoaDon)->first();
+
+        if (!$hoaDon) {
+            return response()->json(['success' => false, 'message' => 'Hóa đơn không tồn tại.']);
+        }
+
+        $hoaDonId = $hoaDon->id;
+
+        // Kiểm tra xem hóa đơn có món ăn nào không
+        $totalMonAn = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)->count();
+
+        // Lấy danh sách món ăn ở trạng thái 'cho_xac_nhan'
         $monAnList = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)
             ->where('trang_thai', 'cho_xac_nhan')
             ->get();
 
         if ($monAnList->isEmpty()) {
-            return response()->json(['success' => false, 'message' => 'Không có món ăn nào hợp lệ hoặc đã thay đổi trạng thái.']);
+            if ($totalMonAn === 0) {
+                return response()->json(['success' => false, 'message' => 'Hóa đơn chưa có món ăn nào.']);
+            }
+            return response()->json(['success' => false, 'message' => 'Có vẻ như hóa đơn chưa thay đổi gì, hãy thử thêm mới món ăn và thử lại.']);
         }
 
         foreach ($monAnList as $monAn) {
@@ -323,7 +339,7 @@ class ThuNganController extends Controller
                 ->get()
         ));
 
-        // --- PHẦN TÍNH TỔNG TIỀN BỔ SUNG ---
+        // Tính lại tổng tiền
         $chiTietList = ChiTietHoaDon::where('hoa_don_id', $hoaDonId)->get();
         $tongTien = 0;
 
@@ -339,7 +355,6 @@ class ThuNganController extends Controller
             'tong_tien_truoc_khi_giam' => $tongTien,
             'updated_at' => now()
         ]);
-        // ----------------------------------
 
         return response()->json(['success' => true]);
     }
@@ -514,12 +529,10 @@ class ThuNganController extends Controller
             ->where('trang_thai', 'xac_nhan')
             ->value('so_nguoi');
 
-        // Lấy số người của các bàn trong danh sách
         $soNguoiDanhSachBanMoi = DatBan::whereIn('ban_an_id', $idDanhSachBanMoi)
             ->where('trang_thai', 'xac_nhan')
-            ->sum('so_nguoi'); // Tính tổng số người của tất cả các bàn trong danh sách
+            ->sum('so_nguoi');
 
-        // Cộng tổng số người lại
         $totalSoNguoi = $soNguoiHienTai + $soNguoiDanhSachBanMoi;
         foreach ($datban as $dat) {
             $dat->update([
@@ -527,10 +540,6 @@ class ThuNganController extends Controller
             ]);
         }
 
-
-
-
-        // Lấy tất cả các bản ghi trong danh sách bàn mới (idDanhSachBanMoi) để xóa
         $datbanDanhSachMoi = DatBan::whereIn('ban_an_id', $idDanhSachBanMoi)
             ->where('trang_thai', 'xac_nhan')
             ->get();
@@ -548,7 +557,6 @@ class ThuNganController extends Controller
             }
         }
 
-        // Lấy ID hóa đơn của bàn hiện tại
         $hoaDonHienTai = HoaDonBan::where('ban_an_id', $idBanHienTai)
             ->where('trang_thai', 'dang_xu_ly')
             ->first();
@@ -563,82 +571,73 @@ class ThuNganController extends Controller
             ]);
 
             HoaDonBan::create([
-                'hoa_don_id' => $hoaDon->id, // Gán hoa_don_id của hóa đơn mới
-                'ban_an_id' => $idBanHienTai, // Gán bàn hiện tại
-                'trang_thai' => 'dang_xu_ly' // Trạng thái của hóa đơn bàn
+                'hoa_don_id' => $hoaDon->id,
+                'ban_an_id' => $idBanHienTai,
+                'trang_thai' => 'dang_xu_ly'
             ]);
 
-            // Lấy ID hóa đơn của bàn hiện tại
             $hoaDonHienTai = HoaDonBan::where('ban_an_id', $idBanHienTai)
                 ->where('trang_thai', 'dang_xu_ly')
                 ->first();
 
-            // Cập nhật trạng thái bàn mới thành "có khách"
             BanAn::where('id', $idBanHienTai)->update(['trang_thai' => 'co_khach']);
             $banAn = BanAn::find($idBanHienTai);
             event(new BanAnUpdated($banAn));
         }
 
-        // Duyệt qua từng bàn mới để ghép vào bàn hiện tại
         foreach ($idDanhSachBanMoi as $idBanMoi) {
             $hoaDonBanMoi = HoaDonBan::where('ban_an_id', $idBanMoi)
                 ->where('trang_thai', 'dang_xu_ly')
                 ->first();
 
-
-
             if ($hoaDonBanMoi) {
                 $hoaDonMoiID = $hoaDonBanMoi->hoa_don_id;
                 $hoaDonHienTaiID = $hoaDonHienTai->hoa_don_id;
 
-                // Lấy danh sách món ăn của hóa đơn bàn mới
                 $chiTietMonAnMoi = ChiTietHoaDon::where('hoa_don_id', $hoaDonMoiID)->get();
 
                 foreach ($chiTietMonAnMoi as $monMoi) {
-                    // Kiểm tra xem món ăn đã tồn tại trong hóa đơn bàn hiện tại chưa
                     $monAnCu = ChiTietHoaDon::where('hoa_don_id', $hoaDonHienTaiID)
                         ->where('mon_an_id', $monMoi->mon_an_id)
+                        ->where('trang_thai', $monMoi->trang_thai)
                         ->first();
 
                     if ($monAnCu) {
-                        // Cộng dồn số lượng và thành tiền nếu món đã tồn tại
                         $monAnCu->so_luong += $monMoi->so_luong;
-                        $monAnCu->thanh_tien += $monMoi->thanh_tien;
+                        $monAnCu->thanh_tien = $monAnCu->so_luong * $monAnCu->don_gia;
                         $monAnCu->save();
-
-                        $monMoi->delete(); // Xóa món cũ trong hóa đơn bàn mới
+                        $monMoi->delete();
                     } else {
-                        // Nếu món chưa tồn tại, gán nó vào hóa đơn bàn hiện tại
-                        $monMoi->hoa_don_id = $hoaDonHienTaiID;
-                        $monMoi->save();
+                        ChiTietHoaDon::create([
+                            'hoa_don_id' => $hoaDonHienTaiID,
+                            'mon_an_id' => $monMoi->mon_an_id,
+                            'so_luong' => $monMoi->so_luong,
+                            'don_gia' => $monMoi->don_gia,
+                            'thanh_tien' => $monMoi->thanh_tien,
+                            'trang_thai' => $monMoi->trang_thai
+                        ]);
+                        $monMoi->delete();
                     }
                 }
 
                 $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $hoaDonHienTaiID)->get();
-
-                // Khởi tạo biến để tính tổng tiền
                 $tongTien = 0;
 
                 foreach ($chiTietHoaDon as $chiTiet) {
-                    // Tính lại thành tiền cho từng món ăn
                     $chiTiet->thanh_tien = $chiTiet->so_luong * $chiTiet->don_gia;
-
-                    // Cộng dồn thành tiền vào tổng tiền
                     $tongTien += $chiTiet->thanh_tien;
+                    $chiTiet->save();
                 }
 
-                // Cập nhật tổng tiền vào bảng HoaDon
                 HoaDon::where('id', $hoaDonHienTaiID)->update([
                     'tong_tien_truoc_khi_giam' => $tongTien
                 ]);
 
                 HoaDon::where('id', $hoaDonMoiID)->delete();
 
-                // Cập nhật hóa đơn bàn để bàn mới dùng chung hóa đơn với bàn hiện tại
                 HoaDonBan::where('ban_an_id', $idBanMoi)
                     ->update(['hoa_don_id' => $hoaDonHienTaiID]);
             } else {
-                // Nếu bàn mới chưa có hóa đơn, gán nó vào hóa đơn bàn hiện tại
                 HoaDonBan::create([
                     'hoa_don_id' => $hoaDonHienTai->hoa_don_id,
                     'ban_an_id' => $idBanMoi,
@@ -646,7 +645,6 @@ class ThuNganController extends Controller
                 ]);
             }
 
-            // Cập nhật trạng thái bàn mới thành "có khách"
             BanAn::where('id', $idBanMoi)->update(['trang_thai' => 'co_khach']);
             $banAn = BanAn::find($idBanMoi);
             event(new BanAnUpdated($banAn));
