@@ -129,7 +129,7 @@
                     <label>Mức lương</label>
                     <div class="input-group">
                         <input type="number" name="muc_luong" class="form-control" id="mucLuong"
-                            value="{{ old('muc_luong', $luongGanNhat?->muc_luong) }}" required>
+                            value="{{ old('muc_luong', $luongGanNhat?->muc_luong) }}">
                         <div class="input-group-append">
                             <span class="input-group-text" id="donViLuong">VNĐ / Ca</span>
                         </div>
