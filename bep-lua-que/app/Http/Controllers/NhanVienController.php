@@ -30,9 +30,9 @@ class NhanVienController extends Controller
 
     public function store(Request $request)
     {
-        $request->merge([
-            'ngay_ap_dung' => $request->ngay_ap_dung . '-01'
-        ]);
+        if (!empty($request->ngay_ap_dung)) {
+            $request->merge(['ngay_ap_dung' => $request->ngay_ap_dung . '-01']);
+        }
        // Validate input data với thông báo lỗi tùy chỉnh
          $request->validate([
         'ho_ten' => 'required|string|max:255',
@@ -174,7 +174,7 @@ class NhanVienController extends Controller
         'gioi_tinh',
         'ngay_sinh',
         'ngay_vao_lam',
-        'dia_chi'
+        'dia_chi',
     ]);
 
     // Nếu có nhập mật khẩu mới, mã hóa và cập nhật
