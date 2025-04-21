@@ -89,7 +89,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" form="importFileForm" class="btn btn-primary">Xác nhận</button>
+                    <button type="submit" id="btn-import-confirm" class="btn btn-primary">Xác nhận</button>
                 </div>
             </div>
         </div>
@@ -360,6 +360,37 @@
                     }
                 });
             });
+
+            // import
+            $(document).on('click', '#btn-import-confirm', function(e) {
+                e.preventDefault();
+
+                const form = $('#importFileForm')[0];
+                const formData = new FormData(form);
+
+                $.ajax({
+                    url: '{{ route('danh-muc-mon-an.import') }}',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(res) {
+                        $('#importFileModal').modal('hide');
+                        Swal.fire('Thành công!', res.message || 'File đã được nhập thành công.',
+                            'success');
+                        $('#{{ $tableId }}').DataTable().ajax.reload();
+                    },
+                    error: function(xhr) {
+                        let errors = xhr.responseJSON?.errors;
+                        let message = 'Có lỗi xảy ra khi nhập file!';
+                        if (errors) {
+                            message = Object.values(errors).join('<br>');
+                        }
+                        Swal.fire('Lỗi', message, 'error');
+                    }
+                });
+            });
+
 
         });
     </script>
