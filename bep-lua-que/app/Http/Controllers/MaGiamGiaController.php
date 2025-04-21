@@ -186,11 +186,25 @@ class MaGiamGiaController extends Controller
      */
     public function destroy($id)
     {
-        $maGiamGia = MaGiamGia::findOrFail($id);
-        $maGiamGia->delete();
+    $maGiamGia = MaGiamGia::findOrFail($id);
 
-        return redirect()->route('ma-giam-gia.index')
-            ->with('success', 'Mã giảm giá đã được xóa.');
+    // Kiểm tra xem mã giảm giá có được sử dụng trong hóa đơn chưa thanh toán không
+    $isUsed = HoaDon::where('id_ma_giam', $id)
+    ->whereHas('hoaDonBans', function ($query) {
+        $query->where('hoa_don_bans.trang_thai', '!=', 'da_thanh_toan');
+    })
+    ->exists();
+
+    if ($isUsed) {
+    return redirect()->route('ma-giam-gia.index')
+        ->with('error', 'Không thể xóa mã giảm giá vì đang được sử dụng trong hóa đơn chưa thanh toán.');
+    }
+
+
+    $maGiamGia->delete();
+
+    return redirect()->route('ma-giam-gia.index')
+        ->with('success', 'Mã giảm giá đã được xóa.');
     }
 
     public function restore($id)
