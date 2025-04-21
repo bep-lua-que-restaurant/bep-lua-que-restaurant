@@ -553,4 +553,39 @@ class DatBanController extends Controller
 
         return redirect()->back()->with('success', 'Đơn đặt bàn đã được hủy thành công!');
     }
+
+    public function getDatBanByBanId(Request $request, $banId)
+    {
+        try {
+            // Lấy ngày từ query parameter, mặc định là ngày hiện tại (Asia/Ho_Chi_Minh)
+            $date = $request->query('date', Carbon::today('Asia/Ho_Chi_Minh')->toDateString());
+
+            $datBan = DatBan::select(
+                'dat_bans.ma_dat_ban',
+                'dat_bans.so_nguoi',
+                'dat_bans.created_at as thoi_gian_dat',
+                'dat_bans.thoi_gian_den',
+                'dat_bans.trang_thai',
+                'dat_bans.so_dien_thoai',
+                'dat_bans.mo_ta',
+                'khach_hangs.ho_ten as ten_khach_hang'
+            )
+            ->join('ban_ans', 'dat_bans.ban_an_id', '=', 'ban_ans.id')
+            ->leftJoin('khach_hangs', 'dat_bans.khach_hang_id', '=', 'khach_hangs.id')
+            ->where('ban_ans.id', $banId)
+            ->whereNull('dat_bans.deleted_at')
+            ->whereDate('dat_bans.thoi_gian_den', $date)
+            ->orderBy('dat_bans.thoi_gian_den', 'ASC')
+            ->get();
+
+            return response()->json([
+                'dat_ban_list' => $datBan->isEmpty() ? [] : $datBan
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Lỗi khi lấy danh sách đặt bàn: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Đã xảy ra lỗi khi lấy danh sách đặt bàn'
+            ], 500);
+        }
+    }
 }

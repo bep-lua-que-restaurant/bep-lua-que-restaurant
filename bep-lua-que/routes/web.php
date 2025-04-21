@@ -206,18 +206,9 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/dat-ban/{ma_dat_ban}', [DatBanController::class, 'destroy'])->name('dat-ban.destroy');
     Route::post('/dat-ban/store', [DatBanController::class, 'store'])->name('dat-ban.store');
     Route::put('/dat-ban/{maDatBan}', [DatBanController::class, 'update'])->where('maDatBan', '[A-Za-z0-9]+')->name('dat-ban.update');
-    // Route::put('/dat-ban/{maDatBan}', [DatBanController::class, 'update'])->name('dat-ban.update');
 
     Route::get('/dat-ban/edit/{maDatBan}', [DatBanController::class, 'edit'])->name('dat-ban.edit');
-    // Route::put('/dat-ban/{maDatBan}', [DatBanController::class, 'update'])->name('dat-ban.update');
-
-
-
-    // Route::put('/dat-ban/{maDatBan}', [DatBanController::class, 'update'])->name('datban.update');
-
-
-
-
+    Route::get('/list-dat-ban/{banId}', [DatBanController::class, 'getDatBanByBanId'])->name('datban.list');
 
 
     // Route để tìm kiếm khách hàng
