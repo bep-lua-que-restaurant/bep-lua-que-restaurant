@@ -53,8 +53,8 @@
                             <a href="{{ route('nhan-vien.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm nhân viên
                             </a>
-                            <a href="{{ route('nhan-vien.import') }}" class="btn btn-sm btn-secondary" data-toggle="modal"
-                                data-target=".bd-example-modal-lg">
+                            <a href="{{ route('nhan-vien.import') }}" class="btn btn-sm btn-secondary"
+                               data-bs-toggle="modal" data-bs-target="#importFileModal">
                                 <i class="fa fa-upload"></i> Nhập file
                             </a>
                             <a href="{{ route('nhan-vien.export') }}" class="btn btn-sm btn-success">
@@ -133,7 +133,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="importFileModalLabel">Nhập file</h5>
                     <button type="button" class="close" data-bs-dismiss="modal"
-                        aria-label="Close"><span>&times;</span></button>
+                            aria-label="Close"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
                     <!-- Form nhập file -->
@@ -142,7 +142,7 @@
                         @csrf
                         <div class="mb-3">
                             <label for="fileUpload" class="form-label">Chọn file</label>
-                            <input type="file" name="file" id="fileUpload" class="form-control" required>
+                            <input style="height: auto" type="file" name="file" id="fileUpload" class="form-control" required>
                         </div>
                     </form>
                 </div>

@@ -55,11 +55,10 @@
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
                             <!-- Nút Nhập file sẽ hiển thị Modal -->
-                            <a href="{{ route('ca-lam.import') }}" class="btn btn-sm btn-secondary" data-toggle="modal"
-                                data-target=".bd-example-modal-lg">
+                            <a href="{{ route('ca-lam.import') }}" class="btn btn-sm btn-secondary"
+                               data-bs-toggle="modal" data-bs-target="#importFileModal">
                                 <i class="fa fa-upload"></i> Nhập file
                             </a>
-
                             <a href="{{ route('ca-lam.export') }}" class="btn btn-sm btn-success">
                                 <i class="fa fa-download"></i> Xuất file
                             </a>
@@ -120,7 +119,7 @@
                                                     $startTime = \Carbon\Carbon::parse($item->gio_bat_dau);
                                                     $endTime = \Carbon\Carbon::parse($item->gio_ket_thuc);
                                                     $duration = $startTime->diff($endTime);
-                                                    
+
                                                     // Tổng thời gian làm việc (giờ và phút)
                                                     $totalHours = $duration->h;
                                                     $totalMinutes = $duration->i;
@@ -212,7 +211,7 @@
                         @csrf
                         <div class="mb-3">
                             <label for="fileUpload" class="form-label">Chọn file</label>
-                            <input type="file" name="file" id="fileUpload" class="form-control" required>
+                            <input style="height: auto" type="file" name="file" id="fileUpload" class="form-control" required>
                         </div>
                     </form>
                 </div>
