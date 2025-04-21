@@ -42,26 +42,40 @@ class MonAnController extends Controller
                 })
                 ->addColumn('action', function ($row) {
                     $html = '<div class="d-flex align-items-center">';
-
-                    $html .= '<a href="' . route('mon-an.show', $row->id) . '" class="btn btn-info btn-sm p-2 m-2" title="Xem chi tiết"><i class="fa fa-eye"></i></a>';
-                    $html .= '<a href="' . route('mon-an.edit', $row->id) . '" class="btn btn-warning btn-sm p-2 m-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>';
-
+                
+                    // Nút xem chi tiết luôn hiện
+                    $html .= '<a href="' . route('mon-an.show', $row->id) . '" class="btn btn-info btn-sm p-2 m-2" title="Xem chi tiết">
+                                <i class="fa fa-eye"></i></a>';
+                
+                    // Chỉ hiện nút chỉnh sửa nếu chưa bị xóa mềm
+                    if (is_null($row->deleted_at)) {
+                        $html .= '<a href="' . route('mon-an.edit', $row->id) . '" class="btn btn-warning btn-sm p-2 m-2" title="Chỉnh sửa">
+                                    <i class="fa fa-edit"></i></a>';
+                    }
+                
+                    // Nếu đã bị xoá => hiện nút khôi phục
                     if ($row->deleted_at) {
                         $html .= '<form action="' . route('mon-an.restore', $row->id) . '" method="POST" style="display:inline;">'
                             . csrf_field()
-                            . '<button type="submit" class="btn btn-success btn-sm p-2 m-2" title="Khôi phục"><i class="fa fa-recycle"></i></button>'
+                            . '<button type="submit" class="btn btn-success btn-sm p-2 m-2" title="Khôi phục">
+                                <i class="fa fa-recycle"></i></button>'
                             . '</form>';
                     } else {
+                        // Nếu chưa bị xoá => hiện nút xoá
                         $html .= '<form action="' . route('mon-an.destroy', $row->id) . '" method="POST" style="display:inline;">'
                             . csrf_field()
                             . method_field('DELETE')
-                            . '<button type="submit" class="btn btn-danger btn-sm p-2 m-2" title="Xóa"><i class="fa fa-trash"></i></button>'
+                            . '<button type="submit" class="btn btn-danger btn-sm p-2 m-2" title="Xóa">
+                                <i class="fa fa-trash"></i></button>'
                             . '</form>';
                     }
-
+                
                     $html .= '</div>';
+                
                     return $html;
                 })
+                
+               
                 ->rawColumns(['trang_thai', 'action'])
                 ->make(true);
         }
@@ -113,20 +127,6 @@ class MonAnController extends Controller
                     ]);
                 }
             }
-
-            // $nguyenLieus = $request->input('cong_thuc', []);
-            // foreach ($nguyenLieus as $index => $ct) {
-            //     if (!isset($ct['nguyen_lieu_id'], $ct['so_luong']) || $ct['nguyen_lieu_id'] == '' || $ct['so_luong'] == '') {
-            //         continue;
-            //     }
-
-            //     CongThucMonAn::create([
-            //         'mon_an_id' => $monAn->id,
-            //         'nguyen_lieu_id' => $ct['nguyen_lieu_id'],
-            //         'so_luong' => $ct['so_luong'],
-            //         'don_vi' => $ct['don_vi'] ?? null
-            //     ]);
-            // }
 
             DB::commit();
 
@@ -195,20 +195,6 @@ class MonAnController extends Controller
             }
         }
 
-        // ✅ Cập nhật công thức món ăn
-        // $monAn->congThuc()->delete(); // Xoá toàn bộ công thức cũ
-
-        // if ($request->has('cong_thuc')) {
-        //     foreach ($request->cong_thuc as $ct) {
-        //         if (!empty($ct['nguyen_lieu_id']) && isset($ct['so_luong'], $ct['don_vi'])) {
-        //             $monAn->congThuc()->create([
-        //                 'nguyen_lieu_id' => $ct['nguyen_lieu_id'],
-        //                 'so_luong' => $ct['so_luong'],
-        //                 'don_vi' => $ct['don_vi'],
-        //             ]);
-        //         }
-        //     }
-        // }
 
         // Broadcast event
         broadcast(new ThucDonUpdated($monAn))->toOthers();

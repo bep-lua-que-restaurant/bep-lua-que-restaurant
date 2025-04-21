@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\LoaiNguyenLieuExport;
+use App\Imports\LoaiNguyenLieuImport;
 use App\Models\LoaiNguyenLieu;
 use App\Http\Requests\StoreLoaiNguyenLieuRequest;
 use App\Http\Requests\UpdateLoaiNguyenLieuRequest;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LoaiNguyenLieuController extends Controller
 {
@@ -130,5 +133,20 @@ class LoaiNguyenLieuController extends Controller
         $loai->restore();
 
         return redirect()->route('loai-nguyen-lieu.index')->with('success', 'Đã khôi phục loại nguyên liệu!');
+    }
+    public function export()
+    {
+        return Excel::download(new LoaiNguyenLieuExport, 'loai_nguyen_lieu.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv,xls'
+        ]);
+
+        Excel::import(new LoaiNguyenLieuImport, $request->file('file'));
+
+        return back()->with('success', 'Import thành công!');
     }
 }

@@ -817,7 +817,6 @@
 
     // xác nhận thanh toán
     $('#btnThanhToan').on('click', function() {
-
         // Kiểm tra validation
         if (!validateAmountGiven()) {
             return; // Dừng nếu validation thất bại
@@ -834,17 +833,30 @@
         let maHoaDonFind = maHoaDonInFo.innerText;
         let xoaMonCho = (typeof window.mon_an_cho_xac_nhan !== 'undefined' && window.mon_an_cho_xac_nhan) ?
             window.mon_an_cho_xac_nhan :
-            0; // hoặc dùng null tùy yêu cầu phía server
+            0;
 
-        // console.log("xoaMonCho", xoaMonCho);
+        // Lấy thông tin giảm giá (nếu có)
+        var discountAmount = 0;
+        var appliedCodeText = $('#applied-code-text').text().trim();
+        if (appliedCodeText) {
+            // Giả sử appliedCodeText có dạng "CODE - Giảm 50,000 VND"
+            var discountMatch = appliedCodeText.match(/Giảm\s([\d,.]+)\sVND/);
+            if (discountMatch) {
+                discountAmount = parseFloat(discountMatch[1].replace(/\./g, '')) || 0;
+            }
+        }
+
+        // Lấy số tiền khách phải trả (sau giảm giá)
+        var khachCanTra = parseFloat($('#khach_can_tra').val().replace(/\./g, '').replace(' VND', '').trim()) ||
+            0;
+
         var danhSachSanPham = [];
         $("#hoa-don-thanh-toan-body tr").each(function() {
             var sanPham = {
-                ten_san_pham: $(this).find("td:nth-child(2)").text()
-                    .trim(), // Không loại bỏ dấu nữa
+                ten_san_pham: $(this).find("td:nth-child(2)").text().trim(),
                 so_luong: parseInt($(this).find("td:nth-child(3)").text().trim()) || 0,
                 don_gia: parseFloat($(this).find("td:nth-child(4)").text().replace(/\./g, '')
-                    .trim()) || 0,
+                .trim()) || 0,
                 tong_cong: parseFloat($(this).find("td:nth-child(5)").text().replace(/\./g, '')
                     .trim()) || 0
             };
@@ -887,49 +899,55 @@
                         });
                         var soDienThoai = response.khachHang.so_dien_thoai || 'Chưa cập nhật';
 
-                        // Tạo nội dung in, không dùng cấu trúc HTML đầy đủ
+                        // Tạo nội dung in với cấu trúc <table>
                         var printContent = `
-                    <div class="container">
-                        <h1 class="store-name">NHÀ HÀNG BẾP LỬA QUÊ</h1>
-                        <h2 class="invoice-title">HÓA ĐƠN THANH TOÁN</h2>
-                        <p><strong>Mã hóa đơn:</strong> ${maHoaDon}</p>
-                        <p><strong>Ngày:</strong> ${ngayBan}</p>
-                        <p><strong>Khách hàng:</strong> Bàn ${banId}</p>
-                        <p><strong>Khách hàng:</strong> ${tenKhachHang}</p>
-                        <p><strong>Số điện thoại:</strong> ${soDienThoai}</p>
+                        <div class="invoice-container">
+                            <h1 class="invoice-store-name">NHÀ HÀNG BẾP LỬA QUÊ</h1>
+                            <h2 class="invoice-title">HÓA ĐƠN THANH TOÁN</h2>
+                            <p class="invoice-header"><strong>Mã hóa đơn:</strong> ${maHoaDon}</p>
+                            <p class="invoice-header"><strong>Ngày:</strong> ${ngayBan}</p>
+                            <p class="invoice-header"><strong>Khách hàng:</strong> ${tenKhachHang}</p>
+                            <p class="invoice-header"><strong>Số điện thoại:</strong> ${soDienThoai}</p>
 
-                        <div class="divider">-----------------------------------------</div>
+                            <div class="invoice-divider">-----------------------------------------</div>
 
-                        <div class="row header-row">
-                            <div class="col-stt">STT</div>
-                            <div class="col-mon-an">Món ăn</div>
-                            <div class="col-sl">SL.</div>
-                            <div class="col-gia">Giá</div>
-                            <div class="col-tong">Tổng</div>
+                            <table class="invoice-table">
+                                <thead>
+                                    <tr class="invoice-header-row">
+                                        <th class="invoice-col-stt">STT</th>
+                                        <th class="invoice-col-mon-an">Món ăn</th>
+                                        <th class="invoice-col-sl">SL.</th>
+                                        <th class="invoice-col-gia">Giá</th>
+                                        <th class="invoice-col-tong">Tổng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${
+                                        danhSachSanPham && danhSachSanPham.length > 0 
+                                        ? danhSachSanPham.map((item, index) => `
+                                            <tr class="invoice-item">
+                                                <td class="invoice-col-stt">${index + 1}</td>
+                                                <td class="invoice-col-mon-an">${item.ten_san_pham}</td>
+                                                <td class="invoice-col-sl">${item.so_luong}</td>
+                                                <td class="invoice-col-gia">${(item.tong_cong / item.so_luong).toLocaleString('vi-VN', { minimumFractionDigits: 0 })} VND</td>
+                                                <td class="invoice-col-tong">${item.tong_cong.toLocaleString('vi-VN', { minimumFractionDigits: 0 })} VND</td>
+                                            </tr>
+                                        `).join('')
+                                        : `<tr class="invoice-item"><td colspan="5" class="invoice-col-full">Không có dữ liệu</td></tr>`
+                                    }
+                                </tbody>
+                            </table>
+
+                            <div class="invoice-divider">-----------------------------------------</div>
+
+                            <p class="invoice-footer total"><strong>Tổng tiền:</strong> ${totalAmount.toLocaleString('vi-VN', { minimumFractionDigits: 0 })} VND</p>
+                            ${discountAmount > 0 ? `<p class="invoice-footer discount"><strong>Giảm giá:</strong> ${discountAmount.toLocaleString('vi-VN', { minimumFractionDigits: 0 })} VND</p>` : ''}
+                            <p class="invoice-footer must-pay"><strong>Khách phải trả:</strong> ${khachCanTra.toLocaleString('vi-VN', { minimumFractionDigits: 0 })} VND</p>
+                            <p class="invoice-footer amount-given"><strong>Tiền khách đưa:</strong> ${amountGiven.toLocaleString('vi-VN', { minimumFractionDigits: 0 })} VND</p>
+                            <p class="invoice-footer change-return"><strong>Tiền thừa trả khách:</strong> ${changeToReturn.toLocaleString('vi-VN', { minimumFractionDigits: 0 })} VND</p>
+                            <p class="invoice-thank-you">Cảm ơn quý khách! Hẹn gặp lại! 😊</p>
                         </div>
-
-                        ${
-                            danhSachSanPham && danhSachSanPham.length > 0 
-                            ? danhSachSanPham.map((item, index) => `
-                                <div class="row">
-                                    <div class="col-stt">${index + 1}</div>
-                                    <div class="col-mon-an">${item.ten_san_pham}</div>
-                                    <div class="col-sl">${item.so_luong}</div>
-                                    <div class="col-gia">${(item.tong_cong / item.so_luong).toLocaleString('vi-VN', { minimumFractionDigits: 0 })} VND</div>
-                                    <div class="col-tong">${item.tong_cong.toLocaleString('vi-VN', { minimumFractionDigits: 0 })} VND</div>
-                                </div>
-                            `).join('')
-                            : `<div class="row"><div class="col-full">Không có dữ liệu</div></div>`
-                        }
-
-                        <div class="divider">-----------------------------------------</div>
-
-                        <p class="total"><strong>Tổng cộng:</strong> ${totalAmount.toLocaleString('vi-VN', { minimumFractionDigits: 0 })} VND</p>
-                        <p class="amount-given"><strong>Tiền khách đưa:</strong> ${amountGiven.toLocaleString('vi-VN', { minimumFractionDigits: 0 })} VND</p>
-                        <p class="change-return"><strong>Tiền thừa trả khách:</strong> ${changeToReturn.toLocaleString('vi-VN', { minimumFractionDigits: 0 })} VND</p>
-                        <p class="thank-you">Cảm ơn quý khách! Hẹn gặp lại! 😊</p>
-                    </div>
-                `;
+                    `;
 
                         // Tạo phần tử tạm trong DOM để chứa nội dung in
                         var tempDiv = document.createElement('div');
@@ -945,86 +963,125 @@
                             showModal: true,
                             modalTitle: 'Cài Đặt In',
                             style: `
-                        body {
-                            font-family: Arial, sans-serif;
-                            font-size: 14px;
-                            line-height: 1.5;
-                        }
-                        .container {
-                            width: 100%;
-                            max-width: 300px; /* Khổ giấy in nhỏ, thường 80mm */
-                            margin: 0 auto;
-                            padding: 10px;
-                            text-align: left;
-                        }
-                        .store-name {
-                            text-align: center;
-                            font-size: 16px;
-                            font-weight: bold;
-                            margin-bottom: 5px;
-                        }
-                        .invoice-title {
-                            text-align: center;
-                            font-size: 14px;
-                            font-weight: bold;
-                            margin-bottom: 10px;
-                        }
-                        p {
-                            margin: 5px 0;
-                        }
-                        .divider {
-                            text-align: center;
-                            margin: 10px 0;
-                            font-size: 12px;
-                        }
-.row {
-    display: flex;
-    justify-content: flex-start;
-    gap: 5px;
-    margin-bottom: 0; /* Giảm khoảng cách dưới của mỗi hàng */
-    line-height: 1; /* Giảm khoảng cách dọc giữa các dòng văn bản */
-}
-                        .header-row {
-                            font-weight: bold;
-                        }
-                        .col-stt {
-                            width: 8%; /* Giảm chiều rộng */
-                            text-align: left;
-                        }
-                        .col-mon-an {
-                            width: 35%; /* Tăng chiều rộng để chứa tên món dài */
-                            text-align: left;
-                            white-space: nowrap; /* Ngăn tên món xuống dòng */
-                            overflow: hidden; /* Ẩn phần thừa */
-                            text-overflow: ellipsis; /* Thêm dấu ... nếu tên quá dài */
-                        }
-                        .col-sl {
-                            width: 10%; /* Giảm chiều rộng */
-                            text-align: center;
-                        }
-                        .col-gia {
-                            width: 22%; /* Giảm chiều rộng */
-                            text-align: center;
-                        }
-                        .col-tong {
-                            width: 20%; /* Giảm chiều rộng */
-                            text-align: right;
-                        }
-                        .col-full {
-                            width: 100%;
-                            text-align: center;
-                        }
-                        .total, .amount-given, .change-return {
-                            text-align: right;
-                            font-weight: bold;
-                            margin-top: 5px;
-                        }
-                        .thank-you {
-                            text-align: center;
-                            margin-top: 10px;
-                            font-size: 12px;
-                        }
-                    `,
+                            /* Reset CSS để tránh ghi đè */
+                            * {
+                                margin: 0 !important;
+                                padding: 0 !important;
+                                box-sizing: border-box !important;
+                            }
+                            @page {
+                                margin: 0 !important;
+                            }
+                            @media print {
+                                .invoice-container {
+                                    width: 100% !important;
+                                    max-width: 300px !important;
+                                    margin: 0 auto !important;
+                                    padding: 10px !important;
+                                    text-align: left !important;
+                                    font-family: Arial, sans-serif !important;
+                                    font-size: 12px !important;
+                                    line-height: 1 !important;
+                                }
+                            }
+                            .invoice-container {
+                                width: 100%;
+                                max-width: 300px;
+                                margin: 0 auto !important;
+                                padding: 10px !important;
+                                text-align: left;
+                                font-family: Arial, sans-serif;
+                                font-size: 12px;
+                                line-height: 1;
+                            }
+                            .invoice-store-name {
+                                text-align: center;
+                                font-size: 14px;
+                                font-weight: bold;
+                                margin-bottom: 5px !important;
+                            }
+                            .invoice-title {
+                                text-align: center;
+                                font-size: 12px;
+                                font-weight: bold;
+                                margin-bottom: 5px !important;
+                            }
+                            .invoice-header {
+                                margin: 2px 0 !important;
+                                line-height: 1 !important;
+                            }
+                            .invoice-divider {
+                                text-align: center;
+                                margin: 5px 0 !important;
+                                font-size: 10px;
+                                border-top: 1px dashed #000 !important;
+                            }
+                            .invoice-table {
+                                width: 100% !important;
+                                border-collapse: collapse !important;
+                                border-spacing: 0 !important;
+                            }
+                            .invoice-header-row {
+                                font-weight: bold;
+                                border-top: 1px dashed #000 !important;
+                                border-bottom: 1px dashed #000 !important;
+                            }
+                            .invoice-item {
+                                line-height: 1 !important;
+                                height: 14px !important; /* Ép chiều cao hàng nhỏ nhất */
+                            }
+                            .invoice-col-stt {
+                                width: 10%;
+                                text-align: left;
+                                padding: 0 2px !important;
+                                line-height: 1 !important;
+                            }
+                            .invoice-col-mon-an {
+                                width: 40%;
+                                text-align: left;
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                                padding: 0 2px !important;
+                                line-height: 1 !important;
+                            }
+                            .invoice-col-sl {
+                                width: 10%;
+                                text-align: center;
+                                padding: 0 2px !important;
+                                line-height: 1 !important;
+                            }
+                            .invoice-col-gia {
+                                width: 20%;
+                                text-align: center;
+                                padding: 0 2px !important;
+                                line-height: 1 !important;
+                            }
+                            .invoice-col-tong {
+                                width: 20%;
+                                text-align: right;
+                                padding: 0 2px !important;
+                                line-height: 1 !important;
+                            }
+                            .invoice-col-full {
+                                width: 100%;
+                                text-align: center;
+                                padding: 0 2px !important;
+                                line-height: 1 !important;
+                            }
+                            .invoice-footer {
+                                text-align: right;
+                                font-weight: bold;
+                                margin: 2px 0 !important;
+                                line-height: 1 !important;
+                            }
+                            .invoice-thank-you {
+                                text-align: center;
+                                margin-top: 5px !important;
+                                font-size: 10px;
+                                line-height: 1 !important;
+                            }
+                        `,
                             options: {
                                 orientation: 'portrait',
                                 color: true,
@@ -1053,7 +1110,6 @@
                         document.getElementById("changeToReturn").value = "0 VND";
                     } else {
                         showToast("Thanh toán không thành công.", "danger");
-
                     }
                 },
                 error: function(xhr, status, error) {
@@ -1253,37 +1309,37 @@
     });
 
     toastr.options = {
-    closeButton: true,
-    debug: false,
-    newestOnTop: true, // Toast mới nhất hiển thị ở trên
-    progressBar: true,
-    positionClass: "toast-top-right", // Vị trí: góc trên bên phải
-    preventDuplicates: false,
-    onclick: null,
-    showDuration: "300",
-    hideDuration: "1000",
-    timeOut: "5000", // Toast tự ẩn sau 5 giây
-    extendedTimeOut: "1000",
-    showEasing: "swing",
-    hideEasing: "linear",
-    showMethod: "fadeIn",
-    hideMethod: "fadeOut",
-};
+        closeButton: true,
+        debug: false,
+        newestOnTop: true, // Toast mới nhất hiển thị ở trên
+        progressBar: true,
+        positionClass: "toast-top-right", // Vị trí: góc trên bên phải
+        preventDuplicates: false,
+        onclick: null,
+        showDuration: "300",
+        hideDuration: "1000",
+        timeOut: "5000", // Toast tự ẩn sau 5 giây
+        extendedTimeOut: "1000",
+        showEasing: "swing",
+        hideEasing: "linear",
+        showMethod: "fadeIn",
+        hideMethod: "fadeOut",
+    };
 
-function showToast(message, type) {
-    switch (type) {
-        case "success":
-            toastr.success(message);
-            break;
-        case "danger":
-            toastr.error(message);
-            break;
-        case "warning":
-            toastr.warning(message);
-            break;
-        default:
-            toastr.info(message);
-            break;
+    function showToast(message, type) {
+        switch (type) {
+            case "success":
+                toastr.success(message);
+                break;
+            case "danger":
+                toastr.error(message);
+                break;
+            case "warning":
+                toastr.warning(message);
+                break;
+            default:
+                toastr.info(message);
+                break;
+        }
     }
-}
 </script>
