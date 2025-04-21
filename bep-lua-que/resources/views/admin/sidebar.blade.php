@@ -173,8 +173,8 @@
                         <li><a href="{{ route('thongke.topdoanhthu') }}">Thống kê top doanh thu</a></li>
                         <li><a href="{{ route('thongke.thongkesoluongkhach') }}">Thống kê số lượng khách
                                 hàng</a></li>
-                        <li><a href="{{ route('thongke.thongkesoban') }}">Thống kê số bàn
-                            </a></li>
+                        {{-- <li><a href="{{ route('thongke.thongkesoban') }}">Thống kê số bàn
+                            </a></li> --}}
                         <li><a href="{{ route('thongke.thongkemonan') }}">Thống kê món ăn</a></li>
                     </ul>
                 </li>

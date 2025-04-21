@@ -5,9 +5,19 @@ function capNhatBieuDoTronDoanhThu(namNay, namTruoc) {
         return (so / 1_000_000).toFixed(1) + ' triệu';
     }
 
-    // const total = namNay + namTruoc;
-    const tiLe = namTruoc > 0 ? ((namNay - namTruoc) / namTruoc * 100).toFixed(1) : 0;
+    // Đảm bảo giá trị là số
+    namNay = Number(namNay);
+    namTruoc = Number(namTruoc);
 
+    // Tính tỉ lệ thay đổi
+    let tiLe = 0;
+    if (namTruoc === 0 && namNay > 0) {
+        tiLe = 100;
+    } else if (namTruoc > 0) {
+        tiLe = ((namNay - namTruoc) / namTruoc * 100).toFixed(1);
+    }
+
+    // Cập nhật biểu đồ tròn
     new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -30,15 +40,20 @@ function capNhatBieuDoTronDoanhThu(namNay, namTruoc) {
         }
     });
 
-    // Cập nhật phần trăm nâng cao
+    // Xử lý hiển thị phần trăm chênh lệch
     let chenhLechText = '';
-    if (namNay > namTruoc) {
+    if (namTruoc === 0 && namNay === 0) {
+        chenhLechText = 'Không có dữ liệu doanh thu cho cả hai năm';
+    } else if (namTruoc === 0 && namNay > 0) {
+        chenhLechText = 'Tăng 100% so với năm trước';
+    } else if (namNay > namTruoc) {
         chenhLechText = `Tăng ${tiLe}% so với năm trước`;
     } else if (namNay < namTruoc) {
         chenhLechText = `Giảm ${Math.abs(tiLe)}% so với năm trước`;
     } else {
         chenhLechText = 'Không thay đổi so với năm trước';
     }
-    // console.log(chenhLechText)
+
+    // Hiển thị ra giao diện
     document.getElementById('phanTramChenhLechDoanhThu').innerText = chenhLechText;
 }

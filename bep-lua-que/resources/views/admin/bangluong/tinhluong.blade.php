@@ -115,7 +115,7 @@
         @endif --}}
         </form>
     </div>
-    {{ $nhanViens->links('pagination::bootstrap-5') }}
+    {{-- {{ $nhanViens->links('pagination::bootstrap-5') }} --}}
 @endsection
 
 <script>

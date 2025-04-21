@@ -59,6 +59,7 @@ class BangTinhLuongController extends Controller
     }
 
     // 🔹 Lấy dữ liệu phân trang
+    // $data = $query->latest('bang_tinh_luongs.id')->paginate(10);
     $data = $query->latest('bang_tinh_luongs.id')->paginate(10);
 
     // Nếu là AJAX request, trả về partial view
@@ -82,15 +83,17 @@ class BangTinhLuongController extends Controller
          $thangChon =$request->input('thang', now()->format('Y-m'));
      // Tính toán ngày đầu và ngày cuối tháng dựa trên
      $thangChon = $ngayBatDauThang = Carbon::parse($thangChon .'-01'); $ngayKetThucThang = $ngayBatDauThang->copy()->endOfMonth();
+     
      // Lấy danh sách nhân viên có chấm công trong tháng đã chọn
-      $nhanViens = NhanVien::whereHas('chamCongs', function ($query) use ($thangChon) {
+    $nhanViens = NhanVien::whereHas('chamCongs', function ($query) use ($thangChon) {
     $query->whereYear('ngay_cham_cong', date('Y', strtotime($thangChon)))
     ->whereMonth('ngay_cham_cong', date('m', strtotime($thangChon))); }) ->with([
-    'luong', 'chamCongs' => function ($query) use ($thangChon) {
-    $query->whereYear('ngay_cham_cong', date('Y', strtotime($thangChon)))
+    'luong', 'chamCongs' => function ($query) use ($thangChon) { $query
+    ->whereYear('ngay_cham_cong', date('Y', strtotime($thangChon)))
     ->whereMonth('ngay_cham_cong', date('m', strtotime($thangChon)))
-    ->with('caLam'); } ]) ->paginate(10);;
-     foreach ($nhanViens as $nhanVien) {
+    ->with('caLam'); } ]) ->get();
+     
+    foreach ($nhanViens as $nhanVien) {
          // Lấy tất cả bản lương của nhân viên, sắp xếp ngày áp dụng tăng dần 
          $luongs =$nhanVien->luong()->orderBy('ngay_ap_dung', 'asc')->get(); $luongCu = null;
     $luongMoi = null; foreach ($luongs as $luong) { $ngayApDung =

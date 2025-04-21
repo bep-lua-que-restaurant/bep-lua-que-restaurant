@@ -6,8 +6,8 @@
 
 @section('content')
     <div class="row">
-        <div id="booked-list-section">
-            <h2 class="text-center my-3">Danh sách bàn đã được đặt</h2>
+        <div id="booked-list-section" class="container-fluid">
+            <h2 class=" my-3">Danh sách bàn đã được đặt</h2>
 
             <!-- Bộ lọc tìm kiếm -->
             <div class="row d-flex p-3">
@@ -27,9 +27,8 @@
             </div>
 
             <!-- Bảng dữ liệu -->
-            <div class="container">
-                {{-- <h2 class="text-center my-2">Danh Sách Đặt Bàn</h2> --}}
-                <table class="table table-bordered" id="tableBanDat">
+            <div class="table-responsive">
+                <table class="table table-bordered w-100" id="tableBanDat">
                     <thead class="text-center">
                         <tr>
                             <th>Thời Gian Đến</th>
@@ -49,11 +48,9 @@
                                     {{ \Carbon\Carbon::parse($datban->thoi_gian_den)->format('d/m/Y H:i') }}</td>
                                 <td class="align-middle">{{ $datban->ho_ten }}</td>
                                 <td class="align-middle">{{ $datban->so_dien_thoai }}</td>
-                                {{-- <td>{{ $datban->so_nguoi }}</td> --}}
                                 <td class="align-middle">{{ $datban->so_nguoi }}</td>
 
                                 <td>
-                                    {{-- Hiển thị danh sách bàn gọn hơn --}}
                                     <ul class="list-unstyled mb-0">
                                         @foreach (explode(',', $datban->danh_sach_ban) as $ban)
                                             <li><span class="badge bg-primary">{{ trim($ban) }}</span></li>
@@ -75,16 +72,13 @@
                                             Đã hủy</span>
                                     @endif
                                 </td>
-                                <td class="align-middle"
-                                    class="{{ $datban->trang_thai === 'dang_xu_ly' ? 'd-flex justify-content-center gap-2' : '' }}">
+                                <td class="align-middle">
                                     <a href="{{ route('dat-ban.show', $datban->ma_dat_ban) }}"
                                         class="btn btn-primary btn-sm">
-                                        <i class="fas fa-eye"></i> <!-- Icon "Xem" -->
+                                        <i class="fas fa-eye"></i>
                                     </a>
 
-
                                     @if ($datban->trang_thai === 'dang_xu_ly')
-                                        <!-- Nút Hủy luôn hiển thị -->
                                         <form action="{{ route('dat-ban.destroy', $datban->ma_dat_ban) }}" method="post"
                                             style="display: inline;">
                                             @csrf
@@ -93,38 +87,26 @@
                                                 onclick="return confirm('Bạn có chắc chắn muốn hủy đặt bàn này không?');">
                                                 <i class="fas fa-times"></i>
                                             </button>
-
                                         </form>
-
-                                        <!-- Nút Xác nhận: chỉ khi đúng ngày -->
-                                        {{-- @if (($datban->thoi_gian_den instanceof \Carbon\Carbon ? $datban->thoi_gian_den : \Carbon\Carbon::parse($datban->thoi_gian_den))->isSameDay($today))
-                                            <a href="{{ route('dat-ban.edit', $datban->ma_dat_ban) }}"
-                                                class="btn btn-success btn-sm">
-                                                <i class="fas fa-check"></i> <!-- Icon "Xác nhận" -->
-                                            </a>
-                                        @endif --}}
 
                                         @if (
                                             \Carbon\Carbon::parse($datban->thoi_gian_den)->isSameDay($today) &&
                                                 \Carbon\Carbon::parse($datban->thoi_gian_den)->diffInMinutes(\Carbon\Carbon::now()) <= 60)
                                             <a href="{{ route('dat-ban.edit', $datban->ma_dat_ban) }}"
                                                 class="btn btn-success btn-sm">
-                                                <i class="fas fa-check"></i> <!-- Icon "Xác nhận" -->
+                                                <i class="fas fa-check"></i>
                                             </a>
                                         @endif
                                     @endif
-
                                 </td>
-
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
-
             </div>
         </div>
     </div>
-    </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const searchInput = document.getElementById("searchBanDat");

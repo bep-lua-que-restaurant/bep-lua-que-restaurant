@@ -82,7 +82,7 @@ class MonAnController extends Controller
         //     ->select('id', 'ten_nguyen_lieu', 'don_vi_ton')
         //     ->get();
 
-        return view('admin.monan.create', compact('danhMucs', ));
+        return view('admin.monan.create', compact('danhMucs',));
     }
 
 
@@ -141,37 +141,27 @@ class MonAnController extends Controller
 
 
 
-    public function show($id)
+    public function show($monAnId)
     {
-        $monAn->load([
-            'danhMuc',
-            'hinhAnhs'=> function ($query) {
-                $query->withTrashed();
-            },
-        ]);
+        $monAn = MonAn::withTrashed()->with(['danhMuc', 'hinhAnhs'])->findOrFail($monAnId);
 
-    return view('admin.monan.detail', compact('monAn'));
+        return view('admin.monan.detail', compact('monAn'));
     }
+
+
 
 
     public function edit($id)
     {
-    $monAn = MonAn::withTrashed()->findOrFail($id);
+        // Chỉ lấy món ăn chưa bị xoá
+        $monAn = MonAn::findOrFail($id);
 
+        // Lấy danh sách danh mục chưa bị xoá
+        $danhMucs = DanhMucMonAn::whereNull('deleted_at')->get();
 
-        // Chỉ load nguyên liệu chưa bị xoá cho dropdown chọn nguyên liệu
-        // $nguyenLieus = NguyenLieu::select('id', 'ten_nguyen_lieu', 'don_vi_ton')->get();
-
-        // Load công thức kèm nguyên liệu đã bị soft delete
-        // $monAn->load([
-        //     'congThuc.nguyenLieu' => function ($query) {
-        //         $query->withTrashed();
-        //     }
-        // ]);
-
-        return view('admin.monan.edit', compact('monAn', 'danhMucs', ));
-
+        return view('admin.monan.edit', compact('monAn', 'danhMucs'));
     }
+
 
 
     public function update(UpdateMonAnRequest $request, MonAn $monAn)
@@ -241,11 +231,11 @@ class MonAnController extends Controller
         $hoaDonChuaThanhToan = \App\Models\HoaDon::whereHas('chiTietHoaDons', function ($query) use ($monAn) {
             $query->where('mon_an_id', $monAn->id);
         })
-        ->whereHas('hoaDonBans', function ($query) {
-            $query->where('trang_thai', '!=', 'da_thanh_toan');
-        })
-        ->first();
-    
+            ->whereHas('hoaDonBans', function ($query) {
+                $query->where('trang_thai', '!=', 'da_thanh_toan');
+            })
+            ->first();
+
         // Nếu tồn tại hóa đơn chưa thanh toán chứa món ăn này thì không cho xóa
         if ($hoaDonChuaThanhToan) {
             $message = 'Không thể xóa món ăn vì món ăn đang được khách sử dụng';
@@ -254,24 +244,24 @@ class MonAnController extends Controller
             if (request()->ajax()) {
                 return response()->json(['message' => $message], 422);
             }
-        
+
 
             return redirect()->route('mon-an.index')
-                             ->with('error', 'Không thể xóa món ăn vì món ăn đang được khách sử dụng');
+                ->with('error', 'Không thể xóa món ăn vì món ăn đang được khách sử dụng');
         }
-    
+
         // Nếu không có trong hóa đơn chưa thanh toán thì cho phép xóa
         $monAn->update(['trang_thai' => 'ngung_ban']);
         $monAn->delete();
-    
+
         $monAnDeleted = new MonAn();
         $monAnDeleted->id = $monAn->id;
         $monAnDeleted->deleted_at = now();
-    
+
         broadcast(new ThucDonUpdated($monAnDeleted))->toOthers();
-    
+
         return redirect()->route('mon-an.index')
-                         ->with('success', 'Xóa món ăn thành công.');
+            ->with('success', 'Xóa món ăn thành công.');
     }
 
     public function restore($id)

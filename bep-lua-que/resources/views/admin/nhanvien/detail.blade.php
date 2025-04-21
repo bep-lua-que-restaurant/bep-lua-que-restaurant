@@ -85,9 +85,9 @@
                             </li>
 
                             <li class="list-group-item">
-                                <strong>Ngày áp dụng lương:</strong>
+                                <strong>Tháng áp dụng lương:</strong>
                                 @if ($luongMoi)
-                                    {{ \Carbon\Carbon::parse($luongMoi->ngay_ap_dung)->format('d/m/Y') }}
+                                    {{ \Carbon\Carbon::parse($luongMoi->ngay_ap_dung)->format('m/Y') }}
                                 @else
                                     <span class="text-danger">Chưa thiết lập</span>
                                 @endif

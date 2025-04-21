@@ -34,8 +34,8 @@
                             <a href="{{ route('luong.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Tính lương
                             </a>
-                            <a href="{{ route('bang-luong.import') }}" class="btn btn-sm btn-secondary" data-toggle="modal"
-                                data-target=".bd-example-modal-lg">
+                            <a href="{{ route('bang-luong.import') }}" class="btn btn-sm btn-secondary"
+                               data-bs-toggle="modal" data-bs-target="#importFileModal">
                                 <i class="fa fa-upload"></i> Nhập file
                             </a>
                             <a id="exportLink" href="{{ route('bang-luong.export') }}" class="btn btn-sm btn-success">
@@ -105,7 +105,7 @@
                         @csrf
                         <div class="mb-3">
                             <label for="fileUpload" class="form-label">Chọn file</label>
-                            <input type="file" name="file" id="fileUpload" class="form-control" required>
+                            <input style="height: auto" type="file" name="file" id="fileUpload" class="form-control" required>
                             <input type="hidden" name="month" id="selectedMonth">
                         </div>
                     </form>
