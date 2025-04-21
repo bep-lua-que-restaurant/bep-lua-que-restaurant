@@ -120,10 +120,13 @@ $nhanViensAll = NhanVien::where('trang_thai', 'dang_lam_viec')->get();
             $ngayNhanh = Carbon::parse($request->input('ngay_cham_cong_nhanh'));
             $caNhanhId = $request->input('ca_lam_id_nhanh');
             $nhanViensNhanh = $request->input('nhan_vien_ids_nhanh');
-    
-            if ($ngayNhanh->gt(Carbon::now()->startOfDay())) {
-                return redirect()->route('cham-cong.index')->with('error', 'Không thể chấm công cho ngày trong tương lai!');
+            if (
+                $ngayNhanh->gt(Carbon::now()->startOfDay()) || 
+                $ngayNhanh->lt(Carbon::now()->startOfDay())
+            ) {
+                return redirect()->route('cham-cong.index')->with('error', 'Chỉ được chấm công cho ngày hôm nay!');
             }
+            
     
             foreach ($nhanViensNhanh as $nhanVienId) {
                 $chamCong = ChamCong::where('nhan_vien_id', $nhanVienId)
