@@ -33,7 +33,7 @@ class MonAn extends Model
      */
     public function hinhAnhs()
     {
-        return $this->hasMany(HinhAnhMonAn::class, 'mon_an_id', 'id');
+        return $this->hasMany(HinhAnhMonAn::class)->withTrashed();
     }
 
 
@@ -50,9 +50,4 @@ class MonAn extends Model
             ->limit($limit)
             ->get(['id', 'ten_mon_an']);
     }
-    public function congThuc()
-    {
-        return $this->hasMany(CongThucMonAn::class, 'mon_an_id');
-    }
-    
 }
