@@ -37,56 +37,31 @@
 
 <body>
     <div class="container-fluid">
+        <!-- Header -->
+        <header class="row bg-primary text-white align-items-center p-3">
+            <div class="col-4 d-none d-md-block"></div>
+
+            <div class="col-4 text-center">
+                <h1 class="m-0">Lễ tân</h1> <!-- Bạn có thể thay bằng logo sau -->
+            </div>
+
+            <div class="col-4">
+                <nav class="d-flex justify-content-end gap-3">
+                    <a href="/" class="text-white text-decoration-none">🏠 Trang chủ</a>
+                    <a href="{{ route('dat-ban.index') }}" class="text-white text-decoration-none">📅 Đặt bàn</a>
+                    <a href="{{ route('datban.danhsach') }}" class="text-white text-decoration-none">📋 Danh sách</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
         <div class="row">
-            <!-- Header -->
-            <header class="col-12 bg-primary text-white text-center p-3">
-                <h1>Lễ tân</h1>
-            </header>
-        </div>
-        <div class="row">
-            <!-- Sidebar -->
-            {{-- <nav class="col-2 bg-light pt-3">
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a href="/" class="btn btn-primary  w-100">Trang chủ</a>
-                    </li>
-                    <br>
-                    <li class="nav-item">
-                        <a href="{{ route('dat-ban.index') }}" class="btn btn-primary  w-100"> Đặt bàn</a>
-                    </li>
-                    <br>
-                    <li class="nav-item">
-                        <a href="{{ route('datban.danhsach') }}" class="btn btn-primary  w-100">Danh sách</a>
-                    </li>
-
-                </ul>
-            </nav> --}}
-
-
-            <nav class="col-2 bg-light pt-3 vh-100 d-flex flex-column align-items-start p-3 border-end shadow-sm">
-                <ul class="nav flex-column w-100 gap-2">
-                    <li class="nav-item">
-                        <a href="/" class="btn btn-primary w-100 text-start">🏠 Trang chủ</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('dat-ban.index') }}" class="btn btn-primary w-100 text-start">📅 Đặt bàn</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('datban.danhsach') }}" class="btn btn-primary w-100 text-start">📋 Danh
-                            sách</a>
-                    </li>
-                </ul>
-            </nav>
-
-
-
-
-            <!-- Main Content -->
-            <main class="col-10">
+            <main class="col-12 p-4">
                 @yield('content')
             </main>
         </div>
     </div>
+
 
     <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
 

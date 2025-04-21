@@ -1,11 +1,9 @@
 @extends('gdnhanvien.datban.layout')
 
 @section('content')
-    <div class="container">
-        {{-- <h1 class="text-center my-4">Quản lý Đặt Bàn</h1> --}}
-
+    <div class="container-fluid">
         <!-- Chọn ngày -->
-        <div class="row d-flex align-items-center mb-3 mt-5">
+        <div class="row d-flex align-items-center mb-3">
             <div class="col-auto">
                 <label for="datePicker" class="fw-bold">Hiển thị theo ngày:</label>
             </div>
@@ -20,7 +18,7 @@
             <table class="table table-bordered table-hover text-center align-middle">
                 <thead class="table-dark">
                     <tr>
-                        <th class="sticky-col">Bàn / Giờ</th>
+                        <th class="sticky-col text-nowrap">Bàn / Giờ</th>
                         @for ($i = 8; $i <= 22; $i++)
                             <th>{{ sprintf('%02d', $i) }}:00</th>
                             <th>{{ sprintf('%02d', $i) }}:30</th>
@@ -36,6 +34,8 @@
             </table>
         </div>
     </div>
+
+
     <div id="pagination-controls" class="mt-3"></div> <!-- Hiển thị các nút phân trang -->
 
     <!-- Nút mở modal -->
@@ -66,7 +66,7 @@
                         <!-- Form nhập thông tin -->
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="fullName" class="form-label"> <span class="text-danger fs-5">*</span> Họ
+                                <label for="fullName" class="fw-bold"> <span class="text-danger fs-5">*</span> Họ
                                     tên:</label>
                                 <input type="text" class="form-control" id="customerName" name="customer_name">
                                 {{-- @error('customer_name')
@@ -74,8 +74,7 @@
                                 @enderror --}}
                             </div>
                             <div class="col-md-6">
-                                <label for="email" class="form-label"> <span
-                                        class="text-danger fs-5">*</span>Email:</label>
+                                <label for="email" class="fw-bold"> <span class="text-danger fs-5">*</span>Email:</label>
                                 <input type="email" class="form-control" id="customerEmail" name="customer_email">
                                 {{-- @error('customer_email')
                                     <span class="text-danger">{{ $message }}</span>
@@ -85,7 +84,7 @@
 
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="phone" class="form-label"><span class="text-danger fs-5">*</span>Số điện
+                                <label for="phone" class="fw-bold"><span class="text-danger fs-5">*</span>Số điện
                                     thoại:</label>
                                 <input type="tel" class="form-control" id="customerPhone" name="customer_phone">
                                 {{-- @error('customer_phone')
@@ -93,7 +92,7 @@
                                 @enderror --}}
                             </div>
                             <div class="col-md-6">
-                                <label for="numberOfGuests" class="form-label"><span class="text-danger fs-5">*</span>Số
+                                <label for="numberOfGuests" class="fw-bold"><span class="text-danger fs-5">*</span>Số
                                     người:</label>
                                 <input type="number" class="form-control" name="num_people" id="numPeople" min="1">
                                 {{-- @error('num_people')
@@ -121,189 +120,6 @@
             </div>
         </div>
     </div>
-    {{-- <script>
-        $(document).ready(function() {
-            function loadDatBan(date, page = 1) {
-                $("#ngay-tabs").html('<tr><td colspan="30" class="text-center">Đang tải dữ liệu...</td></tr>');
-
-                $.ajax({
-                    url: `/api/datban?page=${page}`,
-                    type: 'GET',
-                    data: {
-                        date: date
-                    },
-                    success: function(response) {
-                        let html = '';
-
-                        response.banPhong.data.forEach(ban => {
-                            const tableClass = ban.trang_thai === "co_khach" ? "bg-info" : "";
-                            html +=
-                                `<tr class="${tableClass}"><td class="fw-bold sticky-col">${ban.ten_ban}</td>`;
-
-                            for (let i = 8; i <= 22; i++) {
-                                ["00", "30"].forEach(minute => {
-                                    const timeSlot =
-                                        `${i.toString().padStart(2, '0')}:${minute}`;
-                                    const thoiGianHienTai = new Date(
-                                        `${date}T${timeSlot}:00`);
-
-                                    const datBan = response.datBans.find(d => {
-                                        if (d.ban_an_id !== ban.id)
-                                            return false;
-
-                                        const thoiGianDen = new Date(d
-                                            .thoi_gian_den);
-                                        const [hours, minutes] = d.gio_du_kien
-                                            .split(':').map(Number);
-
-                                        const thoiGianKetThuc = new Date(
-                                            thoiGianDen);
-                                        thoiGianKetThuc.setHours(hours);
-                                        thoiGianKetThuc.setMinutes(minutes);
-
-                                        return thoiGianHienTai >= thoiGianDen &&
-                                            thoiGianHienTai <= thoiGianKetThuc;
-                                    });
-
-                                    const statusClass = datBan ?
-                                        (datBan.trang_thai === 'xac_nhan' ?
-                                            'btn-success' : 'btn-danger') :
-                                        'bg-light';
-
-                                    const maDatBan = datBan ? datBan.ma_dat_ban : '';
-                                    const gioDuKien = datBan ? datBan.gio_du_kien :
-                                        timeSlot;
-
-                                    const content = `
-                                <button class="btn btn-sm ${statusClass} text-dark btn-view-details selectable-slot" 
-                                    data-ma-dat-ban="${maDatBan}" 
-                                    data-ban-id="${ban.id}" 
-                                    data-ten-ban="${ban.ten_ban}" 
-                                    data-time-slot="${timeSlot}" 
-                                    data-date="${date}"
-                                    data-bs-toggle="tooltip" 
-                                    data-bs-title="Đang tải..."
-                                >
-                                    +
-                                </button>`;
-
-                                    html +=
-                                        `<td class="text-center ${tableClass}"  data-ban-id="${ban.id}">${content}</td>`;
-                                });
-                            }
-                            html += `</tr>`;
-                        });
-
-                        $("#ngay-tabs").html(html);
-                        $('[data-bs-toggle="tooltip"]').tooltip(); // Kích hoạt tooltip
-                        renderPagination(response.banPhong, date);
-                        attachTooltipEvents();
-                    },
-                    error: function() {
-                        $("#ngay-tabs").html(
-                            '<tr><td colspan="30" class="text-center text-danger">Lỗi tải dữ liệu</td></tr>'
-                        );
-                    }
-                });
-            }
-
-            function attachTooltipEvents() {
-                $(".selectable-slot").on("mouseenter", function() {
-                    const button = $(this);
-                    const maDatBan = button.data("ma-dat-ban");
-
-                    if (maDatBan) {
-                        fetch(`/api/datban/${maDatBan}`)
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error(
-                                        `Lỗi API: ${response.status} - ${response.statusText}`);
-                                }
-                                return response.json();
-                            })
-                            .then(data => {
-                                if (!data.ho_ten)
-                                    return; // Không có thông tin thì không hiển thị tooltip
-
-                                const title = `
-                        <strong>Khách:</strong> ${data.ho_ten} <br>
-                        <strong>SĐT:</strong> ${data.so_dien_thoai} <br>
-                        <strong>Số người:</strong> ${data.so_nguoi} <br>
-                        <strong>Mô tả:</strong> ${data.mo_ta || "Không có mô tả"} <br>
-                        <strong>Bàn:</strong> ${data.ban_ans ? data.ban_ans.join(", ") : "Không có bàn"}
-                    `;
-
-                                button.attr("data-bs-title", title);
-
-                                // Xóa tooltip cũ nếu có
-                                const oldTooltip = bootstrap.Tooltip.getInstance(button[0]);
-                                if (oldTooltip) oldTooltip.dispose();
-
-                                // Tạo tooltip mới
-                                const tooltip = new bootstrap.Tooltip(button[0], {
-                                    html: true
-                                });
-                                tooltip.show();
-
-                                // Ẩn tooltip sau 2  giây
-                                setTimeout(() => {
-                                    tooltip.dispose();
-                                }, 2000);
-                            })
-                            .catch(error => console.error("Lỗi khi lấy dữ liệu đặt bàn:", error));
-                    }
-                });
-
-                $(".selectable-slot").on("mouseleave", function() {
-                    const tooltip = bootstrap.Tooltip.getInstance(this);
-                    if (tooltip) tooltip.dispose();
-                });
-            }
-
-            function renderPagination(paginationData, date) {
-                let paginationHtml = '<nav><ul class="pagination justify-content-center">';
-
-                if (paginationData.prev_page_url) {
-                    paginationHtml +=
-                        `<li class="page-item">
-                <a class="page-link pagination-link" href="#" data-page="${paginationData.current_page - 1}" data-date="${date}">«</a></li>`;
-                }
-
-                for (let i = 1; i <= paginationData.last_page; i++) {
-                    let activeClass = (i === paginationData.current_page) ? 'active' : '';
-                    paginationHtml += `<li class="page-item ${activeClass}">
-                <a class="page-link pagination-link" href="#" data-page="${i}" data-date="${date}">${i}</a></li>`;
-                }
-
-                if (paginationData.next_page_url) {
-                    paginationHtml +=
-                        `<li class="page-item">
-                <a class="page-link pagination-link" href="#" data-page="${paginationData.current_page + 1}" data-date="${date}">»</a></li>`;
-                }
-
-                paginationHtml += '</ul></nav>';
-                $("#pagination-controls").html(paginationHtml);
-            }
-
-            $(document).ready(function() {
-                loadDatBan($("#datePicker").val());
-
-                $("#datePicker").on("change", function() {
-                    loadDatBan($(this).val());
-                });
-
-                $(document).on("click", ".pagination-link", function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    let page = $(this).data("page");
-                    let date = $(this).data("date");
-                    loadDatBan(date, page);
-                });
-            });
-        });
-    </script> --}}
-
 
     <script>
         $(document).ready(function() {
@@ -494,44 +310,6 @@
 
                 updateModalButton();
             });
-
-            // 🔹 Kiểm tra xem có slot nào ±30 phút với thời gian mới không
-            // function isValidNewSlot(newTimeSlot, banId) {
-            //     let [newHour, newMinute] = newTimeSlot.split(":").map(Number);
-            //     let newTime = newHour * 60 + newMinute;
-
-            //     if (!selectedSlots[banId] || selectedSlots[banId].length === 0) {
-            //         return true;
-            //     }
-
-            //     // Nếu slot này đã được chọn, cho phép bỏ chọn
-            //     let existingIndex = selectedSlots[banId].findIndex(slot => slot.timeSlot === newTimeSlot);
-            //     if (existingIndex !== -1) {
-            //         return true;
-            //     }
-
-            //     // Lấy danh sách thời gian đã chọn (đơn vị phút)
-            //     let times = selectedSlots[banId].map(slot => {
-            //         let [h, m] = slot.timeSlot.split(":").map(Number);
-            //         return h * 60 + m;
-            //     });
-
-            //     times.push(newTime);
-            //     times.sort((a, b) => a - b);
-
-            //     // Kiểm tra tổng thời gian liên tiếp
-            //     let totalDuration = times[times.length - 1] - times[0] + 30;
-            //     if (totalDuration > 180) return false;
-
-            //     // Kiểm tra các slot có cách nhau đúng 30 phút
-            //     for (let i = 1; i < times.length; i++) {
-            //         if (times[i] - times[i - 1] !== 30) {
-            //             return false;
-            //         }
-            //     }
-
-            //     return true;
-            // }
 
             function isValidNewSlot(newTimeSlot, banId) {
                 let [newHour, newMinute] = newTimeSlot.split(":").map(Number);
@@ -897,10 +675,6 @@
             background-color: #f8f9fa;
         }
 
-
-        /* .btn-success .btn-danger {
-                                                                                                                                                                                                                                                                                                                                pointer-events: none;
-                                                                                                                                                                                                                                                                                                                            } */
 
         .border-left-rounded {
             border-top-left-radius: 10px;
