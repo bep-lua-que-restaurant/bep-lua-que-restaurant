@@ -92,13 +92,23 @@ $(document).ready(function () {
 
 $(document).ready(function () {
     $(".btn-thong-bao").on("click", function () {
-        let hoaDonId =
-            window.luuIdHoaDon !== null && window.luuIdHoaDon !== undefined
-                ? window.luuIdHoaDon
-                : $("#ten-ban").data("hoaDonId");
+        // Lấy phần tử chứa mã hóa đơn
+        var maHoaDonElement = document.getElementById("maHoaDon");
+        var maHoaDon = maHoaDonElement
+            ? (
+                  maHoaDonElement.value ||
+                  maHoaDonElement.textContent ||
+                  maHoaDonElement.innerText
+              ).trim()
+            : null;
 
-        if (!hoaDonId) {
-            alert("Không tìm thấy hóa đơn cho bàn này!");
+        if (!maHoaDon) {
+            Swal.fire({
+                title: "Lỗi",
+                text: "Không tìm thấy mã hóa đơn cho bàn này!",
+                icon: "error",
+                confirmButtonText: "OK",
+            });
             return;
         }
 
@@ -119,7 +129,7 @@ $(document).ready(function () {
                     url: apiUrlThongBaoBep,
                     method: "POST",
                     data: {
-                        hoa_don_id: hoaDonId,
+                        ma_hoa_don: maHoaDon,
                         _token: $("meta[name='csrf-token']").attr("content"),
                     },
                     success: function (response) {
@@ -127,11 +137,10 @@ $(document).ready(function () {
                             var dingSound = new Audio(dingSoundUrl);
                             dingSound.play();
                             showToast("Đã gửi thông báo đến bếp!", "success");
-
                         } else {
                             Swal.fire({
                                 title: "Thông báo",
-                                text: "Có vẻ như hóa đơn chưa có gì thay đổi, hãy thử thêm món rồi thông báo.",
+                                text: response.message,
                                 icon: "info",
                                 confirmButtonText: "OK",
                             });
@@ -167,4 +176,3 @@ window.Echo.channel("datban-channel").listen("DatBanUpdated", (e) => {
 function capNhatIconBan(danhSachBan) {
     console.log(danhSachBan);
 }
-

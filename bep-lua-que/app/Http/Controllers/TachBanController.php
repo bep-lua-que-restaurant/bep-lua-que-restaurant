@@ -30,20 +30,21 @@ class TachBanController extends Controller
         $idBans = HoaDonBan::where('hoa_don_id', $idHoaDon)->pluck('ban_an_id');
         $bansConLai = BanAn::whereNotIn('id', $idBans)->get();
 
-        // Lấy danh sách món ăn kèm số lượng
+        // Lấy danh sách món ăn kèm số lượng và trạng thái
         $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $idHoaDon)
-            ->select('mon_an_id', 'so_luong')
+            ->select('mon_an_id', 'so_luong', 'trang_thai')
             ->get();
 
         $monAnIds = $chiTietHoaDon->pluck('mon_an_id');
-        $monAn = MonAn::whereIn('id', $monAnIds)->get()->keyBy('id'); // Lưu danh sách món theo ID
+        $monAn = MonAn::whereIn('id', $monAnIds)->get()->keyBy('id');
 
-        // Gộp danh sách món ăn với số lượng
+        // Gộp danh sách món ăn với số lượng và trạng thái
         $danhSachMon = $chiTietHoaDon->map(function ($item) use ($monAn) {
             return [
                 'id_mon' => $item->mon_an_id,
                 'ten_mon' => $monAn[$item->mon_an_id]->ten ?? 'Không xác định',
-                'so_luong' => $item->so_luong
+                'so_luong' => $item->so_luong,
+                'trang_thai' => $item->trang_thai
             ];
         });
 
@@ -56,23 +57,14 @@ class TachBanController extends Controller
     private function generateMaHoaDon()
     {
         do {
-            // Lấy ngày hiện tại theo định dạng YYYYMMDD
             $date = date('Ymd');
-
-            // Tạo một số ngẫu nhiên có 4 chữ số từ uniqid()
             $randomNumber = strtoupper(uniqid());
-
-            // Ghép lại thành mã hóa đơn
-            $maHoaDon = 'HD-' . $date . '-' . substr($randomNumber, -4); // Chỉ lấy 4 ký tự cuối
-
-            // Kiểm tra xem mã này đã tồn tại trong bảng hoa_dons chưa
+            $maHoaDon = 'HD-' . $date . '-' . substr($randomNumber, -4);
             $exists = HoaDon::where('ma_hoa_don', $maHoaDon)->exists();
-        } while ($exists); // Nếu tồn tại, tiếp tục tạo mã mới
+        } while ($exists);
 
         return $maHoaDon;
     }
-
-
 
     public function tachDon(Request $request)
     {
@@ -92,7 +84,7 @@ class TachBanController extends Controller
                 'khach_hang_id' => 0,
                 'phuong_thuc_thanh_toan' => 'tien_mat',
                 'tong_tien' => 0,
-                'tong_tien_truoc_khi_giam' => 0 // Thêm trường tong_tien_truoc_khi_giam
+                'tong_tien_truoc_khi_giam' => 0
             ]);
 
             $banAnMoiIds = is_array($banAnMoiIds) ? $banAnMoiIds : [$banAnMoiIds];
@@ -117,22 +109,33 @@ class TachBanController extends Controller
                     throw new \Exception("Không tìm thấy món ăn với ID: $idMon");
                 }
 
+                // Lấy chi tiết hóa đơn gốc để lấy trạng thái
+                $chiTietMonAn = ChiTietHoaDon::where('hoa_don_id', $hoaDonGoc->id)
+                    ->where('mon_an_id', $idMon)
+                    ->first();
+
+                if (!$chiTietMonAn) {
+                    throw new \Exception("Không tìm thấy chi tiết hóa đơn cho món ăn với ID: $idMon");
+                }
+
                 $donGia = $monAnList[$idMon]->gia;
                 $thanhTien = $donGia * $soLuongTach;
                 $tongTienMoi += $thanhTien;
 
+                // Tạo chi tiết hóa đơn mới với trạng thái từ hóa đơn gốc
                 ChiTietHoaDon::create([
                     'hoa_don_id' => $newHoaDon->id,
                     'mon_an_id' => $idMon,
                     'so_luong' => $soLuongTach,
                     'don_gia' => $donGia,
-                    'thanh_tien' => $thanhTien
+                    'thanh_tien' => $thanhTien,
+                    'trang_thai' => $chiTietMonAn->trang_thai // Gán trạng thái từ hóa đơn gốc
                 ]);
             }
 
             $newHoaDon->update([
                 'tong_tien' => $tongTienMoi,
-                'tong_tien_truoc_khi_giam' => $tongTienMoi // Cập nhật cả tong_tien_truoc_khi_giam
+                'tong_tien_truoc_khi_giam' => $tongTienMoi
             ]);
 
             foreach ($monTach as $mon) {
@@ -180,7 +183,7 @@ class TachBanController extends Controller
             $tongTienGoc = ChiTietHoaDon::where('hoa_don_id', $hoaDonGoc->id)->sum('thanh_tien');
             $hoaDonGoc->update([
                 'tong_tien' => $tongTienGoc,
-                'tong_tien_truoc_khi_giam' => $tongTienGoc // Cập nhật cả tong_tien_truoc_khi_giam
+                'tong_tien_truoc_khi_giam' => $tongTienGoc
             ]);
 
             if ($tongTienGoc == 0) {
@@ -189,7 +192,7 @@ class TachBanController extends Controller
                     'hoa_don_goc' => [
                         'ma_hoa_don' => $hoaDonGoc->ma_hoa_don,
                         'tong_tien' => $hoaDonGoc->tong_tien,
-                        'tong_tien_truoc_khi_giam' => $hoaDonGoc->tong_tien_truoc_khi_giam // Thêm trường này
+                        'tong_tien_truoc_khi_giam' => $hoaDonGoc->tong_tien_truoc_khi_giam
                     ]
                 ]);
             }
@@ -222,18 +225,11 @@ class TachBanController extends Controller
     private function xoaHoaDonRong($hoaDon)
     {
         if ($hoaDon->tong_tien == 0) {
-            // Lấy danh sách bàn từ hóa đơn
             $banIds = HoaDonBan::where('hoa_don_id', $hoaDon->id)->pluck('ban_an_id')->toArray();
-
-            // Cập nhật trạng thái bàn về "trống"
             BanAn::whereIn('id', $banIds)->update(['trang_thai' => 'trong']);
-
-            // Gửi sự kiện cập nhật bàn (nếu cần)
             foreach ($banIds as $banId) {
                 event(new BanAnUpdated(BanAn::find($banId)));
             }
-
-            // Xóa hóa đơn cũ
             $hoaDon->forceDelete();
         }
         $hoaDon->forceDelete();

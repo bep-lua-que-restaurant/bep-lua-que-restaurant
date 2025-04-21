@@ -264,7 +264,6 @@
                 },
                 success: function(response) {
                     let tenMon = response.ten_mon
-                    console.log(response)
                     window.luuIdHoaDon = response.data.id;
                     var maHoaDonElement = document.getElementById("maHoaDon");
                     maHoaDonElement.innerText = response.data.ma_hoa_don;
