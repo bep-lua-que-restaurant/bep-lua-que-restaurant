@@ -31,8 +31,8 @@
             <div class="col-md-4">
                 <select id="filter-status" class="form-control">
                     <option value="">-- Tất cả trạng thái --</option>
-                    <option value="Đang kinh doanh">Đang kinh doanh</option>
-                    <option value="Ngừng kinh doanh">Ngừng kinh doanh</option>
+                    <option value="Đang kinh doanh">Đang sử dụng</option>
+                    <option value="Ngừng kinh doanh">Ngừng sử dụng</option>
                 </select>
             </div>
             <div class="col-md-4">
@@ -49,10 +49,6 @@
                         <div class="btn-group">
 
                             <!-- Nút hiển thị modal -->
-                            {{-- <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                data-bs-target="#modalThemNhanhBanAn">
-                                <i class="fa fa-plus"></i> Thêm nhanh
-                            </button> --}}
 
                             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalThemNhanhBanAn">
                                 <i class="fa fa-plus"></i> Thêm nhanh bàn ăn
@@ -70,10 +66,6 @@
                                 <i class="fa fa-download"></i> Xuất file
                             </a>
 
-                            <!-- Nút Danh sách -->
-                            {{-- <a href="{{ route('ban-an.index') }}" class="btn btn-sm btn-info">
-                                <i class="fa fa-list"></i> Danh sách
-                            </a> --}}
                         </div>
 
                         <!-- Modal Nhập File -->
@@ -147,6 +139,19 @@
             </div>
 
         </div>
+
+        {{-- <div id="pagination"></div> --}}
+        {{-- <div id="pagination" class="mt-3 d-flex justify-content-center"></div> --}}
+
+        <nav aria-label="Pagination" class="mt-4">
+            <ul id="pagination" class="pagination justify-content-center mb-0">
+                <!-- Các nút phân trang sẽ được JS đổ vào đây -->
+            </ul>
+        </nav>
+
+
+
+
     </div>
 
     <script>
@@ -165,87 +170,141 @@
                 };
 
                 html += `
-            <tr>
-                <td>
-                    <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
-                        <input type="checkbox" class="custom-control-input" id="customCheckBox${index}">
-                        <label class="custom-control-label" for="customCheckBox${index}"></label>
-                    </div>
-                </td>
-                <td><strong>${item.id}</strong></td>
-                <td><div class="d-flex align-items-center"><span class="w-space-no">${item.ten_ban}</span></div></td>
-                <td>${statusKD}</td>
-                <td><span>${labels[item.trang_thai] ?? item.trang_thai}</span></td>
-                <td>
-                    <div class="d-flex align-items-center">
-                        <button class="btn btn-info btnChiTietBanAn" data-id="${item.id}"><i class="fa fa-eye"></i></button>
-                        ${!deleted ? `<button class="btn btn-warning btn-sm p-2 m-2 btnEditBanAn" data-id="${item.id}"><i class="fa fa-edit"></i></button>` : ''}
-                        ${deleted
-                            ? `<button class="btn btn-success btn-sm p-2 m-2 btnRestoreBanAn" data-id="${item.id}"><i class="fa fa-recycle"></i></button>`
-                            : (item.trang_thai === 'trong'
-                                ? `<button class="btn btn-danger btn-sm p-2 m-2 btnDeleteBanAn" data-id="${item.id}"><i class="fa fa-trash"></i></button>`
-                                : '')
-                        }
-                    </div>
-                </td>
-            </tr>
-        `;
+                    <tr>
+                        <td>
+                            <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
+                                <input type="checkbox" class="custom-control-input" id="customCheckBox${index}">
+                                <label class="custom-control-label" for="customCheckBox${index}"></label>
+                            </div>
+                        </td>
+                        <td><strong>${item.id}</strong></td>
+                        <td><div class="d-flex align-items-center"><span class="w-space-no">${item.ten_ban}</span></div></td>
+                        <td>${statusKD}</td>
+                        <td><span>${labels[item.trang_thai] ?? item.trang_thai}</span></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <button class="btn btn-info btnChiTietBanAn" data-id="${item.id}"><i class="fa fa-eye"></i></button>
+                                ${!deleted ? `<button class="btn btn-warning btn-sm p-2 m-2 btnEditBanAn" data-id="${item.id}"><i class="fa fa-edit"></i></button>` : ''}
+                                ${deleted
+                                    ? `<button class="btn btn-success btn-sm p-2 m-2 btnRestoreBanAn" data-id="${item.id}"><i class="fa fa-recycle"></i></button>`
+                                    : (item.trang_thai === 'trong'
+                                        ? `<button class="btn btn-danger btn-sm p-2 m-2 btnDeleteBanAn" data-id="${item.id}"><i class="fa fa-trash"></i></button>`
+                                        : '')
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                `;
             });
 
             $('#table-body').html(html);
+            attachEventListeners(); // Gắn lại các sự kiện nếu cần
+        }
 
-            // Gắn lại các sự kiện
-            attachEventListeners(); // ← DÒNG QUAN TRỌNG NÀY
+        function renderPagination(paginationData) {
+            let currentPage = paginationData.current_page;
+            let lastPage = paginationData.last_page;
+            let html = '';
+
+            // Previous
+            html += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <button class="page-link" data-page="${currentPage - 1}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </button>
+        </li>
+    `;
+
+            // Pages
+            for (let page = 1; page <= lastPage; page++) {
+                html += `
+            <li class="page-item ${page === currentPage ? 'active' : ''}">
+                <button class="page-link" data-page="${page}">${page}</button>
+            </li>
+        `;
+            }
+
+            // Next
+            html += `
+        <li class="page-item ${currentPage === lastPage ? 'disabled' : ''}">
+            <button class="page-link" data-page="${currentPage + 1}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </button>
+        </li>
+    `;
+
+            $('#pagination').html(html);
+
+            // Bắt sự kiện khi click
+            $('#pagination .page-link').on('click', function() {
+                let page = $(this).data('page');
+                if (page && !$(this).parent().hasClass('disabled') && !$(this).parent().hasClass('active')) {
+                    fetchPage(page);
+                }
+            });
         }
 
 
-        $('#btn-filter').on('click', function() {
+
+        function fetchPage(page = 1) {
             let ten = $('#filter-ten').val();
             let status = $('#filter-status').val();
 
             $.ajax({
-                url: '{{ route('ban-an.fetch') }}',
+                url: '{{ route('ban-an.fetch') }}?page=' + page,
                 method: 'GET',
                 data: {
                     ten: ten,
                     statusFilter: status
                 },
                 success: function(res) {
-                    renderTable(res.data.data); // Laravel paginate trả về trong `data.data`
-                },
-                error: function(err) {
-                    console.error(err);
-                }
-            });
-        });
-
-        // Gọi mặc định khi load trang
-        $(document).ready(function() {
-            $('#btn-filter').click();
-        });
-
-        function fetchAllData() {
-            $.ajax({
-                url: '{{ route('ban-an.fetch') }}',
-                method: 'GET',
-                data: {}, // không gửi filter gì cả
-                success: function(res) {
-                    renderTable(res.data.data); // render lại bảng
+                    renderTable(res.data.data);
+                    renderPagination(res.data);
                 },
                 error: function(err) {
                     console.error(err);
                 }
             });
         }
+
+        $('#btn-filter').on('click', function() {
+            fetchPage(1); // luôn quay về trang 1 khi filter
+        });
+
+        function fetchAllData() {
+            $.ajax({
+                url: '{{ route('ban-an.fetch') }}',
+                method: 'GET',
+                data: {},
+                success: function(res) {
+                    renderTable(res.data.data);
+                    renderPagination(res.data);
+                },
+                error: function(err) {
+                    console.error(err);
+                }
+            });
+        }
+
+        // Hàm này có thể khai báo các sự kiện nút như xem chi tiết, sửa, xoá,...
+        function attachEventListeners() {
+            $('.btnChiTietBanAn').on('click', function() {
+                let id = $(this).data('id');
+                console.log("Xem chi tiết bàn ăn:", id);
+                // show modal hoặc call ajax chi tiết tại đây
+            });
+
+            // Các sự kiện khác: edit, delete, restore...
+        }
+
+        // Load mặc định khi trang được tải
+        $(document).ready(function() {
+            fetchPage(1);
+        });
     </script>
 
 
-    {{-- @include('admin.search-srcip') --}}
-    <!-- Hiển thị phân trang -->
-    {{-- {{ $data->links('pagination::bootstrap-5') }} --}}
 
-    <!-- Modal có sẵn form -->
-    {{-- <div class="modal fade" id="modalThemNhanhBanAn" tabindex="-1" aria-hidden="true" data-bs-backdrop="false"> --}}
     <div class="modal fade" id="modalThemNhanhBanAn" tabindex="-1" aria-hidden="true" data-bs-backdrop="false">
 
         <div class="modal-dialog">
@@ -347,159 +406,6 @@
         </div>
     </div>
 
-
-    {{-- 
-    <script>
-        $(document).ready(function() {
-
-            $('#formThemNhanhBanAn').on('submit', function(e) {
-                e.preventDefault();
-
-                $.ajax({
-                    url: '{{ route('ban-an.store-quick') }}',
-                    type: 'POST',
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        $('#modalThemNhanhBanAn').modal('hide');
-                        alert('Thêm nhanh thành công!');
-                        location.reload(); // hoặc cập nhật danh sách DOM
-                    },
-                    error: function(xhr) {
-                        alert('Lỗi khi thêm bàn ăn!');
-                    }
-                });
-            });
-
-            // Chi tiết bàn ăn
-            $('.btnChiTietBanAn').on('click', function() {
-                const id = $(this).data('id');
-
-                $.ajax({
-                    url: `/ban-an/ajax/${id}`,
-                    type: 'GET',
-                    success: function(data) {
-                        $('#modal-ban-id').text(data.id);
-                        $('#modal-ten-ban').text(data.ten_ban);
-                        $('#modal-so-ghe').text(data.so_ghe);
-                        $('#modal-mo-ta').text(data.mo_ta ?? 'Không có mô tả');
-                        $('#modal-trang-thai').html(data.deleted_at ?
-                            '<span class="badge bg-danger">Ngừng sử dụng</span>' :
-                            '<span class="badge bg-success">Đang sử dụng</span>'
-                        );
-                        $('#chiTietBanAnModal').modal('show');
-                    },
-                    error: function() {
-                        alert('Không thể lấy thông tin bàn ăn.');
-                    }
-                });
-            });
-
-            // Sửa bàn ăn
-            $('.btnEditBanAn').on('click', function() {
-                const id = $(this).data('id');
-
-                $.ajax({
-                    url: `/ban-an/ajax/${id}`,
-                    type: 'GET',
-                    success: function(data) {
-                        $('#edit-id').val(data.id);
-                        $('#edit-ten-ban').val(data.ten_ban);
-                        $('#edit-so-ghe').val(data.so_ghe);
-                        $('#edit-mo-ta').val(data.mo_ta);
-                        $('#editBanAnModal').modal('show');
-                    },
-                    error: function() {
-                        alert('Không thể lấy dữ liệu bàn ăn.');
-                    }
-                });
-            });
-
-            // Gửi form chỉnh sửa
-            $('#formEditBanAn').on('submit', function(e) {
-                e.preventDefault();
-
-                const id = $('#edit-id').val();
-                const formData = {
-                    ten_ban: $('#edit-ten-ban').val(),
-                    mo_ta: $('#edit-mo-ta').val(),
-                    _token: '{{ csrf_token() }}',
-                    _method: 'PUT'
-                };
-
-                $.ajax({
-                    url: `/ban-an/${id}`,
-                    type: 'POST',
-                    data: formData,
-                    success: function() {
-                        $('#editBanAnModal').modal('hide');
-                        alert('Cập nhật thành công!');
-                        location.reload();
-                    },
-                    error: function(xhr) {
-                        let msg = 'Đã xảy ra lỗi';
-                        if (xhr.responseJSON && xhr.responseJSON.message) {
-                            msg = xhr.responseJSON.message;
-                        }
-                        alert(msg);
-                    }
-                });
-            });
-
-            // Xoá bàn ăn
-            $('.btnDeleteBanAn').on('click', function() {
-                const id = $(this).data('id');
-
-                if (!confirm('Bạn có chắc muốn ngừng sử dụng bàn ăn này không?')) {
-                    return;
-                }
-
-                $.ajax({
-                    url: `/ban-an/${id}`,
-                    type: 'POST',
-                    data: {
-                        _method: 'DELETE',
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function() {
-                        alert('Đã ngừng sử dụng bàn ăn!');
-                        location.reload();
-                    },
-                    error: function(xhr) {
-                        if (xhr.status === 403 || xhr.status === 422) {
-                            alert(xhr.responseJSON.message ?? 'Không thể xoá bàn ăn!');
-                        } else {
-                            alert('Lỗi khi xóa bàn ăn!');
-                        }
-                    }
-                });
-            });
-
-            // Khôi phục bàn ăn
-            $('.btnRestoreBanAn').on('click', function() {
-                const id = $(this).data('id');
-
-                if (!confirm('Bạn có chắc muốn khôi phục bàn ăn này không?')) {
-                    return;
-                }
-
-                $.ajax({
-                    url: `/ban-an/restore/${id}`,
-                    type: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-                        alert(response.message ?? 'Khôi phục thành công!');
-                        location.reload();
-                    },
-                    error: function(xhr) {
-                        alert(xhr.responseJSON.message ?? 'Lỗi khi khôi phục bàn ăn!');
-                    }
-                });
-            });
-
-        });
-    </script> --}}
 
     <script>
         $(document).ready(function() {
