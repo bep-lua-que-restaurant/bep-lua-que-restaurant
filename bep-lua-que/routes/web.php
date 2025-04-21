@@ -279,7 +279,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('loai-nguyen-lieu', LoaiNguyenLieuController::class);
     Route::post('loai-nguyen-lieu/{id}/restore', [LoaiNguyenLieuController::class, 'restore'])->name('loai-nguyen-lieu.restore');
     Route::get('export-loai-nguyen-lieu', [LoaiNguyenLieuController::class, 'export'])->name('loai-nguyen-lieu.export');
-    Route::post('/import-loai-nguyen-lieu', [LoaiNguyenLieuController::class, 'importLoaiNguyenLieu'])->name('loai-nguyen-lieu.import');
+    Route::post('/import-loai-nguyen-lieu', [LoaiNguyenLieuController::class, 'import'])->name('loai-nguyen-lieu.import');
 
     // nguyên liệu 
     // Route::get('/nguyen-lieu/export', [NguyenLieuController::class, 'exportNguyenLieu']);
