@@ -86,19 +86,19 @@ class NguyenLieuController extends Controller
     {
         $ngay = $request->input('ngay') ? Carbon::parse($request->input('ngay')) : Carbon::today();
         $loaiId = $request->input('loai_nguyen_lieu_id');
-    
+
         // Lấy ID nguyên liệu theo loại (có thể đã xóa mềm)
         $nguyenLieuIds = NguyenLieu::withTrashed()
             ->when($loaiId, fn($q) => $q->where('loai_nguyen_lieu_id', $loaiId))
             ->pluck('id');
-    
+
         $nguyenLieus = NguyenLieu::withTrashed()
             ->whereIn('id', $nguyenLieuIds)
             ->get();
-    
+
         $duLieu = $nguyenLieus->map(function ($nl) use ($ngay) {
             $id = $nl->id;
-    
+
             // Tổng nhập trong ngày (phân loại)
             $nhapTuBep = DB::table('chi_tiet_phieu_nhap_khos')
                 ->join('phieu_nhap_khos', 'chi_tiet_phieu_nhap_khos.phieu_nhap_kho_id', '=', 'phieu_nhap_khos.id')
@@ -107,7 +107,7 @@ class NguyenLieuController extends Controller
                 ->where('phieu_nhap_khos.loai_phieu', 'nhap_tu_bep')
                 ->where('chi_tiet_phieu_nhap_khos.nguyen_lieu_id', $id)
                 ->sum('so_luong_nhap');
-    
+
             $nhapTuNCC = DB::table('chi_tiet_phieu_nhap_khos')
                 ->join('phieu_nhap_khos', 'chi_tiet_phieu_nhap_khos.phieu_nhap_kho_id', '=', 'phieu_nhap_khos.id')
                 ->where('phieu_nhap_khos.trang_thai', 'da_duyet')
@@ -115,7 +115,7 @@ class NguyenLieuController extends Controller
                 ->where('phieu_nhap_khos.loai_phieu', 'nhap_tu_ncc')
                 ->where('chi_tiet_phieu_nhap_khos.nguyen_lieu_id', $id)
                 ->sum('so_luong_nhap');
-    
+
             // Tổng xuất trong ngày (phân loại)
             $xuatBep = DB::table('chi_tiet_phieu_xuat_khos')
                 ->join('phieu_xuat_khos', 'chi_tiet_phieu_xuat_khos.phieu_xuat_kho_id', '=', 'phieu_xuat_khos.id')
@@ -124,7 +124,7 @@ class NguyenLieuController extends Controller
                 ->where('phieu_xuat_khos.loai_phieu', 'xuat_bep')
                 ->where('chi_tiet_phieu_xuat_khos.nguyen_lieu_id', $id)
                 ->sum('so_luong');
-    
+
             $xuatTraHang = DB::table('chi_tiet_phieu_xuat_khos')
                 ->join('phieu_xuat_khos', 'chi_tiet_phieu_xuat_khos.phieu_xuat_kho_id', '=', 'phieu_xuat_khos.id')
                 ->where('phieu_xuat_khos.trang_thai', 'da_duyet')
@@ -132,7 +132,7 @@ class NguyenLieuController extends Controller
                 ->where('phieu_xuat_khos.loai_phieu', 'xuat_tra_hang')
                 ->where('chi_tiet_phieu_xuat_khos.nguyen_lieu_id', $id)
                 ->sum('so_luong');
-    
+
             $xuatHuy = DB::table('chi_tiet_phieu_xuat_khos')
                 ->join('phieu_xuat_khos', 'chi_tiet_phieu_xuat_khos.phieu_xuat_kho_id', '=', 'phieu_xuat_khos.id')
                 ->where('phieu_xuat_khos.trang_thai', 'da_duyet')
@@ -140,7 +140,7 @@ class NguyenLieuController extends Controller
                 ->where('phieu_xuat_khos.loai_phieu', 'xuat_huy')
                 ->where('chi_tiet_phieu_xuat_khos.nguyen_lieu_id', $id)
                 ->sum('so_luong');
-    
+
             return [
                 'id' => $id,
                 'nguyen_lieu' => $nl->ten_nguyen_lieu,
@@ -156,10 +156,10 @@ class NguyenLieuController extends Controller
                 'da_ngung_su_dung' => $nl->trashed(),
             ];
         });
-    
+
         return response()->json($duLieu);
     }
-    
+
 
 
 
@@ -176,114 +176,94 @@ class NguyenLieuController extends Controller
 
 
     public function HanSuDung(Request $request)
-    {
-        try {
-            $today = Carbon::now();
+{
+    try {
+        $today = Carbon::now();
 
-            // Lấy giá trị ngày và loại nguyên liệu từ request
-            $ngay = $request->input('ngay');
-            $loaiNguyenLieuId = $request->input('loai_nguyen_lieu_id');  // Lấy loại nguyên liệu từ form
-            $ngay = $ngay ? Carbon::parse($ngay) : $today;  // Nếu không có ngày, sử dụng ngày hiện tại
+        // Lọc loại nguyên liệu nếu có
+        $loaiNguyenLieuId = $request->input('loai_nguyen_lieu_id');
 
-            // Không eager load quan hệ lỗi
-            $dsNhap = ChiTietPhieuNhapKho::with('nguyenLieu')
+        $nguyenLieusQuery = NguyenLieu::query();
+        if ($loaiNguyenLieuId) {
+            $nguyenLieusQuery->where('loai_nguyen_lieu_id', $loaiNguyenLieuId);
+        }
+
+        $nguyenLieus = $nguyenLieusQuery->get();
+        $results = [];
+
+        foreach ($nguyenLieus as $nguyenLieu) {
+            // Lấy danh sách chi tiết phiếu nhập thuộc phiếu đã duyệt
+            $dsNhap = ChiTietPhieuNhapKho::where('nguyen_lieu_id', $nguyenLieu->id)
+                ->whereHas('phieuNhapKho', function ($query) {
+                    $query->where('trang_thai', 'da_duyet');
+                })
                 ->where('so_luong_nhap', '>', 0)
                 ->whereNotNull('han_su_dung')
                 ->get();
 
-            // Lọc theo ngày
-            $dsNhap = $dsNhap->filter(function ($item) use ($ngay) {
-                $hanSuDung = Carbon::parse($item->han_su_dung);
-                return $hanSuDung >= $ngay;
-            });
+            if ($dsNhap->isEmpty()) continue;
 
-            // Lọc theo loại nguyên liệu nếu có
-            if ($loaiNguyenLieuId) {
-                $dsNhap = $dsNhap->filter(function ($item) use ($loaiNguyenLieuId) {
-                    return $item->nguyenLieu->loai_nguyen_lieu_id == $loaiNguyenLieuId;
-                });
-            }
+            $tongTon = $nguyenLieu->so_luong_ton ?? 0;
+            $conHan = 0;
+            $hetHan = 0;
+            $tongTheoLo = 0;
 
-            // Nhóm theo nguyên liệu
-            $grouped = $dsNhap->groupBy('nguyen_lieu_id');
+            $loNhap = [];
 
-            $results = [];
+            foreach ($dsNhap as $item) {
+                $soLuong = $item->so_luong_nhap;
+                if ($soLuong <= 0) continue;
 
-            foreach ($grouped as $nguyenLieuId => $danhSachNhap) {
-                $firstItem = $danhSachNhap->first();
+                $han = Carbon::parse($item->han_su_dung);
+                $ngayNhap = Carbon::parse($item->created_at)->startOfDay();
 
-                if (!$firstItem || !$firstItem->nguyenLieu) {
-                    continue;
+                // Cộng vào tổng theo lô
+                $tongTheoLo += $soLuong;
+
+                if ($han->lt($today)) {
+                    $hetHan += $soLuong;
+                } else {
+                    $conHan += $soLuong;
                 }
 
-                $nguyenLieu = $firstItem->nguyenLieu;
-                $tenNguyenLieu = $nguyenLieu->ten_nguyen_lieu;
-                $donVi = $danhSachNhap->pluck('don_vi_nhap')->filter()->first() ?? '';
-
-                $conHan = 0;
-                $sapHetHan = 0;
-                $hetHan = 0;
-                $tongTon = 0;
-                $hanGanNhat = null;
-
-                $loNhap = [];
-
-                foreach ($danhSachNhap as $item) {
-                    $han = Carbon::parse($item->han_su_dung);
-                    $ngayNhap = Carbon::parse($item->created_at); // hoặc $item->ngay_nhap
-                    $soLuongTon = $item->so_luong_nhap;
-                
-                    if ($soLuongTon <= 0) continue;
-                
-                    $tongTon += $soLuongTon;
-                
-                    // Tình trạng
-                    if ($han->gt($today->copy()->addDays(7))) {
-                        $conHan += $soLuongTon;
-                    } elseif ($han->between($today, $today->copy()->addDays(7))) {
-                        $sapHetHan += $soLuongTon;
-                    } elseif ($han->lt($today)) {
-                        $hetHan += $soLuongTon;
-                    }
-                
-                    // Dùng cho biểu đồ
-                    $loNhap[] = [
-                        'so_luong' => $soLuongTon,
-                        'ngay_nhap' => $ngayNhap->format('d/m/Y'),
-                        'han_su_dung' => $han->format('d/m/Y'),
-                    ];
-                }
-                
-               
-                
-                
-
-                // $ngayConLai = $hanGanNhat ? $today->diffInDays($hanGanNhat) : 'Đã hết hạn';
-
-                $results[] = [
-                    'nguyen_lieu' => $tenNguyenLieu,
-                    'so_luong_ton' => $tongTon,
-                    'so_ngay_con_lai' => $hanGanNhat ? $today->diffInDays($hanGanNhat) : 'Đã hết hạn',
-                    'con_han' => $conHan,
-                    'sap_het_han' => $sapHetHan,
-                    'het_han' => $hetHan,
-                    'don_vi' => $donVi,
-                    'lo_nhap' => $loNhap, // 🔥 thêm dữ liệu theo từng lô
+                $loNhap[] = [
+                    'so_luong' => number_format($soLuong, 2),
+                    'ngay_nhap' => $ngayNhap->format('d/m/Y'),
+                    'han_su_dung' => $han->format('d/m/Y'),
+                    'trang_thai' => $han->lt($today) ? 'Hết hạn' : 'Còn hạn',
                 ];
             }
 
-            return response()->json(['data' => $results]);
-        } catch (\Exception $e) {
-            Log::error('Lỗi khi xử lý HanSuDung: ' . $e->getMessage(), [
-                'line' => $e->getLine(),
-                'file' => $e->getFile(),
-            ]);
+            $phanTramConDungDuoc = $tongTon > 0 ? round(($conHan / $tongTon) * 100) : 0;
 
-            return response()->json([
-                'error' => 'Lỗi server khi kiểm tra hạn sử dụng.'
-            ], 500);
+            $results[] = [
+                'nguyen_lieu' => $nguyenLieu->ten_nguyen_lieu,
+                'so_luong_ton' => number_format($tongTon, 2),
+                'tong_so_luong_theo_lo' => number_format($tongTheoLo, 2),
+                'con_han' => $conHan,
+                'het_han' => $hetHan,
+                'don_vi' => $nguyenLieu->don_vi_ton,
+                'phan_tram_con_dung_duoc' => $phanTramConDungDuoc,
+                'lo_nhap' => $loNhap,
+            ];
         }
+
+        return response()->json(['data' => $results]);
+    } catch (\Exception $e) {
+        Log::error('Lỗi khi xử lý HanSuDung: ' . $e->getMessage(), [
+            'line' => $e->getLine(),
+            'file' => $e->getFile(),
+        ]);
+
+        return response()->json([
+            'error' => 'Lỗi server khi kiểm tra hạn sử dụng.'
+        ], 500);
     }
+}
+
+    
+
+
 
 
 
