@@ -95,7 +95,7 @@
                         name: 'ma_phieu'
                     },
 
-                    
+
                     {
                         data: 'ngay_xuat',
                         name: 'ngay_xuat'
@@ -183,7 +183,7 @@
                             </tr>
                             <tr>
                                 <th>Ghi chú:</th>
-                                <td>${d.ghi_chu}</td>
+                                    <td>${d.ghi_chu ? d.ghi_chu : 'Không có'}</td>
                             </tr>  
                              <tr>
                                 <th>Tổng tiền:</th>

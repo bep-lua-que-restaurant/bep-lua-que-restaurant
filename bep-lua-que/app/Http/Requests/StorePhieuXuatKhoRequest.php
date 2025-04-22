@@ -76,6 +76,7 @@ class StorePhieuXuatKhoRequest extends FormRequest
             'nhan_vien_id.exists' => 'Nhân viên không tồn tại.',
 
             'nguoi_nhan.required_if' => 'Vui lòng nhập tên người nhận khi loại phiếu là xuất bếp hoặc xuất huỷ.',
+            'nguoi_nhan.string' => 'Tên người nhận phải là một chuỗi.',
         ];
     }
 }

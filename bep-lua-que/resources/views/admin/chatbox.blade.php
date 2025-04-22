@@ -25,10 +25,12 @@
         }
 
         #chatbox {
+            
             position: fixed;
             bottom: 80px;
             right: 15px;
-            width: 300px;
+            width: 400px;
+            height: 500px;
             background: white;
             border-radius: 8px;
             box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
@@ -38,6 +40,7 @@
             display: flex;
             flex-direction: column;
         }
+
 
         #chatbox header {
             background: #007bff;
@@ -60,11 +63,12 @@
         }
 
         #messages {
-            max-height: 250px;
+            max-height: 350px;
             overflow-y: auto;
             padding: 8px;
             flex: 1;
         }
+
 
         .message {
             margin-bottom: 5px;
@@ -210,7 +214,7 @@
             });
         }
 
-       
+
         function setMessage(text) {
             $("#messageInput").val(text);
             sendMessage();

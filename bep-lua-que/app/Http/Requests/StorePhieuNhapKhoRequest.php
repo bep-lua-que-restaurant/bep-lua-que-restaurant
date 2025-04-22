@@ -151,7 +151,7 @@ class StorePhieuNhapKhoRequest extends FormRequest
             'ma_phieu.required' => 'Mã phiếu nhập kho là bắt buộc.',
             'ma_phieu.unique' => 'Mã phiếu nhập kho đã tồn tại.',
 
-            'nha_cung_cap_id.required' => 'Nhà cung cấp là bắt buộc.',
+            'nha_cung_cap_id.required_if' => 'Nhà cung cấp là bắt buộc khi loại phiếu là nhập từ nhà cung cấp.',
             'nhan_vien_id.required' => 'Nhân viên là bắt buộc.',
             'loai_phieu.required' => 'Loại phiếu là bắt buộc.',
 
@@ -159,7 +159,8 @@ class StorePhieuNhapKhoRequest extends FormRequest
             'ten_nguyen_lieus.required' => 'Tên nguyên liệu là bắt buộc.',
             'ten_nguyen_lieus.*.required' => 'Tên nguyên liệu không được để trống.',
 
-            'loai_nguyen_lieu_ids.required' => 'Loại nguyên liệu là bắt buộc.',
+            'loai_nguyen_lieu_ids.*.required' => 'Loại nguyên liệu không được để trống.',
+
             'loai_nguyen_lieu_ids.*.exists' => 'Loại nguyên liệu không tồn tại.',
 
             'nguyen_lieu_ids.*.exists' => 'Nguyên liệu không tồn tại.',

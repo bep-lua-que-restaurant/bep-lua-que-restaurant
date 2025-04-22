@@ -3,7 +3,7 @@
 @section('title', 'Tạo Phiếu Xuất Kho')
 
 @section('content')
-    @if ($errors->any())
+    {{-- @if ($errors->any())
         <div class="alert alert-danger">
             <strong>Đã xảy ra lỗi:</strong>
             <ul class="mb-0">
@@ -12,7 +12,7 @@
                 @endforeach
             </ul>
         </div>
-    @endif
+    @endif --}}
     <form action="{{ route('phieu-xuat-kho.store') }}" method="POST">
         @csrf
 
