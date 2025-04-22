@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ class ChatController extends Controller
 {
     public function index()
     {
-        return view  ('admin.chatbox');
+        return view('admin.chatbox');
     }
 
     public function guiTinNhan(Request $request)
@@ -92,10 +93,18 @@ class ChatController extends Controller
             } else {
                 $phanHoi = "Top món ăn được đặt nhiều nhất (tính từ trước đến nay):\n";
 
-                foreach ($monAnYeuThich as $mon) {
-                    $phanHoi .= "- " . $mon->ten . " (Đã đặt: " . $mon->tong_so_luong . " lần)\n";
+                $phanHoi = '<table class="table table-bordered table-sm">';
+                $phanHoi .= '<thead><tr><th>#</th><th>Món ăn</th><th>Số lần đã đặt</th></tr></thead><tbody>';
+
+                foreach ($monAnYeuThich as $index => $mon) {
+                    $phanHoi .= '<tr>';
+                    $phanHoi .= '<td>' . ($index + 1) . '</td>';
+                    $phanHoi .= '<td>' . $mon->ten . '</td>';
+                    $phanHoi .= '<td>' . $mon->tong_so_luong . '</td>';
+                    $phanHoi .= '</tr>';
                 }
-                
+
+                $phanHoi .= '</tbody></table>';
             }
         }
 
