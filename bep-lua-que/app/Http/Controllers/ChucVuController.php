@@ -12,9 +12,6 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ChucVuController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $searchInput = $request->input('searchInput');
@@ -22,12 +19,10 @@ class ChucVuController extends Controller
     
         $query = ChucVu::query();
     
-        // Apply search filter
         if ($searchInput) {
             $query->where('ten_chuc_vu', 'like', '%' . $searchInput . '%');
         }
     
-        // Apply status filter
         if ($statusFilter && $statusFilter !== 'Tất cả') {
             if ($statusFilter === 'Đang hoạt động') {
                 $query->whereNull('deleted_at');
@@ -39,64 +34,39 @@ class ChucVuController extends Controller
         return view('admin.chucvu.list', compact('data')); 
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('admin.chucvu.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreChucVuRequest $request)
     {
-        //
         $data = $request->validated();
         ChucVu::create($data);
 
         return redirect()->route('chuc-vu.index')->with('success', 'Thêm chức vụ thành công!');
     }
 
-    
-
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
-{
-    $chucVu = ChucVu::withTrashed()->findOrFail($id);
-    return view('admin.chucvu.detail', compact('chucVu'));
-}
+    {
+        $chucVu = ChucVu::withTrashed()->findOrFail($id);
+        return view('admin.chucvu.detail', compact('chucVu'));
+    }
 
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id)
-{
-    $chucVu = ChucVu::withTrashed()->findOrFail($id);
-    return view('admin.chucvu.edit', compact('chucVu'));
-}
+    {
+        $chucVu = ChucVu::withTrashed()->findOrFail($id);
+        return view('admin.chucvu.edit', compact('chucVu'));
+    }
 
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateChucVuRequest $request, ChucVu $chucVu)
     {
         $data = $request->validated();
-
-        // Cập nhật dữ liệu
         $chucVu->update($data);
 
-        return back()->with('success', 'Cập nhật dịch vụ thành công!');
+        return back()->with('success', 'Cập nhật chức vụ thành công!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(ChucVu $chucVu)
     {
         $chucVu->delete();
@@ -109,12 +79,11 @@ class ChucVuController extends Controller
         $chucVu = ChucVu::withTrashed()->findOrFail($id);
         $chucVu->restore();
 
-        return redirect()->route('chuc-vu.index')->with('success', 'Khôi phục chúc vụ thành công!');
+        return redirect()->route('chuc-vu.index')->with('success', 'Khôi phục chức vụ thành công!');
     }
 
     public function export()
     {
-        // Xuất file Excel với tên "DanhMucMonAn.xlsx"
         return Excel::download(new ChucVuExport, 'ChucVu.xlsx');
     }
 
