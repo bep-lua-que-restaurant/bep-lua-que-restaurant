@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DatBan;
 use Illuminate\Http\Request;
 use App\Models\TinNhan;
 use App\Models\BanAn;
@@ -105,6 +106,51 @@ class ChatController extends Controller
                 }
 
                 $phanHoi .= '</tbody></table>';
+            }
+        }
+        // ==== LỊCH SỬ ĐẶT BÀN ====
+        if (preg_match('/lịch sử đặt bàn\s+(.+)/u', $noiDung, $matches)) {
+            $tenBan = trim($matches[1]);
+            $banAn = BanAn::where('ten_ban', $tenBan)->first();
+
+            if ($banAn) {
+                $datBans = DatBan::where('ban_an_id', $banAn->id)
+                    ->orderByDesc('thoi_gian_den')
+                    ->take(5) // Lấy 5 lịch sử gần nhất
+                    ->get();
+
+                if ($datBans->isEmpty()) {
+                    $phanHoi = "Bàn '{$tenBan}' chưa có lịch sử đặt.";
+                } else {
+                    $phanHoi = "Lịch sử đặt bàn '{$tenBan}':\n";
+                    $phanHoi .= '<table class="table table-bordered table-sm">';
+                    $phanHoi .= '<thead><tr><th>#</th><th>Thời gian đặt</th><th>Trạng thái</th></tr></thead><tbody>';
+                    $trangThaiMap = [
+                        'da_thanh_toan' => 'Đã thanh toán',
+                        'dang_xu_ly' => 'Đang xử lý',
+                        'xac_nhan' => 'Chờ xác nhận',
+                        'da_huy' => 'Huỷ',
+                       
+                        // thêm nếu có trạng thái khác
+                    ];
+                    
+                    foreach ($datBans as $index => $dat) {
+                        $trangThaiKey = mb_strtolower($dat->trang_thai, 'UTF-8');
+                        $trangThaiFormatted = $trangThaiMap[$trangThaiKey] ?? ucfirst(str_replace('_', ' ', $trangThaiKey));
+                    
+                        $phanHoi .= '<tr>';
+                        $phanHoi .= '<td>' . ($index + 1) . '</td>';
+                        $phanHoi .= '<td>' . Carbon::parse($dat->thoi_gian_den)->format('H:i d-m-Y') . '</td>';
+                        $phanHoi .= '<td>' . $trangThaiFormatted . '</td>';
+                        $phanHoi .= '</tr>';
+                    }
+                    
+                    
+
+                    $phanHoi .= '</tbody></table>';
+                }
+            } else {
+                $phanHoi = "Không tìm thấy bàn có tên '{$tenBan}'.";
             }
         }
 
