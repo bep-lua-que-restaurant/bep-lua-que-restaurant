@@ -253,17 +253,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
     Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
-    // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
 
-    // // Đăng nhập phân quyền
-
-    // Route::middleware(['auth'])->group(function () {
-
-    //     Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
-    // });
-    // Route::get('/quan-li', [QuanLyController::class, 'index'])->name('admin.dashboard');
-    Route::get('/bep', [BepController::class, 'index'])->name('bep.dashboard');
-    Route::put('/bep/update/{id}', [BepController::class, 'updateTrangThai']);
 
     // kho
     //loại nguyên liệu

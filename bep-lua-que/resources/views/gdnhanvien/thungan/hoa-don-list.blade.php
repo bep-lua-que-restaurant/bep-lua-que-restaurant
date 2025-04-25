@@ -1109,6 +1109,7 @@
                         document.getElementById("amountGiven").value = "";
                         document.getElementById("changeToReturn").value = "0 VND";
                     } else {
+                        console.log("Error message:", response.message);
                         showToast("Thanh toán không thành công.", "danger");
                     }
                 },
