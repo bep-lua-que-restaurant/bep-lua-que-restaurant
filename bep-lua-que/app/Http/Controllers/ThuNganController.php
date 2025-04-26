@@ -372,40 +372,54 @@ class ThuNganController extends Controller
             return response()->json(['success' => false, 'message' => 'Bàn không hợp lệ.']);
         }
 
-        // Tính tổng giá tiền của các món bị xóa và cập nhật HoaDon
+        // Tìm hóa đơn
+        $hoaDonTheoMa = HoaDon::where('ma_hoa_don', $ma_hoa_don_ban)->first();
+        if (!$hoaDonTheoMa) {
+            return response()->json(['success' => false, 'message' => 'Hóa đơn không tồn tại.']);
+        }
+
+        // Tính tổng tiền gốc của hóa đơn trước khi xử lý xóa món
+        $chiTietHoaDons = ChiTietHoaDon::where('hoa_don_id', $hoaDonTheoMa->id)
+            ->with('monAn')
+            ->get();
+        $tongTienGoc = $chiTietHoaDons->sum(function ($chiTiet) {
+            return $chiTiet->monAn ? $chiTiet->monAn->gia * $chiTiet->so_luong : 0;
+        });
+
+        // Xử lý xóa món ăn chờ
         if (is_array($xoa_mon_cho) && count($xoa_mon_cho) > 0) {
-            // Lấy các bản ghi ChiTietHoaDon trước khi xóa
-            $chiTietHoaDons = ChiTietHoaDon::whereIn('id', $xoa_mon_cho)->get();
+            $chiTietHoaDonsToDelete = ChiTietHoaDon::whereIn('id', $xoa_mon_cho)
+                ->with('monAn')
+                ->get();
 
             // Tính tổng giá tiền của các món bị xóa
-            $totalDeletedPrice = $chiTietHoaDons->sum(function ($chiTiet) {
-                return $chiTiet->don_gia * $chiTiet->so_luong;
+            $totalDeletedPrice = $chiTietHoaDonsToDelete->sum(function ($chiTiet) {
+                return $chiTiet->monAn ? $chiTiet->monAn->gia * $chiTiet->so_luong : 0;
             });
 
-            // Cập nhật tổng tiền trong HoaDon cho hóa đơn liên quan
+            // Cập nhật tổng tiền
             if ($totalDeletedPrice > 0) {
-                $hoaDonTheoMa = HoaDon::where('ma_hoa_don', $ma_hoa_don_ban)->first();
-                if ($hoaDonTheoMa) {
-                    $hoaDonTheoMa->update([
-                        'tong_tien_truoc_giam' => $hoaDonTheoMa->tong_tien_truoc_giam - $totalDeletedPrice,
-                        'tong_tien' => $hoaDonTheoMa->tong_tien - $totalDeletedPrice,
-                    ]);
-                }
+                $tongTienMoi = $hoaDonTheoMa->tong_tien - $totalDeletedPrice;
+                $tongTienTruocKhiGiam = $hoaDonTheoMa->id_ma_giam
+                    ? ($tongTienGoc - $totalDeletedPrice) // Có mã giảm giá: giữ tổng tiền gốc
+                    : $tongTienMoi; // Không có mã giảm giá: bằng tổng tiền mới
+
+                $hoaDonTheoMa->update([
+                    'tong_tien' => $tongTienMoi,
+                    'tong_tien_truoc_khi_giam' => $tongTienTruocKhiGiam,
+                ]);
             }
 
             // Xóa các bản ghi ChiTietHoaDon
-            ChiTietHoaDon::whereIn('id', $xoa_mon_cho)->forceDelete();
+            ChiTietHoaDon::whereIn('id', $xoa_mon_cho)->delete(); // Sử dụng soft delete
         }
 
+        // Lấy thông tin bàn và hóa đơn bàn
         $banAn = BanAn::find($banAnId);
-        $hoaDonTheoMa = HoaDon::where('ma_hoa_don', $ma_hoa_don_ban)->first();
-
-        // Lấy ra bàn dựa theo hóa đơn
         $banTheoHoaDon = HoaDonBan::where('hoa_don_id', $hoaDonTheoMa->id)->get();
-
-        // Lấy ra id bàn
         $banIds = $banTheoHoaDon->pluck('ban_an_id')->toArray();
-        // Lấy ra mã đặt bàn của bàn này
+
+        // Lấy mã đặt bàn
         $maDatBans = DatBan::whereIn('ban_an_id', $banIds)
             ->where('trang_thai', 'xac_nhan')
             ->pluck('ma_dat_ban')
@@ -415,21 +429,27 @@ class ThuNganController extends Controller
             return response()->json(['success' => false, 'message' => 'Không tìm thấy mã đặt bàn.']);
         }
 
-        // Tìm hóa đơn bàn liên quan đến bàn này có trạng thái 'đang xử lý'
+        // Tìm hóa đơn bàn
         $hoaDonBan = HoaDonBan::where('ban_an_id', $banAnId)
             ->where('trang_thai', 'dang_xu_ly')
             ->first();
 
         if (!$hoaDonBan) {
-            return response()->json(['success' => false, 'message' => 'Không tìm thấy hóa đơn.']);
+            return response()->json(['success' => false, 'message' => 'Không tìm thấy hóa đơn bàn.']);
         }
 
-        HoaDon::where('ma_hoa_don', $ma_hoa_don_ban)->update([
+        // Cập nhật thông tin thanh toán và kiểm tra mã giảm giá
+        $tongTienTruocKhiGiam = $hoaDonTheoMa->id_ma_giam
+            ? $tongTienGoc // Có mã giảm giá: giữ tổng tiền gốc
+            : $hoaDonTheoMa->tong_tien; // Không có mã giảm giá: bằng tổng tiền
+
+        $hoaDonTheoMa->update([
             'mo_ta' => $chiTietThanhToan,
-            'phuong_thuc_thanh_toan' => $phuongThucThanhToan
+            'phuong_thuc_thanh_toan' => $phuongThucThanhToan,
+            'tong_tien_truoc_khi_giam' => $tongTienTruocKhiGiam,
         ]);
 
-        // Cập nhật trạng thái tất cả bàn liên quan
+        // Cập nhật trạng thái bàn
         $dsBanCungHoaDon = HoaDonBan::withTrashed()
             ->where('hoa_don_id', $hoaDonBan->hoa_don_id)
             ->where('trang_thai', 'dang_xu_ly')
@@ -443,12 +463,12 @@ class ThuNganController extends Controller
             }
         }
 
-        // Cập nhật trạng thái tất cả hóa đơn liên quan
+        // Cập nhật trạng thái hóa đơn bàn
         HoaDonBan::where('hoa_don_id', $hoaDonBan->hoa_don_id)
             ->where('trang_thai', 'dang_xu_ly')
             ->update(['trang_thai' => 'da_thanh_toan']);
 
-        // Nếu `khach_hang_id` = 0, tạo khách mới
+        // Xử lý khách hàng
         if ($khachHangId == 0) {
             $khachHang = KhachHang::create([
                 'ho_ten' => 'Khách lẻ',
@@ -462,9 +482,8 @@ class ThuNganController extends Controller
 
         $khachHang = KhachHang::find($khachHangId);
 
-        // Cập nhật trạng thái tất cả các bản ghi có cùng `ma_dat_ban` thành 'da_thanh_toan'
+        // Cập nhật trạng thái đặt bàn
         $updateDatBan = DatBan::whereIn('ma_dat_ban', $maDatBans)->get();
-
         foreach ($updateDatBan as $datBan) {
             $datBan->update([
                 'trang_thai' => 'da_thanh_toan',
@@ -472,16 +491,12 @@ class ThuNganController extends Controller
             ]);
         }
 
-        $hoaDon = HoaDon::find($hoaDonBan->hoa_don_id);
-
-        return response()->json(
-            [
-                'success' => true,
-                'message' => 'Cập nhật trạng thái thành công.',
-                'hoaDon' => $hoaDon,
-                'khachHang' => $khachHang,
-            ]
-        );
+        return response()->json([
+            'success' => true,
+            'message' => 'Cập nhật trạng thái thành công.',
+            'hoaDon' => $hoaDonTheoMa,
+            'khachHang' => $khachHang,
+        ]);
     }
 
     public function addCustomer(Request $request)
