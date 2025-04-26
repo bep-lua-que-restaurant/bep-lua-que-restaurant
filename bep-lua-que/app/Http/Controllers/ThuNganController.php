@@ -367,68 +367,108 @@ class ThuNganController extends Controller
         $phuongThucThanhToan = $request->input('phuong_thuc_thanh_toan');
         $ma_hoa_don_ban = $request->input('ma_hoa_don_cua_ban');
         $xoa_mon_cho = $request->input('xoa_mon_cho');
+
         if (!$banAnId) {
             return response()->json(['success' => false, 'message' => 'Bàn không hợp lệ.']);
         }
 
-
-        // // // Nếu là mảng và có ít nhất 1 phần tử thì mới xoá
-        if (is_array($xoa_mon_cho) && count($xoa_mon_cho) > 0) {
-            ChiTietHoaDon::whereIn('id', $xoa_mon_cho)->forceDelete();
+        // Tìm hóa đơn
+        $hoaDonTheoMa = HoaDon::where('ma_hoa_don', $ma_hoa_don_ban)->first();
+        if (!$hoaDonTheoMa) {
+            return response()->json(['success' => false, 'message' => 'Hóa đơn không tồn tại.']);
         }
 
+        // Tính tổng tiền gốc của hóa đơn trước khi xử lý xóa món
+        $chiTietHoaDons = ChiTietHoaDon::where('hoa_don_id', $hoaDonTheoMa->id)
+            ->with('monAn')
+            ->get();
+        $tongTienGoc = $chiTietHoaDons->sum(function ($chiTiet) {
+            return $chiTiet->monAn ? $chiTiet->monAn->gia * $chiTiet->so_luong : 0;
+        });
+
+        // Xử lý xóa món ăn chờ
+        if (is_array($xoa_mon_cho) && count($xoa_mon_cho) > 0) {
+            $chiTietHoaDonsToDelete = ChiTietHoaDon::whereIn('id', $xoa_mon_cho)
+                ->with('monAn')
+                ->get();
+
+            // Tính tổng giá tiền của các món bị xóa
+            $totalDeletedPrice = $chiTietHoaDonsToDelete->sum(function ($chiTiet) {
+                return $chiTiet->monAn ? $chiTiet->monAn->gia * $chiTiet->so_luong : 0;
+            });
+
+            // Cập nhật tổng tiền
+            if ($totalDeletedPrice > 0) {
+                $tongTienMoi = $hoaDonTheoMa->tong_tien - $totalDeletedPrice;
+                $tongTienTruocKhiGiam = $hoaDonTheoMa->id_ma_giam
+                    ? ($tongTienGoc - $totalDeletedPrice) // Có mã giảm giá: giữ tổng tiền gốc
+                    : $tongTienMoi; // Không có mã giảm giá: bằng tổng tiền mới
+
+                $hoaDonTheoMa->update([
+                    'tong_tien' => $tongTienMoi,
+                    'tong_tien_truoc_khi_giam' => $tongTienTruocKhiGiam,
+                ]);
+            }
+
+            // Xóa các bản ghi ChiTietHoaDon
+            ChiTietHoaDon::whereIn('id', $xoa_mon_cho)->delete(); // Sử dụng soft delete
+        }
+
+        // Lấy thông tin bàn và hóa đơn bàn
         $banAn = BanAn::find($banAnId);
-        $hoaDonTheoMa = HoaDon::where('ma_hoa_don', $ma_hoa_don_ban)->first();
-
-        // lấy ra bàn dựa theo hóa đơn
         $banTheoHoaDon = HoaDonBan::where('hoa_don_id', $hoaDonTheoMa->id)->get();
-
-        // lấy ra id bàn
         $banIds = $banTheoHoaDon->pluck('ban_an_id')->toArray();
-        // lấy ra mã đặt bàn của bàn này
+
+        // Lấy mã đặt bàn
         $maDatBans = DatBan::whereIn('ban_an_id', $banIds)
             ->where('trang_thai', 'xac_nhan')
             ->pluck('ma_dat_ban')
-            ->toArray(); // Chuyển về mảng nếu cần
+            ->toArray();
 
         if (!$maDatBans) {
             return response()->json(['success' => false, 'message' => 'Không tìm thấy mã đặt bàn.']);
         }
 
-        // Tìm hóa đơn bàn liên quan đến bàn này có trạng thái 'đang xử lý'
+        // Tìm hóa đơn bàn
         $hoaDonBan = HoaDonBan::where('ban_an_id', $banAnId)
             ->where('trang_thai', 'dang_xu_ly')
             ->first();
 
         if (!$hoaDonBan) {
-            return response()->json(['success' => false, 'message' => 'Không tìm thấy hóa đơn.']);
+            return response()->json(['success' => false, 'message' => 'Không tìm thấy hóa đơn bàn.']);
         }
 
-        HoaDon::where('ma_hoa_don', $ma_hoa_don_ban)->update([
+        // Cập nhật thông tin thanh toán và kiểm tra mã giảm giá
+        $tongTienTruocKhiGiam = $hoaDonTheoMa->id_ma_giam
+            ? $tongTienGoc // Có mã giảm giá: giữ tổng tiền gốc
+            : $hoaDonTheoMa->tong_tien; // Không có mã giảm giá: bằng tổng tiền
+
+        $hoaDonTheoMa->update([
             'mo_ta' => $chiTietThanhToan,
-            'phuong_thuc_thanh_toan' => $phuongThucThanhToan
+            'phuong_thuc_thanh_toan' => $phuongThucThanhToan,
+            'tong_tien_truoc_khi_giam' => $tongTienTruocKhiGiam,
         ]);
 
-        // Cập nhật trạng thái tất cả bàn liên quan
+        // Cập nhật trạng thái bàn
         $dsBanCungHoaDon = HoaDonBan::withTrashed()
             ->where('hoa_don_id', $hoaDonBan->hoa_don_id)
             ->where('trang_thai', 'dang_xu_ly')
             ->pluck('ban_an_id');
 
         foreach ($dsBanCungHoaDon as $banId) {
-            $banAn = BanAn::find($banId); // Truy vấn một lần
+            $banAn = BanAn::find($banId);
             if ($banAn) {
                 $banAn->update(['trang_thai' => 'trong']);
-                event(new BanAnUpdated($banAn)); // Gửi sự kiện realtime
+                event(new BanAnUpdated($banAn));
             }
         }
 
-        // Cập nhật trạng thái tất cả hóa đơn liên quan
+        // Cập nhật trạng thái hóa đơn bàn
         HoaDonBan::where('hoa_don_id', $hoaDonBan->hoa_don_id)
             ->where('trang_thai', 'dang_xu_ly')
             ->update(['trang_thai' => 'da_thanh_toan']);
 
-        // Nếu `khach_hang_id` = 0, tạo khách mới
+        // Xử lý khách hàng
         if ($khachHangId == 0) {
             $khachHang = KhachHang::create([
                 'ho_ten' => 'Khách lẻ',
@@ -441,33 +481,22 @@ class ThuNganController extends Controller
         }
 
         $khachHang = KhachHang::find($khachHangId);
-        // Cập nhật tất cả các bản ghi có cùng `ma_dat_ban` thành 'da_thanh_toan'
-        // $updateDatBan = DatBan::where('ma_dat_ban', $maDatBans)->get();
 
-
-        // $datBanList = DatBan::whereIn('ban_an_id', $dsBanCungHoaDon)->where('trang_thai', 'xac_nhan')->get();
-        $updateDatBan = DatBan::where('ma_dat_ban', $maDatBans)->get();
-
+        // Cập nhật trạng thái đặt bàn
+        $updateDatBan = DatBan::whereIn('ma_dat_ban', $maDatBans)->get();
         foreach ($updateDatBan as $datBan) {
             $datBan->update([
                 'trang_thai' => 'da_thanh_toan',
                 'khach_hang_id' => $khachHangId ?: null,
             ]);
         }
-        // 🔥 Phát sự kiện **sau khi đã hoàn thành** cập nhật dữ liệu
-        // event(new DatBanUpdated($datBanList));
 
-
-        $hoaDon = HoaDon::find($hoaDonBan->hoa_don_id);
-
-        return response()->json(
-            [
-                'success' => true,
-                'message' => 'Cập nhật trạng thái thành công.',
-                'hoaDon' => $hoaDon,
-                'khachHang' => $khachHang,
-            ]
-        );
+        return response()->json([
+            'success' => true,
+            'message' => 'Cập nhật trạng thái thành công.',
+            'hoaDon' => $hoaDonTheoMa,
+            'khachHang' => $khachHang,
+        ]);
     }
 
     public function addCustomer(Request $request)
@@ -718,25 +747,25 @@ class ThuNganController extends Controller
         $lyDoHuy = $request->ly_do ?? 'Không rõ lý do';
         $forceDelete = $request->force_delete ?? false;
         $checkStatusOnly = $request->check_status_only ?? false;
-    
+
         // 1. Lấy chi tiết hóa đơn
         $chiTiet = ChiTietHoaDon::find($chiTietId);
         if (!$chiTiet) {
             return response()->json(['error' => 'Chi tiết hóa đơn không tồn tại!'], 404);
         }
-    
+
         // Lấy thông tin món ăn từ bảng mon_ans để dự phòng
         $monAn = MonAn::find($chiTiet->mon_an_id);
         if (!$monAn) {
             return response()->json(['error' => 'Món ăn không tồn tại!'], 404);
         }
-    
+
         // 2. Lấy hóa đơn
         $hoaDon = HoaDon::find($chiTiet->hoa_don_id);
         if (!$hoaDon) {
             return response()->json(['error' => 'Hóa đơn không tồn tại!'], 404);
         }
-    
+
         // 3. Nếu chỉ kiểm tra trạng thái (lần gọi đầu tiên)
         if ($checkStatusOnly) {
             return response()->json([
@@ -745,16 +774,16 @@ class ThuNganController extends Controller
                 'message' => $chiTiet->trang_thai === 'dang_nau' ? 'Món này đang được nấu, bạn có chắc chắn muốn hủy không?' : ($chiTiet->trang_thai === 'hoan_thanh' ? 'Món này đã hoàn thành, bạn có chắc chắn muốn hủy không?' : 'Món này đang chờ xác nhận.'),
             ], 200);
         }
-    
+
         // 4. Xử lý xóa món (khi người dùng đã xác nhận)
         if ($chiTiet->trang_thai === 'cho_xac_nhan' || $forceDelete) {
             // Lưu trạng thái ban đầu trước khi xóa
             $trangThaiBanDau = $chiTiet->trang_thai;
-    
+
             // Gửi broadcast và xóa bản ghi
             broadcast(new XoaMonAn($chiTiet));
             $chiTiet->forceDelete();
-    
+
             // Nếu trạng thái ban đầu không phải "cho_xac_nhan", lưu vào bảng mon_bi_huys
             if ($trangThaiBanDau !== 'cho_xac_nhan') {
                 MonBiHuy::create([
@@ -771,16 +800,16 @@ class ThuNganController extends Controller
                 'message' => $chiTiet->trang_thai === 'dang_nau' ? 'Món này đang được nấu, bạn có chắc chắn muốn hủy không?' : ($chiTiet->trang_thai === 'hoan_thanh' ? 'Món này đã hoàn thành, bạn có chắc chắn muốn hủy không?' : 'Món này đang chờ xác nhận.'),
             ], 200);
         }
-    
+
         // 5. Cập nhật tổng tiền
         $tongTien = ChiTietHoaDon::where('hoa_don_id', $hoaDon->id)
             ->sum(DB::raw('so_luong * don_gia'));
-    
+
         $hoaDon->update(['tong_tien' => $tongTien]);
         $hoaDon->load('chiTietHoaDons');
-    
+
         broadcast(new HoaDonUpdated($hoaDon))->toOthers();
-    
+
         return response()->json([
             'success' => true,
             'tong_tien' => $tongTien,
@@ -923,7 +952,7 @@ class ThuNganController extends Controller
             });
 
         $tongTien = $chiTietHoaDon->sum('thanh_tien');
-        $tongTienSauGiam = $hoaDon->tong_tien;
+        $tongTienSauGiam = $tongTien;
         $today = Carbon::today();
         $maGiamGias = MaGiamGia::where('min_order_value', '<=', $tongTien)
             ->where('start_date', '<=', $today)

@@ -120,9 +120,11 @@ $(document).ready(function () {
                         <tr data-id-mon="${item.mon_an_id}" id="mon-${item.id}">
 <td class="small">${index}</td>
 <td class="small">
- <i class="bi bi-pencil-square text-primary toggle-ghi-chu" style="cursor: pointer;" data-id="${
-     item.id
- }"></i>
+${
+    item.trang_thai === "cho_xac_nhan"
+        ? `<i class="bi bi-pencil-square text-primary toggle-ghi-chu" style="cursor: pointer;" data-id="${item.id}"></i>`
+        : ""
+}
 
 
     <!-- Thêm điều kiện để thay đổi màu tên món tùy theo trạng thái -->
@@ -317,7 +319,7 @@ $(document).ready(function () {
                 maHoaDon: maHoaDon,
             },
             success: function (response) {
-                // console.log("tien trc giam" + response.tong_tien);
+                console.log("khách cần trả" + response.tong_tien_sau_giam);
                 let ma_hoa_don = response.data;
                 let divMaGiamGia = document.querySelector(".wrap-ma-giam-gia");
                 let maGiamGia = response.ma_giam_gia; // chứa thông tin mã giảm
@@ -815,7 +817,7 @@ window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (data) => {
 
 window.Echo.channel("bep-channel").listen(".mon-moi-duoc-them", (data) => {
     // Tìm tất cả các món có nút xóa hoặc nút tăng/giảm trước khi xóa
-    $(".xoa-mon, .xoa-mon-an, .tang-soluong, .giam-soluong").each(function () {
+    $(".xoa-mon, .xoa-mon-an, .tang-soluong, .giam-soluong, .toggle-ghi-chu").each(function () {
         let row = $(this).closest("tr"); // Lấy dòng (tr) chứa nút
         let statusCell = row.find("td:eq(1)");
         // Đổi màu trạng thái thành "chờ chế biến"
@@ -824,8 +826,7 @@ window.Echo.channel("bep-channel").listen(".mon-moi-duoc-them", (data) => {
     });
 
     // Xóa nút xóa và nút tăng/giảm
-    $(".xoa-mon, .xoa-mon-an").remove();
-    $(".tang-soluong, .giam-soluong").remove();
+    $(".xoa-mon, .xoa-mon-an, .tang-soluong, .giam-soluong, .toggle-ghi-chu").remove();
 
     // Gộp các dòng có cùng monAnId và class text-danger
     let processedMonAnIds = new Set(); // Lưu danh sách monAnId đã xử lý
