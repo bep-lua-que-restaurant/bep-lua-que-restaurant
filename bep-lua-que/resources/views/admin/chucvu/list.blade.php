@@ -56,16 +56,16 @@
                             <table id="chucvuTable" class="table table-responsive-md">
                                 <thead>
                                     <tr>
-                                        <th><strong>ID</strong></th>
+                                        <th><strong>STT</strong></th>
                                         <th><strong>Tên chức vụ</strong></th>
                                         <th><strong>Trạng thái</strong></th>
                                         <th><strong>Hành động</strong></th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($data as $item)
+                                    @foreach ($data as $index => $item)
                                         <tr>
-                                            <td><strong>{{ $item->id }}</strong></td>
+                                            <td><strong>{{ $data->firstItem() + $index }}</strong></td>
                                             <td>{{ $item->ten_chuc_vu }}</td>
                                             <td>
                                                 @if ($item->deleted_at)
@@ -101,6 +101,9 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                            <div id="pagination">
+                                {{ $data->links('pagination::bootstrap-5') }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -132,29 +135,28 @@
             </div>
         </div>
     </div>
-
     <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-    <script>
-        $(document).ready(function () {
-            var table = $('#chucvuTable').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json' // Ngôn ngữ tiếng Việt
-                },
-                pageLength: 10,
-                lengthMenu: [5, 10, 25, 50],
-                order: [[0, 'desc']],
-                columnDefs: [
-                    { orderable: false, targets: 3 } // Vô hiệu hóa sắp xếp trên cột Hành động
-                ]
-            });
+{{--    <script>--}}
+{{--        $(document).ready(function () {--}}
+{{--            var table = $('#chucvuTable').DataTable({--}}
+{{--                language: {--}}
+{{--                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json' // Ngôn ngữ tiếng Việt--}}
+{{--                },--}}
+{{--                pageLength: 10,--}}
+{{--                lengthMenu: [5, 10, 25, 50],--}}
+{{--                order: [[0, 'desc']],--}}
+{{--                columnDefs: [--}}
+{{--                    { orderable: false, targets: 3 } // Vô hiệu hóa sắp xếp trên cột Hành động--}}
+{{--                ]--}}
+{{--            });--}}
 
-            // Tìm kiếm tùy chỉnh
-            $('#customSearch').on('keyup', function () {
-                table.search(this.value).draw();
-            });
-        });
-    </script>
+{{--            // Tìm kiếm tùy chỉnh--}}
+{{--            $('#customSearch').on('keyup', function () {--}}
+{{--                table.search(this.value).draw();--}}
+{{--            });--}}
+{{--        });--}}
+{{--    </script>--}}
 @endsection

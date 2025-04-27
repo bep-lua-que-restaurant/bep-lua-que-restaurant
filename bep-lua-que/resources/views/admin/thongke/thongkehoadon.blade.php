@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-    Thống kê số lượng khách
+    Thống kê số lượng hóa đơn
 @endsection
 
 @section('content')

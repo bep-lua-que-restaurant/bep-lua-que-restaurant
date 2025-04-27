@@ -65,8 +65,8 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-responsive-md">
-                                <thead>
+                            <table id="nhaCungCapTable" class="table table-responsive-md">
+                            <thead>
                                 <tr>
                                     <th style="width:50px;">
                                         <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
@@ -75,7 +75,7 @@
                                             <label class="custom-control-label" for="checkAll"></label>
                                         </div>
                                     </th>
-                                    <th><strong>ID</strong></th>
+                                    <th><strong>STT</strong></th>
                                     <th><strong>Tên </strong></th>
                                     <th><strong>Trạng thái</strong></th>
                                     <th><strong>Hành động</strong></th>
@@ -92,7 +92,7 @@
                                                        for="checkbox{{ $item->id }}"></label>
                                             </div>
                                         </td>
-                                        <td><strong>{{ $item->id }}</strong></td>
+                                        <td><strong>{{ $data->firstItem() + $index }}</strong></td>
                                         <td class="ten-nha-cung-cap">{{ $item->ten_nha_cung_cap }}</td>
                                         <td class="trang-thai-nha-cung-cap">
                                             @if ($item->deleted_at != null)
@@ -137,8 +137,10 @@
                                     </tr>
                                 @endforeach
                                 </tbody>
-
                             </table>
+                            <div id="pagination">
+                                {{ $data->links('pagination::bootstrap-5') }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -177,9 +179,30 @@
     @include('admin.search-srcip')
     <!-- Hiển thị phân trang -->
 {{--        {{ $data->links('pagination::bootstrap-5') }}--}}
-    <div class="d-flex justify-content-center">
-        {{ $data->links('pagination::bootstrap-5') }}
-    </div>
+    <script>
+        $(document).ready(function() {
+            // Lắng nghe sự kiện chuyển trang
+            $(document).on('click', '.pagination a', function(e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+
+                // Gửi yêu cầu AJAX
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        // Cập nhật nội dung bảng
+                        $('#employeeTable').html($(response.html).find('#employeeTable').html());
+                        // Cập nhật phân trang
+                        $('#pagination').html($(response.pagination).html());
+                    },
+                    error: function() {
+                        alert('Lỗi khi tải dữ liệu!');
+                    }
+                });
+            });
+        });
+    </script>
 @endsection
 
 
