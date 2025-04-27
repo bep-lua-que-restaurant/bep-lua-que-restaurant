@@ -21,7 +21,7 @@ class DanhMucMonAnController extends Controller
     {
         if ($request->ajax()) {
             $query = DanhMucMonAn::query()->withTrashed();
-
+    
             return DataTables::of($query)
                 ->addIndexColumn() // ✅ Tạo cột STT
                 ->addColumn('trang_thai', function ($row) {
@@ -31,9 +31,13 @@ class DanhMucMonAnController extends Controller
                 })
                 ->addColumn('action', function ($row) {
                     $html = '<div class="d-flex align-items-center">';
-
-                    $html .= '<button type="button" class="btn btn-warning btn-sm p-2 m-2 btn-edit" data-id="' . $row->id . '" data-bs-toggle="modal" data-bs-target="#editModal"><i class="fa fa-edit"></i></button>';
-
+    
+                    // Chỉ hiển thị nút sửa nếu chưa bị xóa mềm
+                    if (!$row->deleted_at) {
+                        $html .= '<button type="button" class="btn btn-warning btn-sm p-2 m-2 btn-edit" data-id="' . $row->id . '" data-bs-toggle="modal" data-bs-target="#editModal"><i class="fa fa-edit"></i></button>';
+                    }
+    
+                    // Nút khôi phục hoặc xóa
                     if ($row->deleted_at) {
                         $html .= '<form action="' . route('danh-muc-mon-an.restore', $row->id) . '" method="POST" style="display:inline;">' . csrf_field()
                             . '<button type="submit" class="btn btn-success btn-sm p-2 m-2" title="Khôi phục"><i class="fa fa-recycle"></i></button></form>';
@@ -41,15 +45,14 @@ class DanhMucMonAnController extends Controller
                         $html .= '<form action="' . route('danh-muc-mon-an.destroy', $row->id) . '" method="POST" style="display:inline;">' . csrf_field() . method_field('DELETE')
                             . '<button type="submit" class="btn btn-danger btn-sm p-2 m-2" title="Xóa"><i class="fa fa-trash"></i></button></form>';
                     }
-
+    
                     $html .= '</div>';
                     return $html;
                 })
                 ->rawColumns(['trang_thai', 'action']) // ✅ Giữ nguyên HTML
-
                 ->make(true);
         }
-
+    
         return view('admin.danhmuc.list', [
             'route' => route('danh-muc-mon-an.index'),
             'tableId' => 'list-container',
