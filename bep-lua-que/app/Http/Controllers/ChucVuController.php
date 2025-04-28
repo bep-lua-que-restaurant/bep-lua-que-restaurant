@@ -16,13 +16,13 @@ class ChucVuController extends Controller
     {
         $searchInput = $request->input('searchInput');
         $statusFilter = $request->input('statusFilter');
-    
+
         $query = ChucVu::query();
-    
+
         if ($searchInput) {
             $query->where('ten_chuc_vu', 'like', '%' . $searchInput . '%');
         }
-    
+
         if ($statusFilter && $statusFilter !== 'Tất cả') {
             if ($statusFilter === 'Đang hoạt động') {
                 $query->whereNull('deleted_at');
@@ -31,7 +31,7 @@ class ChucVuController extends Controller
             }
         }
         $data = $query->withTrashed()->latest('id')->paginate(10);
-        return view('admin.chucvu.list', compact('data')); 
+        return view('admin.chucvu.list', compact('data'));
     }
 
     public function create()

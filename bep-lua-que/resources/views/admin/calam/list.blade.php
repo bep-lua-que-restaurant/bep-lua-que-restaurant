@@ -99,8 +99,8 @@
                                                     <label class="custom-control-label" for="customCheckBox2"></label>
                                                 </div>
                                             </td> --}}
-                                            <td><strong>{{ $index + 1 }}</strong></td>
 
+                                            <td><strong>{{ $data->firstItem() + $index }}</strong></td>
 
                                             <td class="ten-ca">
                                                 <div class="d-flex align-items-center"><span

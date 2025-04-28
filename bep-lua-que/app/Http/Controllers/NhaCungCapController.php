@@ -26,6 +26,7 @@ class NhaCungCapController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('admin.nhacungcap.index', compact('data', 'searchInputId'))->render(),
+                'pagination' => (string) $data->links('pagination::bootstrap-5') // Trả về phân trang
             ]);
         }
 

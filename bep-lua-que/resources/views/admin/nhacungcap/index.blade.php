@@ -24,15 +24,15 @@
             {{-- @include('admin.filter') --}}
             <div class="col-lg-12 my-4">
                 <div class="d-flex justify-content-between align-items-center">
-                    <!-- Ô tìm kiếm nhân viên -->
+                    <!-- Ô tìm kiếm nhà cung cấp -->
                     <div class="input-group">
                         <input style="height: 45px; margin-right: 10px" type="text" id="searchInput" class="form-control border-1"
-                               placeholder="Tìm kiếm theo tên" onkeyup="filterEmployees()">
+                               placeholder="Tìm kiếm theo tên" onkeyup="locNhaCungCap()">
                     </div>
 
                     <!-- Lựa chọn trạng thái làm việc -->
                     <div>
-                        <select style="padding: 11px 0 11px 0; width: 142px" id="statusFilter" class="btn btn-primary btn-sm" onchange="filterEmployees()">
+                        <select style="padding: 11px 0 11px 0; width: 142px" id="statusFilter" class="btn btn-primary btn-sm" onchange="locNhaCungCap()">
                             <option value=""hidden>Lọc theo trạng thái</option>
                             <option value="Đang hoạt động">Đang hoạt động</option>
                             <option value="Đã ngừng hoạt động">Ngừng hoạt động</option>
@@ -65,8 +65,8 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-responsive-md">
-                                <thead>
+                            <table id="nhaCungCapTable" class="table table-responsive-md">
+                            <thead>
                                 <tr>
                                     <th style="width:50px;">
                                         <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
@@ -75,7 +75,7 @@
                                             <label class="custom-control-label" for="checkAll"></label>
                                         </div>
                                     </th>
-                                    <th><strong>ID</strong></th>
+                                    <th><strong>STT</strong></th>
                                     <th><strong>Tên </strong></th>
                                     <th><strong>Trạng thái</strong></th>
                                     <th><strong>Hành động</strong></th>
@@ -92,7 +92,7 @@
                                                        for="checkbox{{ $item->id }}"></label>
                                             </div>
                                         </td>
-                                        <td><strong>{{ $item->id }}</strong></td>
+                                        <td><strong>{{ $data->firstItem() + $index }}</strong></td>
                                         <td class="ten-nha-cung-cap">{{ $item->ten_nha_cung_cap }}</td>
                                         <td class="trang-thai-nha-cung-cap">
                                             @if ($item->deleted_at != null)
@@ -109,26 +109,26 @@
                                                 <a href="{{ route('nha-cung-cap.show', $item->id) }}" class="btn btn-info btn-sm p-2 m-2">
                                                     <i class="fa fa-eye"></i>
                                                 </a>
-                                                <a href="{{ route('nha-cung-cap.edit', $item->id) }}" class="btn btn-warning btn-sm p-2 m-2">
-                                                    <i class="fa fa-edit "></i>
-                                                </a>
+                                                @if ($item->deleted_at == null)
+                                                    <a href="{{ route('nha-cung-cap.edit', $item->id) }}" class="btn btn-warning btn-sm p-2 m-2">
+                                                        <i class="fa fa-edit"></i>
+                                                    </a>
+                                                @endif
                                                 @if ($item->deleted_at)
-                                                    <form action="{{ route('nha-cung-cap.restore', $item->id) }}" method="POST"
-                                                          style="display:inline;">
+                                                    <form action="{{ route('nha-cung-cap.restore', $item->id) }}" method="POST" style="display:inline;">
                                                         @csrf
                                                         <button type="submit" onclick="return confirm('Bạn có chắc muốn khôi phục mục này không?')"
                                                                 class="btn btn-success btn-sm p-2 m-2" title="Khôi phục">
-                                                            <i class="fa fa-recycle"></i> {{-- Icon khôi phục --}}
+                                                            <i class="fa fa-recycle"></i>
                                                         </button>
                                                     </form>
                                                 @else
-                                                    <form action="{{ route('nha-cung-cap.destroy', $item->id) }}" method="POST"
-                                                          style="display:inline;">
+                                                    <form action="{{ route('nha-cung-cap.destroy', $item->id) }}" method="POST" style="display:inline;">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" onclick="return confirm('Bạn muốn ngừng hoạt động mục này chứ?')"
                                                                 class="btn btn-danger btn-sm p-2 m-2" title="Xóa">
-                                                            <i class="fa fa-trash"></i> {{-- Icon xóa --}}
+                                                            <i class="fa fa-trash"></i>
                                                         </button>
                                                     </form>
                                                 @endif
@@ -137,8 +137,10 @@
                                     </tr>
                                 @endforeach
                                 </tbody>
-
                             </table>
+                            <div id="pagination">
+                                {{ $data->links('pagination::bootstrap-5') }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -177,9 +179,30 @@
     @include('admin.search-srcip')
     <!-- Hiển thị phân trang -->
 {{--        {{ $data->links('pagination::bootstrap-5') }}--}}
-    <div class="d-flex justify-content-center">
-        {{ $data->links('pagination::bootstrap-5') }}
-    </div>
+    <script>
+        $(document).ready(function() {
+            // Lắng nghe sự kiện chuyển trang
+            $(document).on('click', '.pagination a', function(e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+
+                // Gửi yêu cầu AJAX
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        // Cập nhật nội dung bảng
+                        $('#employeeTable').html($(response.html).find('#employeeTable').html());
+                        // Cập nhật phân trang
+                        $('#pagination').html($(response.pagination).html());
+                    },
+                    error: function() {
+                        alert('Lỗi khi tải dữ liệu!');
+                    }
+                });
+            });
+        });
+    </script>
 @endsection
 
 

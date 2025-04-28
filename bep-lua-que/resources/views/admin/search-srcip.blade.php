@@ -1,5 +1,5 @@
 <script>
-    function filterEmployees() {
+    function locNhaCungCap() {
         const input = document.getElementById("searchInput").value.toLowerCase();
         const statusFilter = document.getElementById("statusFilter").value;
         const rows = document.querySelectorAll(".nha-cung-cap-row");
