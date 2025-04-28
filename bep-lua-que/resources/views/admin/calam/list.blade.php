@@ -55,8 +55,8 @@
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
                             <!-- Nút Nhập file sẽ hiển thị Modal -->
-                            <a href="{{ route('ca-lam.import') }}" class="btn btn-sm btn-secondary"
-                               data-bs-toggle="modal" data-bs-target="#importFileModal">
+                            <a href="{{ route('ca-lam.import') }}" class="btn btn-sm btn-secondary" data-bs-toggle="modal"
+                                data-bs-target="#importFileModal">
                                 <i class="fa fa-upload"></i> Nhập file
                             </a>
                             <a href="{{ route('ca-lam.export') }}" class="btn btn-sm btn-success">
@@ -99,7 +99,9 @@
                                                     <label class="custom-control-label" for="customCheckBox2"></label>
                                                 </div>
                                             </td> --}}
-                                            <td><strong>{{ $item->id }}</strong></td>
+                                            <td><strong>{{ $index + 1 }}</strong></td>
+
+
                                             <td class="ten-ca">
                                                 <div class="d-flex align-items-center"><span
                                                         class="w-space-no">{{ $item->ten_ca }}</span></div>
@@ -119,7 +121,7 @@
                                                     $startTime = \Carbon\Carbon::parse($item->gio_bat_dau);
                                                     $endTime = \Carbon\Carbon::parse($item->gio_ket_thuc);
                                                     $duration = $startTime->diff($endTime);
-
+                                                    
                                                     // Tổng thời gian làm việc (giờ và phút)
                                                     $totalHours = $duration->h;
                                                     $totalMinutes = $duration->i;
@@ -148,16 +150,19 @@
                                                         class="btn btn-info btn-sm m-1" title="Xem chi tiết">
                                                         <i class="fa fa-eye"></i>
                                                     </a>
-                                                    <a href="{{ route('ca-lam.edit', $item->id) }}"
-                                                        class="btn btn-warning btn-sm m-1" title="Chỉnh sửa">
-                                                        <i class="fa fa-edit"></i>
-                                                    </a>
+                                                    @if (!$item->deleted_at)
+                                                        <a href="{{ route('ca-lam.edit', $item->id) }}"
+                                                            class="btn btn-warning btn-sm m-1" title="Chỉnh sửa">
+                                                            <i class="fa fa-edit"></i>
+                                                        </a>
+                                                    @endif
+
                                                     @if ($item->deleted_at)
                                                         <form action="{{ route('ca-lam.restore', $item->id) }}"
                                                             method="POST" class="d-inline" style="margin: 0;">
                                                             @csrf
                                                             <button type="submit"
-                                                                onclick="return confirm('Bạn có chắc muốn khôi phục này không?')"
+                                                                onclick="return confirm('Bạn có chắc muốn khôi phục mục này không?')"
                                                                 class="btn btn-success btn-sm m-1" title="Khôi phục">
                                                                 <i class="fa fa-recycle"></i>
                                                             </button>
@@ -211,7 +216,8 @@
                         @csrf
                         <div class="mb-3">
                             <label for="fileUpload" class="form-label">Chọn file</label>
-                            <input style="height: auto" type="file" name="file" id="fileUpload" class="form-control" required>
+                            <input style="height: auto" type="file" name="file" id="fileUpload"
+                                class="form-control" required>
                         </div>
                     </form>
                 </div>

@@ -87,18 +87,23 @@ class CaLamController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCaLamRequest $request, CaLam $caLam)
+
+
+    public function update(UpdateCaLamRequest $request, $id)
     {
-        $data = $request->validated();
+    $caLam = CaLam::withTrashed()->findOrFail($id); // lấy được cả bản xóa mềm
 
-        $data['gio_bat_dau'] = Carbon::createFromFormat('H:i', $data['gio_bat_dau'])->format('H:i:s');
-        $data['gio_ket_thuc'] = Carbon::createFromFormat('H:i', $data['gio_ket_thuc'])->format('H:i:s');
+    $data = $request->validated();
 
-        // Cập nhật dữ liệu
-        $caLam->update($data);
+    $data['gio_bat_dau'] = Carbon::createFromFormat('H:i', $data['gio_bat_dau'])->format('H:i:s');
+    $data['gio_ket_thuc'] = Carbon::createFromFormat('H:i', $data['gio_ket_thuc'])->format('H:i:s');
 
-        return back()->with('success', 'Cập nhật danh mục thành công!');
+    // Chỉ update, không restore
+    $caLam->update($data);
+
+    return back()->with('success', 'Cập nhật ca làm thành công!');
     }
+
 
     /**
      * Remove the specified resource from storage.
