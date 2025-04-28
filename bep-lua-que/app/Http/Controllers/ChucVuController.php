@@ -59,13 +59,16 @@ class ChucVuController extends Controller
         return view('admin.chucvu.edit', compact('chucVu'));
     }
 
-    public function update(UpdateChucVuRequest $request, ChucVu $chucVu)
+    public function update(UpdateChucVuRequest $request, $id)
     {
-        $data = $request->validated();
-        $chucVu->update($data);
+    $chucVu = ChucVu::withTrashed()->findOrFail($id);
 
-        return back()->with('success', 'Cập nhật chức vụ thành công!');
+    $data = $request->validated();
+    $chucVu->update($data);
+
+    return back()->with('success', 'Cập nhật chức vụ thành công!');
     }
+
 
     public function destroy(ChucVu $chucVu)
     {
