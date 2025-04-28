@@ -48,15 +48,17 @@ class PhieuNhapKhoController extends Controller
                     return $row->nhanvien ? $row->nhanVien->ho_ten : 'Chưa có';
                 })
                   // Thêm tên nhân viên vào dữ liệu trả về
-                ->addColumn('action', function ($row) {
+                  ->addColumn('action', function ($row) {
                     $html = '<div class="d-flex align-items-center">';
-
+                
                     // Nút xem chi tiết
                     $html .= '<a href="' . route('phieu-nhap-kho.show', $row->id) . '" class="btn btn-info btn-sm p-2 m-2" title="Xem chi tiết"><i class="fa fa-eye"></i></a>';
-
-                    // Nút chỉnh sửa
-                    $html .= '<a href="' . route('phieu-nhap-kho.edit', $row->id) . '" class="btn btn-warning btn-sm p-2 m-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>';
-
+                
+                    // Chỉ hiện nút chỉnh sửa nếu chưa bị xoá
+                    if (!$row->deleted_at) {
+                        $html .= '<a href="' . route('phieu-nhap-kho.edit', $row->id) . '" class="btn btn-warning btn-sm p-2 m-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>';
+                    }
+                
                     // Nút xóa hoặc khôi phục tùy theo trạng thái soft delete
                     if ($row->deleted_at) {
                         $html .= '<form action="' . route('phieu-nhap-kho.restore', $row->id) . '" method="POST" style="display:inline;">'
@@ -70,6 +72,8 @@ class PhieuNhapKhoController extends Controller
                             . '<button type="submit" class="btn btn-danger btn-sm p-2 m-2" title="Xóa"><i class="fa fa-trash"></i></button>'
                             . '</form>';
                     }
+                
+                   
 
                     $html .= '</div>';
                     return $html;

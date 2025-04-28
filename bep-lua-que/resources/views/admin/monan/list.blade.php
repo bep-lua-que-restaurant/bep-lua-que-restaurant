@@ -51,7 +51,7 @@
                             <table class="table table-responsive-md" id="{{ $tableId }}">
                                 <thead>
                                     <tr>
-                                        <th><strong>ID</strong></th>
+                                        <th><strong>STT</strong></th>
                                         <th><strong>Tên món</strong></th>
                                         <th><strong>Danh mục</strong></th>
                                         <th><strong>Giá</strong></th>
@@ -86,8 +86,10 @@
                 serverSide: true,
                 ajax: '{{ $route }}',
                 columns: [{
-                        data: 'id',
-                        name: 'id'
+                    data: 'DT_RowIndex', // ✅ Số thứ tự
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'ten',

@@ -50,7 +50,7 @@
                             <table class="table table-striped table-bordered" id="{{ $tableId }}">
                                 <thead>
                                     <tr>
-                                        <th><strong>ID</strong></th>
+                                        <th><strong>STT</strong></th>
                                         <th><strong>Mã phiếu</strong></th>
                                         <th><strong>Nhân viên</strong></th>
                                         <th><strong>Ngày nhập</strong></th>
@@ -77,8 +77,10 @@
                 serverSide: true,
                 ajax: '{{ $route }}',
                 columns: [{
-                        data: 'id',
-                        name: 'id'
+                    data: 'DT_RowIndex', // ✅ Số thứ tự
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'ma_phieu',
