@@ -31,26 +31,32 @@ class LoaiNguyenLieuController extends Controller
                 })
                 ->addColumn('action', function ($row) {
                     $html = '<div class="d-flex align-items-center">';
-
-                    // Nút sửa
-                    $html .= '<button type="button" class="btn btn-warning btn-sm p-2 m-2 btn-edit" data-id="' . $row->id . '" data-bs-toggle="modal" data-bs-target="#editModal"><i class="fa fa-edit"></i></button>';
-
+                
+                    // Nếu chưa bị xóa thì mới hiển thị nút Sửa
+                    if (!$row->deleted_at) {
+                        $html .= '<button type="button" class="btn btn-warning btn-sm p-2 m-2 btn-edit" 
+                            data-id="' . $row->id . '" data-bs-toggle="modal" data-bs-target="#editModal" 
+                            title="Chỉnh sửa"><i class="fa fa-edit"></i></button>';
+                    }
+                
                     // Nút khôi phục hoặc xóa
                     if ($row->deleted_at) {
                         $html .= '<form action="' . route('loai-nguyen-lieu.restore', $row->id) . '" method="POST" class="form-delete-restore" style="display:inline;">'
-                            . csrf_field() .
-                            '<button type="submit" class="btn btn-success btn-sm p-2 m-2" title="Khôi phục"><i class="fa fa-recycle"></i></button>'
+                            . csrf_field()
+                            . '<button type="submit" class="btn btn-success btn-sm p-2 m-2" title="Khôi phục"><i class="fa fa-recycle"></i></button>'
                             . '</form>';
                     } else {
                         $html .= '<form action="' . route('loai-nguyen-lieu.destroy', $row->id) . '" method="POST" class="form-delete-restore" style="display:inline;">'
-                            . csrf_field() . method_field('DELETE') .
-                            '<button type="submit" class="btn btn-danger btn-sm p-2 m-2" title="Xóa"><i class="fa fa-trash"></i></button>'
+                            . csrf_field()
+                            . method_field('DELETE')
+                            . '<button type="submit" class="btn btn-danger btn-sm p-2 m-2" title="Xóa"><i class="fa fa-trash"></i></button>'
                             . '</form>';
                     }
-
+                
                     $html .= '</div>';
                     return $html;
                 })
+                
 
                 ->rawColumns(['trang_thai', 'action'])
                 ->make(true);

@@ -87,7 +87,7 @@
                             <table class="table table-responsive-md" id="{{ $tableId }}">
                                 <thead>
                                     <tr>
-                                        <th><strong>ID</strong></th>
+                                        <th><strong>STT</strong></th>
                                         <th><strong>Tên nguyên liệu</strong></th>
                                         <th><strong>Loại</strong></th>
                                         <th><strong>Đơn vị tồn</strong></th>
@@ -123,8 +123,10 @@
                 serverSide: true,
                 ajax: '{{ $route }}',
                 columns: [{
-                        data: 'id',
-                        name: 'id'
+                    data: 'DT_RowIndex', // ✅ Số thứ tự
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'ten_nguyen_lieu',
