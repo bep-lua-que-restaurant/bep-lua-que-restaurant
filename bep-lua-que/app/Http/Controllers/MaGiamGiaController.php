@@ -125,7 +125,7 @@ class MaGiamGiaController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $maGiamGia = MaGiamGia::findOrFail($id);
+        $maGiamGia = MaGiamGia::withTrashed()->findOrFail($id); // lấy cả bản đã xóa mềm
     
         $validated = $request->validate([
             'code' => [

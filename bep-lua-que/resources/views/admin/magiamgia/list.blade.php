@@ -54,8 +54,8 @@
                             <a href="{{ route('ma-giam-gia.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
-                            <a href="#" class="btn btn-sm btn-secondary"
-                               data-bs-toggle="modal" data-bs-target="#importFileModal">
+                            <a href="#" class="btn btn-sm btn-secondary" data-bs-toggle="modal"
+                                data-bs-target="#importFileModal">
                                 <i class="fa fa-upload"></i> Nhập file
                             </a>
 
@@ -114,10 +114,13 @@
                                                         class="btn btn-info btn-sm m-1">
                                                         <i class="fa fa-eye"></i>
                                                     </a>
-                                                    <a href="{{ route('ma-giam-gia.edit', $item->id) }}"
-                                                        class="btn btn-warning btn-sm m-1">
-                                                        <i class="fa fa-edit"></i>
-                                                    </a>
+                                                    @if (!$item->deleted_at)
+                                                        <a href="{{ route('ma-giam-gia.edit', $item->id) }}"
+                                                            class="btn btn-warning btn-sm m-1">
+                                                            <i class="fa fa-edit"></i>
+                                                        </a>
+                                                    @endif
+
                                                     @if ($item->deleted_at)
                                                         <form action="{{ route('ma-giam-gia.restore', $item->id) }}"
                                                             method="POST" class="d-inline" style="margin: 0;">
@@ -169,7 +172,8 @@
                         @csrf
                         <div class="mb-3">
                             <label for="fileUpload" class="form-label">Chọn file</label>
-                            <input style="height: auto" type="file" name="file" id="fileUpload" class="form-control" required>
+                            <input style="height: auto" type="file" name="file" id="fileUpload"
+                                class="form-control" required>
                         </div>
                     </form>
                 </div>

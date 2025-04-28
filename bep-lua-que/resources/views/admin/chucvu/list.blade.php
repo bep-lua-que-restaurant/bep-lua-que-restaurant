@@ -28,7 +28,8 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <!-- Ô tìm kiếm -->
                     <div class="input-group" style="max-width: 300px;">
-                        <input style="height: 45px;" type="text" id="customSearch" class="form-control border-1" placeholder="Tìm kiếm theo chức vụ">
+                        <input style="height: 45px;" type="text" id="customSearch" class="form-control border-1"
+                            placeholder="Tìm kiếm theo chức vụ">
                     </div>
                 </div>
             </div>
@@ -43,7 +44,8 @@
                             <a href="{{ route('chuc-vu.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
-                            <a href="#" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#importFileModal">
+                            <a href="#" class="btn btn-sm btn-secondary" data-bs-toggle="modal"
+                                data-bs-target="#importFileModal">
                                 <i class="fa fa-upload"></i> Nhập file
                             </a>
                             <a href="{{ route('chuc-vu.export') }}" class="btn btn-sm btn-success">
@@ -69,33 +71,47 @@
                                             <td>{{ $item->ten_chuc_vu }}</td>
                                             <td>
                                                 @if ($item->deleted_at)
-                                                    <div class="d-flex align-items-center"><i class="fa fa-circle text-danger mr-1"></i> Đã ngừng hoạt động</div>
+                                                    <div class="d-flex align-items-center"><i
+                                                            class="fa fa-circle text-danger mr-1"></i> Đã ngừng hoạt động
+                                                    </div>
                                                 @else
-                                                    <div class="d-flex align-items-center"><i class="fa fa-circle text-success mr-1"></i> Đang hoạt động</div>
+                                                    <div class="d-flex align-items-center"><i
+                                                            class="fa fa-circle text-success mr-1"></i> Đang hoạt động</div>
                                                 @endif
                                             </td>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <a href="{{ route('chuc-vu.edit', $item->id) }}" class="btn btn-warning btn-sm m-1">
-                                                        <i class="fa fa-edit"></i>
-                                                    </a>
+                                                    @if (!$item->deleted_at)
+                                                        <a href="{{ route('chuc-vu.edit', $item->id) }}"
+                                                            class="btn btn-warning btn-sm m-1">
+                                                            <i class="fa fa-edit"></i>
+                                                        </a>
+                                                    @endif
+
                                                     @if ($item->deleted_at)
-                                                        <form action="{{ route('chuc-vu.restore', $item->id) }}" method="POST" class="d-inline" style="margin: 0;">
+                                                        <form action="{{ route('chuc-vu.restore', $item->id) }}"
+                                                            method="POST" class="d-inline" style="margin: 0;">
                                                             @csrf
-                                                            <button type="submit" onclick="return confirm('Bạn có chắc muốn khôi phục mục này không?')" class="btn btn-success btn-sm m-1" title="Khôi phục">
+                                                            <button type="submit"
+                                                                onclick="return confirm('Bạn có chắc muốn khôi phục mục này không?')"
+                                                                class="btn btn-success btn-sm m-1" title="Khôi phục">
                                                                 <i class="fa fa-recycle"></i>
                                                             </button>
                                                         </form>
                                                     @else
-                                                        <form action="{{ route('chuc-vu.destroy', $item->id) }}" method="POST" class="d-inline" style="margin: 0;">
+                                                        <form action="{{ route('chuc-vu.destroy', $item->id) }}"
+                                                            method="POST" class="d-inline" style="margin: 0;">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="submit" onclick="return confirm('Bạn muốn ngừng hoạt động chức vụ này chứ?')" class="btn btn-danger btn-sm m-1" title="Xóa">
+                                                            <button type="submit"
+                                                                onclick="return confirm('Bạn muốn ngừng hoạt động chức vụ này chứ?')"
+                                                                class="btn btn-danger btn-sm m-1" title="Xóa">
                                                                 <i class="fa fa-trash"></i>
                                                             </button>
                                                         </form>
                                                     @endif
                                                 </div>
+
                                             </td>
                                         </tr>
                                     @endforeach
@@ -113,14 +129,17 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="importFileModalLabel">Nhập file</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span>×</span></button>
+                        <button type="button" class="close" data-bs-dismiss="modal"
+                            aria-label="Close"><span>×</span></button>
                     </div>
                     <div class="modal-body">
-                        <form action="{{ route('chuc-vu.import') }}" method="POST" enctype="multipart/form-data" id="importFileForm">
+                        <form action="{{ route('chuc-vu.import') }}" method="POST" enctype="multipart/form-data"
+                            id="importFileForm">
                             @csrf
                             <div class="mb-3">
                                 <label for="fileUpload" class="form-label">Chọn file</label>
-                                <input style="height: auto" type="file" name="file" id="fileUpload" class="form-control" required>
+                                <input style="height: auto" type="file" name="file" id="fileUpload"
+                                    class="form-control" required>
                             </div>
                         </form>
                     </div>
@@ -138,21 +157,25 @@
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             var table = $('#chucvuTable').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json' // Ngôn ngữ tiếng Việt
                 },
                 pageLength: 10,
                 lengthMenu: [5, 10, 25, 50],
-                order: [[0, 'desc']],
-                columnDefs: [
-                    { orderable: false, targets: 3 } // Vô hiệu hóa sắp xếp trên cột Hành động
+                order: [
+                    [0, 'desc']
+                ],
+                columnDefs: [{
+                        orderable: false,
+                        targets: 3
+                    } // Vô hiệu hóa sắp xếp trên cột Hành động
                 ]
             });
 
             // Tìm kiếm tùy chỉnh
-            $('#customSearch').on('keyup', function () {
+            $('#customSearch').on('keyup', function() {
                 table.search(this.value).draw();
             });
         });
