@@ -53,7 +53,7 @@ class MonAnExport implements FromCollection, WithHeadings, WithMapping, WithEven
 
                 // Gộp ô cho tiêu đề lớn
                 $sheet->mergeCells('A1:D1');
-                $sheet->setCellValue('A1', 'Dịch vụ');
+                $sheet->setCellValue('A1', 'Món ăn');
 
                 // Định dạng tiêu đề lớn
                 $sheet->getStyle('A1')->applyFromArray([
