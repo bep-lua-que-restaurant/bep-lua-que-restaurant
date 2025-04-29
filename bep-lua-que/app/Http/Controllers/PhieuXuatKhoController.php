@@ -22,9 +22,11 @@ class PhieuXuatKhoController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = PhieuXuatKho::query()
-                ->with(['nhaCungCap', 'nhanVien'])
-                ->withTrashed();
+            $query = PhieuXuatKho::query()->with(['nhaCungCap' => function ($query) {
+                $query->withTrashed(); // Thêm withTrashed để lấy cả các bản ghi bị xóa mềm
+            }, 'nhanVien'])
+                ->withTrashed()
+                ->get();
 
             return DataTables::of($query)
                 ->addIndexColumn()
@@ -40,8 +42,8 @@ class PhieuXuatKhoController extends Controller
                 ->addColumn('tong_gia_tri', function ($row) {
                     return number_format($row->tong_tien, 0, ',', '.');
                 })
-                ->addColumn('nha_cung_cap', function ($row) {
-                    return $row->nhaCungCap ? $row->nhaCungCap->ten_nha_cung_cap : 'Không có';
+                ->addColumn('nhaCungCap', function ($row) {
+                    return $row->nhaCungCap ? $row->nhaCungCap->ten_nha_cung_cap : 'Chưa có';
                 })
                 ->addColumn('nhanvien', function ($row) {
                     return $row->nhanvien ? $row->nhanVien->ho_ten : 'Chưa có';
@@ -187,7 +189,9 @@ class PhieuXuatKhoController extends Controller
         }
 
         $phieuXuatKho->load([
-            'nhaCungCap',
+            'nhaCungCap' => function ($query) {
+                $query->withTrashed();
+            },
             'nhanVien',
             'chiTietPhieuXuatKhos.nguyenLieu' => function ($query) {
                 $query->withTrashed(); // Hiện nguyên liệu đã bị xoá
