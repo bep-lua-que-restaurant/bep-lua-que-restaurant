@@ -38,13 +38,14 @@
                         <h4 class="card-title">Danh sách Phiếu xuất kho</h4>
 
                         <div class="btn-group">
+                            <a href="{{ route('phieu-xuat-kho.create') }}" class="btn btn-sm btn-primary">
+                                <i class="fa fa-plus"></i> Thêm mới
+                            </a>
                             <a href="{{ route('phieu-xuat-kho.export') }}" class="btn btn-success">
                                 <i class="fa fa-file-excel"></i> Xuất file
                             </a>
 
-                            <a href="{{ route('phieu-xuat-kho.create') }}" class="btn btn-sm btn-primary">
-                                <i class="fa fa-plus"></i> Thêm mới
-                            </a>
+
                         </div>
                     </div>
                     <div class="card-body">
@@ -87,7 +88,7 @@
                 serverSide: true,
                 ajax: '{{ $route }}',
                 columns: [{
-                    data: 'DT_RowIndex', // ✅ Số thứ tự
+                        data: 'DT_RowIndex', // ✅ Số thứ tự
                         name: 'DT_RowIndex',
                         orderable: false,
                         searchable: false
@@ -130,7 +131,23 @@
                     }
                 ],
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json'
+                    processing: "Đang xử lý...",
+                    lengthMenu: "Hiển thị _MENU_ dòng mỗi trang",
+                    zeroRecords: "Không tìm thấy dữ liệu phù hợp",
+                    info: "Hiển thị _START_ đến _END_ của _TOTAL_ dòng",
+                    infoEmpty: "Hiển thị 0 đến 0 của 0 dòng",
+                    infoFiltered: "(lọc từ _MAX_ tổng số dòng)",
+                    search: "Tìm kiếm:",
+                    paginate: {
+                        first: "Đầu",
+                        previous: "Trước",
+                        next: "Tiếp",
+                        last: "Cuối"
+                    },
+                    aria: {
+                        sortAscending: ": Sắp xếp tăng dần",
+                        sortDescending: ": Sắp xếp giảm dần"
+                    }
                 },
                 pagingType: 'full_numbers',
                 renderer: 'bootstrap',

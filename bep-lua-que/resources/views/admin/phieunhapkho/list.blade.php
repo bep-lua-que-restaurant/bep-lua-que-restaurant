@@ -55,7 +55,7 @@
                                         <th><strong>Nhân viên</strong></th>
                                         <th><strong>Ngày nhập</strong></th>
                                         <th><strong>Trạng thái</strong></th>
-                                        <th><strong>Action</strong></th> <!-- Cột Action -->
+                                        <th><strong>Hành động</strong></th> <!-- Cột Action -->
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -77,7 +77,7 @@
                 serverSide: true,
                 ajax: '{{ $route }}',
                 columns: [{
-                    data: 'DT_RowIndex', // ✅ Số thứ tự
+                        data: 'DT_RowIndex', // ✅ Số thứ tự
                         name: 'DT_RowIndex',
                         orderable: false,
                         searchable: false
@@ -94,7 +94,7 @@
                         data: 'ngay_nhap',
                         name: 'ngay_nhap'
                     },
-                    
+
                     {
                         data: 'trang_thai',
                         name: 'trang_thai',
@@ -131,7 +131,7 @@
             // Format Row Details
             function formatDetails(data) {
                 console.log(data);
-                
+
                 const loaiPhieuText = data.loai_phieu === 'nhap_tu_bep' ? 'Nhập từ bếp' :
                     data.loai_phieu === 'nhap_tu_ncc' ? 'Nhập từ nhà cung cấp' :
                     'Không xác định';

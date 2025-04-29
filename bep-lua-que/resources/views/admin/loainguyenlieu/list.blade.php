@@ -78,8 +78,9 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Xác nhận</button>
+
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Xác nhận</button>
                     </div>
                 </form>
             </div>
@@ -344,7 +345,7 @@
             });
         });
     </script>
-    
+
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection

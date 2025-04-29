@@ -23,7 +23,7 @@
             </div>
         </div>
 
-        <div class="row">
+        {{-- <div class="row">
             <div class="col-lg-12 my-4">
                 <div class="d-flex justify-content-between align-items-center">
                     <!-- Ô tìm kiếm -->
@@ -33,7 +33,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         <div class="row">
             <div class="col-lg-12">
@@ -67,7 +67,7 @@
                                 <tbody>
                                     @foreach ($data as $index => $item)
                                         <tr>
-                                            <td><strong>{{ $data->firstItem() + $index }}</strong></td>
+                                            <td><strong>{{ $loop->iteration }}</strong></td>
                                             <td>{{ $item->ten_chuc_vu }}</td>
                                             <td>
                                                 @if ($item->deleted_at)
@@ -159,25 +159,28 @@
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
 
-{{--    <script>--}}
-{{--        $(document).ready(function () {--}}
-{{--            var table = $('#chucvuTable').DataTable({--}}
-{{--                language: {--}}
-{{--                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json' // Ngôn ngữ tiếng Việt--}}
-{{--                },--}}
-{{--                pageLength: 10,--}}
-{{--                lengthMenu: [5, 10, 25, 50],--}}
-{{--                order: [[0, 'desc']],--}}
-{{--                columnDefs: [--}}
-{{--                    { orderable: false, targets: 3 } // Vô hiệu hóa sắp xếp trên cột Hành động--}}
-{{--                ]--}}
-{{--            });--}}
+    <script>
+        $(document).ready(function() {
+            var table = $('#chucvuTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json' // Ngôn ngữ tiếng Việt
+                },
+                pageLength: 10,
+                lengthMenu: [5, 10, 25, 50],
+                order: [
+                    [0, 'desc']
+                ],
+                columnDefs: [{
+                        orderable: false,
+                        targets: 3
+                    } // Vô hiệu hóa sắp xếp trên cột Hành động
+                ]
+            });
 
-{{--            // Tìm kiếm tùy chỉnh--}}
-{{--            $('#customSearch').on('keyup', function () {--}}
-{{--                table.search(this.value).draw();--}}
-{{--            });--}}
-{{--        });--}}
-{{--    </script>--}}
-
+            // Tìm kiếm tùy chỉnh
+            $('#customSearch').on('keyup', function() {
+                table.search(this.value).draw();
+            });
+        });
+    </script>
 @endsection
