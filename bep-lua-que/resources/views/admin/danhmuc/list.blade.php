@@ -33,9 +33,14 @@
                             </button>
 
                             <!-- Nút Nhập file sẽ hiển thị Modal -->
-                            <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
-                                data-target=".bd-example-modal-lg">
-                                <i class="fa fa-download"></i> Nhập file
+{{--                            <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"--}}
+{{--                                data-target=".bd-example-modal-lg">--}}
+{{--                                <i class="fa fa-download"></i> Nhập file--}}
+{{--                            </a>--}}
+
+                            <a href="#" class="btn btn-sm btn-secondary"
+                               data-bs-toggle="modal" data-bs-target="#importFileModal">
+                                <i class="fa fa-upload"></i> Nhập file
                             </a>
 
                             <a href="{{ route('danh-muc-mon-an.export') }}" class="btn btn-sm btn-success">
@@ -83,7 +88,7 @@
                         @csrf
                         <div class="mb-3">
                             <label for="fileUpload" class="form-label">Chọn file</label>
-                            <input type="file" name="file" id="fileUpload" class="form-control" required>
+                            <input style="height: auto" type="file" name="file" id="fileUpload" class="form-control" required>
                         </div>
                     </form>
                 </div>

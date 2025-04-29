@@ -38,13 +38,14 @@
                         <h4 class="card-title">Danh sách Phiếu xuất kho</h4>
 
                         <div class="btn-group">
-                            <a href="{{ route('phieu-xuat-kho.create') }}" class="btn btn-sm btn-primary">
-                                <i class="fa fa-plus"></i> Thêm mới
-                            </a>
-                            <a href="{{ route('phieu-xuat-kho.export') }}" class="btn btn-success">
+
+                            <a style="font-size: 14px" href="{{ route('phieu-xuat-kho.export') }}" class="btn btn-success">
                                 <i class="fa fa-file-excel"></i> Xuất file
                             </a>
 
+                            <a style="padding: 7px 10px 0 10px" href="{{ route('phieu-xuat-kho.create') }}" class="btn btn-sm btn-primary">
+                                <i class="fa fa-plus"></i> Thêm mới
+                            </a>
 
                         </div>
                     </div>
@@ -174,7 +175,7 @@
             // Định dạng chi tiết của phiếu xuất kho
             function format(d) {
                 return `
-                           
+
                           <div class="container">
                         <h5>Thông tin phiếu xuất kho</h5>
                         <table class="table table-bordered">
@@ -182,12 +183,12 @@
                                 <th>Người nhận:</th>
                                 <td>${d.nguoi_nhan}</td>
                             </tr>
-                             <tr> 
+                             <tr>
                                 <th>Nhân viên:</th>
                                <td>${d.nhanvien}</td>
                             </tr>
-                               
-                            <tr> 
+
+                            <tr>
                                 <th>Nhà cung cấp:</th>
                                <td>${d.nha_cung_cap}</td>
                             </tr>
@@ -195,7 +196,7 @@
                                 <th>Ngày xuất:</th>
                                 <td>${d.ngay_xuat}</td>
                             </tr>
-                           
+
                             <tr>
                                 <th>Trạng thái:</th>
                                 <td>${d.trang_thai}</td>
@@ -203,7 +204,7 @@
                             <tr>
                                 <th>Ghi chú:</th>
                                     <td>${d.ghi_chu ? d.ghi_chu : 'Không có'}</td>
-                            </tr>  
+                            </tr>
                              <tr>
                                 <th>Tổng tiền:</th>
                                 <td>${d.tong_tien} VNĐ</td>
