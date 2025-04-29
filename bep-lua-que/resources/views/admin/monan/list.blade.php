@@ -44,6 +44,15 @@
                             {{-- <a href="#" class="btn btn-sm btn-info">
                                 <i class="fa fa-list"></i> Danh sách
                             </a> --}}
+                            <!-- Nút Nhập file sẽ hiển thị Modal -->
+                            <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
+                                data-target=".bd-example-modal-lg">
+                                <i class="fa fa-download"></i> Nhập file
+                            </a>
+
+                            <a href="{{ route('mon-an.export') }}" class="btn btn-sm btn-success">
+                                <i class="fa fa-upload"></i> Xuất file
+                            </a>
                         </div>
                     </div>
                     <div class="card-body">
@@ -62,6 +71,33 @@
                                 <tbody></tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal Nhập file -->
+        <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true" id="importFileModal">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="importFileModalLabel">Nhập file</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal"
+                            aria-label="Close"><span>&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Form nhập file -->
+                        <form action="{{ route('mon-an.import') }}" method="POST" enctype="multipart/form-data"
+                            id="importFileForm">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="fileUpload" class="form-label">Chọn file</label>
+                                <input type="file" name="file" id="fileUpload" class="form-control" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" id="btn-import-confirm" class="btn btn-primary">Xác nhận</button>
                     </div>
                 </div>
             </div>
@@ -86,7 +122,7 @@
                 serverSide: true,
                 ajax: '{{ $route }}',
                 columns: [{
-                    data: 'DT_RowIndex', // ✅ Số thứ tự
+                        data: 'DT_RowIndex', // ✅ Số thứ tự
                         name: 'DT_RowIndex',
                         orderable: false,
                         searchable: false
@@ -115,7 +151,23 @@
                     }
                 ],
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json'
+                    processing: "Đang xử lý...",
+                    lengthMenu: "Hiển thị _MENU_ dòng mỗi trang",
+                    zeroRecords: "Không tìm thấy dữ liệu phù hợp",
+                    info: "Hiển thị _START_ đến _END_ của _TOTAL_ dòng",
+                    infoEmpty: "Hiển thị 0 đến 0 của 0 dòng",
+                    infoFiltered: "(lọc từ _MAX_ tổng số dòng)",
+                    search: "Tìm kiếm:",
+                    paginate: {
+                        first: "Đầu",
+                        previous: "Trước",
+                        next: "Tiếp",
+                        last: "Cuối"
+                    },
+                    aria: {
+                        sortAscending: ": Sắp xếp tăng dần",
+                        sortDescending: ": Sắp xếp giảm dần"
+                    }
                 },
                 pagingType: 'full_numbers',
                 renderer: 'bootstrap',
@@ -164,6 +216,35 @@
                             }
 
                         });
+                    }
+                });
+            });
+            // import
+            $(document).on('click', '#btn-import-confirm', function(e) {
+                e.preventDefault();
+
+                const form = $('#importFileForm')[0];
+                const formData = new FormData(form);
+
+                $.ajax({
+                    url: '{{ route('mon-an.import') }}',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(res) {
+                        $('#importFileModal').modal('hide');
+                        Swal.fire('Thành công!', res.message || 'File đã được nhập thành công.',
+                            'success');
+                        $('#{{ $tableId }}').DataTable().ajax.reload();
+                    },
+                    error: function(xhr) {
+                        let errors = xhr.responseJSON?.errors;
+                        let message = 'Có lỗi xảy ra khi nhập file!';
+                        if (errors) {
+                            message = Object.values(errors).join('<br>');
+                        }
+                        Swal.fire('Lỗi', message, 'error');
                     }
                 });
             });

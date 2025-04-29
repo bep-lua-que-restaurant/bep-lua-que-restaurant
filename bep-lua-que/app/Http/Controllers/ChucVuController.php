@@ -72,10 +72,23 @@ class ChucVuController extends Controller
 
     public function destroy(ChucVu $chucVu)
     {
+        // Kiểm tra xem còn nhân viên nào đang làm việc với chức vụ này không
+        $nhanVienDangLamViec = \App\Models\NhanVien::where('chuc_vu_id', $chucVu->id)
+            ->where('trang_thai', 'dang_lam_viec')
+            ->count();
+    
+        if ($nhanVienDangLamViec > 0) {
+            return redirect()->route('chuc-vu.index')
+                ->with('error', 'Không thể xóa chức vụ vì vẫn còn nhân viên đang làm việc!');
+        }
+    
+        // Nếu chỉ còn nhân viên nghỉ việc hoặc không còn ai, thì cho phép xóa
         $chucVu->delete();
-
-        return redirect()->route('chuc-vu.index')->with('success', 'Xóa chức vụ thành công!');
+    
+        return redirect()->route('chuc-vu.index')
+            ->with('success', 'Xóa chức vụ thành công!');
     }
+    
 
     public function restore($id)
     {
