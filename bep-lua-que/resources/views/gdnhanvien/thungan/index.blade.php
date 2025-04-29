@@ -56,16 +56,6 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item text-primary" href="/"><i
                                         class="fas fa-tachometer-alt me-2"></i> Dashboard</a></li>
-                            <li><a class="dropdown-item text-primary" href="bep"><i
-                                        class="fas fa-utensils me-2"></i> Bếp</a></li>
-                            <li><a class="dropdown-item text-danger" href="dat-ban"><i
-                                        class="fas fa-concierge-bell me-2"></i> Lễ tân</a></li>
-                            <li>
-                                <button class="dropdown-item text-warning" onclick="showOrders()" type="button">
-                                    <i class="fas fa-list me-2"></i> Đơn đặt bàn
-                                </button>
-                            </li>
-
                         </ul>
 
                     </div>
