@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use App\Exports\DanhMucMonAnExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\DanhMucMonAnImport;
+use App\Models\MonAn;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -121,11 +123,40 @@ class DanhMucMonAnController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DanhMucMonAn $danhMucMonAn)
+    public function destroy(Request $request, DanhMucMonAn $danhMucMonAn)
     {
-        $danhMucMonAn->delete();
-
-        return redirect()->route('danh-muc-mon-an.index');
+        try {
+            // Kiểm tra xem danh mục có món ăn nào liên quan đến hóa đơn bàn đã thanh toán không
+            $hasPaidOrder = MonAn::where('danh_muc_mon_an_id', $danhMucMonAn->id)
+                ->join('chi_tiet_hoa_dons', 'mon_ans.id', '=', 'chi_tiet_hoa_dons.mon_an_id')
+                ->join('hoa_dons', 'chi_tiet_hoa_dons.hoa_don_id', '=', 'hoa_dons.id')
+                ->join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
+                ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
+                ->exists();
+    
+            if ($hasPaidOrder) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Danh mục này có món ăn đang được sử dụng, không thể xóa.'
+                ], 422);
+            }
+    
+            // Xóa mềm danh mục
+            $danhMucMonAn->delete();
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Xóa danh mục thành công.'
+            ]);
+        } catch (\Exception $e) {
+            // Ghi log lỗi để debug
+            Log::error('Lỗi khi xóa danh mục món ăn: ' . $e->getMessage());
+    
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã xảy ra lỗi khi xóa danh mục. Vui lòng thử lại.'
+            ], 500);
+        }
     }
 
     public function restore($id)

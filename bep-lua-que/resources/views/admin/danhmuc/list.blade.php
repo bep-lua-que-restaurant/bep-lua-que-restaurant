@@ -174,27 +174,28 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
-
+    
             var table = $('#{{ $tableId }}').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: '{{ $route }}',
-                columns: [{
-                        data: 'DT_RowIndex', // ✅ Số thứ tự
+                columns: [
+                    {
+                        data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
                         orderable: false,
                         searchable: false
                     },
                     {
-                        data: 'ten', // Tên danh mục
+                        data: 'ten',
                         name: 'ten'
                     },
                     {
-                        data: 'trang_thai', // Trạng thái kinh doanh
+                        data: 'trang_thai',
                         name: 'deleted_at'
                     },
                     {
-                        data: 'action', // Các nút hành động
+                        data: 'action',
                         name: 'action',
                         orderable: false,
                         searchable: false
@@ -220,21 +221,66 @@
                     }
                 },
                 pagingType: 'full_numbers',
-
-
                 lengthMenu: [5, 10, 25, 50],
                 pageLength: 10
             });
-
-            // Xử lý submit form với SweetAlert2
-            $(document).on('submit', 'form', function(e) {
+    
+            // Xử lý submit form xóa với SweetAlert2
+            $(document).on('submit', '.delete-form', function(e) {
                 e.preventDefault();
                 var form = $(this);
-                var isDelete = form.find('button[title="Xóa"]').length > 0;
-
+    
                 Swal.fire({
-                    title: isDelete ? 'Bạn muốn ngừng kinh doanh mục này chứ?' :
-                        'Bạn có chắc muốn khôi phục mục này không?',
+                    title: 'Bạn muốn ngừng kinh doanh mục này chứ?',
+                    text: "Hành động này có thể thay đổi trạng thái của danh mục!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Xác nhận',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: form.attr('action'),
+                            method: form.attr('method'),
+                            data: form.serialize(),
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire(
+                                        'Thành công!',
+                                        response.message, // "Xóa danh mục thành công."
+                                        'success'
+                                    );
+                                    table.ajax.reload();
+                                } else {
+                                    Swal.fire(
+                                        'Lỗi!',
+                                        response.message, // "Danh mục này có món ăn đang được sử dụng, không thể xóa."
+                                        'error'
+                                    );
+                                }
+                            },
+                            error: function(xhr) {
+                                let message = xhr.responseJSON?.message || 'Có lỗi xảy ra, vui lòng thử lại!';
+                                Swal.fire(
+                                    'Lỗi!',
+                                    message,
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+    
+            // Xử lý submit form khôi phục
+            $(document).on('submit', 'form:not(.delete-form)', function(e) {
+                e.preventDefault();
+                var form = $(this);
+    
+                Swal.fire({
+                    title: 'Bạn có chắc muốn khôi phục mục này không?',
                     text: "Hành động này có thể thay đổi trạng thái của danh mục!",
                     icon: 'warning',
                     showCancelButton: true,
@@ -251,17 +297,16 @@
                             success: function(response) {
                                 Swal.fire(
                                     'Thành công!',
-                                    isDelete ?
-                                    'Danh mục đã được ngừng kinh doanh.' :
-                                    'Danh mục đã được khôi phục.',
+                                    response.message || 'Danh mục đã được khôi phục.',
                                     'success'
                                 );
                                 table.ajax.reload();
                             },
                             error: function(xhr) {
+                                let message = xhr.responseJSON?.message || 'Có lỗi xảy ra, vui lòng thử lại!';
                                 Swal.fire(
                                     'Lỗi!',
-                                    'Có lỗi xảy ra, vui lòng thử lại!',
+                                    message,
                                     'error'
                                 );
                             }
@@ -269,81 +314,64 @@
                     }
                 });
             });
-
-            // nút sửa
+    
+            // Nút sửa
             $(document).on('click', '.btn-edit', function() {
                 const id = $(this).data('id');
-
+    
                 $.ajax({
                     url: `/danh-muc-mon-an/${id}`,
                     type: 'GET',
                     success: function(data) {
-                        // Gán dữ liệu vào các input/textarea
                         $('#edit-id').val(data.id);
                         $('#edit-ten').val(data.ten);
                         $('#edit-mo-ta').val(data.mo_ta ?? 'Chưa có mô tả');
-
-                        // Cập nhật action cho form (PUT về đúng route update)
                         $('#editForm').attr('action', `/danh-muc-mon-an/${id}`);
-
-                        // Hiện modal
                         $('#editModal').modal('show');
                     },
                     error: function(xhr) {
-                        alert('Lỗi khi lấy dữ liệu: ' + xhr.responseText);
+                        Swal.fire('Lỗi!', 'Lỗi khi lấy dữ liệu: ' + xhr.responseText, 'error');
                     }
                 });
             });
-
+    
             $(document).on('click', '#editForm button[type="submit"]', function(e) {
-                e.preventDefault(); // Ngăn gửi form truyền thống
-
+                e.preventDefault();
                 const id = $('#edit-id').val();
-
                 const formData = {
                     ten: $('#edit-ten').val(),
                     mo_ta: $('#edit-mo-ta').val(),
                     _token: $('input[name="_token"]').val(),
                     _method: 'PUT'
                 };
-
+    
                 $.ajax({
                     url: `/danh-muc-mon-an/${id}`,
-                    type: 'POST', // Laravel hỗ trợ PUT thông qua _method
+                    type: 'POST',
                     data: formData,
                     success: function(response) {
-                        // Ẩn modal sau khi lưu thành công
                         $('#editModal').modal('hide');
-
-                        // Reload lại datatable
-                        $('#{{ $tableId }}').DataTable().ajax.reload();
-
-                        // Thông báo thành công
-                        Swal.fire('Thành công!', 'Danh mục đã được cập nhật.', 'success');
+                        table.ajax.reload();
+                        Swal.fire('Thành công!', response.message, 'success');
                     },
                     error: function(xhr) {
-                        let msg = 'Đã có lỗi xảy ra.';
-                        if (xhr.responseJSON && xhr.responseJSON.message) {
-                            msg = xhr.responseJSON.message;
-                        }
-                        Swal.fire('Lỗi!', msg, 'error');
+                        let message = xhr.responseJSON?.message || 'Đã có lỗi xảy ra.';
+                        Swal.fire('Lỗi!', message, 'error');
                     }
                 });
             });
-
-            // thêm mới
+    
+            // Thêm mới
             $(document).on('click', '.btn-create', function() {
-                // Reset form
                 $('#createForm')[0].reset();
                 $('#createModal').modal('show');
             });
-
+    
             $(document).on('click', '#btn-save-create', function(e) {
                 e.preventDefault();
-
                 const form = $('#createForm')[0];
                 const formData = new FormData(form);
-
+    
                 $.ajax({
                     url: '/danh-muc-mon-an',
                     type: 'POST',
@@ -353,26 +381,22 @@
                     success: function(res) {
                         $('#createModal').modal('hide');
                         Swal.fire('Thành công!', res.message, 'success');
-                        $('#yourDataTableId').DataTable().ajax.reload();
+                        table.ajax.reload();
                     },
                     error: function(xhr) {
                         let errors = xhr.responseJSON?.errors;
-                        let message = 'Có lỗi xảy ra!';
-                        if (errors) {
-                            message = Object.values(errors).join('<br>');
-                        }
-                        Swal.fire('Lỗi', message, 'error');
+                        let message = errors ? Object.values(errors).join('<br>') : 'Có lỗi xảy ra!';
+                        Swal.fire('Lỗi!', message, 'error');
                     }
                 });
             });
-
-            // import
+    
+            // Nhập file
             $(document).on('click', '#btn-import-confirm', function(e) {
                 e.preventDefault();
-
                 const form = $('#importFileForm')[0];
                 const formData = new FormData(form);
-
+    
                 $.ajax({
                     url: '{{ route('danh-muc-mon-an.import') }}',
                     type: 'POST',
@@ -381,22 +405,16 @@
                     contentType: false,
                     success: function(res) {
                         $('#importFileModal').modal('hide');
-                        Swal.fire('Thành công!', res.message || 'File đã được nhập thành công.',
-                            'success');
-                        $('#{{ $tableId }}').DataTable().ajax.reload();
+                        Swal.fire('Thành công!', res.message || 'File đã được nhập thành công.', 'success');
+                        table.ajax.reload();
                     },
                     error: function(xhr) {
                         let errors = xhr.responseJSON?.errors;
-                        let message = 'Có lỗi xảy ra khi nhập file!';
-                        if (errors) {
-                            message = Object.values(errors).join('<br>');
-                        }
-                        Swal.fire('Lỗi', message, 'error');
+                        let message = errors ? Object.values(errors).join('<br>') : 'Có lỗi xảy ra khi nhập file!';
+                        Swal.fire('Lỗi!', message, 'error');
                     }
                 });
             });
-
-
         });
     </script>
 @endsection
