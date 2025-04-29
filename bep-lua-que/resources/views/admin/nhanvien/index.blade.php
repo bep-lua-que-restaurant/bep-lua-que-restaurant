@@ -26,13 +26,13 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <!-- Ô tìm kiếm nhân viên -->
                     <div class="input-group">
-                        <input style="height: 45px" type="text" id="searchInput" class="form-control border-1"
+                        <input style="height: 45px; margin-right: 10px" type="text" id="searchInput" class="form-control border-1"
                             placeholder="Tìm kiếm theo tên..." onkeyup="filterEmployees()">
                     </div>
 
                     <!-- Lựa chọn trạng thái làm việc -->
                     <div>
-                        <select id="statusFilter" class="btn btn-primary btn-sm" onchange="filterEmployees()">
+                        <select style="padding: 11px 0 11px 0; width: 142px" id="statusFilter" class="btn btn-primary btn-sm" onchange="filterEmployees()">
                             <option value="">Lọc theo trạng thái</option>
                             <option value="Đang làm việc">Đang làm việc</option>
                             <option value="Nghỉ việc">Đã nghỉ việc</option>

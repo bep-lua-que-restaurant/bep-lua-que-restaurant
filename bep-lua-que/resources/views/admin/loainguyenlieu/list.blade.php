@@ -30,9 +30,9 @@
                                 <i class="fa fa-plus"></i> Thêm mới
 
                             </button>
-                            <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
-                                data-target=".bd-example-modal-lg">
-                                <i class="fa fa-download"></i> Nhập file
+                            <a href="#" class="btn btn-sm btn-secondary"
+                               data-bs-toggle="modal" data-bs-target=".bd-example-modal-lg">
+                                <i class="fa fa-upload"></i> Nhập file
                             </a>
                             <a href="{{ route('loai-nguyen-lieu.export') }}" class="btn btn-sm btn-success">
                                 <i class="fa fa-upload"></i> Xuất file
@@ -74,7 +74,7 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="fileUpload">Chọn file</label>
-                            <input type="file" name="file" id="fileUpload" class="form-control" required>
+                            <input style="height: auto" type="file" name="file" id="fileUpload" class="form-control" required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -344,7 +344,7 @@
             });
         });
     </script>
-    
+
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
