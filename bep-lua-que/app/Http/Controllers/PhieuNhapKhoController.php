@@ -25,7 +25,11 @@ class PhieuNhapKhoController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = PhieuNhapKho::query()->with(['nhacungcap','nhanVien'])->withTrashed();
+            $query = PhieuNhapKho::query()->with(['nhaCungCap' => function ($query) {
+                $query->withTrashed(); // Thêm withTrashed để lấy cả các bản ghi bị xóa mềm
+            }, 'nhanVien'])
+                ->withTrashed()
+                ->get();
 
             return DataTables::of($query)
                 ->addIndexColumn()
@@ -41,8 +45,8 @@ class PhieuNhapKhoController extends Controller
                 ->addColumn('tong_gia_tri', function ($row) {
                     return number_format($row->tong_tien, 0, ',', '.');  // Lấy trực tiếp giá trị từ cột tong_tien
                 })
-                ->addColumn('nhacungcap', function ($row) {
-                    return $row->nhacungcap ? $row->nhacungcap->ten_nha_cung_cap : 'Chưa có';
+                ->addColumn('nhaCungCap', function ($row) {
+                    return $row->nhaCungCap ? $row->nhaCungCap->ten_nha_cung_cap : 'Chưa có';
                 })
                 ->addColumn('nhanvien', function ($row) {
                     return $row->nhanvien ? $row->nhanVien->ho_ten : 'Chưa có';
@@ -50,15 +54,15 @@ class PhieuNhapKhoController extends Controller
                   // Thêm tên nhân viên vào dữ liệu trả về
                   ->addColumn('action', function ($row) {
                     $html = '<div class="d-flex align-items-center">';
-                
+
                     // Nút xem chi tiết
                     $html .= '<a href="' . route('phieu-nhap-kho.show', $row->id) . '" class="btn btn-info btn-sm p-2 m-2" title="Xem chi tiết"><i class="fa fa-eye"></i></a>';
-                
+
                     // Chỉ hiện nút chỉnh sửa nếu chưa bị xoá
                     if (!$row->deleted_at) {
                         $html .= '<a href="' . route('phieu-nhap-kho.edit', $row->id) . '" class="btn btn-warning btn-sm p-2 m-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>';
                     }
-                
+
                     // Nút xóa hoặc khôi phục tùy theo trạng thái soft delete
                     if ($row->deleted_at) {
                         $html .= '<form action="' . route('phieu-nhap-kho.restore', $row->id) . '" method="POST" style="display:inline;">'
@@ -72,8 +76,8 @@ class PhieuNhapKhoController extends Controller
                             . '<button type="submit" class="btn btn-danger btn-sm p-2 m-2" title="Xóa"><i class="fa fa-trash"></i></button>'
                             . '</form>';
                     }
-                
-                   
+
+
 
                     $html .= '</div>';
                     return $html;
@@ -159,7 +163,7 @@ class PhieuNhapKhoController extends Controller
         $tongTien = 0;
         $canhBaoNguyenLieuXoa = [];
         $nguyenLieuDaXuLy = []; // Mảng theo dõi các nguyên liệu đã xử lý hoặc tạo mới
-        
+
         // Lặp qua các nguyên liệu nhập
         foreach ($request->so_luong_nhaps as $index => $soLuong) {
             $tenNguyenLieu = $request->ten_nguyen_lieus[$index] ?? null;
@@ -260,7 +264,7 @@ class PhieuNhapKhoController extends Controller
         $phieu->duyetUrl = route('phieu-nhap-kho.duyet', $phieu->id);
         $phieu->huyUrl = route('phieu-nhap-kho.huy', $phieu->id);
 
-      
+
 
         return response()->json([
             'phieu' => $phieu,
@@ -281,7 +285,9 @@ class PhieuNhapKhoController extends Controller
 
         // Load các quan hệ kèm nguyên liệu đã bị xoá
         $phieuNhapKho->load([
-            'nhaCungCap',
+            'nhaCungCap' => function ($query) {
+                $query->withTrashed();
+            },
             'nhanVien',
             'chiTietPhieuNhaps.nguyenLieu' => function ($query) {
                 $query->withTrashed();
