@@ -67,7 +67,7 @@
                                 <tbody>
                                     @foreach ($data as $index => $item)
                                         <tr>
-                                            <td><strong>{{ $loop->iteration }}</strong></td>
+                                            <td><strong>{{ $loop->iteration }}</strong></td>    
                                             <td>{{ $item->ten_chuc_vu }}</td>
                                             <td>
                                                 @if ($item->deleted_at)
@@ -117,9 +117,7 @@
                                     @endforeach
                                 </tbody>
                             </table>
-                            <div id="pagination">
-                                {{ $data->links('pagination::bootstrap-5') }}
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -163,18 +161,34 @@
         $(document).ready(function() {
             var table = $('#chucvuTable').DataTable({
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json' // Ngôn ngữ tiếng Việt
+                    processing: "Đang xử lý...",
+                    lengthMenu: "Hiển thị _MENU_ dòng mỗi trang",
+                    zeroRecords: "Không tìm thấy dữ liệu phù hợp",
+                    info: "Hiển thị _START_ đến _END_ của _TOTAL_ dòng",
+                    infoEmpty: "Hiển thị 0 đến 0 của 0 dòng",
+                    infoFiltered: "(lọc từ _MAX_ tổng số dòng)",
+                    search: "Tìm kiếm:",
+                    paginate: {
+                        first: "Đầu",
+                        previous: "Trước",
+                        next: "Tiếp",
+                        last: "Cuối"
+                    },
+                    aria: {
+                        sortAscending: ": Sắp xếp tăng dần",
+                        sortDescending: ": Sắp xếp giảm dần"
+                    }
                 },
-                pageLength: 10,
+                pagingType: 'full_numbers',
                 lengthMenu: [5, 10, 25, 50],
+                pageLength: 10,
                 order: [
-                    [0, 'desc']
-                ],
+                    [1, 'desc']
+                ], // Sắp xếp theo cột "Tên chức vụ" (cột 2, index 1) giảm dần
                 columnDefs: [{
-                        orderable: false,
-                        targets: 3
-                    } // Vô hiệu hóa sắp xếp trên cột Hành động
-                ]
+                    orderable: false,
+                    targets: [0, 3] // Vô hiệu hóa sắp xếp trên cột STT (0) và Hành động (3)
+                }]
             });
 
             // Tìm kiếm tùy chỉnh

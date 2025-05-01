@@ -30,7 +30,7 @@ class ChucVuController extends Controller
                 $query->whereNotNull('deleted_at');
             }
         }
-        $data = $query->withTrashed()->latest('id')->paginate(10);
+        $data = $query->get();
         return view('admin.chucvu.list', compact('data'));
     }
 
