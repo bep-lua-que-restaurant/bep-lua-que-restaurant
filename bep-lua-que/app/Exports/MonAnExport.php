@@ -44,7 +44,7 @@ class MonAnExport implements FromCollection, WithHeadings, WithMapping, WithEven
             'Thời gian nấu' => $row->thoi_gian_nau ,
         ];
     }
-    
+
     public function registerEvents(): array
     {
         return [

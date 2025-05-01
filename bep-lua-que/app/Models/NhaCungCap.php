@@ -24,4 +24,9 @@ class NhaCungCap extends Model
         return $this->hasMany(PhieuNhapKho::class, 'nha_cung_cap_id');
     }
 
+    public function phieuXuatKhos()
+    {
+        return $this->hasMany(PhieuXuatKho::class, 'nha_cung_cap_id');
+    }
+
 }

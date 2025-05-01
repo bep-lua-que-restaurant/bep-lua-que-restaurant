@@ -38,15 +38,12 @@
                         <h4 class="card-title">Danh sách Phiếu xuất kho</h4>
 
                         <div class="btn-group">
-
-                            <a style="font-size: 14px" href="{{ route('phieu-xuat-kho.export') }}" class="btn btn-success">
-                                <i class="fa fa-file-excel"></i> Xuất file
-                            </a>
-
                             <a style="padding: 7px 10px 0 10px" href="{{ route('phieu-xuat-kho.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
-
+                            <a style="font-size: 14px" href="{{ route('phieu-xuat-kho.export') }}" class="btn btn-success">
+                                <i class="fa fa-file-excel"></i> Xuất file
+                            </a>
                         </div>
                     </div>
                     <div class="card-body">
@@ -190,7 +187,7 @@
 
                             <tr>
                                 <th>Nhà cung cấp:</th>
-                               <td>${d.nha_cung_cap}</td>
+                               <td>${d.nhaCungCap}</td>
                             </tr>
                             <tr>
                                 <th>Ngày xuất:</th>

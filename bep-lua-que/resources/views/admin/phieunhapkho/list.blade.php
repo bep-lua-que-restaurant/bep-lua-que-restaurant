@@ -155,7 +155,7 @@
                 return `
                     <div class="row p-4 bg-light rounded" style="border-left: 5px solid #007bff; margin-bottom: 20px;">
                         <h5>Thông tin phiếu nhập kho</h5>
-                       
+
                         <table class="table table-bordered">
                             <tr>
                                 <th>Loại phiếu:</th>
@@ -164,9 +164,9 @@
                             </tr>
                             <tr>
                                 <th>Nhà cung Cấp:</th>
-                                <td> ${data.nhacungcap ?? '—'}</td>
+                                <td>${data.nhaCungCap ?? '—'}</td>
                             </tr>
-                           
+
                             <tr>
                                 <th>Ngày nhập:</th>
                                 <td>${data.ngay_nhap}</td>
@@ -174,7 +174,7 @@
                             <tr>
                                 <th>Ghi chú:</th>
                                 <td>${data.ghi_chu ?? ''} </td>
-                            </tr>  
+                            </tr>
                              <tr>
                                 <th>Tổng tiền:</th>
                                 <td>${data.tong_tien ?? 0} VNĐ</td>

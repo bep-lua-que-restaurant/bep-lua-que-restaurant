@@ -87,9 +87,39 @@ class NhaCungCapController extends Controller
 
     public function destroy(NhaCungCap $nhaCungCap)
     {
+        // Kiểm tra xem có phiếu nhập kho nào liên kết với nhà cung cấp này và trạng thái là "cho_duyet"
+        $kiemTraPhieuNhap = $nhaCungCap->phieuNhapKhos()
+            ->where('trang_thai', 'cho_duyet')
+            ->exists();
+
+        $kiemTraPhieuXuat = $nhaCungCap->phieuXuatKhos()
+            ->where('trang_thai', 'cho_duyet')
+            ->exists();
+
+        // Nếu cả phiếu nhập kho và phiếu xuất kho đều đang chờ duyệt
+        if ($kiemTraPhieuNhap && $kiemTraPhieuXuat) {
+            return redirect()->route('nha-cung-cap.index')
+                ->with('error', 'Không thể xóa nhà cung cấp vì đang có phiếu nhập kho và phiếu xuất kho đều ở trạng thái chờ duyệt.');
+        }
+
+        // Nếu chỉ có phiếu nhập kho đang chờ duyệt
+        if ($kiemTraPhieuNhap) {
+            return redirect()->route('nha-cung-cap.index')
+                ->with('error', 'Không thể xóa nhà cung cấp vì đang có phiếu nhập kho ở trạng thái chờ duyệt.');
+        }
+
+        // Nếu chỉ có phiếu xuất kho đang chờ duyệt
+        if ($kiemTraPhieuXuat) {
+            return redirect()->route('nha-cung-cap.index')
+                ->with('error', 'Không thể xóa nhà cung cấp vì đang có phiếu xuất kho ở trạng thái chờ duyệt.');
+        }
+
+        // Xóa nhà cung cấp nếu không có phiếu nhập kho và phiếu xuất kho nào đang chờ duyệt
         $nhaCungCap->delete();
         return redirect()->route('nha-cung-cap.index')->with('success', 'Xóa nhà cung cấp thành công!');
     }
+
+
 
     public function restore($id)
     {
