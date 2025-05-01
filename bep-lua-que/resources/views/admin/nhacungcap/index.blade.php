@@ -26,13 +26,14 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <!-- Ô tìm kiếm nhà cung cấp -->
                     <div class="input-group">
-                        <input style="height: 45px; margin-right: 10px" type="text" id="searchInput" class="form-control border-1"
-                               placeholder="Tìm kiếm theo tên" onkeyup="locNhaCungCap()">
+                        <input style="height: 45px; margin-right: 10px" type="text" id="searchInput"
+                            class="form-control border-1" placeholder="Tìm kiếm theo tên" onkeyup="locNhaCungCap()">
                     </div>
 
                     <!-- Lựa chọn trạng thái làm việc -->
                     <div>
-                        <select style="padding: 11px 0 11px 0; width: 142px" id="statusFilter" class="btn btn-primary btn-sm" onchange="locNhaCungCap()">
+                        <select style="padding: 11px 0 11px 0; width: 142px" id="statusFilter"
+                            class="btn btn-primary btn-sm" onchange="locNhaCungCap()">
                             <option value=""hidden>Lọc theo trạng thái</option>
                             <option value="Đang hoạt động">Đang hoạt động</option>
                             <option value="Đã ngừng hoạt động">Ngừng hoạt động</option>
@@ -55,7 +56,7 @@
                             </a>
                             <!-- Nút Nhập file sẽ hiển thị Modal -->
                             <a href="{{ route('nha_cung_cap.import') }}" class="btn btn-sm btn-secondary"
-                               data-bs-toggle="modal" data-bs-target="#importFileModal">
+                                data-bs-toggle="modal" data-bs-target="#importFileModal">
                                 <i class="fa fa-upload"></i> Nhập file
                             </a>
                             <a href="{{ route('nha-cung-cap.export') }}" class="btn btn-sm btn-success">
@@ -66,76 +67,84 @@
                     <div class="card-body">
                         <div class="table-responsive">
                             <table id="nhaCungCapTable" class="table table-responsive-md">
-                            <thead>
-                                <tr>
-                                    <th style="width:50px;">
-                                        <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
-                                            <input type="checkbox" class="custom-control-input" id="checkAll"
-                                                   required="">
-                                            <label class="custom-control-label" for="checkAll"></label>
-                                        </div>
-                                    </th>
-                                    <th><strong>STT</strong></th>
-                                    <th><strong>Tên </strong></th>
-                                    <th><strong>Trạng thái</strong></th>
-                                    <th><strong>Hành động</strong></th>
-                                </tr>
-                                </thead>
-                                <tbody id="employeeTable">
-                                @foreach ($data as $index => $item)
-                                    <tr class="nha-cung-cap-row">
-                                        <td>
-                                            <div class="custom-control custom-checkbox checkbox-success">
-                                                <input type="checkbox" class="custom-control-input"
-                                                       id="checkbox{{ $item->id }}">
-                                                <label class="custom-control-label"
-                                                       for="checkbox{{ $item->id }}"></label>
+                                <thead>
+                                    <tr>
+                                        <th style="width:50px;">
+                                            <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
+                                                <input type="checkbox" class="custom-control-input" id="checkAll"
+                                                    required="">
+                                                <label class="custom-control-label" for="checkAll"></label>
                                             </div>
-                                        </td>
-                                        <td><strong>{{ $data->firstItem() + $index }}</strong></td>
-                                        <td class="ten-nha-cung-cap">{{ $item->ten_nha_cung_cap }}</td>
-                                        <td class="trang-thai-nha-cung-cap">
-                                            @if ($item->deleted_at != null)
-                                                <div class="d-flex align-items-center"><i class="fa fa-circle text-danger mr-1"></i> Đã ngừng hoạt động
-                                                </div>
-                                            @else
-                                                <div class="d-flex align-items-center"><i class="fa fa-circle text-success mr-1"></i> Đang hoạt động
-                                                </div>
-                                                {{ $item->deleted_at }}
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <a href="{{ route('nha-cung-cap.show', $item->id) }}" class="btn btn-info btn-sm p-2 m-2">
-                                                    <i class="fa fa-eye"></i>
-                                                </a>
-                                                @if ($item->deleted_at == null)
-                                                    <a href="{{ route('nha-cung-cap.edit', $item->id) }}" class="btn btn-warning btn-sm p-2 m-2">
-                                                        <i class="fa fa-edit"></i>
-                                                    </a>
-                                                @endif
-                                                @if ($item->deleted_at)
-                                                    <form action="{{ route('nha-cung-cap.restore', $item->id) }}" method="POST" style="display:inline;">
-                                                        @csrf
-                                                        <button type="submit" onclick="return confirm('Bạn có chắc muốn khôi phục mục này không?')"
-                                                                class="btn btn-success btn-sm p-2 m-2" title="Khôi phục">
-                                                            <i class="fa fa-recycle"></i>
-                                                        </button>
-                                                    </form>
-                                                @else
-                                                    <form action="{{ route('nha-cung-cap.destroy', $item->id) }}" method="POST" style="display:inline;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" onclick="return confirm('Bạn muốn ngừng hoạt động mục này chứ?')"
-                                                                class="btn btn-danger btn-sm p-2 m-2" title="Xóa">
-                                                            <i class="fa fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                @endif
-                                            </div>
-                                        </td>
+                                        </th>
+                                        <th><strong>STT</strong></th>
+                                        <th><strong>Tên </strong></th>
+                                        <th><strong>Trạng thái</strong></th>
+                                        <th><strong>Hành động</strong></th>
                                     </tr>
-                                @endforeach
+                                </thead>
+                                <tbody>
+                                    @foreach ($data as $index => $item)
+                                        <tr class="nha-cung-cap-row">
+                                            <td>
+                                                <div class="custom-control custom-checkbox checkbox-success">
+                                                    <input type="checkbox" class="custom-control-input"
+                                                        id="checkbox{{ $item->id }}">
+                                                    <label class="custom-control-label"
+                                                        for="checkbox{{ $item->id }}"></label>
+                                                </div>
+                                            </td>
+                                            <td><strong>{{ $data->firstItem() + $index }}</strong></td>
+                                            <td class="ten-nha-cung-cap">{{ $item->ten_nha_cung_cap }}</td>
+                                            <td class="trang-thai-nha-cung-cap">
+                                                @if ($item->deleted_at != null)
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fa fa-circle text-danger mr-1"></i> Đã ngừng hoạt động
+                                                    </div>
+                                                @else
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fa fa-circle text-success mr-1"></i> Đang hoạt động
+                                                    </div>
+                                                    {{ $item->deleted_at }}
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <a href="{{ route('nha-cung-cap.show', $item->id) }}"
+                                                        class="btn btn-info btn-sm p-2 m-2">
+                                                        <i class="fa fa-eye"></i>
+                                                    </a>
+                                                    @if ($item->deleted_at == null)
+                                                        <a href="{{ route('nha-cung-cap.edit', $item->id) }}"
+                                                            class="btn btn-warning btn-sm p-2 m-2">
+                                                            <i class="fa fa-edit"></i>
+                                                        </a>
+                                                    @endif
+                                                    @if ($item->deleted_at)
+                                                        <form action="{{ route('nha-cung-cap.restore', $item->id) }}"
+                                                            method="POST" style="display:inline;">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                onclick="return confirm('Bạn có chắc muốn khôi phục mục này không?')"
+                                                                class="btn btn-success btn-sm p-2 m-2" title="Khôi phục">
+                                                                <i class="fa fa-recycle"></i>
+                                                            </button>
+                                                        </form>
+                                                    @else
+                                                        <form action="{{ route('nha-cung-cap.destroy', $item->id) }}"
+                                                            method="POST" style="display:inline;">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit"
+                                                                onclick="return confirm('Bạn muốn ngừng hoạt động mục này chứ?')"
+                                                                class="btn btn-danger btn-sm p-2 m-2" title="Xóa">
+                                                                <i class="fa fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
                             <div id="pagination">
@@ -155,16 +164,17 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="importFileModalLabel">Nhập file</h5>
                     <button type="button" class="close" data-bs-dismiss="modal"
-                            aria-label="Close"><span>&times;</span></button>
+                        aria-label="Close"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
                     <!-- Form nhập file -->
                     <form action="{{ route('nha_cung_cap.import') }}" method="POST" enctype="multipart/form-data"
-                          id="importFileForm">
+                        id="importFileForm">
                         @csrf
                         <div class="mb-3">
                             <label for="fileUpload" class="form-label">Chọn file</label>
-                            <input style="height: auto" type="file" name="file" id="fileUpload" class="form-control" required>
+                            <input style="height: auto" type="file" name="file" id="fileUpload"
+                                class="form-control" required>
                         </div>
                     </form>
                 </div>
@@ -177,32 +187,4 @@
     </div>
 
     @include('admin.search-srcip')
-    <!-- Hiển thị phân trang -->
-{{--        {{ $data->links('pagination::bootstrap-5') }}--}}
-    <script>
-        $(document).ready(function() {
-            // Lắng nghe sự kiện chuyển trang
-            $(document).on('click', '.pagination a', function(e) {
-                e.preventDefault();
-                var url = $(this).attr('href');
-
-                // Gửi yêu cầu AJAX
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(response) {
-                        // Cập nhật nội dung bảng
-                        $('#employeeTable').html($(response.html).find('#employeeTable').html());
-                        // Cập nhật phân trang
-                        $('#pagination').html($(response.pagination).html());
-                    },
-                    error: function() {
-                        alert('Lỗi khi tải dữ liệu!');
-                    }
-                });
-            });
-        });
-    </script>
 @endsection
-
-

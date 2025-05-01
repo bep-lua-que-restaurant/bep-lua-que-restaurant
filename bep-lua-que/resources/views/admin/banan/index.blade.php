@@ -118,7 +118,7 @@
                                                 <label class="custom-control-label" for="checkAll"></label>
                                             </div>
                                         </th>
-                                        <th><strong>ID.</strong></th>
+                                        <th><strong>STT</strong></th>
                                         <th><strong>Tên bàn </strong></th>
                                         {{-- <th><strong>Số ghế </strong></th> --}}
                                         <th><strong>Trạng Thái</strong></th>
@@ -155,8 +155,10 @@
     </div>
 
     <script>
-        function renderTable(data) {
+        function renderTable(data, currentPage) {
             let html = '';
+            let startIndex = (currentPage - 1) * 10 + 1; // Số thứ tự bắt đầu từ đâu (số bản ghi trên các trang trước đó)
+
             data.forEach((item, index) => {
                 let deleted = item.deleted_at !== null;
                 let statusKD = deleted ?
@@ -170,31 +172,31 @@
                 };
 
                 html += `
-                    <tr>
-                        <td>
-                            <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
-                                <input type="checkbox" class="custom-control-input" id="customCheckBox${index}">
-                                <label class="custom-control-label" for="customCheckBox${index}"></label>
-                            </div>
-                        </td>
-                        <td><strong>${item.id}</strong></td>
-                        <td><div class="d-flex align-items-center"><span class="w-space-no">${item.ten_ban}</span></div></td>
-                        <td>${statusKD}</td>
-                        <td><span>${labels[item.trang_thai] ?? item.trang_thai}</span></td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <button class="btn btn-info btnChiTietBanAn" data-id="${item.id}"><i class="fa fa-eye"></i></button>
-                                ${!deleted ? `<button class="btn btn-warning btn-sm p-2 m-2 btnEditBanAn" data-id="${item.id}"><i class="fa fa-edit"></i></button>` : ''}
-                                ${deleted
-                                    ? `<button class="btn btn-success btn-sm p-2 m-2 btnRestoreBanAn" data-id="${item.id}"><i class="fa fa-recycle"></i></button>`
-                                    : (item.trang_thai === 'trong'
-                                        ? `<button class="btn btn-danger btn-sm p-2 m-2 btnDeleteBanAn" data-id="${item.id}"><i class="fa fa-trash"></i></button>`
-                                        : '')
-                                }
-                            </div>
-                        </td>
-                    </tr>
-                `;
+            <tr>
+                <td>
+                    <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
+                        <input type="checkbox" class="custom-control-input" id="customCheckBox${index}">
+                        <label class="custom-control-label" for="customCheckBox${index}"></label>
+                    </div>
+                </td>
+                <td><strong>${startIndex + index}</strong></td> <!-- Hiển thị số thứ tự dựa trên trang -->
+                <td><div class="d-flex align-items-center"><span class="w-space-no">${item.ten_ban}</span></div></td>
+                <td>${statusKD}</td>
+                <td><span>${labels[item.trang_thai] ?? item.trang_thai}</span></td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-info btnChiTietBanAn" data-id="${item.id}"><i class="fa fa-eye"></i></button>
+                        ${!deleted ? `<button class="btn btn-warning btn-sm p-2 m-2 btnEditBanAn" data-id="${item.id}"><i class="fa fa-edit"></i></button>` : ''}
+                        ${deleted
+                    ? `<button class="btn btn-success btn-sm p-2 m-2 btnRestoreBanAn" data-id="${item.id}"><i class="fa fa-recycle"></i></button>`
+                    : (item.trang_thai === 'trong'
+                        ? `<button class="btn btn-danger btn-sm p-2 m-2 btnDeleteBanAn" data-id="${item.id}"><i class="fa fa-trash"></i></button>`
+                        : '')
+                }
+                    </div>
+                </td>
+            </tr>
+        `;
             });
 
             $('#table-body').html(html);
@@ -245,7 +247,6 @@
         }
 
 
-
         function fetchPage(page = 1) {
             let ten = $('#filter-ten').val();
             let status = $('#filter-status').val();
@@ -258,7 +259,7 @@
                     statusFilter: status
                 },
                 success: function(res) {
-                    renderTable(res.data.data);
+                    renderTable(res.data.data, res.data.current_page);  // Truyền current_page vào renderTable
                     renderPagination(res.data);
                 },
                 error: function(err) {
@@ -347,10 +348,10 @@
                 </div>
                 <div class="modal-body">
                     <table class="table">
-                        <tr>
-                            <th>ID</th>
-                            <td id="modal-ban-id"></td>
-                        </tr>
+{{--                        <tr>--}}
+{{--                            <th>ID</th>--}}
+{{--                            <td id="modal-ban-id"></td>--}}
+{{--                        </tr>--}}
                         <tr>
                             <th>Tên bàn</th>
                             <td id="modal-ten-ban"></td>
@@ -459,7 +460,7 @@
                     url: `/ban-an/ajax/${id}`,
                     type: 'GET',
                     success: function(data) {
-                        $('#modal-ban-id').text(data.id);
+                        // $('#modal-ban-id').text(data.id);
                         $('#modal-ten-ban').text(data.ten_ban);
                         $('#modal-so-ghe').text(data.so_ghe);
                         $('#modal-mo-ta').text(data.mo_ta ?? 'Không có mô tả');
