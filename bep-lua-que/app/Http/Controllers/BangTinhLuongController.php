@@ -47,11 +47,15 @@ class BangTinhLuongController extends Controller
     // 🔹 Lọc theo tháng và năm nếu có yêu cầu từ request
     if ($request->has('month') && $request->month != '') {
         $month = $request->month;
-        $year = now()->year; // Lấy năm hiện tại
-
-        $query->whereMonth('bang_tinh_luongs.thang_nam', $month)
-              ->whereYear('bang_tinh_luongs.thang_nam', $year);
+        $year = now()->year;
+    } else {
+        $month = now()->month;
+        $year = now()->year;
     }
+    
+    $query->whereMonth('bang_tinh_luongs.thang_nam', $month)
+          ->whereYear('bang_tinh_luongs.thang_nam', $year);
+    
 
     // 🔹 Lọc theo tên nhân viên nếu có yêu cầu
     if ($request->has('ten') && $request->ten != '') {

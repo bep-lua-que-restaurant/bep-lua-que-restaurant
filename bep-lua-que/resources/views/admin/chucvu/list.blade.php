@@ -67,7 +67,7 @@
                                 <tbody>
                                     @foreach ($data as $index => $item)
                                         <tr>
-                                            <td><strong>{{ $loop->iteration }}</strong></td>    
+                                            <td></td>
                                             <td>{{ $item->ten_chuc_vu }}</td>
                                             <td>
                                                 @if ($item->deleted_at)
@@ -190,7 +190,15 @@
                     targets: [0, 3] // Vô hiệu hóa sắp xếp trên cột STT (0) và Hành động (3)
                 }]
             });
-
+            // Gán lại STT theo vị trí thực tế của dòng
+            table.on('order.dt search.dt draw.dt', function() {
+                table.column(0, {
+                    search: 'applied',
+                    order: 'applied'
+                }).nodes().each(function(cell, i) {
+                    cell.innerHTML = i + 1;
+                });
+            }).draw();
             // Tìm kiếm tùy chỉnh
             $('#customSearch').on('keyup', function() {
                 table.search(this.value).draw();

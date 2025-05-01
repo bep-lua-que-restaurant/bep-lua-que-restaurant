@@ -25,7 +25,7 @@ class MonAnController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = MonAn::with(['danhMuc'])->withTrashed();
+            $query = MonAn::with(['danhMuc'])->withTrashed()->orderByDesc('created_at');;
 
             return DataTables::of($query)
                 ->addIndexColumn()
