@@ -17,16 +17,26 @@ class NhaCungCapController extends Controller
     {
         $query = NhaCungCap::query();
 
-//        if ($request->has('ten_nha_cung_cap') && $request->ten_nha_cung_cap != '') {
-//            $query->where('ten_nha_cung_cap', 'like', '%' . $request->ten_nha_cung_cap . '%');
-//        }
+
         $searchInputId = 'searchInput';
+        if ($request->has('searchInput') && $request->searchInput != '') {
+            $query->where('ten_nha_cung_cap', 'like', '%' . $request->searchInput . '%');
+        }
+
+        if ($request->has('statusFilter') && $request->statusFilter != '') {
+            if ($request->statusFilter === 'Đang hoạt động') {
+                $query->whereNull('deleted_at');
+            } elseif ($request->statusFilter === 'Đã ngừng hoạt động') {
+                $query->whereNotNull('deleted_at');
+            }
+        }
+
         $data = $query->withTrashed()->latest('id')->paginate(10);
 
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('admin.nhacungcap.index', compact('data', 'searchInputId'))->render(),
-                'pagination' => (string) $data->links('pagination::bootstrap-5') // Trả về phân trang
+                'pagination' => (string) $data->links('pagination::bootstrap-5')->toHtml() // Trả về phân trang
             ]);
         }
 
@@ -150,4 +160,3 @@ class NhaCungCapController extends Controller
         return back()->with('success', 'Nhập dữ liệu thành công!');
     }
 }
-

@@ -177,7 +177,7 @@
                                 <label class="custom-control-label" for="customCheckBox${index}"></label>
                             </div>
                         </td>
-                        <td><strong>${item.id}</strong></td>
+                        <td><strong>${index + 1}</strong></td>
                         <td><div class="d-flex align-items-center"><span class="w-space-no">${item.ten_ban}</span></div></td>
                         <td>${statusKD}</td>
                         <td><span>${labels[item.trang_thai] ?? item.trang_thai}</span></td>

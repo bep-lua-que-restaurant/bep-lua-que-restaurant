@@ -1,25 +1,28 @@
 <script>
-    function locNhaCungCap() {
-        const input = document.getElementById("searchInput").value.toLowerCase();
-        const statusFilter = document.getElementById("statusFilter").value;
-        const rows = document.querySelectorAll(".nha-cung-cap-row");
+    function locNhaCungCap(page = 1) {
+        var searchInput = $('#searchInput').val();
+        var statusFilter = $('#statusFilter').val();
 
-        rows.forEach(row => {
-            const name = row.querySelector(".ten-nha-cung-cap").textContent.toLowerCase();
-            const id = row.querySelector("td:nth-child(2)").textContent.toLowerCase();
-            const status = row.querySelector(".trang-thai-nha-cung-cap").textContent.trim();
-
-            const matchesSearch = name.includes(input) || id.includes(input);
-
-            const matchesStatus = statusFilter === "Tất cả" || statusFilter === "" || status.includes(
-                statusFilter);
-
-
-            if (matchesSearch && matchesStatus) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
+        $.ajax({
+            url: '{{ route("nha-cung-cap.index") }}',
+            type: 'GET',
+            data: {
+                searchInput: searchInput,
+                statusFilter: statusFilter,
+                page: page
+            },
+            success: function (response) {
+                $('#nhaCungCapTable').html($(response.html).find('#nhaCungCapTable').html());
+                $('#pagination').html($(response.pagination).html());
+            },
+            error: function () {
+                alert('Lỗi khi tải dữ liệu!');
             }
         });
     }
+    $(document).on('click', '.pagination a', function(e) {
+        e.preventDefault();
+        var page = $(this).attr('href').split('page=')[1];
+        locNhaCungCap(page);
+    });
 </script>
