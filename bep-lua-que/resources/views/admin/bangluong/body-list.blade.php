@@ -1,11 +1,11 @@
 @foreach ($data as $index => $item)
     <tr>
-        <td>
+        {{-- <td>
             <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
                 <input type="checkbox" class="custom-control-input" id="customCheckBox{{ $index }}">
                 <label class="custom-control-label" for="customCheckBox{{ $index }}"></label>
             </div>
-        </td>
+        </td> --}}
         <td><strong>BL{{ $item->id }}</strong></td>
 
         <!-- Tên nhân viên -->

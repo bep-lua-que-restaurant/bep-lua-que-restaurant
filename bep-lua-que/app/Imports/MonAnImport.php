@@ -44,7 +44,8 @@ class MonAnImport implements ToModel, WithHeadingRow
     private function convertGia($gia)
     {
         $gia = preg_replace('/[^0-9,.]/', '', $gia);
-        $gia = str_replace(',', '', $gia);
+        // / Xóa dấu . và dấu , để tránh hiểu sai phần thập phân
+    $gia = str_replace(['.', ','], '', $gia);
 
         return is_numeric($gia) ? (float) $gia : 0;
     }

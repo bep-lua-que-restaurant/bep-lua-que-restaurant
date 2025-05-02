@@ -18,7 +18,7 @@ class NhanVienController extends Controller
     public function index()
     {
         $searchInputId = 'searchInput';
-        $nhanViens = NhanVien::with('chucVu')->paginate(10);
+        $nhanViens = NhanVien::with('chucVu')->orderBy('created_at', 'desc')->paginate(10);
         return view('admin.nhanvien.index', compact('nhanViens', 'searchInputId'));
     }
 

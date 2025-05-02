@@ -358,7 +358,7 @@
                                                     tooltip: {
                                                         callbacks: {
                                                             label: function(
-                                                            context) {
+                                                                context) {
                                                                 const index =
                                                                     context
                                                                     .dataIndex;
@@ -371,7 +371,7 @@
                                                                     context
                                                                     .dataset
                                                                     .data[
-                                                                    index];
+                                                                        index];
                                                                 const label =
                                                                     context
                                                                     .label;
@@ -383,10 +383,11 @@
                                                                     'undefined' ?
                                                                     ((value /
                                                                             ton
-                                                                            ) *
+                                                                        ) *
                                                                         100)
                                                                     .toFixed(
-                                                                    0) + '%' :
+                                                                        0) +
+                                                                    '%' :
                                                                     '0%';
 
                                                                 let labelStr =
@@ -396,7 +397,7 @@
                                                                     loList
                                                                     .length ===
                                                                     0)
-                                                            return labelStr;
+                                                                    return labelStr;
 
                                                                 // Dòng lô hàng chi tiết (mỗi dòng riêng)
                                                                 const
@@ -407,10 +408,11 @@
                                                                     );
 
                                                                 return [
-                                                                        labelStr]
+                                                                        labelStr
+                                                                    ]
                                                                     .concat(
                                                                         loDetails
-                                                                        );
+                                                                    );
                                                             }
                                                         },
                                                         // Bạn có thể thêm style để dễ đọc hơn

@@ -26,11 +26,16 @@
                             @csrf
 
                             <div class="row mb-3">
-                                <div class="col-md-6">
+                                {{-- <div class="col-md-6">
                                     <p><strong>ID:</strong> {{ $maGiamGia->id }}</p>
-                                </div>
+                                </div> --}}
                                 <div class="col-md-6">
                                     <p><strong>Mã:</strong> {{ $maGiamGia->code }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Số Lượt Sử Dụng:</strong> {{ $maGiamGia->used }}
+                                        {{ $maGiamGia->usage_limit == 0 ? 'Không giới hạn' : $maGiamGia->usage_limit }}
+                                    </p>
                                 </div>
                             </div>
 
@@ -68,11 +73,7 @@
                                         </span>
                                     </p>
                                 </div>
-                                <div class="col-md-6">
-                                    <p><strong>Số Lượt Sử Dụng:</strong> {{ $maGiamGia->used }}
-                                        {{ $maGiamGia->usage_limit == 0 ? 'Không giới hạn' : $maGiamGia->usage_limit }}
-                                    </p>
-                                </div>
+
                             </div>
                             <!-- Trạng thái -->
                             <div class="form-group">

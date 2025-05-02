@@ -22,7 +22,7 @@ class DanhMucMonAnController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = DanhMucMonAn::query()->withTrashed();
+            $query = DanhMucMonAn::query()->withTrashed()->orderByDesc('created_at');;
     
             return DataTables::of($query)
                 ->addIndexColumn() // ✅ Tạo cột STT
@@ -133,8 +133,9 @@ class DanhMucMonAnController extends Controller
                 ->join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
                 ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
                 ->exists();
-    
-            if ($hasPaidOrder) {
+    // Kiểm tra xem có món ăn nào đang sử dụng danh mục này không
+    $hasMonAn = MonAn::where('danh_muc_mon_an_id', $danhMucMonAn->id)->exists();
+            if ($hasPaidOrder || $hasMonAn) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Danh mục này có món ăn đang được sử dụng, không thể xóa.'
