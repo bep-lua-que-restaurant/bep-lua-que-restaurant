@@ -11,7 +11,7 @@ class ThongKeTopDoanhThuController extends Controller
 {
     public function index(Request $request)
     {
-        $filterType = $request->input('filterType', 'day');
+        $filterType = $request->input('filterType', 'year');
         $chartType = $request->input('chartType', 'gioBanChay'); // Lấy giá trị mặc định là giờ bán chạy
         $fromDate = $request->input('fromDate');
         $toDate = $request->input('toDate');

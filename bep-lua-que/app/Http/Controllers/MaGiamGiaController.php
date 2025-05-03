@@ -34,46 +34,40 @@ class MaGiamGiaController extends Controller
                        });
              })
              ->update(['deleted_at' => now()]);
-         
-         $searchInput = $request->input('searchInput');
-         $statusFilter = $request->input('statusFilter');
-     
+
          $query = MaGiamGia::query();
-     
-         // Apply search filter
-         if ($searchInput) {
-             $query->where('code', 'like', '%' . $searchInput . '%');
+
+         $searchInputId = 'searchInput';
+         if ($request->has('searchInput') && $request->searchInput != '') {
+             $query->where('code', 'like', '%' . $request->searchInput . '%');
          }
-     
-         // Apply status filter
-         if ($statusFilter && $statusFilter !== 'Tất cả') {
-             if ($statusFilter === 'Đang hoạt động') {
-                 $query->where(function($q) {
-                     $q->whereNull('deleted_at')
-                       ->whereDate('end_date', '>=', Carbon::today())
-                       ->where('usage_limit', '>', 0)
-                       ->whereRaw('(SELECT COUNT(*) FROM hoa_dons WHERE hoa_dons.id_ma_giam = ma_giam_gias.id) < usage_limit'); // Đảm bảo số lượt chưa dùng hết
-                 });
-             } else if ($statusFilter === 'Đã ngừng hoạt động') {
-                 $query->where(function($q) {
-                     $q->whereNotNull('deleted_at')
-                       ->orWhereDate('end_date', '<', Carbon::today())
-                       ->orWhere('usage_limit', '<=', 0)
-                       ->orWhereRaw('(SELECT COUNT(*) FROM hoa_dons WHERE hoa_dons.id_ma_giam = ma_giam_gias.id) >= usage_limit'); // Đã hết lượt hoặc hết hạn
-                 });
+
+         if ($request->has('statusFilter') && $request->statusFilter != '') {
+             if ($request->statusFilter === 'Đang hoạt động') {
+                 $query->whereNull('deleted_at');
+             } elseif ($request->statusFilter === 'Đã ngừng hoạt động') {
+                 $query->whereNotNull('deleted_at');
              }
          }
-     
-         $data = $query->withTrashed()->paginate(10);
-     // Thêm số lượt đã sử dụng vào dữ liệu
-        foreach ($data as $item) {
-        $item->usage_count = HoaDon::where('id_ma_giam', $item->id)->count();
-        }
+
+         $data = $query->withTrashed()->latest('id')->paginate(10);
+         // Thêm số lượt đã sử dụng vào dữ liệu
+         foreach ($data as $item) {
+             $item->usage_count = HoaDon::where('id_ma_giam', $item->id)->count();
+         }
+
+         if ($request->ajax()) {
+             return response()->json([
+                 'html' => view('admin.magiamgia.list', compact('data', 'searchInputId'))->render(),
+                 'pagination' => (string) $data->links('pagination::bootstrap-5')->toHtml() // Trả về phân trang
+             ]);
+         }
+
          return view('admin.magiamgia.list', compact('data'));
      }
-     
 
-    
+
+
 
 
     /**
@@ -90,15 +84,15 @@ class MaGiamGiaController extends Controller
     public function store(StoreMaGiamGiaRequest $request)
     {
         $validated = $request->validated();
-    
+
         // Nếu không có usage_limit, gán mặc định là 0
         $validated['usage_limit'] = $validated['usage_limit'] ?? 0;
-    
+
         MaGiamGia::create($validated);
-    
+
         return redirect()->route('ma-giam-gia.index')->with('success', 'Thêm mã giảm giá thành công!');
     }
-    
+
 
     /**
      * Display the specified resource.
@@ -126,7 +120,7 @@ class MaGiamGiaController extends Controller
     public function update(Request $request, $id)
     {
         $maGiamGia = MaGiamGia::withTrashed()->findOrFail($id); // lấy cả bản đã xóa mềm
-    
+
         $validated = $request->validate([
             'code' => [
                 'required',
@@ -145,42 +139,42 @@ class MaGiamGiaController extends Controller
             'code.string' => 'Mã giảm giá phải là chuỗi.',
             'code.max' => 'Mã giảm giá tối đa 20 ký tự.',
             'code.unique' => 'Mã giảm giá đã tồn tại.',
-    
+
             'type.required' => 'Vui lòng chọn loại giảm giá.',
             'type.in' => 'Loại giảm giá không hợp lệ.',
-    
+
             'value.required' => 'Giá trị giảm không được để trống.',
             'value.numeric' => 'Giá trị giảm phải là số.',
             'value.min' => 'Giá trị giảm phải lớn hơn 0.',
-    
+
             'min_order_value.required' => 'Đơn hàng tối thiểu không được để trống.',
             'min_order_value.numeric' => 'Đơn hàng tối thiểu phải là số.',
             'min_order_value.min' => 'Đơn hàng tối thiểu phải lớn hơn hoặc bằng 0.',
-    
+
             'start_date.required' => 'Ngày bắt đầu không được để trống.',
             'start_date.date' => 'Ngày bắt đầu không đúng định dạng.',
             'start_date.after_or_equal' => 'Ngày bắt đầu phải từ hôm nay trở đi.',
-    
+
             'end_date.required' => 'Ngày kết thúc không được để trống.',
             'end_date.date' => 'Ngày kết thúc không đúng định dạng.',
             'end_date.after' => 'Ngày kết thúc phải sau ngày bắt đầu.',
-    
+
             'usage_limit.required' => 'Giới hạn sử dụng không được để trống.',
             'usage_limit.integer' => 'Giới hạn sử dụng phải là số nguyên.',
             'usage_limit.min' => 'Giới hạn sử dụng không được âm.',
         ]);
-    
+
         // Nếu không có usage_limit, gán mặc định là 0
         // Trong trường hợp này không còn nullable, nên cần đảm bảo đã nhập usage_limit
         $validated['usage_limit'] = $validated['usage_limit'] ?? 0;
-    
+
         $maGiamGia->update($validated);
-    
+
         return back()->with('success', 'Cập nhật mã giảm giá thành công!');
     }
-    
 
-    
+
+
     /**
      * Remove the specified resource from storage.
      */
@@ -210,7 +204,7 @@ class MaGiamGiaController extends Controller
     public function restore($id)
 {
     $maGiamGia = MaGiamGia::withTrashed()->findOrFail($id);
-    
+
     // Nếu mã đã hoàn toàn hết hạn (qua hết ngày) hoặc hết số lượt
     if (Carbon::parse($maGiamGia->end_date)->endOfDay()->lt(now())) {
         return redirect()->route('ma-giam-gia.index')->with('error', 'Mã giảm giá đã hết hạn, không thể khôi phục.');
@@ -224,11 +218,11 @@ class MaGiamGiaController extends Controller
 
     // Nếu không hết hạn và còn lượt, cho phép khôi phục
     $maGiamGia->restore();
-    
+
     return redirect()->route('ma-giam-gia.index')->with('success', 'Khôi phục thành công!');
 }
 
-    
+
 
     public function export()
     {

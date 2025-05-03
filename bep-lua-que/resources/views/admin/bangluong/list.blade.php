@@ -81,6 +81,9 @@
                                 </tbody>
 
                             </table>
+                            <div>
+                                {{ $data->links('pagination::bootstrap-5') }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -121,7 +124,7 @@
 
     @include('admin.search-srcip')
     <!-- Hiển thị phân trang -->
-    {{ $data->links('pagination::bootstrap-5') }}
+
 
 
     <script>
