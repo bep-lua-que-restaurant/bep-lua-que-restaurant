@@ -10,6 +10,7 @@ use App\Models\HoaDonBan;
 use App\Models\KhachHang;
 use App\Events\BanAnUpdated;
 use App\Events\DatBanUpdated;
+use App\Events\GhepBanEvent;
 use App\Models\PhongAn;
 use Illuminate\Http\Request;
 use App\Events\HoaDonUpdated;
@@ -550,29 +551,29 @@ class ThuNganController extends Controller
     {
         $idBanHienTai = $request->id_ban_hien_tai;
         $idDanhSachBanMoi = json_decode($request->input('danh_sach_ban'), true);
-
+    
         $datban = DatBan::where('ban_an_id', $idBanHienTai)
             ->where('trang_thai', 'xac_nhan')->get();
-
+    
         $soNguoiHienTai = DatBan::where('ban_an_id', $idBanHienTai)
             ->where('trang_thai', 'xac_nhan')
             ->value('so_nguoi');
-
+    
         $soNguoiDanhSachBanMoi = DatBan::whereIn('ban_an_id', $idDanhSachBanMoi)
             ->where('trang_thai', 'xac_nhan')
             ->sum('so_nguoi');
-
+    
         $totalSoNguoi = $soNguoiHienTai + $soNguoiDanhSachBanMoi;
         foreach ($datban as $dat) {
             $dat->update([
                 'so_nguoi' => $totalSoNguoi,
             ]);
         }
-
+    
         $datbanDanhSachMoi = DatBan::whereIn('ban_an_id', $idDanhSachBanMoi)
             ->where('trang_thai', 'xac_nhan')
             ->get();
-
+    
         $firstDatBan = $datban->first();
         if ($firstDatBan) {
             $maDatBanChung = $firstDatBan->ma_dat_ban;
@@ -585,11 +586,11 @@ class ThuNganController extends Controller
                 }
             }
         }
-
+    
         $hoaDonHienTai = HoaDonBan::where('ban_an_id', $idBanHienTai)
             ->where('trang_thai', 'dang_xu_ly')
             ->first();
-
+    
         if (!$hoaDonHienTai) {
             $hoaDon = HoaDon::create([
                 'ma_hoa_don' => $this->generateMaHoaDon(),
@@ -598,39 +599,56 @@ class ThuNganController extends Controller
                 'phuong_thuc_thanh_toan' => 'tien_mat',
                 'mo_ta' => null
             ]);
-
+    
             HoaDonBan::create([
                 'hoa_don_id' => $hoaDon->id,
                 'ban_an_id' => $idBanHienTai,
                 'trang_thai' => 'dang_xu_ly'
             ]);
-
+    
             $hoaDonHienTai = HoaDonBan::where('ban_an_id', $idBanHienTai)
                 ->where('trang_thai', 'dang_xu_ly')
                 ->first();
-
+    
             BanAn::where('id', $idBanHienTai)->update(['trang_thai' => 'co_khach']);
             $banAn = BanAn::find($idBanHienTai);
             event(new BanAnUpdated($banAn));
         }
-
+    
+        $hoaDonHienTaiID = $hoaDonHienTai->hoa_don_id;
+        $maHoaDonChung = HoaDon::where('id', $hoaDonHienTaiID)->value('ma_hoa_don');
+        $monAns = [];
+        $maHoaDonCu = [];
+        $banAnIds = array_merge([$idBanHienTai], $idDanhSachBanMoi);
+    
+        // Lấy tất cả mã hóa đơn từ các bàn được ghép
+        $hoaDonBans = HoaDonBan::whereIn('ban_an_id', $banAnIds)
+            ->where('trang_thai', 'dang_xu_ly')
+            ->with(['hoaDon'])
+            ->get();
+    
+        foreach ($hoaDonBans as $hoaDonBan) {
+            if ($hoaDonBan->hoa_don_id != $hoaDonHienTaiID && $hoaDonBan->hoaDon) {
+                $maHoaDonCu[] = $hoaDonBan->hoaDon->ma_hoa_don;
+            }
+        }
+    
         foreach ($idDanhSachBanMoi as $idBanMoi) {
             $hoaDonBanMoi = HoaDonBan::where('ban_an_id', $idBanMoi)
                 ->where('trang_thai', 'dang_xu_ly')
                 ->first();
-
+    
             if ($hoaDonBanMoi) {
                 $hoaDonMoiID = $hoaDonBanMoi->hoa_don_id;
-                $hoaDonHienTaiID = $hoaDonHienTai->hoa_don_id;
-
+    
                 $chiTietMonAnMoi = ChiTietHoaDon::where('hoa_don_id', $hoaDonMoiID)->get();
-
+    
                 foreach ($chiTietMonAnMoi as $monMoi) {
                     $monAnCu = ChiTietHoaDon::where('hoa_don_id', $hoaDonHienTaiID)
                         ->where('mon_an_id', $monMoi->mon_an_id)
                         ->where('trang_thai', $monMoi->trang_thai)
                         ->first();
-
+    
                     if ($monAnCu) {
                         $monAnCu->so_luong += $monMoi->so_luong;
                         $monAnCu->thanh_tien = $monAnCu->so_luong * $monAnCu->don_gia;
@@ -648,22 +666,22 @@ class ThuNganController extends Controller
                         $monMoi->delete();
                     }
                 }
-
+    
                 $chiTietHoaDon = ChiTietHoaDon::where('hoa_don_id', $hoaDonHienTaiID)->get();
                 $tongTien = 0;
-
+    
                 foreach ($chiTietHoaDon as $chiTiet) {
                     $chiTiet->thanh_tien = $chiTiet->so_luong * $chiTiet->don_gia;
                     $tongTien += $chiTiet->thanh_tien;
                     $chiTiet->save();
                 }
-
+    
                 HoaDon::where('id', $hoaDonHienTaiID)->update([
                     'tong_tien_truoc_khi_giam' => $tongTien
                 ]);
-
+    
                 HoaDon::where('id', $hoaDonMoiID)->delete();
-
+    
                 HoaDonBan::where('ban_an_id', $idBanMoi)
                     ->update(['hoa_don_id' => $hoaDonHienTaiID]);
             } else {
@@ -673,15 +691,36 @@ class ThuNganController extends Controller
                     'trang_thai' => 'dang_xu_ly'
                 ]);
             }
-
+    
             BanAn::where('id', $idBanMoi)->update(['trang_thai' => 'co_khach']);
             $banAn = BanAn::find($idBanMoi);
             event(new BanAnUpdated($banAn));
         }
-
+    
+        // Thu thập danh sách món ăn để gửi qua sự kiện
+        $chiTietHoaDons = ChiTietHoaDon::where('hoa_don_id', $hoaDonHienTaiID)
+            ->with(['monAn'])
+            ->get();
+    
+        foreach ($chiTietHoaDons as $chiTiet) {
+            $monAns[] = [
+                'id' => $chiTiet->id,
+                'mon_an_id' => $chiTiet->mon_an_id,
+                'ten' => $chiTiet->monAn ? $chiTiet->monAn->ten : 'Không xác định',
+                'so_luong' => $chiTiet->so_luong,
+                'thoi_gian_nau' => $chiTiet->monAn ? $chiTiet->monAn->thoi_gian_nau : 0,
+                'ghi_chu' => $chiTiet->ghi_chu,
+                'trang_thai' => $chiTiet->trang_thai,
+                'thoi_gian_hoan_thanh_du_kien' => $chiTiet->thoi_gian_hoan_thanh_du_kien ? $chiTiet->thoi_gian_hoan_thanh_du_kien->toDateTimeString() : null,
+                'ma_hoa_don' => $maHoaDonChung
+            ];
+        }
+    
+        // Phát sự kiện ghép bàn
+        event(new GhepBanEvent($monAns, $maHoaDonChung, $maHoaDonCu));
+    
         return response()->json(['message' => 'Ghép bàn thành công!']);
     }
-
     public function updateQuantity(Request $request)
     {
         $monAnId = $request->mon_an_id;
