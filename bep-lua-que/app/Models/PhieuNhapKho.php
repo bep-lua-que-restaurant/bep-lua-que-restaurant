@@ -28,7 +28,8 @@ class PhieuNhapKho extends Model
      */
     public function nhaCungCap()
     {
-        return $this->belongsTo(NhaCungCap::class, 'nha_cung_cap_id', 'id');
+        return $this->belongsTo(NhaCungCap::class, 'nha_cung_cap_id', 'id')->withTrashed();
+
     }
 
     /**
