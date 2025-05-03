@@ -21,24 +21,24 @@ class ChamCongController extends Controller
     /**
      * Display a listing of the resource.
      */
-   
+
      public function index(Request $request)
      {
          Carbon::setLocale('vi');
-     
+
          $selectedMonth = $request->query('selected_month', Carbon::now()->format('Y-m'));
          $selectedDate = Carbon::parse($selectedMonth . '-01');
-     
+
          $firstDayOfMonth = $selectedDate->copy()->startOfMonth();
          $lastDayOfMonth = $selectedDate->copy()->endOfMonth();
-     
+
          $dates = collect();
-     
+
          // Đây nè: dùng biến tạm riêng $day, không thay đổi $firstDayOfMonth
          for ($day = $firstDayOfMonth->copy(); $day->lte($lastDayOfMonth); $day->addDay()) {
              $dates->push($day->copy());
          }
-     
+
          $caLams = CaLam::withTrashed()
          ->where(function ($query) use ($firstDayOfMonth, $lastDayOfMonth) {
              $query->whereNull('deleted_at') // chưa bị xóa
@@ -50,7 +50,7 @@ class ChamCongController extends Controller
                  });
          })
          ->get();
-     
+
          $nhanViens = NhanVien::where(function ($query) use ($firstDayOfMonth, $lastDayOfMonth) {
             $query->where('trang_thai', 'dang_lam_viec')
                 ->orWhereHas('chamCongs', function ($q) use ($firstDayOfMonth, $lastDayOfMonth) {
@@ -59,12 +59,12 @@ class ChamCongController extends Controller
                         $lastDayOfMonth->format('Y-m-d')
                     ]);
                 });
-        })->paginate(10);
-        
+        })->paginate(8);
+
         // Tạo thêm biến chứa toàn bộ nhân viên để dùng riêng cho chấm công nhanh
 $nhanViensAll = NhanVien::where('trang_thai', 'dang_lam_viec')->get();
 
-     
+
          $chamCongs = DB::table('cham_congs')
              ->join('nhan_viens', 'cham_congs.nhan_vien_id', '=', 'nhan_viens.id')
              ->join('ca_lams', 'cham_congs.ca_lam_id', '=', 'ca_lams.id')
@@ -82,7 +82,7 @@ $nhanViensAll = NhanVien::where('trang_thai', 'dang_lam_viec')->get();
                  DB::raw('CASE WHEN cham_congs.id IS NOT NULL THEN 1 ELSE 0 END AS da_cham_cong')
              )
              ->get();
-     
+
          if ($request->ajax()) {
              return response()->json([
                 //  'dates' => $dates->toArray(),
@@ -90,13 +90,13 @@ $nhanViensAll = NhanVien::where('trang_thai', 'dang_lam_viec')->get();
                  'pagination' => (string) $nhanViens->links(), // Trả về phân trang
              ]);
          }
-     
+
          return view('admin.chamcong.chamcong', compact('dates', 'caLams', 'chamCongs', 'nhanViens','nhanViensAll'));
      }
-     
-     
-     
-    
+
+
+
+
 
 
 
@@ -114,26 +114,26 @@ $nhanViensAll = NhanVien::where('trang_thai', 'dang_lam_viec')->get();
     public function store(Request $request)
     {
         $changesMade = false; // <-- khai báo ngay đầu tiên
-    
-        // ========== CHẤM CÔNG NHANH ========== 
+
+        // ========== CHẤM CÔNG NHANH ==========
         if ($request->filled('ngay_cham_cong_nhanh') && $request->filled('ca_lam_id_nhanh') && $request->filled('nhan_vien_ids_nhanh')) {
             $ngayNhanh = Carbon::parse($request->input('ngay_cham_cong_nhanh'));
             $caNhanhId = $request->input('ca_lam_id_nhanh');
             $nhanViensNhanh = $request->input('nhan_vien_ids_nhanh');
             if (
-                $ngayNhanh->gt(Carbon::now()->startOfDay()) || 
+                $ngayNhanh->gt(Carbon::now()->startOfDay()) ||
                 $ngayNhanh->lt(Carbon::now()->startOfDay())
             ) {
                 return redirect()->route('cham-cong.index')->with('error', 'Chỉ được chấm công cho ngày hôm nay!');
             }
-            
-    
+
+
             foreach ($nhanViensNhanh as $nhanVienId) {
                 $chamCong = ChamCong::where('nhan_vien_id', $nhanVienId)
                     ->where('ngay_cham_cong', $ngayNhanh->toDateString())
                     ->where('ca_lam_id', $caNhanhId)
                     ->first();
-    
+
                 if (!$chamCong) {
                     ChamCong::create([
                         'nhan_vien_id' => $nhanVienId,
@@ -144,7 +144,7 @@ $nhanViensAll = NhanVien::where('trang_thai', 'dang_lam_viec')->get();
                 }
             }
         }
-    
+
         $isEditMode = $request->has('is_edit_mode') && $request->input('is_edit_mode') == 1;
 $caLamData = $request->input('ca_lam');
 
@@ -177,30 +177,30 @@ if ($caLamData && is_array($caLamData) && count($caLamData) > 0) {
                         $existingChamCong->forceDelete();
                         $changesMade = true;
                     }
-                    
+
             }
         }
     }
 }
 
-        
-    
+
+
         // Check biến changesMade chung
         if (!$changesMade) {
             return redirect()->route('cham-cong.index')->with('error', 'Không có dữ liệu nào để lưu!');
         }
-    
+
         return redirect()->route('cham-cong.index')->with('success', $isEditMode ? 'Cập nhật chấm công thành công!' : 'Chấm công thành công!');
     }
-    
-    
 
-    
 
-    
 
-    
-    
+
+
+
+
+
+
 
 
 
@@ -241,7 +241,7 @@ if ($caLamData && is_array($caLamData) && count($caLamData) > 0) {
                 <label for='modalGhiChu' class='form-label'>Ghi chú</label>
                 <input type='text' class='form-control' id='modalGhiChu' value='" . e($moTa) . "'>
             </div>
-          
+
         ", 200);
     }
 
@@ -266,7 +266,7 @@ if ($caLamData && is_array($caLamData) && count($caLamData) > 0) {
                 );
             }
         }
-    
+
         // CẬP NHẬT PHẦN CHẤM CÔNG LẺ
         if ($request->has('ca_lam')) {
             foreach ($request->ca_lam as $nhanVienId => $ngays) {
@@ -291,10 +291,10 @@ if ($caLamData && is_array($caLamData) && count($caLamData) > 0) {
                 }
             }
         }
-    
+
         return redirect()->back()->with('success', 'Đã cập nhật chấm công thành công!');
     }
-    
+
     /**
      * Remove the specified resource from storage.
      */

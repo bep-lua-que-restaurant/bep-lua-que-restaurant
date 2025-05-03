@@ -119,6 +119,9 @@
                                 </tbody>
 
                             </table>
+                            <div>
+                                {{ $nhanViens->links('pagination::bootstrap-5') }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -155,7 +158,7 @@
     </div>
 
     <!-- Hiển thị phân trang -->
-    {{ $nhanViens->links('pagination::bootstrap-5') }}
+
 @endsection
 <script>
     function filterEmployees() {

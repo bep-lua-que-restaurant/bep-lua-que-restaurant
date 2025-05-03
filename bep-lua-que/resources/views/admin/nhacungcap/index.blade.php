@@ -186,5 +186,5 @@
         </div>
     </div>
 
-    @include('admin.search-srcip')
+    @include('admin.timkiem-nhacungcap')
 @endsection

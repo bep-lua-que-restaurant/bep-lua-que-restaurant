@@ -148,11 +148,28 @@ $(document).ready(function () {
         ngayBatDauObj.setHours(0, 0, 0, 0);
         ngayKetThucObj.setHours(0, 0, 0, 0);
 
-        if (ngayBatDauObj > ngayKetThucObj) {
+        // Kiểm tra năm bắt đầu không lớn hơn năm kết thúc
+        if (ngayBatDauObj.getFullYear() > ngayKetThucObj.getFullYear()) {
+            alert("Năm của ngày bắt đầu không thể lớn hơn năm của ngày kết thúc!");
+            return;
+        }
+
+        // Nếu cùng năm, kiểm tra tháng
+        if (ngayBatDauObj.getFullYear() === ngayKetThucObj.getFullYear() &&
+            ngayBatDauObj.getMonth() > ngayKetThucObj.getMonth()) {
+            alert("Tháng của ngày bắt đầu không thể lớn hơn tháng của ngày kết thúc!");
+            return;
+        }
+
+        // Nếu cùng năm và tháng, kiểm tra ngày
+        if (ngayBatDauObj.getFullYear() === ngayKetThucObj.getFullYear() &&
+            ngayBatDauObj.getMonth() === ngayKetThucObj.getMonth() &&
+            ngayBatDauObj.getDate() > ngayKetThucObj.getDate()) {
             alert("Ngày bắt đầu không thể lớn hơn ngày kết thúc!");
             return;
         }
 
+        // Kiểm tra ngày không lớn hơn ngày hiện tại
         if (ngayBatDauObj > ngayHienTai || ngayKetThucObj > ngayHienTai) {
             alert("Chỉ lọc đến ngày hiện tại! Vui lòng chọn đến ngày " +
                 ngayHienTai.toLocaleDateString('vi-VN') + ".");
