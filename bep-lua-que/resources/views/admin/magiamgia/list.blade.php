@@ -72,13 +72,6 @@
                             <table id="maGiamGiaTable" class="table table-responsive-md">
                                 <thead>
                                 <tr>
-                                    <th style="width:50px;">
-                                        <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
-                                            <input type="checkbox" class="custom-control-input" id="checkAll"
-                                                   required="">
-                                            <label class="custom-control-label" for="checkAll"></label>
-                                        </div>
-                                    </th>
                                     <th>STT</th>
                                     <th>Mã</th>
                                     <th>Loại</th>
@@ -92,14 +85,6 @@
                                 <tbody>
                                 @foreach ($data as $index => $item)
                                     <tr class="ma-giam-gia-row">
-                                        <td>
-                                            <div class="custom-control custom-checkbox checkbox-success">
-                                                <input type="checkbox" class="custom-control-input"
-                                                       id="checkbox{{ $item->id }}">
-                                                <label class="custom-control-label"
-                                                       for="checkbox{{ $item->id }}"></label>
-                                            </div>
-                                        </td>
                                         <td>{{ $data->firstItem() + $index }}</td>
                                         <td class="ma-giam-gia-code">{{ $item->code }}</td>
                                         <td>{{ $item->type == 'percentage' ? 'Phần trăm' : 'Tiền' }}</td>
