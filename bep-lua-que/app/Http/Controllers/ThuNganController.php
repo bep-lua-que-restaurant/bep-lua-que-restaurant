@@ -213,8 +213,9 @@ class ThuNganController extends Controller
 
         // Lấy tổng số người đặt bàn (gộp tất cả bàn)
         $soNguoi = DatBan::whereIn('ban_an_id', $banAnIds)
-            ->where('trang_thai', 'xac_nhan')
-            ->sum('so_nguoi');
+        ->where('trang_thai', 'xac_nhan')
+        ->orderBy('created_at', 'desc')
+        ->value('so_nguoi') ?? 0;
 
         // Lấy danh sách tên bàn
         $tenBanAn = BanAn::whereIn('id', $banAnIds)->pluck('ten_ban');
