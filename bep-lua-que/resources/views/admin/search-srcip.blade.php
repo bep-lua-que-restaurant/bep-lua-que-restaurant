@@ -4,18 +4,18 @@
         var statusFilter = $('#statusFilter').val();
 
         $.ajax({
-            url: '{{ route("nha-cung-cap.index") }}',
+            url: '{{ route('nha-cung-cap.index') }}',
             type: 'GET',
             data: {
                 searchInput: searchInput,
                 statusFilter: statusFilter,
                 page: page
             },
-            success: function (response) {
+            success: function(response) {
                 $('#nhaCungCapTable').html($(response.html).find('#nhaCungCapTable').html());
                 $('#pagination').html($(response.pagination).html());
             },
-            error: function () {
+            error: function() {
                 alert('Lỗi khi tải dữ liệu!');
             }
         });

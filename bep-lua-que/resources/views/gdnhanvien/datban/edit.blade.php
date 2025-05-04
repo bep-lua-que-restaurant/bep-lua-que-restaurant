@@ -12,7 +12,7 @@
                 <thead class="table-dark">
                     <tr>
                         <th class="sticky-col text-nowrap">Bàn / Giờ</th>
-                        @for ($i = 8; $i <= 22; $i++)
+                        @for ($i = 7; $i <= 21; $i++)
                             <th>{{ sprintf('%02d', $i) }}:00</th>
                             <th>{{ sprintf('%02d', $i) }}:30</th>
                         @endfor
