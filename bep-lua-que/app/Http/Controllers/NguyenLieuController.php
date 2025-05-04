@@ -286,20 +286,33 @@ class NguyenLieuController extends Controller
      * Hiển thị thông tin chi tiết nguyên liệu.
      */
 
-    public function show($id)
-    {
-        try {
-            $nguyenLieu = NguyenLieu::withTrashed()
-                ->with(['loaiNguyenLieu' => function ($query) {
-                    $query->withTrashed();
-                }])
-                ->findOrFail($id);
-
-            return view('admin.nguyenlieu.detail', compact('nguyenLieu'));
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Nguyên liệu không tồn tại hoặc đã bị xóa.');
-        }
-    }
+     public function show($id)
+     {
+         try {
+             $nguyenLieu = NguyenLieu::withTrashed()
+                 ->with([
+                     'loaiNguyenLieu' => fn($q) => $q->withTrashed(),
+     
+                     // Chi tiết các đợt nhập kho của nguyên liệu
+                     'chiTietPhieuNhapKhos' => function ($query) {
+                         $query->with([
+                             // Gồm cả phiếu nhập chứa nó
+                             'phieuNhapKho' => function ($q) {
+                                 // Gồm luôn cả nhà cung cấp (đã xoá vẫn hiển thị)
+                                 $q->with(['nhaCungCap' => fn($ncc) => $ncc->withTrashed()]);
+                             }
+                         ]);
+                     }
+                 ])
+                 ->findOrFail($id);
+     
+             return view('admin.nguyenlieu.detail', compact('nguyenLieu'));
+     
+         } catch (\Exception $e) {
+             return redirect()->back()->with('error', 'Nguyên liệu không tồn tại hoặc đã bị xóa.');
+         }
+     }
+     
 
 
 

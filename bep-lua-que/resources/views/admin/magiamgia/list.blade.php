@@ -27,13 +27,13 @@
                     <!-- Ô tìm kiếm mã giảm giá -->
                     <div class="input-group">
                         <input style="height: 45px; margin-right: 10px" type="text" id="searchInput"
-                            class="form-control border-1" placeholder="Tìm kiếm theo mã" onkeyup="filterDiscountCodes()">
+                            class="form-control border-1" placeholder="Tìm kiếm theo mã" onkeyup="locMaGiamGia()">
                     </div>
 
                     <!-- Lựa chọn trạng thái -->
                     <div>
                         <select style="padding: 11px 0 11px 0; width: 142px" id="statusFilter"
-                            class="btn btn-primary btn-sm" onchange="filterDiscountCodes()">
+                            class="btn btn-primary btn-sm" onchange="locMaGiamGia()">
                             <option value="" hidden>Lọc theo trạng thái</option>
                             <option value="Đang hoạt động">Đang hoạt động</option>
                             <option value="Đã ngừng hoạt động">Ngừng hoạt động</option>
@@ -69,87 +69,90 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-responsive-md">
+                            <table id="maGiamGiaTable" class="table table-responsive-md">
                                 <thead>
-                                    <tr>
-                                        <th>STT</th>
-                                        <th>Mã</th>
-                                        <th>Loại</th>
-                                        <th>Giá trị</th>
-                                        <th>Hiệu lực</th>
-                                        <th>Số lượt đã dùng</th>
-                                        <th>Trạng thái</th>
-                                        <th>Hành động</th>
-                                    </tr>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Mã</th>
+                                    <th>Loại</th>
+                                    <th>Giá trị</th>
+                                    <th>Hiệu lực</th>
+                                    <th>Số lượt đã dùng</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hành động</th>
+                                </tr>
                                 </thead>
-                                <tbody id="magiamgia">
-                                    @foreach ($data as $index => $item)
-                                        <tr class="ma-giam-gia-row">
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td class="ma-giam-gia-code">{{ $item->code }}</td>
-                                            <td>{{ $item->type == 'percentage' ? 'Phần trăm' : 'Tiền' }}</td>
-                                            <td class="text-center">
-                                                @if ($item->type == 'percentage')
-                                                    {{ number_format($item->value, 0, ',', '.') . '%' }}
-                                                @else
-                                                    {{ number_format($item->value, 0, ',', '.') . 'VND' }}
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if ($item->start_date && $item->end_date)
-                                                    Từ: {{ \Carbon\Carbon::parse($item->start_date)->format('d/m/Y') }}<br>
-                                                    Đến: {{ \Carbon\Carbon::parse($item->end_date)->format('d/m/Y') }}
-                                                @else
-                                                    Không xác định
-                                                @endif
-                                            </td>
-                                            <td class="text-center">{{ $item->usage_count ?? 0 }}</td>
+                                <tbody>
+                                @foreach ($data as $index => $item)
+                                    <tr class="ma-giam-gia-row">
+                                        <td>{{ $data->firstItem() + $index }}</td>
+                                        <td class="ma-giam-gia-code">{{ $item->code }}</td>
+                                        <td>{{ $item->type == 'percentage' ? 'Phần trăm' : 'Tiền' }}</td>
+                                        <td class="text-center">
+                                            @if ($item->type == 'percentage')
+                                                {{ number_format($item->value, 0, ',', '.') . '%' }}
+                                            @else
+                                                {{ number_format($item->value, 0, ',', '.') . 'VND' }}
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($item->start_date && $item->end_date)
+                                                Từ: {{ \Carbon\Carbon::parse($item->start_date)->format('d/m/Y') }}<br>
+                                                Đến: {{ \Carbon\Carbon::parse($item->end_date)->format('d/m/Y') }}
+                                            @else
+                                                Không xác định
+                                            @endif
+                                        </td>
+                                        <td class="text-center">{{ $item->usage_count ?? 0 }}</td>
 
-                                            <td class="ma-giam-gia-status">
-                                                {{ $item->deleted_at ? 'Đã ngừng hoạt động' : 'Đang hoạt động' }}
-                                            </td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <a href="{{ route('ma-giam-gia.show', $item->id) }}"
-                                                        class="btn btn-info btn-sm m-1">
-                                                        <i class="fa fa-eye"></i>
+                                        <td class="ma-giam-gia-status">
+                                            {{ $item->deleted_at ? 'Đã ngừng hoạt động' : 'Đang hoạt động' }}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <a href="{{ route('ma-giam-gia.show', $item->id) }}"
+                                                   class="btn btn-info btn-sm m-1">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
+                                                @if (!$item->deleted_at)
+                                                    <a href="{{ route('ma-giam-gia.edit', $item->id) }}"
+                                                       class="btn btn-warning btn-sm m-1">
+                                                        <i class="fa fa-edit"></i>
                                                     </a>
-                                                    @if (!$item->deleted_at)
-                                                        <a href="{{ route('ma-giam-gia.edit', $item->id) }}"
-                                                            class="btn btn-warning btn-sm m-1">
-                                                            <i class="fa fa-edit"></i>
-                                                        </a>
-                                                    @endif
+                                                @endif
 
-                                                    @if ($item->deleted_at)
-                                                        <form action="{{ route('ma-giam-gia.restore', $item->id) }}"
-                                                            method="POST" class="d-inline" style="margin: 0;">
-                                                            @csrf
-                                                            <button type="submit"
+                                                @if ($item->deleted_at)
+                                                    <form action="{{ route('ma-giam-gia.restore', $item->id) }}"
+                                                          method="POST" class="d-inline" style="margin: 0;">
+                                                        @csrf
+                                                        <button type="submit"
                                                                 onclick="return confirm('Bạn có chắc muốn khôi phục mục này không?')"
                                                                 class="btn btn-success btn-sm m-1" title="Khôi phục">
-                                                                <i class="fa fa-recycle"></i>
-                                                            </button>
-                                                        </form>
-                                                    @else
-                                                        <form action="{{ route('ma-giam-gia.destroy', $item->id) }}"
-                                                            method="POST" class="d-inline" style="margin: 0;">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit"
+                                                            <i class="fa fa-recycle"></i>
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <form action="{{ route('ma-giam-gia.destroy', $item->id) }}"
+                                                          method="POST" class="d-inline" style="margin: 0;">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
                                                                 onclick="return confirm('Bạn muốn ngừng mã giảm này chứ?')"
                                                                 class="btn btn-danger btn-sm m-1" title="Xóa">
-                                                                <i class="fa fa-trash"></i>
-                                                            </button>
-                                                        </form>
-                                                    @endif
-                                                </div>
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
 
-                                            </td>
-                                        </tr>
-                                    @endforeach
+                                        </td>
+                                    </tr>
+                                @endforeach
                                 </tbody>
                             </table>
+                            <div id="pagination">
+                                {{ $data->links('pagination::bootstrap-5') }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -185,36 +188,34 @@
         </div>
     </div>
 
-    @include('admin.search-srcip')
+    <script>
+        function locMaGiamGia(page = 1) {
+            var searchInput = $('#searchInput').val();
+            var statusFilter = $('#statusFilter').val();
 
-    <!-- Hiển thị phân trang -->
-    {{ $data->links('pagination::bootstrap-5') }}
+            $.ajax({
+                url: '{{ route("ma-giam-gia.index") }}',
+                type: 'GET',
+                data: {
+                    searchInput: searchInput,
+                    statusFilter: statusFilter,
+                    page: page
+                },
+                success: function (response) {
+                    $('#maGiamGiaTable').html($(response.html).find('#maGiamGiaTable').html());
+                    $('#pagination').html($(response.pagination).html());
+                },
+                error: function () {
+                    alert('Lỗi khi tải dữ liệu!');
+                }
+            });
+        }
+        $(document).on('click', '.pagination a', function(e) {
+            e.preventDefault();
+            var page = $(this).attr('href').split('page=')[1];
+            locMaGiamGia(page);
+        });
+    </script>
 @endsection
 
-<script>
-    function filterDiscountCodes() {
-        // Get the values from the filter inputs
-        let searchInput = document.getElementById("searchInput").value.toLowerCase();
-        let statusFilter = document.getElementById("statusFilter").value;
-        let rows = document.querySelectorAll("#magiamgia tr"); // Select all rows in the table
 
-        rows.forEach(row => {
-            // Get the relevant data from the row
-            let code = row.querySelector(".ma-giam-gia-code")?.textContent.toLowerCase(); // For "Mã"
-            let status = row.querySelector(".ma-giam-gia-status")?.textContent.trim()
-                .toLowerCase(); // For "Trạng thái"
-
-            // Check if the row matches the search input and the selected status filter
-            let matchesSearch = (code && code.includes(searchInput));
-            let matchesStatus = (statusFilter === "" || statusFilter === "Tất cả" || status === statusFilter
-                .toLowerCase());
-
-            // Show or hide the row based on the conditions
-            if (matchesSearch && matchesStatus) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
-            }
-        });
-    }
-</script>

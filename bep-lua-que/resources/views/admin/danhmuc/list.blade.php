@@ -149,10 +149,10 @@
                             <label>Mô tả</label>
                             <textarea name="mo_ta" class="form-control"></textarea>
                         </div>
-                        <div class="mb-3">
+                        {{-- <div class="mb-3">
                             <label>Hình ảnh</label>
                             <input type="file" name="hinh_anh" class="form-control">
-                        </div>
+                        </div> --}}
                     </div>
                     <div class="modal-footer">
                         <button type="button" id="btn-save-create" class="btn btn-primary">Lưu</button>

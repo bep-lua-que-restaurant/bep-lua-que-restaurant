@@ -187,7 +187,7 @@
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         const choCheBienList = document.getElementById('cho-che-bien-list');
         const dangNauList = document.getElementById('dang-nau-list');
-        const processedEvents = new Set(); // Lưu trữ các sự kiện đã xử lý
+        const processedEvents = new Set();
 
         async function updateStatus(id, status) {
             console.log(`updateStatus called: id=${id}, status=${status}`);
@@ -255,36 +255,26 @@
                     console.log(`dish-${id} not found in Chờ chế biến`);
                 }
 
-                // Tìm món trùng trong Đang nấu
-                const existingDish = Array.from(dangNauList.children).find(d =>
-                    d.getAttribute('data-mon-an-id') == monAnId &&
-                    d.getAttribute('data-ma-hoa-don') === maHoaDon
-                );
+                // Thêm món mới vào Đang nấu
+                const newDish = document.createElement('div');
+                newDish.id = `dish-${id}`;
+                newDish.className = 'list-group-item d-flex justify-content-between align-items-center';
+                newDish.setAttribute('data-mon-an-id', monAnId);
+                newDish.setAttribute('data-ma-hoa-don', maHoaDon);
+                newDish.setAttribute('data-ten', ten);
+                newDish.setAttribute('data-so-luong', soLuong);
+                newDish.setAttribute('data-thoi-gian-nau', thoiGianNau);
+                newDish.setAttribute('data-ghi-chu', ghiChu);
+                newDish.setAttribute('data-all-ids', id);
 
-                if (existingDish) {
-                    console.log(`Found existing dish in Đang nấu: id=${existingDish.id}, monAnId=${monAnId}, maHoaDon=${maHoaDon}`);
-                    // Gộp món
-                    const existingId = existingDish.id.split('-')[1];
-                    const allIds = existingDish.getAttribute('data-all-ids') ? existingDish.getAttribute('data-all-ids').split(',') : [existingId];
-                    allIds.push(id);
-                    const existingSoLuong = parseInt(existingDish.getAttribute('data-so-luong')) || 0;
-                    const newSoLuong = existingSoLuong + soLuong;
-                    const existingGhiChu = existingDish.getAttribute('data-ghi-chu');
-                    const newGhiChu = existingGhiChu && ghiChu ? `${existingGhiChu}, ${ghiChu}` : existingGhiChu || ghiChu || '';
-
-                    existingDish.id = `dish-${id}`;
-                    existingDish.setAttribute('data-all-ids', allIds.join(','));
-                    existingDish.setAttribute('data-so-luong', newSoLuong);
-                    existingDish.setAttribute('data-ghi-chu', newGhiChu);
-                    existingDish.setAttribute('data-thoi-gian-nau', thoiGianNau);
-
-                    const thoiGianNauTong = (thoiGianNau * newSoLuong).toFixed(2);
-                    existingDish.querySelector('div').innerHTML = `
+                const thoiGianNauTong = (thoiGianNau * soLuong).toFixed(2);
+                newDish.innerHTML = `
+                    <div>
                         <strong>${ten}</strong> - 
                         ${maHoaDon ? maHoaDon : '<span class="text-danger">Không có mã hóa đơn</span>'}
-                        <br><small>Số lượng: ${newSoLuong}</small>
+                        <br><small>Số lượng: ${soLuong}</small>
                         <br><small>Thời gian nấu: ${thoiGianNauTong} phút</small>
-                        ${newGhiChu ? `<br><small style="color: #ff6347; font-size: 0.8em;" class="ghi-chu">Ghi chú: ${newGhiChu}</small>` : ''}
+                        ${ghiChu ? `<br><small style="color: #ff6347; font-size: 0.8em;" class="ghi-chu">Ghi chú: ${ghiChu}</small>` : ''}
                         ${thoiGianHoanThanhDuKien ? `
                             <br>
                             <small id="timer-${id}" style="color: red; font-size: 10px;"
@@ -292,64 +282,23 @@
                                 Hoàn thành dự kiến: ${new Date(thoiGianHoanThanhDuKien).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                             </small>
                         ` : ''}
-                    `;
-                    existingDish.querySelector('.status-buttons').innerHTML =
-                        `<button class="btn btn-success btn-sm status-btn" onclick="updateStatus(${id}, 'hoan_thanh')">Lên món</button>`;
+                    </div>
+                    <div class="status-buttons">
+                        <button class="btn btn-success btn-sm status-btn"
+                            onclick="updateStatus(${id}, 'hoan_thanh')">
+                            Lên món
+                        </button>
+                    </div>
+                `;
+                dangNauList.appendChild(newDish);
 
-                    if (thoiGianHoanThanhDuKien) {
-                        console.log(`Starting countdown for id=${id}, thoiGianHoanThanhDuKien=${thoiGianHoanThanhDuKien}`);
-                        startCountdown(id, new Date(thoiGianHoanThanhDuKien));
-                    }
-
-                    showToast(`Gộp ${ten}, số lượng: ${newSoLuong}`, 'success');
-                    console.log(`Merged dish: newSoLuong=${newSoLuong}, newGhiChu=${newGhiChu}, allIds=${allIds.join(',')}`);
-                } else {
-                    console.log('No existing dish found, adding new dish to Đang nấu');
-                    // Thêm món mới vào Đang nấu
-                    const newDish = document.createElement('div');
-                    newDish.id = `dish-${id}`;
-                    newDish.className = 'list-group-item d-flex justify-content-between align-items-center';
-                    newDish.setAttribute('data-mon-an-id', monAnId);
-                    newDish.setAttribute('data-ma-hoa-don', maHoaDon);
-                    newDish.setAttribute('data-ten', ten);
-                    newDish.setAttribute('data-so-luong', soLuong);
-                    newDish.setAttribute('data-thoi-gian-nau', thoiGianNau);
-                    newDish.setAttribute('data-ghi-chu', ghiChu);
-                    newDish.setAttribute('data-all-ids', id);
-
-                    const thoiGianNauTong = (thoiGianNau * soLuong).toFixed(2);
-                    newDish.innerHTML = `
-                        <div>
-                            <strong>${ten}</strong> - 
-                            ${maHoaDon ? maHoaDon : '<span class="text-danger">Không có mã hóa đơn</span>'}
-                            <br><small>Số lượng: ${soLuong}</small>
-                            <br><small>Thời gian nấu: ${thoiGianNauTong} phút</small>
-                            ${ghiChu ? `<br><small style="color: #ff6347; font-size: 0.8em;" class="ghi-chu">Ghi chú: ${ghiChu}</small>` : ''}
-                            ${thoiGianHoanThanhDuKien ? `
-                                <br>
-                                <small id="timer-${id}" style="color: red; font-size: 10px;"
-                                    data-thoi-gian-hoan-thanh-du_kien="${thoiGianHoanThanhDuKien}">
-                                    Hoàn thành dự kiến: ${new Date(thoiGianHoanThanhDuKien).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
-                                </small>
-                            ` : ''}
-                        </div>
-                        <div class="status-buttons">
-                            <button class="btn btn-success btn-sm status-btn"
-                                onclick="updateStatus(${id}, 'hoan_thanh')">
-                                Lên món
-                            </button>
-                        </div>
-                    `;
-                    dangNauList.appendChild(newDish);
-
-                    if (thoiGianHoanThanhDuKien) {
-                        console.log(`Starting countdown for new dish id=${id}, thoiGianHoanThanhDuKien=${thoiGianHoanThanhDuKien}`);
-                        startCountdown(id, new Date(thoiGianHoanThanhDuKien));
-                    }
-
-                    showToast(`Chuyển ${ten} sang đang nấu`, 'success');
-                    console.log(`Added new dish: id=${id}, ten=${ten}, allIds=${id}`);
+                if (thoiGianHoanThanhDuKien) {
+                    console.log(`Starting countdown for new dish id=${id}, thoiGianHoanThanhDuKien=${thoiGianHoanThanhDuKien}`);
+                    startCountdown(id, new Date(thoiGianHoanThanhDuKien));
                 }
+
+                showToast(`Chuyển ${ten} sang đang nấu`, 'success');
+                console.log(`Added new dish: id=${id}, ten=${ten}, allIds=${id}`);
             } else if (status === 'hoan_thanh' && monAnData) {
                 console.log('Processing hoan_thanh status');
                 let dish = document.getElementById(`dish-${id}`);
@@ -428,11 +377,18 @@
                     <br><small>Số lượng: ${monAn.so_luong}</small>
                     <br><small>Thời gian nấu: ${thoiGianNauTong} phút</small>
                     ${ghiChu}
+                    ${monAn.thoi_gian_hoan_thanh_du_kien && monAn.trang_thai === 'dang_nau' ? `
+                        <br>
+                        <small id="timer-${monAn.id}" style="color: red; font-size: 10px;"
+                            data-thoi-gian-hoan-thanh-du_kien="${monAn.thoi_gian_hoan_thanh_du_kien}">
+                            Hoàn thành dự kiến: ${new Date(monAn.thoi_gian_hoan_thanh_du_kien).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                        </small>
+                    ` : ''}
                 </div>
                 <div class="status-buttons">
-                    <button class="btn btn-warning btn-sm status-btn" 
-                        onclick="updateStatus(${monAn.id}, 'dang_nau')">
-                        Nấu
+                    <button class="btn ${monAn.trang_thai === 'dang_nau' ? 'btn-success' : 'btn-warning'} btn-sm status-btn" 
+                        onclick="updateStatus(${monAn.id}, '${monAn.trang_thai === 'dang_nau' ? 'hoan_thanh' : 'dang_nau'}')">
+                        ${monAn.trang_thai === 'dang_nau' ? 'Lên món' : 'Nấu'}
                     </button>
                 </div>
             `;
@@ -440,35 +396,46 @@
             return div;
         }
 
-        function replaceDishesByHoaDon(monAns, maHoaDon) {
-            console.log('replaceDishesByHoaDon called:', monAns, maHoaDon);
+        function replaceDishesByHoaDon(monAns, maHoaDon, maHoaDonCu = []) {
+            console.log('replaceDishesByHoaDon called:', monAns, maHoaDon, maHoaDonCu);
             if (!monAns || !Array.isArray(monAns) || monAns.length === 0) {
                 console.warn('Dữ liệu món mới không hợp lệ hoặc rỗng:', monAns);
                 showToast('Dữ liệu món mới không hợp lệ', 'warning');
                 return false;
             }
 
-            const dishesToRemove = Array.from(choCheBienList.children).filter(dish =>
-                dish.getAttribute('data-ma-hoa-don') === maHoaDon
-            );
-            console.log(`Removing ${dishesToRemove.length} dishes with ma_hoa_don=${maHoaDon} from Chờ chế biến`);
-            dishesToRemove.forEach(dish => {
-                console.log(`Removing dish id=${dish.id}`);
-                dish.remove();
+            // Xóa các món hiện tại trong cả hai danh sách có ma_hoa_don tương ứng
+            const lists = [choCheBienList, dangNauList];
+            const maHoaDonToRemove = [maHoaDon, ...maHoaDonCu].filter(Boolean);
+
+            lists.forEach(list => {
+                const dishesToRemove = Array.from(list.children).filter(dish =>
+                    maHoaDonToRemove.includes(dish.getAttribute('data-ma-hoa-don'))
+                );
+                console.log(`Removing ${dishesToRemove.length} dishes with ma_hoa_don in ${maHoaDonToRemove} from ${list.id}`);
+                dishesToRemove.forEach(dish => {
+                    console.log(`Removing dish id=${dish.id}`);
+                    dish.remove();
+                });
             });
 
-            monAns.forEach((monAn, index) => {
+            // Thêm từng món riêng biệt vào danh sách tương ứng
+            monAns.forEach(monAn => {
                 if (monAn.trang_thai === 'hoan_thanh') {
                     console.log(`Skipping completed dish: id=${monAn.id}, ten=${monAn.ten}`);
                     return;
                 }
                 const dishElement = createDishElement(monAn, maHoaDon);
                 if (dishElement) {
-                    choCheBienList.appendChild(dishElement);
-                    showToast(`Thêm ${monAn.ten}`, 'success');
-                    console.log(`Added dish: id=dish-${monAn.id}, ten=${monAn.ten}`);
+                    const targetList = monAn.trang_thai === 'dang_nau' ? dangNauList : choCheBienList;
+                    targetList.appendChild(dishElement);
+                    showToast(`Cập nhật ${monAn.ten} với mã hóa đơn ${maHoaDon}`, 'success');
+                    console.log(`Added dish: id=dish-${monAn.id}, ten=${monAn.ten}, list=${targetList.id}`);
+                    if (monAn.trang_thai === 'dang_nau' && monAn.thoi_gian_hoan_thanh_du_kien) {
+                        startCountdown(monAn.id, new Date(monAn.thoi_gian_hoan_thanh_du_kien));
+                    }
                 } else {
-                    console.warn(`Bỏ qua món không hợp lệ tại index ${index}:`, monAn);
+                    console.warn(`Bỏ qua món không hợp lệ:`, monAn);
                 }
             });
 
@@ -507,6 +474,18 @@
                 console.warn('Dữ liệu món ăn không hợp lệ trong trang-thai-cap-nhat:', data);
                 showToast('Dữ liệu món ăn không hợp lệ', 'warning');
             }
+        });
+
+        channel.listen('.ghep-ban', (data) => {
+            console.log('Pusher event .ghep-ban received:', data);
+            if (!data?.monAns || !data.maHoaDon) {
+                console.warn('Dữ liệu ghép bàn không hợp lệ:', data);
+                showToast('Dữ liệu ghép bàn không hợp lệ', 'warning');
+                return;
+            }
+
+            replaceDishesByHoaDon(data.monAns, data.maHoaDon, data.maHoaDonCu || []);
+            showToast(`Đã cập nhật món ăn cho mã hóa đơn ${data.maHoaDon} sau khi ghép bàn`, 'success');
         });
 
         window.Echo.channel('xoa-mon-an-channel')

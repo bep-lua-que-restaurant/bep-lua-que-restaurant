@@ -69,13 +69,6 @@
                             <table id="nhaCungCapTable" class="table table-responsive-md">
                                 <thead>
                                     <tr>
-                                        <th style="width:50px;">
-                                            <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
-                                                <input type="checkbox" class="custom-control-input" id="checkAll"
-                                                    required="">
-                                                <label class="custom-control-label" for="checkAll"></label>
-                                            </div>
-                                        </th>
                                         <th><strong>STT</strong></th>
                                         <th><strong>Tên </strong></th>
                                         <th><strong>Trạng thái</strong></th>
@@ -85,14 +78,6 @@
                                 <tbody>
                                     @foreach ($data as $index => $item)
                                         <tr class="nha-cung-cap-row">
-                                            <td>
-                                                <div class="custom-control custom-checkbox checkbox-success">
-                                                    <input type="checkbox" class="custom-control-input"
-                                                        id="checkbox{{ $item->id }}">
-                                                    <label class="custom-control-label"
-                                                        for="checkbox{{ $item->id }}"></label>
-                                                </div>
-                                            </td>
                                             <td><strong>{{ $data->firstItem() + $index }}</strong></td>
                                             <td class="ten-nha-cung-cap">{{ $item->ten_nha_cung_cap }}</td>
                                             <td class="trang-thai-nha-cung-cap">
@@ -186,5 +171,5 @@
         </div>
     </div>
 
-    @include('admin.search-srcip')
+    @include('admin.timkiem-nhacungcap')
 @endsection

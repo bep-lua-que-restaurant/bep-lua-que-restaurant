@@ -112,6 +112,7 @@
                             <table class="table table-responsive-md">
                                 <thead>
                                     <tr>
+
                                         <th style="width:50px;">
                                             <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
                                                 <input type="checkbox" class="custom-control-input" id="checkAll"
@@ -120,6 +121,7 @@
                                             </div>
                                         </th>
                                         <th><strong>STT</strong></th>
+
                                         <th><strong>Tên bàn </strong></th>
                                         {{-- <th><strong>Số ghế </strong></th> --}}
                                         <th><strong>Trạng Thái</strong></th>
@@ -172,12 +174,6 @@
 
                 html += `
                     <tr>
-                        <td>
-                            <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
-                                <input type="checkbox" class="custom-control-input" id="customCheckBox${index}">
-                                <label class="custom-control-label" for="customCheckBox${index}"></label>
-                            </div>
-                        </td>
                         <td><strong>${index + 1}</strong></td>
                         <td><div class="d-flex align-items-center"><span class="w-space-no">${item.ten_ban}</span></div></td>
                         <td>${statusKD}</td>
