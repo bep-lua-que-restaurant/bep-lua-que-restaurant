@@ -113,13 +113,13 @@
                                 <thead>
                                     <tr>
 
-                                        <th style="width:50px;">
+                                        {{-- <th style="width:50px;">
                                             <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
                                                 <input type="checkbox" class="custom-control-input" id="checkAll"
                                                     required="">
                                                 <label class="custom-control-label" for="checkAll"></label>
                                             </div>
-                                        </th>
+                                        </th> --}}
                                         <th><strong>STT</strong></th>
 
                                         <th><strong>Tên bàn </strong></th>
