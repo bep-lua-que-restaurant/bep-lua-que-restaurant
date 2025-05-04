@@ -33,13 +33,13 @@
                             </button>
 
                             <!-- Nút Nhập file sẽ hiển thị Modal -->
-{{--                            <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal"--}}
-{{--                                data-target=".bd-example-modal-lg">--}}
-{{--                                <i class="fa fa-download"></i> Nhập file--}}
-{{--                            </a>--}}
+                            {{--                            <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal" --}}
+                            {{--                                data-target=".bd-example-modal-lg"> --}}
+                            {{--                                <i class="fa fa-download"></i> Nhập file --}}
+                            {{--                            </a> --}}
 
-                            <a href="#" class="btn btn-sm btn-secondary"
-                               data-bs-toggle="modal" data-bs-target="#importFileModal">
+                            <a href="#" class="btn btn-sm btn-secondary" data-bs-toggle="modal"
+                                data-bs-target="#importFileModal">
                                 <i class="fa fa-upload"></i> Nhập file
                             </a>
 
@@ -88,7 +88,8 @@
                         @csrf
                         <div class="mb-3">
                             <label for="fileUpload" class="form-label">Chọn file</label>
-                            <input style="height: auto" type="file" name="file" id="fileUpload" class="form-control" required>
+                            <input style="height: auto" type="file" name="file" id="fileUpload" class="form-control"
+                                required>
                         </div>
                     </form>
                 </div>
@@ -174,13 +175,12 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
-    
+
             var table = $('#{{ $tableId }}').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: '{{ $route }}',
-                columns: [
-                    {
+                columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
                         orderable: false,
@@ -224,12 +224,12 @@
                 lengthMenu: [5, 10, 25, 50],
                 pageLength: 10
             });
-    
+
             // Xử lý submit form xóa với SweetAlert2
             $(document).on('submit', '.delete-form', function(e) {
                 e.preventDefault();
                 var form = $(this);
-    
+
                 Swal.fire({
                     title: 'Bạn muốn ngừng kinh doanh mục này chứ?',
                     text: "Hành động này có thể thay đổi trạng thái của danh mục!",
@@ -249,20 +249,23 @@
                                 if (response.success) {
                                     Swal.fire(
                                         'Thành công!',
-                                        response.message, // "Xóa danh mục thành công."
+                                        response
+                                        .message, // "Xóa danh mục thành công."
                                         'success'
                                     );
                                     table.ajax.reload();
                                 } else {
                                     Swal.fire(
                                         'Lỗi!',
-                                        response.message, // "Danh mục này có món ăn đang được sử dụng, không thể xóa."
+                                        response
+                                        .message, // "Danh mục này có món ăn đang được sử dụng, không thể xóa."
                                         'error'
                                     );
                                 }
                             },
                             error: function(xhr) {
-                                let message = xhr.responseJSON?.message || 'Có lỗi xảy ra, vui lòng thử lại!';
+                                let message = xhr.responseJSON?.message ||
+                                    'Có lỗi xảy ra, vui lòng thử lại!';
                                 Swal.fire(
                                     'Lỗi!',
                                     message,
@@ -273,12 +276,12 @@
                     }
                 });
             });
-    
+
             // Xử lý submit form khôi phục
             $(document).on('submit', 'form:not(.delete-form)', function(e) {
                 e.preventDefault();
                 var form = $(this);
-    
+
                 Swal.fire({
                     title: 'Bạn có chắc muốn khôi phục mục này không?',
                     text: "Hành động này có thể thay đổi trạng thái của danh mục!",
@@ -297,13 +300,15 @@
                             success: function(response) {
                                 Swal.fire(
                                     'Thành công!',
-                                    response.message || 'Danh mục đã được khôi phục.',
+                                    response.message ||
+                                    'Danh mục đã được khôi phục.',
                                     'success'
                                 );
                                 table.ajax.reload();
                             },
                             error: function(xhr) {
-                                let message = xhr.responseJSON?.message || 'Có lỗi xảy ra, vui lòng thử lại!';
+                                let message = xhr.responseJSON?.message ||
+                                    'Có lỗi xảy ra, vui lòng thử lại!';
                                 Swal.fire(
                                     'Lỗi!',
                                     message,
@@ -314,11 +319,11 @@
                     }
                 });
             });
-    
+
             // Nút sửa
             $(document).on('click', '.btn-edit', function() {
                 const id = $(this).data('id');
-    
+
                 $.ajax({
                     url: `/danh-muc-mon-an/${id}`,
                     type: 'GET',
@@ -334,7 +339,7 @@
                     }
                 });
             });
-    
+
             $(document).on('click', '#editForm button[type="submit"]', function(e) {
                 e.preventDefault();
                 const id = $('#edit-id').val();
@@ -344,7 +349,7 @@
                     _token: $('input[name="_token"]').val(),
                     _method: 'PUT'
                 };
-    
+
                 $.ajax({
                     url: `/danh-muc-mon-an/${id}`,
                     type: 'POST',
@@ -360,18 +365,18 @@
                     }
                 });
             });
-    
+
             // Thêm mới
             $(document).on('click', '.btn-create', function() {
                 $('#createForm')[0].reset();
                 $('#createModal').modal('show');
             });
-    
+
             $(document).on('click', '#btn-save-create', function(e) {
                 e.preventDefault();
                 const form = $('#createForm')[0];
                 const formData = new FormData(form);
-    
+
                 $.ajax({
                     url: '/danh-muc-mon-an',
                     type: 'POST',
@@ -385,18 +390,19 @@
                     },
                     error: function(xhr) {
                         let errors = xhr.responseJSON?.errors;
-                        let message = errors ? Object.values(errors).join('<br>') : 'Có lỗi xảy ra!';
+                        let message = errors ? Object.values(errors).join('<br>') :
+                            'Có lỗi xảy ra!';
                         Swal.fire('Lỗi!', message, 'error');
                     }
                 });
             });
-    
+
             // Nhập file
             $(document).on('click', '#btn-import-confirm', function(e) {
                 e.preventDefault();
                 const form = $('#importFileForm')[0];
                 const formData = new FormData(form);
-    
+
                 $.ajax({
                     url: '{{ route('danh-muc-mon-an.import') }}',
                     type: 'POST',
@@ -405,12 +411,14 @@
                     contentType: false,
                     success: function(res) {
                         $('#importFileModal').modal('hide');
-                        Swal.fire('Thành công!', res.message || 'File đã được nhập thành công.', 'success');
+                        Swal.fire('Thành công!', res.message || 'File đã được nhập thành công.',
+                            'success');
                         table.ajax.reload();
                     },
                     error: function(xhr) {
                         let errors = xhr.responseJSON?.errors;
-                        let message = errors ? Object.values(errors).join('<br>') : 'Có lỗi xảy ra khi nhập file!';
+                        let message = errors ? Object.values(errors).join('<br>') :
+                            'Có lỗi xảy ra khi nhập file!';
                         Swal.fire('Lỗi!', message, 'error');
                     }
                 });

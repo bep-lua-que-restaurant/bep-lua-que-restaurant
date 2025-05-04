@@ -45,7 +45,7 @@ class DatBanController extends Controller
         return response()->json([
             'ho_ten' => $datBans->first()->khachHang->ho_ten ?? null, // Lấy thông tin khách hàng từ dòng đầu tiên
             'so_dien_thoai' => $datBans->first()->so_dien_thoai,
-            'so_nguoi' => $datBans->sum('so_nguoi'), // Tổng số người từ tất cả các dòng
+            'so_nguoi' => $datBans->first()->so_nguoi, // Tổng số người từ tất cả các dòng
             'mo_ta' => $datBans->first()->mo_ta,
             'ban_ans' => $datBans->pluck('banAn.ten_ban')->toArray(), // Lấy danh sách tên bàn
         ]);
