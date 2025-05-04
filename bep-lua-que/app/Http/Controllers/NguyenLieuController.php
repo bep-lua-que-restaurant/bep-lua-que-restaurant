@@ -33,7 +33,8 @@ class NguyenLieuController extends Controller
         if ($request->ajax()) {
             $query = NguyenLieu::query()
                 ->with(['loaiNguyenLieu']) // Giả sử có quan hệ loaiNguyenLieu()
-                ->withTrashed();
+                ->withTrashed()
+                ->orderByDesc('created_at');
 
             return DataTables::of($query)
                 ->addIndexColumn()
