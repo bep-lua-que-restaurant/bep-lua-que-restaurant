@@ -97,9 +97,10 @@
                     </div>
                 </div>
                 <div class="card-footer d-flex justify-content-end">
-                    <a href="{{ route('nhan-vien.edit', $nhanVien->id) }}" class="btn btn-success "
-                        style="margin-right: 10px; height: 40px;">Cập nhật</a>
-
+                    @if ($nhanVien->trang_thai === 'dang_lam_viec')
+                        <a href="{{ route('nhan-vien.edit', $nhanVien->id) }}" class="btn btn-success"
+                            style="margin-right: 10px; height: 40px;">Cập nhật</a>
+                    @endif
                     <!-- Nút Nghỉ việc / Khôi phục -->
                     @if ($nhanVien->trang_thai === 'dang_lam_viec')
                         <form action="{{ route('nhan-vien.nghi-viec', $nhanVien->id) }}" method="POST"
