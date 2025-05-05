@@ -38,7 +38,8 @@
                         <h4 class="card-title">Danh sách Phiếu xuất kho</h4>
 
                         <div class="btn-group">
-                            <a style="padding: 7px 10px 0 10px" href="{{ route('phieu-xuat-kho.create') }}" class="btn btn-sm btn-primary">
+                            <a style="padding: 7px 10px 0 10px" href="{{ route('phieu-xuat-kho.create') }}"
+                                class="btn btn-sm btn-primary">
                                 <i class="fa fa-plus"></i> Thêm mới
                             </a>
                             <a style="font-size: 14px" href="{{ route('phieu-xuat-kho.export') }}" class="btn btn-success">
@@ -204,7 +205,8 @@
                             </tr>
                              <tr>
                                 <th>Tổng tiền:</th>
-                                <td>${d.tong_tien} VNĐ</td>
+                                <td>${Number(d.tong_tien ?? 0).toLocaleString('vi-VN', { maximumFractionDigits: 0 })} VND</td>
+
                             </tr>
 
                         </table>

@@ -177,7 +177,7 @@
                             </tr>
                              <tr>
                                 <th>Tổng tiền:</th>
-                                <td>${data.tong_tien ?? 0} VNĐ</td>
+                                <td>${Number(data.tong_tien ?? 0).toLocaleString('vi-VN', { maximumFractionDigits: 0 })} VND</td>
                             </tr>
 
                         </table>
