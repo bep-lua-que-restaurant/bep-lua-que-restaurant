@@ -200,31 +200,45 @@ class NhanVienController extends Controller
 
     $ngayApDung = $request->ngay_ap_dung;
 
-    // Nếu chỉ có YYYY-MM thì thêm ngày đầu tháng
-    if (strlen($ngayApDung) === 7) {
-        $ngayApDung .= '-01';
+    if (strlen($ngayApDung) === 7) { // nếu là dạng YYYY-MM
+        $ngayApDung .= '-01'; // gán thêm ngày đầu tháng
     }
     
-    // Tìm lương hiện tại áp dụng trong tháng đó
-    $existingLuong = $nhanVien->luong()->whereDate('ngay_ap_dung', '=', $ngayApDung)->first();
+    $ngayApDungCarbon = \Carbon\Carbon::parse($ngayApDung);
+    
+    // Kiểm tra xem đã có lương trong tháng đó chưa
+    $existingLuong = $nhanVien->luong()
+        ->whereYear('ngay_ap_dung', $ngayApDungCarbon->year)
+        ->whereMonth('ngay_ap_dung', $ngayApDungCarbon->month)
+        ->first();
     
     if ($existingLuong) {
-        // Nếu mức lương hoặc hình thức bị thay đổi nhưng tháng giữ nguyên → không cho phép
         if (
-            $existingLuong->muc_luong != $request->muc_luong ||
-            $existingLuong->hinh_thuc != $request->hinh_thuc_luong
+            $existingLuong->hinh_thuc == $request->hinh_thuc_luong &&
+            $existingLuong->muc_luong == $request->muc_luong
         ) {
-            return back()->with('error', 'Lương phải áp dụng vào tháng sau.');
+            
+        } else {
+            $nextMonth = $ngayApDungCarbon->copy()->addMonthNoOverflow()->startOfMonth();
+            $nhanVien->luong()->create([
+                'nhan_vien_id' => $nhanVien->id,
+                'hinh_thuc' => $request->hinh_thuc_luong,
+                'muc_luong' => $request->muc_luong,
+                'ngay_ap_dung' => $nextMonth->format('Y-m-d'),
+            ]);
+            return back()->with('success', 'Đã cập nhật lương mới bắt đầu từ tháng kế tiếp: ' . $nextMonth->format('m/Y'));
         }
-    } else {
-        // Nếu chưa có lương cho tháng đó → tạo mới
-        $nhanVien->luong()->create([
-            'nhan_vien_id' => $nhanVien->id,
-            'hinh_thuc' => $request->hinh_thuc_luong,
-            'muc_luong' => $request->muc_luong,
-            'ngay_ap_dung' => $ngayApDung,
-        ]);
-    }
+        } else {
+            $nhanVien->luong()->create([
+                'nhan_vien_id' => $nhanVien->id,
+                'hinh_thuc' => $request->hinh_thuc_luong,
+                'muc_luong' => $request->muc_luong,
+                'ngay_ap_dung' => $ngayApDungCarbon->format('Y-m-d'),
+            ]);
+            return back()->with('success', 'Đã tạo bản ghi lương mới từ tháng: ' . $ngayApDungCarbon->format('m/Y'));
+
+        }
+    
     
 
 
