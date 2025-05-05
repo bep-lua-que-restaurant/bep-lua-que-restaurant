@@ -703,27 +703,27 @@ class ThuNganController extends Controller
             ->with(['monAn'])
             ->get();
 
-            foreach ($chiTietHoaDons as $chiTiet) {
-                // Kiểm tra kiểu dữ liệu của thoi_gian_hoan_thanh_du_kien
-                $thoiGianHoanThanh = $chiTiet->thoi_gian_hoan_thanh_du_kien;
-                if ($thoiGianHoanThanh) {
-                    $thoiGianHoanThanh = is_string($thoiGianHoanThanh) ? $thoiGianHoanThanh : $thoiGianHoanThanh->toDateTimeString();
-                } else {
-                    $thoiGianHoanThanh = null;
-                }
-            
-                $monAns[] = [
-                    'id' => $chiTiet->id,
-                    'mon_an_id' => $chiTiet->mon_an_id,
-                    'ten' => $chiTiet->monAn->ten,
-                    'so_luong' => $chiTiet->so_luong,
-                    'thoi_gian_nau' => $chiTiet->monAn->thoi_gian_nau,
-                    'ghi_chu' => $chiTiet->ghi_chu,
-                    'trang_thai' => $chiTiet->trang_thai,
-                    'thoi_gian_hoan_thanh_du_kien' => $thoiGianHoanThanh,
-                    'ma_hoa_don' => $maHoaDonChung
-                ];
+        foreach ($chiTietHoaDons as $chiTiet) {
+            // Kiểm tra kiểu dữ liệu của thoi_gian_hoan_thanh_du_kien
+            $thoiGianHoanThanh = $chiTiet->thoi_gian_hoan_thanh_du_kien;
+            if ($thoiGianHoanThanh) {
+                $thoiGianHoanThanh = is_string($thoiGianHoanThanh) ? $thoiGianHoanThanh : $thoiGianHoanThanh->toDateTimeString();
+            } else {
+                $thoiGianHoanThanh = null;
             }
+
+            $monAns[] = [
+                'id' => $chiTiet->id,
+                'mon_an_id' => $chiTiet->mon_an_id,
+                'ten' => $chiTiet->monAn->ten,
+                'so_luong' => $chiTiet->so_luong,
+                'thoi_gian_nau' => $chiTiet->monAn->thoi_gian_nau,
+                'ghi_chu' => $chiTiet->ghi_chu,
+                'trang_thai' => $chiTiet->trang_thai,
+                'thoi_gian_hoan_thanh_du_kien' => $thoiGianHoanThanh,
+                'ma_hoa_don' => $maHoaDonChung
+            ];
+        }
 
         // Phát sự kiện ghép bàn
         event(new GhepBanEvent($monAns, $maHoaDonChung, $maHoaDonCu));
@@ -1122,6 +1122,23 @@ class ThuNganController extends Controller
             'ma_hoa_don' => $maHoaDon,
             'tong_tien_truoc_khi_giam' => $tongTienTruocKhiGiam,
             'tong_tien_sau_giam' => $tongTienSauGiam,
+        ]);
+    }
+
+    public function getIdFromMaHoaDon(Request $request)
+    {
+        $maHoaDon = $request->input('ma_hoa_don');
+
+        // Tìm hóa đơn theo ma_hoa_don
+        $hoaDon = HoaDon::where('ma_hoa_don', $maHoaDon)->first();
+
+        if (!$hoaDon) {
+            return response()->json(['error' => 'Hóa đơn không tồn tại'], 404);
+        }
+
+        return response()->json([
+            'hoa_don_id' => $hoaDon->id,
+            'ma_hoa_don' => $hoaDon->ma_hoa_don,
         ]);
     }
 }

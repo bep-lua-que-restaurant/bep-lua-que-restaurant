@@ -303,6 +303,42 @@ ${
         });
     }
 
+    window.Echo.channel("ghep-channel").listen(".ghep-ban", (event) => {
+        // Kiểm tra dữ liệu sự kiện
+        if (!event.maHoaDon) {
+            showToast("Lỗi: Không tìm thấy mã hóa đơn!", "error");
+            return;
+        }
+
+        const monAns = event.monAns;
+        const maHoaDon = event.maHoaDon;
+        const maHoaDonCu = event.maHoaDonCu;
+
+        // Gọi AJAX để lấy hoa_don_id từ ma_hoa_don
+        $.ajax({
+            url: "thu-ngan/get-id-from-ma", // Endpoint API
+            method: "GET",
+            data: { ma_hoa_don: maHoaDon }, // Gửi ma_hoa_don
+            success: function (response) {
+                // Kiểm tra phản hồi từ server
+                if (response.error) {
+                    console.error("Lỗi từ server:", response.error);
+                    showToast("Lỗi: " + response.error, "error");
+                    return;
+                }
+                const hoaDonId = response.hoa_don_id;
+                // Cập nhật data attribute
+                $("#ten-ban").data("hoaDonId", hoaDonId); // Sử dụng hoa_don_id từ API
+
+                // Tải lại chi tiết hóa đơn
+                loadChiTietHoaDon(hoaDonId);
+            },
+            error: function (xhr, status, error) {
+                console.error("Lỗi khi gọi API:", error);
+                showToast("Lỗi: Không thể lấy ID hóa đơn!", "error");
+            },
+        });
+    });
     let nutThanhToan = document.querySelector("#thanhToan-btn");
     nutThanhToan.onclick = function () {
         let maHoaDonElement = document.getElementById("maHoaDon");
@@ -319,7 +355,6 @@ ${
                 maHoaDon: maHoaDon,
             },
             success: function (response) {
-                console.log("khách cần trả" + response.tong_tien_sau_giam);
                 let ma_hoa_don = response.data;
                 let divMaGiamGia = document.querySelector(".wrap-ma-giam-gia");
                 let maGiamGia = response.ma_giam_gia; // chứa thông tin mã giảm
@@ -560,7 +595,7 @@ ${
 });
 
 window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (data) => {
-    console.log(data);
+
 
     if (
         !data.monAn ||

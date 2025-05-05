@@ -39,7 +39,7 @@ class GhepBanEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('bep-channel');
+        return new Channel('ghep-channel');
     }
 
     /**

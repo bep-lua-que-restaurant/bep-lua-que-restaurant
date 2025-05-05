@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,8 @@
     <!-- FilePond CSS -->
     <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
     <!-- FilePond Image Preview CSS -->
-    <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet"/>
+    <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css"
+        rel="stylesheet" />
     <!-- FilePond Image Transform -->
     <script src="https://unpkg.com/filepond-plugin-image-transform/dist/filepond-plugin-image-transform.js"></script>
     <!-- Tesseract.js -->
@@ -23,22 +25,28 @@
         .filepond--root {
             @apply bg-white border border-gray-200 rounded-xl shadow-md;
         }
+
         .filepond--drop-label {
             @apply text-gray-600 text-center font-medium;
         }
+
         .filepond--panel-root {
             @apply bg-gradient-to-b from-gray-50 to-white;
         }
+
         .filepond--item-panel {
             @apply bg-gray-100 border border-gray-200 rounded-lg;
         }
+
         .filepond--file-action-button {
             @apply bg-indigo-500 hover:bg-indigo-600 text-white;
         }
+
         /* Tùy chỉnh background */
         body {
             background: linear-gradient(135deg, #e0f2fe, #dbeafe);
         }
+
         /* Tùy chỉnh thông báo */
         #notification {
             display: none;
@@ -46,6 +54,7 @@
         }
     </style>
 </head>
+
 <body class="flex items-center justify-center min-h-screen">
     <div class="container max-w-md mx-auto bg-white p-8 rounded-2xl shadow-xl">
         <!-- Tiêu đề -->
@@ -54,22 +63,10 @@
         <div class="mb-8">
             <label for="invoiceCode" class="block text-sm font-medium text-gray-700 mb-2">Mã hóa đơn</label>
             <div class="flex space-x-3">
-                <input 
-                    type="text" 
-                    id="invoiceCode" 
-                    placeholder="Nhập mã hóa đơn" 
-                    class="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 bg-gray-50"
-                >
-                <button 
-                    onclick="searchInvoice()" 
-                    class="px-5 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-300 transform hover:scale-105"
-                >
-                    Tìm
-                </button>
-                <button 
-                    onclick="saveInvoice()" 
-                    class="px-5 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300 transform hover:scale-105"
-                >
+                <input type="text" id="invoiceCode" placeholder="Nhập mã hóa đơn"
+                    class="flex-1 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 bg-gray-50">
+                <button onclick="saveInvoice()"
+                    class="px-5 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300 transform hover:scale-105">
                     Lưu
                 </button>
             </div>
@@ -92,7 +89,8 @@
         function showNotification(message, type = 'error') {
             const notification = document.getElementById('notification');
             notification.textContent = message;
-            notification.className = `fixed bottom-4 right-4 p-4 rounded-lg shadow-lg text-white ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
+            notification.className =
+                `fixed bottom-4 right-4 p-4 rounded-lg shadow-lg text-white ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
             notification.style.display = 'block';
             setTimeout(() => {
                 notification.style.display = 'none';
@@ -132,7 +130,9 @@
 
                 // Trích xuất văn bản
                 try {
-                    const { createWorker } = Tesseract;
+                    const {
+                        createWorker
+                    } = Tesseract;
                     const worker = await createWorker({
                         langPath: 'https://tessdata.projectnaptha.com/4.0.0',
                         logger: m => console.log(m),
@@ -144,14 +144,21 @@
                         tessedit_ocr_engine_mode: 3,
                         tessedit_pageseg_mode: 6
                     });
-                    const { data: { text } } = await worker.recognize(imageData);
+                    const {
+                        data: {
+                            text
+                        }
+                    } = await worker.recognize(imageData);
                     await worker.terminate();
 
                     console.log('Văn bản trích xuất:', text);
-                    console.log('Các biến thể thử nghiệm:', text.match(/(?:BQL\s*)?HD\s*-\s*\d{8}\s*-\s*[A-Z0-9]{4}/i), text.match(/T?HD\d{8}[A-Z0-9]{4}/i));
+                    console.log('Các biến thể thử nghiệm:', text.match(
+                        /(?:BQL\s*)?HD\s*-\s*\d{8}\s*-\s*[A-Z0-9]{4}/i), text.match(
+                        /T?HD\d{8}[A-Z0-9]{4}/i));
 
                     // Tìm mã hóa đơn
-                    const invoiceCodeMatch = text.match(/(?:BQL\s*)?HD\s*-\s*\d{8}\s*-\s*[A-Z0-9]{4}|T?HD\d{8}[A-Z0-9]{4}/i);
+                    const invoiceCodeMatch = text.match(
+                        /(?:BQL\s*)?HD\s*-\s*\d{8}\s*-\s*[A-Z0-9]{4}|T?HD\d{8}[A-Z0-9]{4}/i);
                     let invoiceCode = invoiceCodeMatch ? invoiceCodeMatch[0].replace(/\s/g, '') : '';
 
                     // Xử lý lỗi OCR
@@ -227,4 +234,5 @@
         }
     </script>
 </body>
+
 </html>
