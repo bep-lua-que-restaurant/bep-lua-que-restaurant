@@ -45,6 +45,7 @@
                             <a style="font-size: 14px" href="{{ route('phieu-xuat-kho.export') }}" class="btn btn-success">
                                 <i class="fa fa-file-excel"></i> Xuất file
                             </a>
+
                         </div>
                     </div>
                     <div class="card-body">
