@@ -46,13 +46,30 @@ class NhanVienSeeder extends Seeder
                 'deleted_at' => null,
             ],
             [
-                'chuc_vu_id' => 6, // Bếp
+                'chuc_vu_id' => 2, // Bếp
                 'ma_nhan_vien' => 'NV0076',
                 'ho_ten' => 'Lê Văn C',
                 'email' => 'bep@gmail.com',
                 'so_dien_thoai' => '0912345680',
                 'password' => Hash::make('12345678'), // Mã hóa mật khẩu
                 'dia_chi' => 'Địa chỉ Bếp',
+                'hinh_anh' => 'default.png',
+                'gioi_tinh' => 'nam',
+                'ngay_sinh' => '1988-11-20',
+                'ngay_vao_lam' => '2019-07-15',
+                'trang_thai' => 'dang_lam_viec',
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => null,
+            ],
+            [
+                'chuc_vu_id' => 1, 
+                'ma_nhan_vien' => 'NV00726',
+                'ho_ten' => 'Lê Văn k',
+                'email' => 'letan@gmail.com',
+                'so_dien_thoai' => '0962345680',
+                'password' => Hash::make('12345678'), // Mã hóa mật khẩu
+                'dia_chi' => 'Địa chỉ le tan',
                 'hinh_anh' => 'default.png',
                 'gioi_tinh' => 'nam',
                 'ngay_sinh' => '1988-11-20',
