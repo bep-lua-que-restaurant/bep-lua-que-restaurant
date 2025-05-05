@@ -478,12 +478,10 @@
                         <!-- Cột chọn hóa đơn -->
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="banMoi" class="form-label">Chọn hóa đơn</label>
-                                <select class="form-select" id="banMoi">
-                                    <option value="new" selected>Tạo hóa đơn mới</option>
-                                    <option value="2">Bàn 2</option>
-                                    <option value="3">Bàn 3</option>
-                                </select>
+                                <div style="height: 2rem;"></div> <!-- Placeholder giữ khoảng cách -->
+                                <div class="custom-select" id="banMoi" style="position: relative; border: 1px solid #ced4da; border-radius: 0.25rem; padding: 0.375rem 0.75rem; cursor: pointer; background-color: #fff;">
+                                    <div class="selected-option" data-value="new">Tạo hóa đơn mới</div>
+                                </div>
                             </div>
                         </div>
 
