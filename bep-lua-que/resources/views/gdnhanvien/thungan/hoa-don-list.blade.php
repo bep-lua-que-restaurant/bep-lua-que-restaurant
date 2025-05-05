@@ -856,7 +856,7 @@
                 ten_san_pham: $(this).find("td:nth-child(2)").text().trim(),
                 so_luong: parseInt($(this).find("td:nth-child(3)").text().trim()) || 0,
                 don_gia: parseFloat($(this).find("td:nth-child(4)").text().replace(/\./g, '')
-                .trim()) || 0,
+                    .trim()) || 0,
                 tong_cong: parseFloat($(this).find("td:nth-child(5)").text().replace(/\./g, '')
                     .trim()) || 0
             };
@@ -1300,6 +1300,7 @@
                 success: function(response) {
                     $('#modalGhepBan').modal('hide');
                     showToast(response.message, "success");
+                    location.reload();
                 },
                 error: function(xhr) {
                     console.log(xhr.responseText);
@@ -1343,6 +1344,4 @@
                 break;
         }
     }
-
-
 </script>
