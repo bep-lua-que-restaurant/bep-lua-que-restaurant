@@ -206,43 +206,43 @@
                 });
 
                 Highcharts.chart('thongKeChart', {
-                    data: {
-                        enabled: true
-                    },
-                    exportData: {
-                        tableFormatter: function (items) {
-                            const columns = this.getDataRows(true); // true để lấy cả header
-                            const html = [];
-
-                            html.push('<table class="highcharts-data-table"><thead><tr>');
-                            columns[0].forEach(header => {
-                                html.push('<th>' + header + '</th>');
-                            });
-                            html.push('</tr></thead><tbody>');
-
-                            for (let i = 1; i < columns.length; i++) {
-                                html.push('<tr>');
-                                columns[i].forEach((val, j) => {
-                                    if (j === 0) {
-                                        // Cột đầu tiên là "Thời gian"
-                                        html.push('<td>' + val + '</td>');
-                                    } else {
-                                        // Cột Doanh thu: định dạng tiền
-                                        const formatted = Highcharts.numberFormat(Number(val), 0, ',', '.') + ' VNĐ';
-                                        html.push('<td style="text-align:right;">' + formatted + '</td>');
-                                    }
-                                });
-                                html.push('</tr>');
-                            }
-
-                            html.push('</tbody></table>');
-                            return html.join('');
-                        }
-                    },
-
-                    exporting: {
-                        enabled: true
-                    },
+                    // data: {
+                    //     enabled: true
+                    // },
+                    // exportData: {
+                    //     tableFormatter: function (items) {
+                    //         const columns = this.getDataRows(true); // true để lấy cả header
+                    //         const html = [];
+                    //
+                    //         html.push('<table class="highcharts-data-table"><thead><tr>');
+                    //         columns[0].forEach(header => {
+                    //             html.push('<th>' + header + '</th>');
+                    //         });
+                    //         html.push('</tr></thead><tbody>');
+                    //
+                    //         for (let i = 1; i < columns.length; i++) {
+                    //             html.push('<tr>');
+                    //             columns[i].forEach((val, j) => {
+                    //                 if (j === 0) {
+                    //                     // Cột đầu tiên là "Thời gian"
+                    //                     html.push('<td>' + val + '</td>');
+                    //                 } else {
+                    //                     // Cột Doanh thu: định dạng tiền
+                    //                     const formatted = Highcharts.numberFormat(Number(val), 0, ',', '.') + ' VNĐ';
+                    //                     html.push('<td style="text-align:right;">' + formatted + '</td>');
+                    //                 }
+                    //             });
+                    //             html.push('</tr>');
+                    //         }
+                    //
+                    //         html.push('</tbody></table>');
+                    //         return html.join('');
+                    //     }
+                    // },
+                    //
+                    // exporting: {
+                    //     enabled: true
+                    // },
 
 
                     chart: { type: 'column',

@@ -1,5 +1,12 @@
+let bieuDoLuongKhach = null; // Biến toàn cục lưu trữ đối tượng biểu đồ khách hàng
+
 function capNhatBieuDoTronSoLuongKhach(namNay, namTruoc) {
     const ctx = document.getElementById('bieuDoTronSoLuongKhachHangNam').getContext('2d');
+
+    // Nếu đã có biểu đồ, hủy nó đi
+    if (bieuDoLuongKhach) {
+        bieuDoLuongKhach.destroy();
+    }
 
     // Đảm bảo giá trị là số
     namNay = Number(namNay);
@@ -13,7 +20,8 @@ function capNhatBieuDoTronSoLuongKhach(namNay, namTruoc) {
         tiLe = ((namNay - namTruoc) / namTruoc * 100).toFixed(1);
     }
 
-    new Chart(ctx, {
+    // Cập nhật biểu đồ tròn mới
+    bieuDoLuongKhach = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: [
@@ -49,5 +57,6 @@ function capNhatBieuDoTronSoLuongKhach(namNay, namTruoc) {
         chenhLechText = 'Không thay đổi so với năm trước';
     }
 
+    // Hiển thị ra giao diện
     document.getElementById('phanTramChenhLechSoLuongKhachHang').innerText = chenhLechText;
 }

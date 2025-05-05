@@ -12,7 +12,7 @@ class ThongKeTopDoanhThuController extends Controller
     public function index(Request $request)
     {
         $filterType = $request->input('filterType', 'year');
-        $chartType = $request->input('chartType', 'gioBanChay'); // Lấy giá trị mặc định là giờ bán chạy
+        $chartType = $request->input('chartType', 'gioBanChay');
         $fromDate = $request->input('fromDate');
         $toDate = $request->input('toDate');
 
@@ -29,46 +29,41 @@ class ThongKeTopDoanhThuController extends Controller
                 $filterType = 'day';
             }
 
-            $query = HoaDon::whereBetween('hoa_dons.created_at', [$from, $to]);
+            $query = HoaDon::whereBetween('created_at', [$from, $to]);
         } else {
             if ($filterType == 'year') {
-                $query = HoaDon::whereYear('hoa_dons.created_at', Carbon::now()->year);
+                $query = HoaDon::whereYear('created_at', Carbon::now()->year);
             } elseif ($filterType == 'month') {
-                $query = HoaDon::whereYear('hoa_dons.created_at', Carbon::now()->year)
-                    ->whereMonth('hoa_dons.created_at', Carbon::now()->month);
+                $query = HoaDon::whereYear('created_at', Carbon::now()->year)
+                    ->whereMonth('created_at', Carbon::now()->month);
             } elseif ($filterType == 'week') {
-                $query = HoaDon::whereBetween('hoa_dons.created_at', [
+                $query = HoaDon::whereBetween('created_at', [
                     Carbon::now()->startOfWeek(),
                     Carbon::now()->endOfWeek()
                 ]);
             } elseif ($filterType == 'day') {
-                $query = HoaDon::whereDate('hoa_dons.created_at', Carbon::now()->toDateString());
+                $query = HoaDon::whereDate('created_at', Carbon::now()->toDateString());
             }
         }
 
-        // Thêm điều kiện chỉ lấy các hóa đơn có trạng thái "đã thanh toán"
-        $query->join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
-            ->where('hoa_don_bans.trang_thai', 'da_thanh_toan');
+        // Lọc theo hóa đơn đã thanh toán bằng whereHas
+        $query->whereHas('hoaDonBan', function ($q) {
+            $q->where('trang_thai', 'da_thanh_toan');
+        });
 
-        // Tính tổng doanh thu
-        $totalSales = $query->sum('hoa_dons.tong_tien');
+        // Tổng doanh thu
+        $totalSales = $query->sum('tong_tien');
 
-        // Lấy dữ liệu giờ bán chạy hoặc bán ít
-        $topDoanhThuQuery = $query->select(
-            DB::raw("DATE_FORMAT(hoa_dons.created_at, '%H:00') as hour"),
-            DB::raw("SUM(hoa_dons.tong_tien) as total_revenue")
-        )
-            ->groupBy('hour');
+        // Dữ liệu doanh thu theo giờ
+        $topDoanhThuQuery = clone $query;
 
-        if ($chartType == 'gioBanChay') {
-            $topDoanhThuQuery->orderByDesc('total_revenue'); // Sắp xếp giảm dần
-        } else {
-            $topDoanhThuQuery->orderBy('total_revenue'); // Sắp xếp tăng dần
-        }
+        $topDoanhThu = $topDoanhThuQuery
+            ->selectRaw("DATE_FORMAT(created_at, '%H:00') as hour, SUM(tong_tien) as total_revenue")
+            ->groupBy('hour')
+            ->orderBy($chartType == 'gioBanChay' ? 'total_revenue' : 'total_revenue', $chartType == 'gioBanChay' ? 'desc' : 'asc')
+            ->limit(5)
+            ->get();
 
-        $topDoanhThu = $topDoanhThuQuery->limit(5)->get();
-
-        // Gán dữ liệu cho biểu đồ
         $labels = $topDoanhThu->pluck('hour')->toArray();
         $data = $topDoanhThu->pluck('total_revenue')->toArray();
 
