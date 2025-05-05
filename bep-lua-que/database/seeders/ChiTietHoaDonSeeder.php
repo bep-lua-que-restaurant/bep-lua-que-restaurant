@@ -9,22 +9,24 @@ use Illuminate\Support\Facades\DB;
 
 class ChiTietHoaDonSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Lấy danh sách món ăn
-        $monAnList = DB::table('mon_ans')->pluck('gia', 'id')->toArray();
+        // Lấy danh sách món ăn với trạng thái 'dang_ban'
+        $monAnList = DB::table('mon_ans')
+            ->where('trang_thai', 'dang_ban')
+            ->pluck('gia', 'id')
+            ->toArray();
 
-        // Lấy danh sách hóa đơn
-        $hoaDonList = DB::table('hoa_don_bans')->pluck('created_at', 'hoa_don_id')->toArray();
+        // Lấy danh sách hóa đơn từ hoa_don_bans
+        $hoaDonList = DB::table('hoa_don_bans')
+            ->whereBetween('hoa_don_id', [5479, 5928])
+            ->pluck('created_at', 'hoa_don_id')
+            ->toArray();
 
         $data = [];
 
         foreach ($hoaDonList as $hoaDonId => $hoaDonTime) {
-            // Mỗi hóa đơn có từ 1-5 món ăn
-            $monAnRandom = array_rand($monAnList, rand(1, 5));
+            $monAnRandom = array_rand($monAnList, rand(1, min(5, count($monAnList))));
             $monAnRandom = is_array($monAnRandom) ? $monAnRandom : [$monAnRandom];
 
             foreach ($monAnRandom as $monAnId) {
@@ -47,6 +49,10 @@ class ChiTietHoaDonSeeder extends Seeder
             }
         }
 
+        // Xóa dữ liệu cũ
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('chi_tiet_hoa_dons')->truncate();
         DB::table('chi_tiet_hoa_dons')->insert($data);
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 }

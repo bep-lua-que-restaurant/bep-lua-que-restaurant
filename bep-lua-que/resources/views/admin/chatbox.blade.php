@@ -25,7 +25,7 @@
         }
 
         #chatbox {
-            
+
             position: fixed;
             bottom: 80px;
             right: 15px;
@@ -188,6 +188,7 @@
         });
 
         function sendMessage() {
+            const currentUserId = {{ auth()->id() }};
             let message = $("#messageInput").val().trim();
             if (message === "") return;
 
@@ -201,17 +202,19 @@
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
                 data: {
-                    nguoi_dung_id: 1, // Thay thế bằng user ID thực tế
+                    nguoi_dung_id: currentUserId,
                     noi_dung: message
                 },
                 success: function(response) {
                     $("#messages").append(`<div class="message bot">${response.phan_hoi}</div>`);
                     $("#messages").scrollTop($("#messages")[0].scrollHeight);
                 },
-                error: function() {
-                    $("#messages").append(`<div class="message bot">❌ Lỗi khi gửi tin nhắn</div>`);
+                error: function(xhr) {
+                    const errorMsg = xhr.responseJSON?.message || "❌ Lỗi khi gửi tin nhắn";
+                    $("#messages").append(`<div class="message bot">${errorMsg}</div>`);
                 }
             });
+
         }
 
 

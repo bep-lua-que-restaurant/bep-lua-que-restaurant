@@ -186,7 +186,7 @@ $(document).ready(function () {
                 mon_tach: danhSachTach,
             }),
             success: function (res) {
-                console.log(res);
+       
                 if (res.xac_nhan_xoa) {
                     // Nếu hóa đơn gốc trống, hỏi xác nhận xóa
                     Swal.fire({

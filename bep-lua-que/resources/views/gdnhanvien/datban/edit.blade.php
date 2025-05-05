@@ -12,7 +12,7 @@
                 <thead class="table-dark">
                     <tr>
                         <th class="sticky-col text-nowrap">Bàn / Giờ</th>
-                        @for ($i = 8; $i <= 22; $i++)
+                        @for ($i = 7; $i <= 21; $i++)
                             <th>{{ sprintf('%02d', $i) }}:00</th>
                             <th>{{ sprintf('%02d', $i) }}:30</th>
                         @endfor
@@ -30,7 +30,7 @@
                         <tr class="{{ $banAn->trang_thai == 'co_khach' ? 'bg-info' : '' }}" data-ban-id="{{ $banAn->id }}">
                             <td class="fw-bold sticky-col">{{ $banAn->ten_ban }}</td>
 
-                            @for ($i = 8; $i <= 22; $i++)
+                            @for ($i = 7; $i <= 21; $i++)
                                 @foreach ([0, 30] as $minute)
                                     @php
                                         $timeSlot = sprintf('%02d:%02d', $i, $minute);

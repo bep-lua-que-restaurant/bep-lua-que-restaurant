@@ -26,6 +26,7 @@ class PhieuXuatKhoController extends Controller
                 $query->withTrashed(); // Thêm withTrashed để lấy cả các bản ghi bị xóa mềm
             }, 'nhanVien'])
                 ->withTrashed()
+                ->orderByDesc('created_at')
                 ->get();
 
             return DataTables::of($query)

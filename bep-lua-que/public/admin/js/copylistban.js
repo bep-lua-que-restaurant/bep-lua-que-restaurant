@@ -303,6 +303,42 @@ ${
         });
     }
 
+    window.Echo.channel("ghep-channel").listen(".ghep-ban", (event) => {
+        // Kiểm tra dữ liệu sự kiện
+        if (!event.maHoaDon) {
+            showToast("Lỗi: Không tìm thấy mã hóa đơn!", "error");
+            return;
+        }
+
+        const monAns = event.monAns;
+        const maHoaDon = event.maHoaDon;
+        const maHoaDonCu = event.maHoaDonCu;
+
+        // Gọi AJAX để lấy hoa_don_id từ ma_hoa_don
+        $.ajax({
+            url: "thu-ngan/get-id-from-ma", // Endpoint API
+            method: "GET",
+            data: { ma_hoa_don: maHoaDon }, // Gửi ma_hoa_don
+            success: function (response) {
+                // Kiểm tra phản hồi từ server
+                if (response.error) {
+                    console.error("Lỗi từ server:", response.error);
+                    showToast("Lỗi: " + response.error, "error");
+                    return;
+                }
+                const hoaDonId = response.hoa_don_id;
+                // Cập nhật data attribute
+                $("#ten-ban").data("hoaDonId", hoaDonId); // Sử dụng hoa_don_id từ API
+
+                // Tải lại chi tiết hóa đơn
+                loadChiTietHoaDon(hoaDonId);
+            },
+            error: function (xhr, status, error) {
+                console.error("Lỗi khi gọi API:", error);
+                showToast("Lỗi: Không thể lấy ID hóa đơn!", "error");
+            },
+        });
+    });
     let nutThanhToan = document.querySelector("#thanhToan-btn");
     nutThanhToan.onclick = function () {
         let maHoaDonElement = document.getElementById("maHoaDon");
@@ -319,7 +355,6 @@ ${
                 maHoaDon: maHoaDon,
             },
             success: function (response) {
-                console.log("khách cần trả" + response.tong_tien_sau_giam);
                 let ma_hoa_don = response.data;
                 let divMaGiamGia = document.querySelector(".wrap-ma-giam-gia");
                 let maGiamGia = response.ma_giam_gia; // chứa thông tin mã giảm
@@ -416,13 +451,12 @@ ${
         });
     }
 
-    // render mã giảm giá
+    // Render mã giảm giá
     function renderDiscountCodes(discounts, ma_hoa_don) {
-        // console.log(discounts);
         let discountListHtml = "";
 
         discounts.forEach((discount) => {
-            const isApplied = discount.is_applied; // <-- thêm biến này
+            const isApplied = discount.is_applied;
             const buttonClass = isApplied
                 ? "btn-success"
                 : "btn-outline-primary";
@@ -431,6 +465,16 @@ ${
                 : '<i class="bi bi-ticket-perforated me-1"></i><span style="font-size: 0.8rem;">Áp dụng</span>';
             const isDisabled = isApplied ? "disabled" : "";
 
+            // Định dạng giá trị giảm dựa trên type
+            let discountText = "";
+            if (discount.type === "percentage") {
+                discountText = `Giảm ${Math.round(discount.value)}%`;
+            } else if (discount.type === "fixed") {
+                discountText = `Giảm ${parseFloat(
+                    discount.value
+                ).toLocaleString("vi-VN")} VND`;
+            }
+
             discountListHtml += `
             <li class="list-group-item d-flex justify-content-between align-items-center ${
                 isApplied ? "applied" : ""
@@ -438,26 +482,35 @@ ${
                 <div>
                     <span class="fw-bold text-primary">${discount.code}</span>
                     <p class="mb-0 text-muted" style="font-size: 0.85rem;">
-                        Giảm ${Math.round(discount.value)}% cho đơn từ ${
+                        ${discountText} cho đơn từ ${
                 parseFloat(discount.min_order_value).toLocaleString("vi-VN") +
                 " VNĐ"
             }
                     </p>
                 </div>
-                <button class="btn ${buttonClass} btn-sm apply-discount"  data-ma-hoa-don="${ma_hoa_don}"  data-id="${
-                discount.id
-            }" ${isDisabled}>
+                <button class="btn ${buttonClass} btn-sm apply-discount" 
+                        data-ma-hoa-don="${ma_hoa_don}" 
+                        data-id="${discount.id}" 
+                        ${isDisabled}>
                     ${buttonText}
                 </button>
             </li>
         `;
         });
 
-        document.querySelector(".discount-list .list-group").innerHTML =
-            discountListHtml;
+        const discountList = document.querySelector(
+            ".discount-list .list-group"
+        );
+        if (discountList) {
+            discountList.innerHTML =
+                discountListHtml ||
+                '<li class="list-group-item text-center">Không có mã giảm giá khả dụng</li>';
+        } else {
+            console.error("Không tìm thấy phần tử .discount-list .list-group");
+        }
     }
 
-    // áp mã
+    // Áp mã giảm giá
     $(document).on("click", ".apply-discount", function () {
         const $btn = $(this);
         const idCode = $(this).data("id");
@@ -475,7 +528,7 @@ ${
                 if (response.success) {
                     showToast("Đã áp dụng mã giảm giá!", "success");
 
-                    // 👉 Reset lại tất cả các nút về mặc định
+                    // Reset lại tất cả các nút về mặc định
                     $(".apply-discount")
                         .removeClass("btn-success")
                         .addClass("btn-outline-primary")
@@ -484,7 +537,7 @@ ${
                         )
                         .prop("disabled", false);
 
-                    // 👉 Cập nhật nút hiện tại
+                    // Cập nhật nút hiện tại
                     $btn.removeClass("btn-outline-primary")
                         .addClass("btn-success")
                         .html(
@@ -492,14 +545,44 @@ ${
                         )
                         .prop("disabled", true);
 
-                    // 👉 Optional: Thêm class cho li (nếu muốn hiệu ứng khác)
+                    // Optional: Thêm class cho li (nếu muốn hiệu ứng khác)
                     $(".discount-list .list-group-item").removeClass("applied");
                     $btn.closest("li").addClass("applied");
 
+                    // Cập nhật tổng tiền sau giảm
                     $("#khach_can_tra").val(
                         response.tong_tien_sau_giam.toLocaleString("vi-VN") +
                             " VNĐ"
                     );
+
+                    // Render lại danh sách mã giảm giá từ response
+                    if (response.ma_giam_gia) {
+                        renderDiscountCodes(response.ma_giam_gia, maHoaDon);
+                    }
+
+                    // Cập nhật mã đã áp dụng trong #applied-code
+                    const appliedDiscount = response.ma_giam_gia.find(
+                        (d) => d.is_applied
+                    );
+                    if (appliedDiscount) {
+                        let discountText = "";
+                        if (appliedDiscount.type === "percentage") {
+                            discountText = `Giảm ${Math.round(
+                                appliedDiscount.value
+                            )}%`;
+                        } else if (appliedDiscount.type === "fixed") {
+                            discountText = `Giảm ${parseFloat(
+                                appliedDiscount.value
+                            ).toLocaleString("vi-VN")} VND`;
+                        }
+                        $("#applied-code-text").text(
+                            `${appliedDiscount.code} - ${discountText}`
+                        );
+                        $("#applied-code").show();
+                    } else {
+                        $("#applied-code").hide();
+                        $("#applied-code-text").text("");
+                    }
                 } else {
                     alert(response.message || "Không áp dụng được mã giảm.");
                 }
@@ -512,7 +595,7 @@ ${
 });
 
 window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (data) => {
-    console.log(data);
+
 
     if (
         !data.monAn ||
@@ -817,7 +900,9 @@ window.Echo.channel("bep-channel").listen(".trang-thai-cap-nhat", (data) => {
 
 window.Echo.channel("bep-channel").listen(".mon-moi-duoc-them", (data) => {
     // Tìm tất cả các món có nút xóa hoặc nút tăng/giảm trước khi xóa
-    $(".xoa-mon, .xoa-mon-an, .tang-soluong, .giam-soluong, .toggle-ghi-chu").each(function () {
+    $(
+        ".xoa-mon, .xoa-mon-an, .tang-soluong, .giam-soluong, .toggle-ghi-chu"
+    ).each(function () {
         let row = $(this).closest("tr"); // Lấy dòng (tr) chứa nút
         let statusCell = row.find("td:eq(1)");
         // Đổi màu trạng thái thành "chờ chế biến"
@@ -826,7 +911,9 @@ window.Echo.channel("bep-channel").listen(".mon-moi-duoc-them", (data) => {
     });
 
     // Xóa nút xóa và nút tăng/giảm
-    $(".xoa-mon, .xoa-mon-an, .tang-soluong, .giam-soluong, .toggle-ghi-chu").remove();
+    $(
+        ".xoa-mon, .xoa-mon-an, .tang-soluong, .giam-soluong, .toggle-ghi-chu"
+    ).remove();
 
     // Gộp các dòng có cùng monAnId và class text-danger
     let processedMonAnIds = new Set(); // Lưu danh sách monAnId đã xử lý

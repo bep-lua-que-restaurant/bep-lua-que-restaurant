@@ -11,7 +11,7 @@
                     class="text-dark">{{ $phieuNhapKho->ma_phieu }}</span>
             </h3>
             <div>
-               
+
                 <a href="{{ route('phieu-nhap-kho.index') }}" class="btn btn-secondary">
                     <i class="fa fa-arrow-left"></i> Quay lại
                 </a>
@@ -24,7 +24,7 @@
                 <strong>Thông tin chung</strong>
             </div>
             <div class="card-body">
-                <p><strong>📦 Nhà cung cấp:</strong> {{ $phieuNhapKho->nhaCungCap->ten_nha_cung_cap ?? 'N/A' }}</p>
+                <p><strong>📦 Nhà cung cấp:</strong> {{ $phieuNhapKho->nhaCungCap->ten_nha_cung_cap ?? 'Không có' }}</p>
                 <p><strong>👤 Nhân viên nhập:</strong> {{ $phieuNhapKho->nhanVien->ho_ten ?? 'N/A' }}</p>
                 <p><strong>📅 Ngày nhập:</strong> {{ \Carbon\Carbon::parse($phieuNhapKho->ngay_nhap)->format('d/m/Y') }}</p>
                 <p><strong>📝 Ghi chú:</strong> {{ $phieuNhapKho->ghi_chu ?? 'Không có' }}</p>
@@ -70,8 +70,6 @@
 
                     @case('da_duyet')
                         <span class="badge bg-success">Đã duyệt</span>
-
-                        
                     @break
 
                     @case('da_huy')
@@ -111,9 +109,10 @@
                                 <td>{{ $chiTiet->ten_nguyen_lieu }}</td>
                                 <td>{{ $chiTiet->loaiNguyenLieu->ten_loai ?? 'Không rõ' }}</td>
                                 <td>{{ $chiTiet->don_vi_nhap }}</td>
-                                <td>{{ $chiTiet->so_luong_nhap }}</td>
-                                <td>{{ number_format($chiTiet->don_gia, 0, ',', '.') }} đ</td>
-                                <td class="text-end">{{ number_format($chiTiet->thanh_tien, 0, ',', '.') }} đ</td>
+                                <td>{{ number_format($chiTiet->so_luong_nhap) }}</td>
+
+                                <td>{{ number_format($chiTiet->don_gia, 0, ',', '.') }} VND</td>
+                                <td class="text-end">{{ number_format($chiTiet->thanh_tien, 0, ',', '.') }} VND</td>
                                 <td>{{ $chiTiet->ngay_san_xuat ?? '-' }}</td>
                                 <td>{{ $chiTiet->han_su_dung ?? '-' }}</td>
                             </tr>
@@ -124,7 +123,7 @@
                         <tr class="table-light">
                             <th colspan="7" class="text-end">Tổng tiền:</th>
                             <th class="text-end text-danger" colspan="3">
-                                {{ number_format($tongTien, 0, ',', '.') }} đ
+                                {{ number_format($tongTien, 0, ',', '.') }} VND
                             </th>
                         </tr>
                     </tfoot>

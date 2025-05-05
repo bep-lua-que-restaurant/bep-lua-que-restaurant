@@ -56,13 +56,14 @@
 
 
                             <!-- Nút Nhập file (Mở Modal) -->
-                            <a style="padding: 10px 10px 0 10px" href="#" class="btn btn-sm btn-secondary" data-toggle="modal"
-                                data-target="#importExcelModal">
+                            <a style="padding: 10px 10px 0 10px" href="#" class="btn btn-sm btn-secondary"
+                                data-toggle="modal" data-target="#importExcelModal">
                                 <i class="fa fa-upload"></i> Nhập file
                             </a>
 
                             <!-- Nút Xuất file -->
-                            <a style="padding: 10px 10px 0 10px" href="{{ route('ban-an.export') }}" class="btn btn-sm btn-success">
+                            <a style="padding: 10px 10px 0 10px" href="{{ route('ban-an.export') }}"
+                                class="btn btn-sm btn-success">
                                 <i class="fa fa-download"></i> Xuất file
                             </a>
 
@@ -85,8 +86,8 @@
                                             @csrf
                                             <div class="form-group">
                                                 <label for="file">Chọn file Excel (.xlsx, .xls)</label>
-                                                <input style="height: auto" type="file" name="file" id="file" class="form-control"
-                                                    required>
+                                                <input style="height: auto" type="file" name="file" id="file"
+                                                    class="form-control" required>
                                                 @if ($errors->has('file'))
                                                     <small class="text-danger">*{{ $errors->first('file') }}</small>
                                                 @endif
@@ -111,7 +112,16 @@
                             <table class="table table-responsive-md">
                                 <thead>
                                     <tr>
-                                        <th><strong>ID.</strong></th>
+
+                                        {{-- <th style="width:50px;">
+                                            <div class="custom-control custom-checkbox checkbox-success check-lg mr-3">
+                                                <input type="checkbox" class="custom-control-input" id="checkAll"
+                                                    required="">
+                                                <label class="custom-control-label" for="checkAll"></label>
+                                            </div>
+                                        </th> --}}
+                                        <th><strong>STT</strong></th>
+
                                         <th><strong>Tên bàn </strong></th>
                                         {{-- <th><strong>Số ghế </strong></th> --}}
                                         <th><strong>Trạng Thái</strong></th>

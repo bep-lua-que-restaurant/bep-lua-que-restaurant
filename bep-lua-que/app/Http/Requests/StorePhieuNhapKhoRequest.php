@@ -46,10 +46,11 @@ class StorePhieuNhapKhoRequest extends FormRequest
             'don_vi_nhaps.*' => ['required', 'string', 'regex:/^[^\d]*$/'],
 
             'so_luong_nhaps' => 'required|array',
-            'so_luong_nhaps.*' => 'required|numeric|min:0.01',
+            'so_luong_nhaps.*' => 'required|numeric|min:0.01|max:500',
+
 
             'don_gias' => 'nullable|array|required_if:loai_phieu,nhap_tu_ncc',
-            'don_gias.*' => 'nullable|numeric|min:0',
+            'don_gias.*' => 'nullable|numeric|min:0.01',
 
             'ngay_san_xuats' => 'nullable|array',
             'ngay_san_xuats.*' => 'nullable|date',
@@ -175,7 +176,7 @@ class StorePhieuNhapKhoRequest extends FormRequest
             'so_luong_nhaps.required' => 'Số lượng nhập là bắt buộc.',
             'so_luong_nhaps.*.required' => 'Số lượng nhập không được để trống.',
             'so_luong_nhaps.*.min' => 'Số lượng nhập phải lớn hơn 0.',
-
+            'so_luong_nhaps.*.max' => 'Số lượng nhập không được lớn hơn 500.',
 
 
             'don_gias.required' => 'Đơn giá là bắt buộc.',

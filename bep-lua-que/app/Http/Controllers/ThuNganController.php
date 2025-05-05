@@ -10,6 +10,7 @@ use App\Models\HoaDonBan;
 use App\Models\KhachHang;
 use App\Events\BanAnUpdated;
 use App\Events\DatBanUpdated;
+use App\Events\GhepBanEvent;
 use App\Models\PhongAn;
 use Illuminate\Http\Request;
 use App\Events\HoaDonUpdated;
@@ -213,7 +214,8 @@ class ThuNganController extends Controller
         // Lấy tổng số người đặt bàn (gộp tất cả bàn)
         $soNguoi = DatBan::whereIn('ban_an_id', $banAnIds)
             ->where('trang_thai', 'xac_nhan')
-            ->sum('so_nguoi');
+            ->orderBy('created_at', 'desc')
+            ->value('so_nguoi') ?? 0;
 
         // Lấy danh sách tên bàn
         $tenBanAn = BanAn::whereIn('id', $banAnIds)->pluck('ten_ban');
@@ -614,6 +616,24 @@ class ThuNganController extends Controller
             event(new BanAnUpdated($banAn));
         }
 
+        $hoaDonHienTaiID = $hoaDonHienTai->hoa_don_id;
+        $maHoaDonChung = HoaDon::where('id', $hoaDonHienTaiID)->value('ma_hoa_don');
+        $monAns = [];
+        $maHoaDonCu = [];
+        $banAnIds = array_merge([$idBanHienTai], $idDanhSachBanMoi);
+
+        // Lấy tất cả mã hóa đơn từ các bàn được ghép
+        $hoaDonBans = HoaDonBan::whereIn('ban_an_id', $banAnIds)
+            ->where('trang_thai', 'dang_xu_ly')
+            ->with(['hoaDon'])
+            ->get();
+
+        foreach ($hoaDonBans as $hoaDonBan) {
+            if ($hoaDonBan->hoa_don_id != $hoaDonHienTaiID && $hoaDonBan->hoaDon) {
+                $maHoaDonCu[] = $hoaDonBan->hoaDon->ma_hoa_don;
+            }
+        }
+
         foreach ($idDanhSachBanMoi as $idBanMoi) {
             $hoaDonBanMoi = HoaDonBan::where('ban_an_id', $idBanMoi)
                 ->where('trang_thai', 'dang_xu_ly')
@@ -621,7 +641,6 @@ class ThuNganController extends Controller
 
             if ($hoaDonBanMoi) {
                 $hoaDonMoiID = $hoaDonBanMoi->hoa_don_id;
-                $hoaDonHienTaiID = $hoaDonHienTai->hoa_don_id;
 
                 $chiTietMonAnMoi = ChiTietHoaDon::where('hoa_don_id', $hoaDonMoiID)->get();
 
@@ -679,9 +698,41 @@ class ThuNganController extends Controller
             event(new BanAnUpdated($banAn));
         }
 
-        return response()->json(['message' => 'Ghép bàn thành công!']);
-    }
+        // Thu thập danh sách món ăn để gửi qua sự kiện
+        $chiTietHoaDons = ChiTietHoaDon::where('hoa_don_id', $hoaDonHienTaiID)
+            ->with(['monAn'])
+            ->get();
 
+        foreach ($chiTietHoaDons as $chiTiet) {
+            // Kiểm tra kiểu dữ liệu của thoi_gian_hoan_thanh_du_kien
+            $thoiGianHoanThanh = $chiTiet->thoi_gian_hoan_thanh_du_kien;
+            if ($thoiGianHoanThanh) {
+                $thoiGianHoanThanh = is_string($thoiGianHoanThanh) ? $thoiGianHoanThanh : $thoiGianHoanThanh->toDateTimeString();
+            } else {
+                $thoiGianHoanThanh = null;
+            }
+
+            $monAns[] = [
+                'id' => $chiTiet->id,
+                'mon_an_id' => $chiTiet->mon_an_id,
+                'ten' => $chiTiet->monAn->ten,
+                'so_luong' => $chiTiet->so_luong,
+                'thoi_gian_nau' => $chiTiet->monAn->thoi_gian_nau,
+                'ghi_chu' => $chiTiet->ghi_chu,
+                'trang_thai' => $chiTiet->trang_thai,
+                'thoi_gian_hoan_thanh_du_kien' => $thoiGianHoanThanh,
+                'ma_hoa_don' => $maHoaDonChung
+            ];
+        }
+
+        // Phát sự kiện ghép bàn
+        event(new GhepBanEvent($monAns, $maHoaDonChung, $maHoaDonCu));
+
+        return response()->json([
+            'message' => 'Ghép bàn thành công!',
+            'ma_hoa_don' => $maHoaDonChung
+        ]);
+    }
     public function updateQuantity(Request $request)
     {
         $monAnId = $request->mon_an_id;
@@ -1071,6 +1122,23 @@ class ThuNganController extends Controller
             'ma_hoa_don' => $maHoaDon,
             'tong_tien_truoc_khi_giam' => $tongTienTruocKhiGiam,
             'tong_tien_sau_giam' => $tongTienSauGiam,
+        ]);
+    }
+
+    public function getIdFromMaHoaDon(Request $request)
+    {
+        $maHoaDon = $request->input('ma_hoa_don');
+
+        // Tìm hóa đơn theo ma_hoa_don
+        $hoaDon = HoaDon::where('ma_hoa_don', $maHoaDon)->first();
+
+        if (!$hoaDon) {
+            return response()->json(['error' => 'Hóa đơn không tồn tại'], 404);
+        }
+
+        return response()->json([
+            'hoa_don_id' => $hoaDon->id,
+            'ma_hoa_don' => $hoaDon->ma_hoa_don,
         ]);
     }
 }

@@ -104,8 +104,7 @@
                                 data-ten="{{ $mon->monAn->ten ?? 'Không xác định' }}"
                                 data-so-luong="{{ $mon->so_luong }}"
                                 data-thoi-gian-nau="{{ $mon->monAn->thoi_gian_nau }}"
-                                data-ghi-chu="{{ $mon->ghi_chu ?? '' }}"
-                                data-all-ids="{{ $mon->id }}">
+                                data-ghi-chu="{{ $mon->ghi_chu ?? '' }}" data-all-ids="{{ $mon->id }}">
                                 <div>
                                     <strong>{{ $mon->monAn->ten ?? 'Không xác định' }}</strong> -
                                     {{ $mon->hoaDon ? $mon->hoaDon->ma_hoa_don ?? 'Không có mã hóa đơn' : '<span class="text-danger">Không có hóa đơn</span>' }}
@@ -142,8 +141,7 @@
                                 data-ten="{{ $mon->monAn->ten ?? 'Không xác định' }}"
                                 data-so-luong="{{ $mon->so_luong }}"
                                 data-thoi-gian-nau="{{ $mon->monAn->thoi_gian_nau }}"
-                                data-ghi-chu="{{ $mon->ghi_chu ?? '' }}"
-                                data-all-ids="{{ $mon->id }}">
+                                data-ghi-chu="{{ $mon->ghi_chu ?? '' }}" data-all-ids="{{ $mon->id }}">
                                 <div>
                                     <strong>{{ $mon->monAn->ten ?? 'Không xác định' }}</strong> -
                                     {{ $mon->hoaDon ? $mon->hoaDon->ma_hoa_don ?? 'Không có mã hóa đơn' : '<span class="text-danger">Không có hóa đơn</span>' }}
@@ -159,7 +157,8 @@
                                         <br>
                                         <small id="timer-{{ $mon->id }}" style="color: red; font-size: 10px;"
                                             data-thoi-gian-hoan-thanh-du_kien="{{ $mon->thoi_gian_hoan_thanh_du_kien }}">
-                                            Hoàn thành dự kiến: {{ date('H:i', strtotime($mon->thoi_gian_hoan_thanh_du_kien)) }}
+                                            Hoàn thành dự kiến:
+                                            {{ date('H:i', strtotime($mon->thoi_gian_hoan_thanh_du_kien)) }}
                                         </small>
                                     @endif
                                 </div>
@@ -187,13 +186,13 @@
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         const choCheBienList = document.getElementById('cho-che-bien-list');
         const dangNauList = document.getElementById('dang-nau-list');
-        const processedEvents = new Set(); // Lưu trữ các sự kiện đã xử lý
+        const processedEvents = new Set();
 
         async function updateStatus(id, status) {
-            console.log(`updateStatus called: id=${id}, status=${status}`);
+
             const message = status === 'dang_nau' ? 'Bạn có chắc muốn bắt đầu nấu món này?' : 'Món này đã hoàn thành?';
             if (!confirm(message)) {
-                console.log('Update cancelled by user');
+
                 return;
             }
 
@@ -211,9 +210,9 @@
                 });
 
                 const data = await response.json();
-                console.log('Update response:', data);
+
                 if (data.success) {
-                    console.log(`Update successful for id=${id}, status=${status}`);
+
                 } else {
                     showToast('Cập nhật thất bại: ' + data.message, 'danger');
                     console.error('Update failed:', data.message);
@@ -225,17 +224,17 @@
         }
 
         function moveDish(id, status, monAnData = null) {
-            console.log(`moveDish called: id=${id}, status=${status}, monAnData=`, monAnData);
+
             const eventKey = `${id}-${status}`;
             if (processedEvents.has(eventKey)) {
-                console.log(`Event already processed: ${eventKey}`);
+
                 return;
             }
             processedEvents.add(eventKey);
-            console.log(`Added to processedEvents: ${eventKey}`);
+
 
             if (status === 'dang_nau' && monAnData) {
-                console.log('Processing dang_nau status');
+
                 const monAnId = monAnData.mon_an_id || monAnData.ten;
                 const ten = monAnData.mon_an?.ten || monAnData.ten || 'Không xác định';
                 const maHoaDon = monAnData.hoa_don?.ma_hoa_don || monAnData.ma_hoa_don || monAnData.hoa_don_id || '';
@@ -244,125 +243,75 @@
                 const ghiChu = monAnData.ghi_chu || '';
                 const thoiGianHoanThanhDuKien = monAnData.thoi_gian_hoan_thanh_du_kien;
 
-                console.log(`monAnId=${monAnId}, ten=${ten}, maHoaDon=${maHoaDon}, soLuong=${soLuong}, thoiGianNau=${thoiGianNau}`);
+
 
                 // Xóa món khỏi Chờ chế biến
                 const dishInChoCheBien = document.getElementById(`dish-${id}`);
                 if (dishInChoCheBien) {
-                    console.log(`Removing dish-${id} from Chờ chế biến`);
+
                     dishInChoCheBien.remove();
                 } else {
                     console.log(`dish-${id} not found in Chờ chế biến`);
                 }
 
-                // Tìm món trùng trong Đang nấu
-                const existingDish = Array.from(dangNauList.children).find(d =>
-                    d.getAttribute('data-mon-an-id') == monAnId &&
-                    d.getAttribute('data-ma-hoa-don') === maHoaDon
-                );
+                // Thêm món mới vào Đang nấu
+                const newDish = document.createElement('div');
+                newDish.id = `dish-${id}`;
+                newDish.className = 'list-group-item d-flex justify-content-between align-items-center';
+                newDish.setAttribute('data-mon-an-id', monAnId);
+                newDish.setAttribute('data-ma-hoa-don', maHoaDon);
+                newDish.setAttribute('data-ten', ten);
+                newDish.setAttribute('data-so-luong', soLuong);
+                newDish.setAttribute('data-thoi-gian-nau', thoiGianNau);
+                newDish.setAttribute('data-ghi-chu', ghiChu);
+                newDish.setAttribute('data-all-ids', id);
 
-                if (existingDish) {
-                    console.log(`Found existing dish in Đang nấu: id=${existingDish.id}, monAnId=${monAnId}, maHoaDon=${maHoaDon}`);
-                    // Gộp món
-                    const existingId = existingDish.id.split('-')[1];
-                    const allIds = existingDish.getAttribute('data-all-ids') ? existingDish.getAttribute('data-all-ids').split(',') : [existingId];
-                    allIds.push(id);
-                    const existingSoLuong = parseInt(existingDish.getAttribute('data-so-luong')) || 0;
-                    const newSoLuong = existingSoLuong + soLuong;
-                    const existingGhiChu = existingDish.getAttribute('data-ghi-chu');
-                    const newGhiChu = existingGhiChu && ghiChu ? `${existingGhiChu}, ${ghiChu}` : existingGhiChu || ghiChu || '';
-
-                    existingDish.id = `dish-${id}`;
-                    existingDish.setAttribute('data-all-ids', allIds.join(','));
-                    existingDish.setAttribute('data-so-luong', newSoLuong);
-                    existingDish.setAttribute('data-ghi-chu', newGhiChu);
-                    existingDish.setAttribute('data-thoi-gian-nau', thoiGianNau);
-
-                    const thoiGianNauTong = (thoiGianNau * newSoLuong).toFixed(2);
-                    existingDish.querySelector('div').innerHTML = `
+                const thoiGianNauTong = (thoiGianNau * soLuong).toFixed(2);
+                newDish.innerHTML = `
+                    <div>
                         <strong>${ten}</strong> - 
                         ${maHoaDon ? maHoaDon : '<span class="text-danger">Không có mã hóa đơn</span>'}
-                        <br><small>Số lượng: ${newSoLuong}</small>
+                        <br><small>Số lượng: ${soLuong}</small>
                         <br><small>Thời gian nấu: ${thoiGianNauTong} phút</small>
-                        ${newGhiChu ? `<br><small style="color: #ff6347; font-size: 0.8em;" class="ghi-chu">Ghi chú: ${newGhiChu}</small>` : ''}
+                        ${ghiChu ? `<br><small style="color: #ff6347; font-size: 0.8em;" class="ghi-chu">Ghi chú: ${ghiChu}</small>` : ''}
                         ${thoiGianHoanThanhDuKien ? `
-                            <br>
-                            <small id="timer-${id}" style="color: red; font-size: 10px;"
-                                data-thoi-gian-hoan-thanh-du_kien="${thoiGianHoanThanhDuKien}">
-                                Hoàn thành dự kiến: ${new Date(thoiGianHoanThanhDuKien).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
-                            </small>
-                        ` : ''}
-                    `;
-                    existingDish.querySelector('.status-buttons').innerHTML =
-                        `<button class="btn btn-success btn-sm status-btn" onclick="updateStatus(${id}, 'hoan_thanh')">Lên món</button>`;
-
-                    if (thoiGianHoanThanhDuKien) {
-                        console.log(`Starting countdown for id=${id}, thoiGianHoanThanhDuKien=${thoiGianHoanThanhDuKien}`);
-                        startCountdown(id, new Date(thoiGianHoanThanhDuKien));
-                    }
-
-                    showToast(`Gộp ${ten}, số lượng: ${newSoLuong}`, 'success');
-                    console.log(`Merged dish: newSoLuong=${newSoLuong}, newGhiChu=${newGhiChu}, allIds=${allIds.join(',')}`);
-                } else {
-                    console.log('No existing dish found, adding new dish to Đang nấu');
-                    // Thêm món mới vào Đang nấu
-                    const newDish = document.createElement('div');
-                    newDish.id = `dish-${id}`;
-                    newDish.className = 'list-group-item d-flex justify-content-between align-items-center';
-                    newDish.setAttribute('data-mon-an-id', monAnId);
-                    newDish.setAttribute('data-ma-hoa-don', maHoaDon);
-                    newDish.setAttribute('data-ten', ten);
-                    newDish.setAttribute('data-so-luong', soLuong);
-                    newDish.setAttribute('data-thoi-gian-nau', thoiGianNau);
-                    newDish.setAttribute('data-ghi-chu', ghiChu);
-                    newDish.setAttribute('data-all-ids', id);
-
-                    const thoiGianNauTong = (thoiGianNau * soLuong).toFixed(2);
-                    newDish.innerHTML = `
-                        <div>
-                            <strong>${ten}</strong> - 
-                            ${maHoaDon ? maHoaDon : '<span class="text-danger">Không có mã hóa đơn</span>'}
-                            <br><small>Số lượng: ${soLuong}</small>
-                            <br><small>Thời gian nấu: ${thoiGianNauTong} phút</small>
-                            ${ghiChu ? `<br><small style="color: #ff6347; font-size: 0.8em;" class="ghi-chu">Ghi chú: ${ghiChu}</small>` : ''}
-                            ${thoiGianHoanThanhDuKien ? `
                                 <br>
                                 <small id="timer-${id}" style="color: red; font-size: 10px;"
                                     data-thoi-gian-hoan-thanh-du_kien="${thoiGianHoanThanhDuKien}">
                                     Hoàn thành dự kiến: ${new Date(thoiGianHoanThanhDuKien).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                                 </small>
                             ` : ''}
-                        </div>
-                        <div class="status-buttons">
-                            <button class="btn btn-success btn-sm status-btn"
-                                onclick="updateStatus(${id}, 'hoan_thanh')">
-                                Lên món
-                            </button>
-                        </div>
-                    `;
-                    dangNauList.appendChild(newDish);
+                    </div>
+                    <div class="status-buttons">
+                        <button class="btn btn-success btn-sm status-btn"
+                            onclick="updateStatus(${id}, 'hoan_thanh')">
+                            Lên món
+                        </button>
+                    </div>
+                `;
+                dangNauList.appendChild(newDish);
 
-                    if (thoiGianHoanThanhDuKien) {
-                        console.log(`Starting countdown for new dish id=${id}, thoiGianHoanThanhDuKien=${thoiGianHoanThanhDuKien}`);
-                        startCountdown(id, new Date(thoiGianHoanThanhDuKien));
-                    }
+                if (thoiGianHoanThanhDuKien) {
 
-                    showToast(`Chuyển ${ten} sang đang nấu`, 'success');
-                    console.log(`Added new dish: id=${id}, ten=${ten}, allIds=${id}`);
+                    startCountdown(id, new Date(thoiGianHoanThanhDuKien));
                 }
+
+                showToast(`Chuyển ${ten} sang đang nấu`, 'success');
+
             } else if (status === 'hoan_thanh' && monAnData) {
-                console.log('Processing hoan_thanh status');
+
                 let dish = document.getElementById(`dish-${id}`);
                 let ten = monAnData.mon_an?.ten || monAnData.ten || 'Không xác định';
                 let maHoaDon = monAnData.hoa_don?.ma_hoa_don || monAnData.ma_hoa_don || monAnData.hoa_don_id || '';
                 const monAnId = monAnData.mon_an_id || monAnData.ten;
 
-                console.log(`Looking for dish: id=${id}, monAnId=${monAnId}, maHoaDon=${maHoaDon}, ten=${ten}`);
+
 
                 if (!dish) {
-                    console.log(`dish-${id} not found, searching by all-ids or mon_an_id and ma_hoa_don`);
+
                     dish = Array.from(dangNauList.children).find(d => {
-                        const allIds = d.getAttribute('data-all-ids') ? d.getAttribute('data-all-ids').split(',') : [d.id.split('-')[1]];
+                        const allIds = d.getAttribute('data-all-ids') ? d.getAttribute('data-all-ids').split(',') :
+                            [d.id.split('-')[1]];
                         return allIds.includes(String(id)) || (
                             d.getAttribute('data-mon-an-id') == monAnId &&
                             d.getAttribute('data-ma-hoa-don') === maHoaDon
@@ -370,14 +319,14 @@
                     });
                     if (dish) {
                         ten = dish.getAttribute('data-ten') || ten;
-                        console.log(`Found dish by all-ids or mon_an_id/ma_hoa_don: id=${dish.id}, ten=${ten}, allIds=${dish.getAttribute('data-all-ids')}`);
+
                     } else {
                         console.log('No dish found by all-ids, mon_an_id, or ma_hoa_don');
                     }
                 }
 
                 if (dish) {
-                    console.log(`Removing dish-${id} from Đang nấu`);
+
                     dish.remove();
                     showToast(`Món ${ten} đã hoàn thành`, 'success');
                 } else {
@@ -392,8 +341,9 @@
         }
 
         function createDishElement(monAn, maHoaDon) {
-            console.log('createDishElement called:', monAn, maHoaDon);
-            if (!monAn || typeof monAn.id !== 'number' || !monAn.ten || typeof monAn.ten !== 'string' || monAn.ten.trim() === '') {
+
+            if (!monAn || typeof monAn.id !== 'number' || !monAn.ten || typeof monAn.ten !== 'string' || monAn.ten
+            .trim() === '') {
                 console.error('Dữ liệu món ăn không hợp lệ:', monAn);
                 showToast('Dữ liệu món ăn không hợp lệ', 'warning');
                 return null;
@@ -428,47 +378,65 @@
                     <br><small>Số lượng: ${monAn.so_luong}</small>
                     <br><small>Thời gian nấu: ${thoiGianNauTong} phút</small>
                     ${ghiChu}
+                    ${monAn.thoi_gian_hoan_thanh_du_kien && monAn.trang_thai === 'dang_nau' ? `
+                            <br>
+                            <small id="timer-${monAn.id}" style="color: red; font-size: 10px;"
+                                data-thoi-gian-hoan-thanh-du_kien="${monAn.thoi_gian_hoan_thanh_du_kien}">
+                                Hoàn thành dự kiến: ${new Date(monAn.thoi_gian_hoan_thanh_du_kien).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                            </small>
+                        ` : ''}
                 </div>
                 <div class="status-buttons">
-                    <button class="btn btn-warning btn-sm status-btn" 
-                        onclick="updateStatus(${monAn.id}, 'dang_nau')">
-                        Nấu
+                    <button class="btn ${monAn.trang_thai === 'dang_nau' ? 'btn-success' : 'btn-warning'} btn-sm status-btn" 
+                        onclick="updateStatus(${monAn.id}, '${monAn.trang_thai === 'dang_nau' ? 'hoan_thanh' : 'dang_nau'}')">
+                        ${monAn.trang_thai === 'dang_nau' ? 'Lên món' : 'Nấu'}
                     </button>
                 </div>
             `;
-            console.log(`Created dish element: id=dish-${monAn.id}, ten=${monAn.ten}`);
+
             return div;
         }
 
-        function replaceDishesByHoaDon(monAns, maHoaDon) {
-            console.log('replaceDishesByHoaDon called:', monAns, maHoaDon);
+        function replaceDishesByHoaDon(monAns, maHoaDon, maHoaDonCu = []) {
+
             if (!monAns || !Array.isArray(monAns) || monAns.length === 0) {
                 console.warn('Dữ liệu món mới không hợp lệ hoặc rỗng:', monAns);
                 showToast('Dữ liệu món mới không hợp lệ', 'warning');
                 return false;
             }
 
-            const dishesToRemove = Array.from(choCheBienList.children).filter(dish =>
-                dish.getAttribute('data-ma-hoa-don') === maHoaDon
-            );
-            console.log(`Removing ${dishesToRemove.length} dishes with ma_hoa_don=${maHoaDon} from Chờ chế biến`);
-            dishesToRemove.forEach(dish => {
-                console.log(`Removing dish id=${dish.id}`);
-                dish.remove();
+            // Xóa các món hiện tại trong cả hai danh sách có ma_hoa_don tương ứng
+            const lists = [choCheBienList, dangNauList];
+            const maHoaDonToRemove = [maHoaDon, ...maHoaDonCu].filter(Boolean);
+
+            lists.forEach(list => {
+                const dishesToRemove = Array.from(list.children).filter(dish =>
+                    maHoaDonToRemove.includes(dish.getAttribute('data-ma-hoa-don'))
+                );
+
+                dishesToRemove.forEach(dish => {
+
+                    dish.remove();
+                });
             });
 
-            monAns.forEach((monAn, index) => {
+            // Thêm từng món riêng biệt vào danh sách tương ứng
+            monAns.forEach(monAn => {
                 if (monAn.trang_thai === 'hoan_thanh') {
-                    console.log(`Skipping completed dish: id=${monAn.id}, ten=${monAn.ten}`);
+
                     return;
                 }
                 const dishElement = createDishElement(monAn, maHoaDon);
                 if (dishElement) {
-                    choCheBienList.appendChild(dishElement);
-                    showToast(`Thêm ${monAn.ten}`, 'success');
-                    console.log(`Added dish: id=dish-${monAn.id}, ten=${monAn.ten}`);
+                    const targetList = monAn.trang_thai === 'dang_nau' ? dangNauList : choCheBienList;
+                    targetList.appendChild(dishElement);
+                    showToast(`Cập nhật ${monAn.ten} với mã hóa đơn ${maHoaDon}`, 'success');
+
+                    if (monAn.trang_thai === 'dang_nau' && monAn.thoi_gian_hoan_thanh_du_kien) {
+                        startCountdown(monAn.id, new Date(monAn.thoi_gian_hoan_thanh_du_kien));
+                    }
                 } else {
-                    console.warn(`Bỏ qua món không hợp lệ tại index ${index}:`, monAn);
+                    console.warn(`Bỏ qua món không hợp lệ:`, monAn);
                 }
             });
 
@@ -486,7 +454,7 @@
         const channel = window.Echo.channel('bep-channel');
 
         channel.listen('.mon-moi-duoc-them', (data) => {
-            console.log('Pusher event .mon-moi-duoc-them received:', data);
+
             if (!data?.monAns || !data.monAns.length) {
                 console.warn('Dữ liệu món mới không hợp lệ hoặc rỗng:', data);
                 showToast('Dữ liệu món mới không hợp lệ', 'warning');
@@ -498,10 +466,10 @@
         });
 
         channel.listen('.trang-thai-cap-nhat', (data) => {
-            console.log('Pusher event .trang-thai-cap-nhat received:', data);
+
             const monAn = data.mon || data.monAn || {};
             if (monAn.id && monAn.trang_thai) {
-                console.log(`Processing trang-thai-cap-nhat: id=${monAn.id}, trang_thai=${monAn.trang_thai}`);
+
                 moveDish(monAn.id, monAn.trang_thai, monAn);
             } else {
                 console.warn('Dữ liệu món ăn không hợp lệ trong trang-thai-cap-nhat:', data);
@@ -509,14 +477,26 @@
             }
         });
 
+        channel.listen('.ghep-ban', (data) => {
+
+            if (!data?.monAns || !data.maHoaDon) {
+                console.warn('Dữ liệu ghép bàn không hợp lệ:', data);
+                showToast('Dữ liệu ghép bàn không hợp lệ', 'warning');
+                return;
+            }
+
+            replaceDishesByHoaDon(data.monAns, data.maHoaDon, data.maHoaDonCu || []);
+            showToast(`Đã cập nhật món ăn cho mã hóa đơn ${data.maHoaDon} sau khi ghép bàn`, 'success');
+        });
+
         window.Echo.channel('xoa-mon-an-channel')
             .listen('.xoa-mon-an-event', (e) => {
-                console.log('Pusher event .xoa-mon-an-event received:', e);
+
                 if (e && e.data && e.data.id) {
                     const monAnId = e.data.id;
                     const dish = document.getElementById(`dish-${monAnId}`);
                     if (dish) {
-                        console.log(`Removing dish id=dish-${monAnId} due to xoa-mon-an-event`);
+
                         dish.remove();
                         showToast(`Món id ${monAnId} đã được xóa`, 'success');
                     } else {
@@ -529,24 +509,25 @@
             });
 
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOM fully loaded, initializing countdown timers');
+
             const dishes = document.querySelectorAll('[id^="dish-"]');
             dishes.forEach(dish => {
                 const timerElement = dish.querySelector('[id^="timer-"]');
                 if (timerElement) {
                     const monAnId = dish.id.split('-')[1];
-                    const thoiGianHoanThanhDuKien = new Date(timerElement.getAttribute('data-thoi-gian-hoan-thanh-du_kien'));
-                    console.log(`Starting countdown for dish id=dish-${monAnId}, thoiGianHoanThanhDuKien=${thoiGianHoanThanhDuKien}`);
+                    const thoiGianHoanThanhDuKien = new Date(timerElement.getAttribute(
+                        'data-thoi-gian-hoan-thanh-du_kien'));
+
                     startCountdown(monAnId, thoiGianHoanThanhDuKien);
                 }
             });
         });
 
         function startCountdown(monAnId, thoiGianHoanThanhDuKien) {
-            console.log(`startCountdown called: monAnId=${monAnId}, thoiGianHoanThanhDuKien=${thoiGianHoanThanhDuKien}`);
+
             const timerElement = document.getElementById(`timer-${monAnId}`);
             if (!timerElement) {
-                console.log(`timer-${monAnId} not found`);
+
                 return;
             }
 
@@ -563,7 +544,7 @@
                         const tenMon = dishNameElement ? dishNameElement.textContent : 'Món';
                         dishNameElement.style.color = 'red';
                         showToast(`Món "${tenMon}" đã nấu xong, hãy lên món!`, 'success');
-                        console.log(`Countdown completed for dish-${monAnId}, tenMon=${tenMon}`);
+
                         if (document.hasFocus()) {
                             dingSound.play().catch(error => console.log('Lỗi phát âm thanh:', error));
                         }
@@ -575,7 +556,7 @@
         }
 
         function showToast(message, type) {
-            console.log(`showToast: message=${message}, type=${type}`);
+
             const toastEl = document.getElementById('toastMessage');
             toastEl.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning');
             toastEl.classList.add('text-bg-' + type);

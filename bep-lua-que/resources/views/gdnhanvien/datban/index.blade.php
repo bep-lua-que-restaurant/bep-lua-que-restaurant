@@ -19,7 +19,7 @@
                 <thead class="table-dark">
                     <tr>
                         <th class="sticky-col text-nowrap">Bàn / Giờ</th>
-                        @for ($i = 8; $i <= 22; $i++)
+                        @for ($i = 7; $i <= 21; $i++)
                             <th>{{ sprintf('%02d', $i) }}:00</th>
                             <th>{{ sprintf('%02d', $i) }}:30</th>
                         @endfor
@@ -140,7 +140,7 @@
                             html +=
                                 `<tr class="${tableClass}"><td class="fw-bold sticky-col">${ban.ten_ban}</td>`;
 
-                            for (let i = 8; i <= 22; i++) {
+                            for (let i = 7; i <= 21; i++) {
                                 ["00", "30"].forEach(minute => {
                                     const timeSlot =
                                         `${i.toString().padStart(2, '0')}:${minute}`;
@@ -524,8 +524,8 @@
             if (customerEmail === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
                 errors.push("Email không hợp lệ.");
             }
-            if (numPeople === '' || isNaN(numPeople) || numPeople <= 0) {
-                errors.push("Số người phải lớn hơn 0.");
+            if (numPeople === '' || isNaN(numPeople) || numPeople <= 0 || numPeople > 20) {
+                errors.push("Số người phải lớn hơn 0 và không được vượt quá 20.");
             }
             if (thoiGianDen === '') {
                 errors.push("Vui lòng chọn thời gian đến.");

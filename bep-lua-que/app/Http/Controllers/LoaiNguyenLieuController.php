@@ -20,7 +20,7 @@ class LoaiNguyenLieuController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = LoaiNguyenLieu::query()->withTrashed();
+            $query = LoaiNguyenLieu::query()->withTrashed() ->orderByDesc('created_at');
 
             return DataTables::of($query)
                 ->addIndexColumn()

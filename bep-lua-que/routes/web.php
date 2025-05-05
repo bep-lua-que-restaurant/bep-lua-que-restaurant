@@ -380,6 +380,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('thu-ngan/apply-discount', [ThuNganController::class, 'applyDiscount'])->name('thungan.applyDiscount');
     Route::get('thu-ngan/upload-bill', [BillImageController::class, 'create'])->name('upload.bill.create');
     Route::post('thu-ngan/save-bill-image', [BillImageController::class, 'saveBillImage'])->name('upload.bill.save');
+    Route::get('thu-ngan/get-id-from-ma', [ThuNganController::class, 'getIdFromMaHoaDon'])->name('hoa-don.get-id-from-ma');
     //Chấm công
     Route::get('/cham-cong', [ChamCongController::class, 'index'])->name('cham-cong.index');
     Route::post('/chamcong/store', [ChamCongController::class, 'store'])->name('chamcong.store');

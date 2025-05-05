@@ -249,7 +249,7 @@
     style="width: 70%; padding: 20px;">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="offcanvasRightLabel">
-            Phiếu thanh toán - <span id="tableInfo"> </span> - <span id="maHoaDonInFo">Chưa có hóa đơn</span>
+            Phiếu thanh toán - <span id="maHoaDonInFo">Chưa có hóa đơn</span>
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
@@ -856,7 +856,7 @@
                 ten_san_pham: $(this).find("td:nth-child(2)").text().trim(),
                 so_luong: parseInt($(this).find("td:nth-child(3)").text().trim()) || 0,
                 don_gia: parseFloat($(this).find("td:nth-child(4)").text().replace(/\./g, '')
-                .trim()) || 0,
+                    .trim()) || 0,
                 tong_cong: parseFloat($(this).find("td:nth-child(5)").text().replace(/\./g, '')
                     .trim()) || 0
             };
@@ -1156,7 +1156,30 @@
 
         // Dùng jQuery để thêm sự kiện cho nút Lưu
         $('#btnLuuSoNguoi').click(function() {
-            let soNguoi = $("#soNguoiInput").val();
+            let soNguoiInput = $("#soNguoiInput");
+            let soNguoi = soNguoiInput.val().trim();
+
+            // Xóa thông báo lỗi cũ
+            soNguoiInput.removeClass('is-invalid');
+            $(".error-message").remove();
+
+            // Kiểm tra định dạng số người
+            if (!soNguoi) {
+                soNguoiInput.addClass('is-invalid')
+                    .after(
+                    '<div class="error-message text-danger">Số người không được để trống!</div>');
+                return;
+            }
+
+            // Kiểm tra xem giá trị có phải là số nguyên dương
+            let soNguoiNum = parseInt(soNguoi);
+            if (isNaN(soNguoiNum) || soNguoiNum <= 0) {
+                soNguoiInput.addClass('is-invalid')
+                    .after(
+                        '<div class="error-message text-danger">Số người phải là số nguyên dương!</div>'
+                        );
+                return;
+            }
 
             $.ajax({
                 url: 'thu-ngan-save-so-nguoi',
@@ -1300,6 +1323,7 @@
                 success: function(response) {
                     $('#modalGhepBan').modal('hide');
                     showToast(response.message, "success");
+                    // location.reload();
                 },
                 error: function(xhr) {
                     console.log(xhr.responseText);

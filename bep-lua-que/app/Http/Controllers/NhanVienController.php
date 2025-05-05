@@ -45,7 +45,7 @@ class NhanVienController extends Controller
         'ngay_vao_lam' => 'nullable|date',
         'dia_chi' => 'nullable|string|max:255',
         'hinh_thuc_luong' => 'required|in:ca,thang,gio',
-        'muc_luong' => 'required|numeric|min:0',
+        'muc_luong' => 'required|numeric|min:0.01',
         'ngay_ap_dung' => [
          'required',
          'date',
@@ -68,6 +68,7 @@ class NhanVienController extends Controller
         'hinh_thuc_luong.required' => 'Hình thức lương là bắt buộc.',
         'muc_luong.required' => 'Mức lương là bắt buộc.',
         'muc_luong.numeric' => 'Mức lương phải là một số.',
+        'muc_luong.min' => 'Mức lương phải lớn hơn 0.',
         'hinh_anh.image' => 'Hình ảnh phải là file ảnh.',
         'hinh_anh.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg, gif, hoặc webp.',
         'hinh_anh.max' => 'Hình ảnh không được vượt quá 2MB.',
@@ -198,21 +199,30 @@ class NhanVienController extends Controller
     $nhanVien->update($data);
 
     $ngayApDung = $request->ngay_ap_dung;
-    if (strlen($ngayApDung) === 7) { // nếu là dạng YYYY-MM
-    $ngayApDung .= '-01'; // gán thêm ngày đầu tháng
+
+    // Nếu chỉ có YYYY-MM thì thêm ngày đầu tháng
+    if (strlen($ngayApDung) === 7) {
+        $ngayApDung .= '-01';
     }
-    $existingLuong = $nhanVien->luong()->where([
-        'hinh_thuc' => $request->hinh_thuc_luong,
-        'muc_luong' => $request->muc_luong,
-       'ngay_ap_dung' => $ngayApDung,
-    ])->first();
     
-    if (!$existingLuong) {
+    // Tìm lương hiện tại áp dụng trong tháng đó
+    $existingLuong = $nhanVien->luong()->whereDate('ngay_ap_dung', '=', $ngayApDung)->first();
+    
+    if ($existingLuong) {
+        // Nếu mức lương hoặc hình thức bị thay đổi nhưng tháng giữ nguyên → không cho phép
+        if (
+            $existingLuong->muc_luong != $request->muc_luong ||
+            $existingLuong->hinh_thuc != $request->hinh_thuc_luong
+        ) {
+            return back()->with('error', 'Lương phải áp dụng vào tháng sau.');
+        }
+    } else {
+        // Nếu chưa có lương cho tháng đó → tạo mới
         $nhanVien->luong()->create([
             'nhan_vien_id' => $nhanVien->id,
             'hinh_thuc' => $request->hinh_thuc_luong,
             'muc_luong' => $request->muc_luong,
-           'ngay_ap_dung' => $ngayApDung,
+            'ngay_ap_dung' => $ngayApDung,
         ]);
     }
     
