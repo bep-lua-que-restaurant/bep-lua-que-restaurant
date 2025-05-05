@@ -128,8 +128,10 @@
                 <div class="col-md-6 mb-3">
                     <label>Mức lương</label>
                     <div class="input-group">
-                        <input type="number" name="muc_luong" class="form-control" id="mucLuong"
-                            value="{{ old('muc_luong', $luongGanNhat?->muc_luong) }}">
+                        <input type="text" id="mucLuongDisplay" class="form-control"
+                            value="{{ old('muc_luong', number_format($luongGanNhat?->muc_luong ?? 0, 0, '.', ',')) }}"
+                            placeholder="Nhập mức lương">
+                        <input type="hidden" name="muc_luong" id="mucLuong" value="{{ old('muc_luong', $luongGanNhat?->muc_luong ?? 0) }}">
                         <div class="input-group-append">
                             <span class="input-group-text" id="donViLuong">VNĐ / Ca</span>
                         </div>
