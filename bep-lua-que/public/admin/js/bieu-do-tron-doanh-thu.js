@@ -1,8 +1,13 @@
+let bieuDoDoanhThu = null; // Biến toàn cục lưu trữ đối tượng biểu đồ
+
 function capNhatBieuDoTronDoanhThu(namNay, namTruoc) {
+    console.log("Cập nhật biểu đồ tròn với dữ liệu:", namNay, namTruoc);  // Kiểm tra dữ liệu đầu vào
+
     const ctx = document.getElementById('bieuDoTronDoanhThuNam').getContext('2d');
 
-    function formatTrieu(so) {
-        return (so / 1_000_000).toFixed(1) + ' triệu';
+    // Nếu đã có biểu đồ, hủy nó đi
+    if (bieuDoDoanhThu) {
+        bieuDoDoanhThu.destroy();
     }
 
     // Đảm bảo giá trị là số
@@ -17,8 +22,8 @@ function capNhatBieuDoTronDoanhThu(namNay, namTruoc) {
         tiLe = ((namNay - namTruoc) / namTruoc * 100).toFixed(1);
     }
 
-    // Cập nhật biểu đồ tròn
-    new Chart(ctx, {
+    // Cập nhật biểu đồ tròn mới
+    bieuDoDoanhThu = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: [
@@ -56,4 +61,8 @@ function capNhatBieuDoTronDoanhThu(namNay, namTruoc) {
 
     // Hiển thị ra giao diện
     document.getElementById('phanTramChenhLechDoanhThu').innerText = chenhLechText;
+}
+
+function formatTrieu(so) {
+    return (so / 1_000_000).toFixed(1) + ' triệu';
 }

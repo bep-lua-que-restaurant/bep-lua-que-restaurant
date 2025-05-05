@@ -22,9 +22,10 @@ class ThongKeController extends Controller
         $homQua = Carbon::yesterday();
 
         // Truy vấn doanh thu chỉ với hóa đơn có trạng thái 'da_thanh_toan'
-        $duLieuDoanhThu = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
-            ->where('hoa_don_bans.trang_thai', 'da_thanh_toan') // Chỉ lấy hóa đơn đã thanh toán
-            ->whereDate('hoa_dons.created_at', '>=', $homQua)
+        $duLieuDoanhThu = HoaDon::whereDate('created_at', '>=', $homQua)
+            ->whereHas('hoaDonBan', function ($query) {
+                $query->where('trang_thai', 'da_thanh_toan'); // Chỉ lấy hóa đơn đã thanh toán
+            })
             ->selectRaw('DATE(hoa_dons.created_at) as date, SUM(hoa_dons.tong_tien) as revenue')
             ->groupBy('date')
             ->pluck('revenue', 'date');
@@ -47,12 +48,14 @@ class ThongKeController extends Controller
         // Số đơn đang phục vụ hôm nay (trạng thái 'dang_xu_ly')
         $donDangPhucVuHomNay = HoaDonBan::whereDate('created_at', $homNay)
             ->where('trang_thai', 'dang_xu_ly')
-            ->count();
+            ->distinct('hoa_don_id')  // Nhóm đúng theo hoa_don_id
+            ->count('hoa_don_id');  // Đếm số lượng hoa_don_id duy nhất
 
         // Số đơn đã phục vụ hôm qua (trạng thái 'da_thanh_toan')
         $donPhucVuHomQua = HoaDonBan::whereDate('created_at', $homQua)
             ->where('trang_thai', 'da_thanh_toan')
-            ->count();
+            ->distinct('hoa_don_id')  // Nhóm đúng theo hoa_don_id
+            ->count('hoa_don_id');  // Đếm số lượng hoa_don_id duy nhất
 
         // Truy vấn số khách hôm nay & hôm qua
         $duLieuKhachHang = DatBan::whereDate('created_at', '>=', $homQua)
@@ -65,10 +68,11 @@ class ThongKeController extends Controller
         $soLuongKhachHomQua = $duLieuKhachHang[$homQua->toDateString()] ?? 0;
 
         // Truy vấn doanh số theo giờ trong ngày hôm nay (chỉ lấy hóa đơn đã thanh toán)
-        $duLieuBanHang = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
-            ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
-            ->whereDate('hoa_dons.created_at', $homNay)
-            ->selectRaw('HOUR(hoa_dons.created_at) as hour, SUM(hoa_dons.tong_tien) as revenue')
+        $duLieuBanHang = HoaDon::whereDate('created_at', $homNay)
+            ->whereHas('hoaDonBan', function ($query) {
+                $query->where('trang_thai', 'da_thanh_toan');
+            })
+            ->selectRaw('HOUR(created_at) as hour, SUM(tong_tien) as revenue')
             ->groupBy('hour')
             ->pluck('revenue', 'hour');
 
@@ -79,26 +83,32 @@ class ThongKeController extends Controller
         $namHienTai = Carbon::now()->year;
         $namTruoc = $namHienTai - 1;
 
-        $doanhThuNamNay = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
-            ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
-            ->whereYear('hoa_dons.created_at', $namHienTai)
+        // Doanh thu năm nay
+        $doanhThuNamNay = HoaDon::whereYear('hoa_dons.created_at', $namHienTai)
+            ->whereHas('hoaDonBan', function ($query) {
+                $query->where('trang_thai', 'da_thanh_toan');
+            })
             ->sum('hoa_dons.tong_tien');
 
-        $doanhThuNamTruoc = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
-            ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
-            ->whereYear('hoa_dons.created_at', $namTruoc)
+        // Doanh thu năm trước
+        $doanhThuNamTruoc = HoaDon::whereYear('hoa_dons.created_at', $namTruoc)
+            ->whereHas('hoaDonBan', function ($query) {
+                $query->where('trang_thai', 'da_thanh_toan');
+            })
             ->sum('hoa_dons.tong_tien');
 
-        // Lấy tổng số lượng hóa đơn của năm trước
-        $soLuongHoaDonNamNay = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
-            ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
-            ->whereYear('hoa_dons.created_at', $namHienTai)
+        // Tổng số lượng hóa đơn năm nay
+        $soLuongHoaDonNamNay = HoaDon::whereYear('hoa_dons.created_at', $namHienTai)
+            ->whereHas('hoaDonBan', function ($query) {
+                $query->where('trang_thai', 'da_thanh_toan');
+            })
             ->count();
 
-        // Lấy tổng số lượng hóa đơn của năm hiện tại
-        $soLuongHoaDonNamTruoc = HoaDon::join('hoa_don_bans', 'hoa_dons.id', '=', 'hoa_don_bans.hoa_don_id')
-            ->where('hoa_don_bans.trang_thai', 'da_thanh_toan')
-            ->whereYear('hoa_dons.created_at', $namTruoc)
+        // Tổng số lượng hóa đơn năm trước
+        $soLuongHoaDonNamTruoc = HoaDon::whereYear('hoa_dons.created_at', $namTruoc)
+            ->whereHas('hoaDonBan', function ($query) {
+                $query->where('trang_thai', 'da_thanh_toan');
+            })
             ->count();
 
         $khachNamNay = DatBan::whereYear('thoi_gian_den', $namHienTai)

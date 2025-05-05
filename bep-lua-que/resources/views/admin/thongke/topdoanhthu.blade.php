@@ -72,7 +72,7 @@
                         </select>
 
                         <!-- chọn top 8 giờ bán chạy hoặc bán ít -->
-                        <div style="display: flex; align-items: center; gap: 10px; margin-right: 210px">
+                        <div style="display: flex; align-items: center; gap: 10px">
                             <label for="chartType" style="font-weight: bold; white-space: nowrap;">Thống kê:</label>
                             <select name="chartType" id="chartType" class="form-select mr-2" style="width: 155px">
                                 <option value="gioBanChay" selected>Giờ bán chạy</option>
