@@ -125,54 +125,55 @@
             document.querySelectorAll("#salaryTable tr").forEach((row) => {
                 let luongChinh = parseFloat(row.querySelector(".luong-chinh").value) || 0;
                 let soCaLam = parseFloat(row.querySelector(".so-ca-lam").textContent) || 0;
-                let thuongPhat = parseFloat(row.querySelector(".thuong-phat-input").value) ||
-                    0; // Lấy giá trị thưởng/phạt
+                let thuongPhat = parseFloat(row.querySelector(".thuong-phat-input").value) || 0;
 
-                let total = (luongChinh * soCaLam) + thuongPhat; // Tính tổng lương với thưởng/phạt
+                let total = (luongChinh * soCaLam) + thuongPhat;
 
-                // Cập nhật giá trị vào input và hiển thị
+                if (total < 0) {
+                    total = 0;
+                    row.querySelector(".tong-luong span").textContent = "0";
+                } else {
+                    row.querySelector(".tong-luong span").textContent = total.toLocaleString("vi-VN");
+                }
+
                 row.querySelector('input[name="tong_luong[]"]').value = total;
-                row.querySelector(".tong-luong span").textContent =
-                    total.toLocaleString("vi-VN");
                 totalSalary += total;
             });
 
-            document.getElementById("tongCong").textContent =
-                totalSalary.toLocaleString("vi-VN");
+            document.getElementById("tongCong").textContent = totalSalary.toLocaleString("vi-VN");
         }
 
-        // Gọi hàm tính tổng khi trang được tải
         calculateTotal();
 
-        // Thêm sự kiện khi người dùng thay đổi lương chính hoặc thưởng/phạt
         document.querySelectorAll(".luong-chinh").forEach((input) => {
             input.addEventListener("input", calculateTotal);
         });
 
-        document.querySelectorAll('.thuong-phat-input').forEach(function(input) {
-            input.addEventListener('input', function() {
-                const row = input.closest('tr'); // tìm dòng hiện tại
+        document.querySelectorAll(".thuong-phat-input").forEach(function(input) {
+            input.addEventListener("input", function() {
+                const row = input.closest("tr");
 
-                // Cập nhật lại tổng lương khi thưởng/phạt thay đổi
-                const luong = parseFloat(row.querySelector('.luong-co-ban').value) || 0;
-                const soCa = parseFloat(row.querySelector('.so-ca-lam').value) || 0;
+                const luong = parseFloat(row.querySelector(".luong-co-ban").value) || 0;
+                const soCa = parseFloat(row.querySelector(".so-ca-lam").value) || 0;
                 const thuongPhat = parseFloat(input.value) || 0;
 
-                const tongLuong = (luong * soCa) + thuongPhat;
+                let tongLuong = (luong * soCa) + thuongPhat;
 
-                // Cập nhật giá trị tổng lương vào cả input hidden và span hiển thị
-                row.querySelector('.tong-luong-hidden').value = tongLuong;
-                row.querySelector('.tong-luong-span').textContent = tongLuong.toLocaleString(
-                    'vi-VN');
+                if (tongLuong < 0) {
+                    tongLuong = 0;
+                    row.querySelector(".tong-luong-span").textContent = "0";
+                } else {
+                    row.querySelector(".tong-luong-span").textContent = tongLuong
+                        .toLocaleString("vi-VN");
+                }
 
-                // Tính lại tổng lương toàn bộ bảng
+                row.querySelector(".tong-luong-hidden").value = tongLuong;
+
                 calculateTotal();
             });
         });
-
-
-
     });
+
 
     function confirmChotLuong(event) {
         if (!confirm('Bạn có chắc chắn muốn chốt lương?')) {

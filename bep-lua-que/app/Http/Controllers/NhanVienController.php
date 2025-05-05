@@ -45,7 +45,7 @@ class NhanVienController extends Controller
         'ngay_vao_lam' => 'nullable|date',
         'dia_chi' => 'nullable|string|max:255',
         'hinh_thuc_luong' => 'required|in:ca,thang,gio',
-        'muc_luong' => 'required|numeric|min:0',
+        'muc_luong' => 'required|numeric|min:0.01',
         'ngay_ap_dung' => [
          'required',
          'date',
@@ -68,6 +68,7 @@ class NhanVienController extends Controller
         'hinh_thuc_luong.required' => 'Hình thức lương là bắt buộc.',
         'muc_luong.required' => 'Mức lương là bắt buộc.',
         'muc_luong.numeric' => 'Mức lương phải là một số.',
+        'muc_luong.min' => 'Mức lương phải lớn hơn 0.',
         'hinh_anh.image' => 'Hình ảnh phải là file ảnh.',
         'hinh_anh.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg, gif, hoặc webp.',
         'hinh_anh.max' => 'Hình ảnh không được vượt quá 2MB.',

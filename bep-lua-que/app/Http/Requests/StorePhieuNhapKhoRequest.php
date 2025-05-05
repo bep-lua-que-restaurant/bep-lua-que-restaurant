@@ -49,7 +49,7 @@ class StorePhieuNhapKhoRequest extends FormRequest
             'so_luong_nhaps.*' => 'required|numeric|min:0.01',
 
             'don_gias' => 'nullable|array|required_if:loai_phieu,nhap_tu_ncc',
-            'don_gias.*' => 'nullable|numeric|min:0',
+            'don_gias.*' => 'nullable|numeric|min:0.01',
 
             'ngay_san_xuats' => 'nullable|array',
             'ngay_san_xuats.*' => 'nullable|date',
