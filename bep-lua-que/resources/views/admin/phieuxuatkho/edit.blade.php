@@ -64,7 +64,7 @@
                             class="form-control @error('nguoi_nhan') is-invalid @enderror"
                             value="{{ old('nguoi_nhan', $phieuXuatKho->nguoi_nhan) }}">
                         @error('nguoi_nhan')
-                            <div class="invalid-feedback">{{$message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                 @else
@@ -176,23 +176,23 @@
         // Biến từ controller
         const loaiPhieu = @json($phieuXuatKho->loai_phieu); // Ví dụ: 'bep', 'tra_ncc', v.v.
         const nguyenLieuOptions = @json($nguyenLieuOptions); // Mảng nguyên liệu từ controller
-    
+
         // Thêm dòng mới
-        $('#addRow').click(function () {
+        $('#addRow').click(function() {
             let options = `<option value="" selected>Chọn nguyên liệu</option>`; // Option trống
-    
+
             // Duyệt qua danh sách nguyên liệu để tạo options
             nguyenLieuOptions.forEach(opt => {
                 const isDeleted = opt.deleted_at !== null;
                 const deletedLabel = isDeleted ? ' (ĐÃ XOÁ)' : '';
                 const disabledAttr = isDeleted ? 'disabled style="color:red;"' : '';
-    
+
                 options += `
                     <option value="${opt.id}" data-loai="${opt.loai_nguyen_lieu_id}" data-don-gia="${opt.don_gia}" data-don-vi="${opt.don_vi}" ${disabledAttr}>
                         ${opt.text}${deletedLabel}
                     </option>`;
             });
-    
+
             const row = `
                 <tr>
                     <td>
@@ -218,36 +218,36 @@
                         <button type="button" class="btn btn-outline-danger btn-sm remove-row">Xoá</button>
                     </td>
                 </tr>`;
-    
+
             $('#chiTietTable tbody').append(row);
         });
-    
+
         // Khi thay đổi nguyên liệu
-        $(document).on('change', 'select[name="nguyen_lieu_ids[]"]', function () {
+        $(document).on('change', 'select[name="nguyen_lieu_ids[]"]', function() {
             const selectedOption = $(this).find('option:selected');
-    
+
             const donGia = selectedOption.data('don-gia') ?? '';
             const donVi = selectedOption.data('don-vi') ?? '';
             const loaiId = selectedOption.data('loai') ?? '';
-    
+
             const row = $(this).closest('tr');
-    
+
             // Cập nhật hidden loai_id
             row.find('input.loai-id-hidden').val(loaiId);
-    
+
             // Cập nhật đơn vị
             row.find('input[name="don_vi_xuats[]"]').val(donVi);
-    
+
             // Cập nhật đơn giá nếu không phải phiếu bếp
             if (loaiPhieu !== 'xuat_bep') {
                 row.find('input[name="don_gias[]"]').val(donGia);
             }
         });
-    
+
         // Xoá dòng
-        $(document).on('click', '.remove-row', function () {
+        $(document).on('click', '.remove-row', function() {
             $(this).closest('tr').remove();
         });
     </script>
-    
+
 @endsection

@@ -524,8 +524,8 @@
             if (customerEmail === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
                 errors.push("Email không hợp lệ.");
             }
-            if (numPeople === '' || isNaN(numPeople) || numPeople <= 0 || numPeople > 50) {
-                errors.push("Số người phải lớn hơn 0 và không được vượt quá 50.");
+            if (numPeople === '' || isNaN(numPeople) || numPeople <= 0 || numPeople > 20) {
+                errors.push("Số người phải lớn hơn 0 và không được vượt quá 20.");
             }
             if (thoiGianDen === '') {
                 errors.push("Vui lòng chọn thời gian đến.");
