@@ -1156,7 +1156,27 @@
 
         // Dùng jQuery để thêm sự kiện cho nút Lưu
         $('#btnLuuSoNguoi').click(function() {
-            let soNguoi = $("#soNguoiInput").val();
+            let soNguoiInput = $("#soNguoiInput");
+        let soNguoi = soNguoiInput.val().trim();
+
+        // Xóa thông báo lỗi cũ
+        soNguoiInput.removeClass('is-invalid');
+        $(".error-message").remove();
+
+        // Kiểm tra định dạng số người
+        if (!soNguoi) {
+            soNguoiInput.addClass('is-invalid')
+                .after('<div class="error-message text-danger">Số người không được để trống!</div>');
+            return;
+        }
+
+        // Kiểm tra xem giá trị có phải là số nguyên dương
+        let soNguoiNum = parseInt(soNguoi);
+        if (isNaN(soNguoiNum) || soNguoiNum <= 0) {
+            soNguoiInput.addClass('is-invalid')
+                .after('<div class="error-message text-danger">Số người phải là số nguyên dương!</div>');
+            return;
+        }
 
             $.ajax({
                 url: 'thu-ngan-save-so-nguoi',
