@@ -32,6 +32,18 @@ class ThongKeController extends Controller
         $tongTienHomNay = $duLieuDoanhThu[$homNay->toDateString()] ?? 0;
         $tongTienHomQua = $duLieuDoanhThu[$homQua->toDateString()] ?? 0;
 
+        // $homNay = Carbon::today();
+        // $homQua = Carbon::yesterday();
+
+        // // Truy vấn doanh thu tất cả hóa đơn, không yêu cầu trạng thái 'da_thanh_toan'
+        // $duLieuDoanhThu = HoaDon::whereDate('created_at', '>=', $homQua)
+        //     ->selectRaw('DATE(created_at) as date, SUM(tong_tien) as revenue')
+        //     ->groupBy('date')
+        //     ->pluck('revenue', 'date');
+
+        // $tongTienHomNay = $duLieuDoanhThu[$homNay->toDateString()] ?? 0;
+        // $tongTienHomQua = $duLieuDoanhThu[$homQua->toDateString()] ?? 0;
+
         // Số đơn đang phục vụ hôm nay (trạng thái 'dang_xu_ly')
         $donDangPhucVuHomNay = HoaDonBan::whereDate('created_at', $homNay)
             ->where('trang_thai', 'dang_xu_ly')
